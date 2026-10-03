@@ -21,23 +21,23 @@ Current step: **Step 1, repository and app initialization.**
 
 ## Stack
 
-| Layer | Choice |
-| --- | --- |
-| Repository | pnpm workspaces + Turborepo, Node LTS pinned, TypeScript strict |
-| Patient and provider app | Next.js (React, TypeScript), installable PWA, server rendered |
-| Admin panel | React + TypeScript single-page app with a data-grid library |
-| UI | Design tokens, Tailwind CSS, accessible headless components, Storybook |
-| i18n | ICU message catalogues; locale-prefixed routes `/or`, `/en`, `/hi` |
-| API | Node.js NestJS REST API, OpenAPI spec, typed client generated for front ends |
-| Data | PostgreSQL, Redis, S3-compatible object storage, India cloud region only |
-| Keys and secrets | Managed KMS (India region), envelope encryption, secrets manager |
-| Background jobs | Queue workers (notifications, reminders, auto-cancel, payouts) |
-| Unit and component tests | Vitest, Testing Library, axe |
-| E2E tests | Playwright with mobile, tablet and desktop projects |
-| Security checks | Static analysis, dependency, container and secret scanning in CI |
-| Performance checks | Lighthouse CI, bundle-size budgets |
-| Observability | OpenTelemetry, structured JSON logs, front-end error tracking, RUM |
-| Delivery | GitHub Actions, preview deploy per PR, dev / staging / production, IaC, feature flags |
+| Layer                    | Choice                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| Repository               | pnpm workspaces + Turborepo, Node LTS pinned, TypeScript strict                       |
+| Patient and provider app | Next.js (React, TypeScript), installable PWA, server rendered                         |
+| Admin panel              | React + TypeScript single-page app with a data-grid library                           |
+| UI                       | Design tokens, Tailwind CSS, accessible headless components, Storybook                |
+| i18n                     | ICU message catalogues; locale-prefixed routes `/or`, `/en`, `/hi`                    |
+| API                      | Node.js NestJS REST API, OpenAPI spec, typed client generated for front ends          |
+| Data                     | PostgreSQL, Redis, S3-compatible object storage, India cloud region only              |
+| Keys and secrets         | Managed KMS (India region), envelope encryption, secrets manager                      |
+| Background jobs          | Queue workers (notifications, reminders, auto-cancel, payouts)                        |
+| Unit and component tests | Vitest, Testing Library, axe                                                          |
+| E2E tests                | Playwright with mobile, tablet and desktop projects                                   |
+| Security checks          | Static analysis, dependency, container and secret scanning in CI                      |
+| Performance checks       | Lighthouse CI, bundle-size budgets                                                    |
+| Observability            | OpenTelemetry, structured JSON logs, front-end error tracking, RUM                    |
+| Delivery                 | GitHub Actions, preview deploy per PR, dev / staging / production, IaC, feature flags |
 
 Third parties (SMS, payments, video, identity verification) always sit behind an adapter interface
 with a test double.
@@ -90,14 +90,26 @@ Package scope: `@heach/*` (for example `@heach/ui`).
   function or component. Move it to `packages/*` once a second app needs it.
 - **Keep it simple.** Choose the plainest solution that meets the requirement. No speculative
   abstractions, no layers or generics added "for later", no clever one-liners that are hard to read.
-- **Small units.** Each function does one thing and stays short (aim for under about 30 lines). Each
+- **Small units.** Each function does one thing and stays short: aim for under 30 lines; ESLint
+  fails any function over 100 lines (`max-lines-per-function`). Each
   component, module and file has one responsibility. Split anything that grows past that.
 - **Standard patterns, applied where they fit:** NestJS modules, services and dependency injection
   in the API; adapters for third parties; repositories for data access; composition and custom hooks
   in React; pure functions for business rules. Follow SOLID and each framework's documented
   conventions instead of inventing new ones.
-- Clear names over comments; comment only the *why* that the code cannot show.
+- Clear names over comments; comment only the _why_ that the code cannot show.
 
 ## Commands
 
-<!-- Filled in as the repository is built. -->
+Requires Node 24 LTS (`.nvmrc`) and pnpm (version pinned in `package.json`).
+
+```sh
+pnpm install          # install all workspaces
+pnpm dev              # run every app in dev mode
+pnpm build            # build everything (Turborepo, cached)
+pnpm lint             # ESLint (typescript-eslint strict + sonarjs)
+pnpm typecheck        # tsc --noEmit in every workspace
+pnpm test             # unit tests
+pnpm format           # Prettier write; format:check to verify only
+pnpm --filter <pkg> <script>   # run one workspace's script
+```
