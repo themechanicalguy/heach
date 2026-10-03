@@ -1,0 +1,17 @@
+{
+  "app": {
+    "name": "HEACH Admin",
+    "skipToContent": "Skip to main content",
+    "navLabel": "Admin sections"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "verification": "Verification",
+    "bookings": "Bookings",
+    "finance": "Finance"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "placeholder": "Admin features arrive in later steps."
+  }
+}

@@ -1,0 +1,79 @@
+/* Desktop-first placeholder layout. Replaced by design tokens in Step 2. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.admin {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.admin__sidebar {
+  padding: 1.5rem 1rem;
+  border-right: 1px solid #d0d4d9;
+  background: #f5f6f8;
+}
+
+.admin__brand {
+  margin: 0 0 1rem;
+  font-weight: 700;
+}
+
+.admin__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin__nav a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: #1f2933;
+}
+
+.admin__content {
+  padding: 2rem;
+}
+
+.admin__skip {
+  position: absolute;
+  left: -100vw;
+}
+
+.admin__skip:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* Tablet: sidebar becomes a top bar. */
+@media (max-width: 1023px) {
+  .admin {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin__sidebar {
+    border-right: 0;
+    border-bottom: 1px solid #d0d4d9;
+  }
+
+  .admin__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .admin__content {
+    padding: 1.5rem 1rem;
+  }
+}
