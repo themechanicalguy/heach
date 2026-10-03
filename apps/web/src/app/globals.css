@@ -1,0 +1,25 @@
+/* Minimal mobile-first base. Replaced by design tokens and Tailwind in Step 2. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.page {
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+h1 {
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
