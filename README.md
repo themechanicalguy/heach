@@ -9,16 +9,14 @@ care providers. See [`docs/`](docs/) for the requirements and implementation gui
 Prerequisites: Node 24 LTS (see `.nvmrc`), pnpm (version pinned in `package.json`), Docker.
 
 ```sh
-nvm use               # Node 24
+nvm use
 pnpm install
-pnpm setup            # creates .env from .env.example (local, never committed)
-pnpm dev              # web :3000, admin :5173, api :3001
+pnpm dev:up      # creates .env, picks free ports, starts PostgreSQL, Redis, S3, Mailpit, then the apps
+pnpm dev:down    # stops the services (after Ctrl+C on the apps)
 ```
 
-| App                       | URL                   | Checks                                    |
-| ------------------------- | --------------------- | ----------------------------------------- |
-| Web (patients, providers) | http://localhost:3000 | `/healthz`                                |
-| Admin                     | http://localhost:5173 |                                           |
-| API                       | http://localhost:3001 | `/healthz`, `/readyz`, OpenAPI at `/docs` |
+Web http://localhost:3000, admin http://localhost:5173, API http://localhost:3001
+(`/readyz`, `/docs`), mail and SMS inbox http://localhost:8025.
 
-All commands are listed in [`CLAUDE.md`](CLAUDE.md#commands).
+Full guide: [`docs/local-development.md`](docs/local-development.md). All commands are listed in
+[`CLAUDE.md`](CLAUDE.md#commands).

@@ -10,8 +10,12 @@
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "dev": "turbo run dev",
+    "dev:up": "node scripts/dev-up.mjs",
+    "dev:down": "docker compose --profile init down",
+    "services:up": "node scripts/dev-up.mjs --services-only",
+    "services:reset": "docker compose --profile init down --volumes",
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint && eslint scripts",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",

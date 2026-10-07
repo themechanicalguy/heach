@@ -46,9 +46,16 @@ export interface components {
       /** @example 0.1.0 */
       version: string;
     };
-    ReadyStatusDto: {
+    ReadinessChecksDto: {
       /** @enum {string} */
-      status: 'ok';
+      postgres: 'ok' | 'down';
+      /** @enum {string} */
+      redis: 'ok' | 'down';
+    };
+    ReadinessDto: {
+      /** @enum {string} */
+      status: 'ok' | 'error';
+      checks: components['schemas']['ReadinessChecksDto'];
     };
   };
   responses: never;
@@ -92,7 +99,15 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['ReadyStatusDto'];
+          'application/json': components['schemas']['ReadinessDto'];
+        };
+      };
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReadinessDto'];
         };
       };
     };

@@ -22,6 +22,27 @@ jobs:
     name: Checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Real PostgreSQL and Redis for API integration tests (TS-03). CI-only throwaway credentials.
+    services:
+      postgres:
+        image: postgres:18.6-alpine
+        env:
+          POSTGRES_USER: heach_ci
+          POSTGRES_PASSWORD: ci-only-not-a-secret
+          POSTGRES_DB: heach_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U heach_ci -d heach_ci"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+      redis:
+        image: redis:8.8.3-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgresql://heach_ci:ci-only-not-a-secret@localhost:5432/heach_ci
+      REDIS_URL: redis://localhost:6379/0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -78,11 +99,16 @@ jobs:
           persist-credentials: false
       - name: Build image
         run: docker build -f apps/api/Dockerfile -t heach-api:ci .
-      - name: Image runs as non-root and passes /healthz
+      # No data stores here: the URLs point nowhere, so /healthz is 200 and /readyz is 503.
+      - name: Image runs as non-root, passes /healthz, reports not ready without data stores
         run: |
-          docker run -d --name api -p 3001:3001 heach-api:ci
+          docker run -d --name api -p 3001:3001 \
+            -e DATABASE_URL=postgresql://none@127.0.0.1:1/none \
+            -e REDIS_URL=redis://127.0.0.1:1/0 \
+            heach-api:ci
           for i in $(seq 1 20); do curl -fsS localhost:3001/healthz && break; sleep 1; done
           curl -fsS localhost:3001/healthz
           test "$(docker exec api whoami)" = node
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3001/docs)" = 404
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3001/readyz)" = 503
           docker stop api

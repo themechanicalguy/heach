@@ -30,7 +30,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReadyStatusDto"
+                  "$ref": "#/components/schemas/ReadinessDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessDto"
                 }
               }
             }
@@ -64,15 +74,32 @@
         },
         "required": ["status", "version"]
       },
-      "ReadyStatusDto": {
+      "ReadinessChecksDto": {
+        "type": "object",
+        "properties": {
+          "postgres": {
+            "type": "string",
+            "enum": ["ok", "down"]
+          },
+          "redis": {
+            "type": "string",
+            "enum": ["ok", "down"]
+          }
+        },
+        "required": ["postgres", "redis"]
+      },
+      "ReadinessDto": {
         "type": "object",
         "properties": {
           "status": {
             "type": "string",
-            "enum": ["ok"]
+            "enum": ["ok", "error"]
+          },
+          "checks": {
+            "$ref": "#/components/schemas/ReadinessChecksDto"
           }
         },
-        "required": ["status"]
+        "required": ["status", "checks"]
       }
     }
   }

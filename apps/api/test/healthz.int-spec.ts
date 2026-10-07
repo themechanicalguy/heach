@@ -2,15 +2,7 @@ import type { HealthStatus } from '@heach/types';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
-import { createApp } from '../src/app.factory.js';
-
-async function bootApp(nodeEnv: string): Promise<INestApplication<App>> {
-  process.env.NODE_ENV = nodeEnv;
-  process.env.API_PORT = '3001';
-  const app = await createApp();
-  await app.init();
-  return app as INestApplication<App>;
-}
+import { bootApp } from './boot-app.js';
 
 describe('API (integration)', () => {
   let app: INestApplication<App>;
@@ -20,7 +12,7 @@ describe('API (integration)', () => {
   });
 
   it('GET /healthz returns status and version', async () => {
-    app = await bootApp('test');
+    app = await bootApp();
 
     const response = await request(app.getHttpServer()).get('/healthz').expect(200);
 
@@ -30,7 +22,7 @@ describe('API (integration)', () => {
   });
 
   it('unknown routes return the shared error shape', async () => {
-    app = await bootApp('test');
+    app = await bootApp();
 
     const response = await request(app.getHttpServer()).get('/nope').expect(404);
 
@@ -38,7 +30,7 @@ describe('API (integration)', () => {
   });
 
   it('serves /docs outside production only', async () => {
-    app = await bootApp('test');
+    app = await bootApp();
     await request(app.getHttpServer()).get('/docs').expect(200);
     await app.close();
 

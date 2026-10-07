@@ -4,4 +4,4 @@ import type { components } from './generated/api.js';
 export type { components, paths } from './generated/api.js';
 
 export type HealthStatus = components['schemas']['HealthStatusDto'];
-export type ReadyStatus = components['schemas']['ReadyStatusDto'];
+export type Readiness = components['schemas']['ReadinessDto'];
