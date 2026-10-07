@@ -112,3 +112,18 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3001/docs)" = 404
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3001/readyz)" = 503
           docker stop api
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # full history: a secret removed in a later commit is still leaked
+          persist-credentials: false
+      - name: gitleaks (whole history, findings redacted)
+        run: |
+          docker run --rm --network none -v "$PWD:/repo:ro" -w /repo --entrypoint sh \
+            zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            -c 'git config --global --add safe.directory /repo && gitleaks git --redact --no-banner --exit-code 1 /repo'

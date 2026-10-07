@@ -8,6 +8,7 @@
     "pnpm": ">=12.8.1"
   },
   "scripts": {
+    "prepare": "node scripts/hooks/install.mjs",
     "setup": "node scripts/setup.mjs",
     "dev": "turbo run dev",
     "dev:up": "node scripts/dev-up.mjs",
@@ -19,7 +20,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "secrets:scan": "node scripts/scan-secrets.mjs"
   },
   "devDependencies": {
     "@heach/config": "workspace:*",

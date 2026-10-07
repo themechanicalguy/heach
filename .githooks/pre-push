@@ -1,0 +1,3 @@
+#!/bin/sh
+# git passes "<remote> <url>" as arguments and the refs being pushed on stdin.
+exec node scripts/hooks/pre-push.mjs "$@"

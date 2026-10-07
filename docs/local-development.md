@@ -72,6 +72,23 @@ OTPs and notifications can be read in the inbox.
 | `docker compose ps` | Service status and health |
 | `docker compose logs -f postgres` | Follow one service's logs |
 
+## Git hooks
+
+`pnpm install` points git at `.githooks/` (no extra tools). They run on every commit and push:
+
+| Hook | Checks |
+| --- | --- |
+| `pre-commit` | No `.env` files staged (only `.env.example`); no secrets in staged changes (gitleaks, findings redacted); Prettier on staged files; lint and typecheck of changed packages |
+| `commit-msg` | [Conventional Commits](https://www.conventionalcommits.org): `<type>(<scope>): <summary>`, for example `fix(api): close Redis on shutdown` |
+| `pre-push` | Blocks pushing to `main`; push a branch and open a pull request |
+
+The secret scan uses gitleaks if it is installed, otherwise its pinned Docker image (Docker must
+be running). CI scans the whole history again, so a skipped hook does not skip the check.
+`pnpm secrets:scan` runs the full-history scan locally.
+
+If a hook blocks you, fix the cause. `--no-verify` skips hooks; never use it to commit a secret.
+If a secret was ever committed, treat it as leaked: rotate it, even after removing it.
+
 ## Troubleshooting
 
 - **`set POSTGRES_USER in .env`** (or any `set … in .env`): your `.env` predates a new

@@ -2,7 +2,10 @@
 // exists, only keys it is missing are appended, with their .env.example placeholder values.
 import { appendFileSync, copyFileSync, existsSync, readFileSync } from 'node:fs';
 import process from 'node:process';
+import { installHooks } from './hooks/install.mjs';
 import { readEnv } from './lib/env-file.mjs';
+
+installHooks();
 
 if (!existsSync('.env')) {
   copyFileSync('.env.example', '.env');
