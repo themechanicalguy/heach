@@ -9,7 +9,16 @@ export default defineConfig({
     setupFiles: ['reflect-metadata'],
     projects: [
       { extends: true, test: { name: 'unit', include: ['src/**/*.spec.ts'] } },
-      { extends: true, test: { name: 'integration', include: ['test/**/*.int-spec.ts'] } },
+      {
+        extends: true,
+        test: {
+          name: 'integration',
+          include: ['test/**/*.int-spec.ts'],
+          setupFiles: ['./test/load-env.ts'],
+          // One app at a time: the suites share the local PostgreSQL and Redis.
+          fileParallelism: false,
+        },
+      },
     ],
   },
 });

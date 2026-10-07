@@ -105,7 +105,9 @@ Requires Node 24 LTS (`.nvmrc`) and pnpm (version pinned in `package.json`).
 
 ```sh
 pnpm install          # install all workspaces
-pnpm dev              # run every app in dev mode
+pnpm dev:up           # .env + Docker services (Postgres, Redis, S3, Mailpit) + all apps
+pnpm dev:down         # stop the Docker services (data kept); services:reset wipes it
+pnpm dev              # run every app in dev mode (services must already be up)
 pnpm build            # build everything (Turborepo, cached)
 pnpm lint             # ESLint (typescript-eslint strict + sonarjs)
 pnpm typecheck        # tsc --noEmit in every workspace

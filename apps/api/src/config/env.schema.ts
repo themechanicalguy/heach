@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
 
 export enum NodeEnv {
   Development = 'development',
@@ -21,4 +21,12 @@ export class EnvVars {
   @IsOptional()
   @IsString()
   BUILD_VERSION?: string;
+
+  /** postgresql:// URL. Staging and production must require TLS (EN-01). */
+  @Matches(/^postgres(ql)?:\/\//)
+  DATABASE_URL!: string;
+
+  /** redis:// (local) or rediss:// (TLS, staging and production). */
+  @Matches(/^rediss?:\/\//)
+  REDIS_URL!: string;
 }

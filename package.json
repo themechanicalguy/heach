@@ -10,6 +10,10 @@
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "dev": "turbo run dev",
+    "dev:up": "pnpm setup && pnpm services:up && pnpm dev",
+    "dev:down": "docker compose --profile init down",
+    "services:up": "docker compose up -d --wait postgres redis s3 mailpit && docker compose run --rm s3-init",
+    "services:reset": "docker compose --profile init down --volumes",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

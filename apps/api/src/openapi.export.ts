@@ -14,6 +14,9 @@ if (!outFile) {
 }
 process.env.NODE_ENV = 'development';
 process.env.API_PORT ??= '3001';
+// Building the document never touches the data stores; these only satisfy env validation.
+process.env.DATABASE_URL ??= 'postgresql://openapi-export@127.0.0.1:1/none';
+process.env.REDIS_URL ??= 'redis://127.0.0.1:1/0';
 
 const app = await createApp({ logger: false });
 writeFileSync(outFile, `${JSON.stringify(buildOpenApiDocument(app, 'contract'), null, 2)}\n`);
