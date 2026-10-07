@@ -11,7 +11,7 @@ Prerequisites: Node 24 LTS (see `.nvmrc`), pnpm (version pinned in `package.json
 ```sh
 nvm use
 pnpm install
-pnpm dev:up      # creates .env, starts PostgreSQL, Redis, S3 and Mailpit, then the three apps
+pnpm dev:up      # creates .env, picks free ports, starts PostgreSQL, Redis, S3, Mailpit, then the apps
 pnpm dev:down    # stops the services (after Ctrl+C on the apps)
 ```
 

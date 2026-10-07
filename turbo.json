@@ -9,7 +9,8 @@
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": ["WEB_PORT", "ADMIN_PORT", "API_PORT"]
     },
     "lint": {
       "dependsOn": ["^build"]

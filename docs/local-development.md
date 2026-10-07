@@ -20,16 +20,26 @@ pnpm dev:up
 
 `pnpm dev:up` does three things:
 
-1. `pnpm setup`: creates `.env` from `.env.example` (git-ignored). If `.env` already exists it
-   only lists keys you are missing; copy those from `.env.example`.
-2. `pnpm services:up`: starts PostgreSQL, Redis, the S3 store and Mailpit, waits until each
-   reports healthy, and creates the local bucket.
-3. `pnpm dev`: builds the shared packages, then starts the three apps with hot reload.
+1. **`.env`**: creates it from `.env.example` (git-ignored). If it already exists, existing
+   values are never changed; keys it is missing are appended with their placeholder values.
+2. **Ports**: if another program (another project's database or container, a dev server)
+   already uses one of HEACH's ports, that service moves to the next free port. `.env` and the
+   matching URL (`DATABASE_URL`, `REDIS_URL`, `S3_ENDPOINT`) are updated, and each move is
+   printed. Ports held by HEACH's own running containers are not treated as clashes.
+3. **Services**: starts PostgreSQL, Redis, the S3 store and Mailpit, waits until each reports
+   healthy, and creates the local bucket if it does not exist.
+4. **Apps**: builds the shared packages, then starts the three apps with hot reload on the
+   ports in `.env`.
+
+It finishes by printing the URL of everything it started. Moved ports stay in `.env` until you
+change them back.
 
 Stop the apps with `Ctrl+C`, then stop the services with `pnpm dev:down`. Your local data is
 kept in Docker volumes between runs.
 
 ## What runs where
+
+Default ports are below; `pnpm dev:up` prints the actual ones.
 
 | What | URL | Notes |
 | --- | --- | --- |
@@ -56,7 +66,7 @@ OTPs and notifications can be read in the inbox.
 | Command | What it does |
 | --- | --- |
 | `pnpm dev:up` | Setup, start and wait for services, then start the apps |
-| `pnpm services:up` | Start the services only |
+| `pnpm services:up` | Same port checks, start the services only (no apps) |
 | `pnpm dev:down` | Stop the services (data kept) |
 | `pnpm services:reset` | Stop the services and **delete all local data** |
 | `docker compose ps` | Service status and health |
@@ -65,9 +75,12 @@ OTPs and notifications can be read in the inbox.
 ## Troubleshooting
 
 - **`set POSTGRES_USER in .env`** (or any `set … in .env`): your `.env` predates a new
-  variable. Run `pnpm setup` to list what is missing and copy it from `.env.example`.
-- **`port is already allocated`**: something else uses that port. Stop it, or change the
-  matching `*_PORT` value in `.env` and the URL that uses it.
+  variable. Run `pnpm setup`; it appends the missing keys.
+- **A port moved**: expected when another program holds it. To go back to the default, stop
+  that program and set the `*_PORT` value and its URL in `.env` back by hand.
+- **`port is already allocated` from plain `docker compose up`**: only `pnpm dev:up` and
+  `pnpm services:up` check ports; use those.
+- **`pnpm dev` without `dev:up`**: apps use the default ports, not the ones in `.env`.
 - **`Cannot connect to the Docker daemon`**: start Docker Desktop.
 - **`/readyz` returns 503**: run `docker compose ps`; the check marked `down` names the service.
 - **Start completely fresh**: `pnpm services:reset`, then `pnpm dev:up`.
