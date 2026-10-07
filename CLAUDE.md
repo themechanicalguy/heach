@@ -16,8 +16,7 @@ Read these before planning any work. Do not copy their content here; link to req
 
 - `docs/mvp-v1-requirements.md` — what to build: roles, journeys, requirement IDs, security, stack
 - `docs/mvp-v1-implementation-guideline.md` — in what order: 10 steps with exit criteria
-
-Current step: **Step 1, repository and app initialization.**
+- `docs/local-development.md` — running everything locally, git hooks. Current: **Step 1**.
 
 ## Stack
 
@@ -66,8 +65,9 @@ Package scope: `@heach/*` (for example `@heach/ui`).
 - **TypeScript strict** everywhere. No `any` without a comment explaining why; no `@ts-ignore`.
 - **No hard-coded user-facing strings.** Every visible string comes from `packages/i18n`, with keys
   in Odia, English and Hindi. Admin is English only but still uses keys.
-- **No secrets in code.** Not in source, tests, fixtures, Dockerfiles or CI files. Local values go in
-  an untracked `.env`; `.env.example` holds names only. Never print secrets in output.
+- **No secrets in code** (source, tests, fixtures, Dockerfiles, CI). Local values go in the
+  untracked `.env`; `.env.example` holds placeholders only. Never print secrets in output.
+  Git hooks and CI run gitleaks; never bypass them with `--no-verify`.
 - **No personal or health data in logs.** Use `@heach/logger`, never `console.log`, in app code.
   Never put Restricted or Confidential data in logs, URLs, error messages, analytics, SMS or push text.
 - **Synthetic data only.** Never use real patient or provider data in development, tests or fixtures.
@@ -113,6 +113,7 @@ pnpm lint             # ESLint (typescript-eslint strict + sonarjs)
 pnpm typecheck        # tsc --noEmit in every workspace
 pnpm test             # unit tests
 pnpm format           # Prettier write; format:check to verify only
+pnpm secrets:scan     # gitleaks over the whole git history (also runs in CI)
 pnpm --filter <pkg> <script>   # run one workspace's script
 pnpm --filter @heach/types generate   # after changing API routes or DTOs; CI runs `check`
 ```
