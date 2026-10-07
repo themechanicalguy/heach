@@ -20,3 +20,18 @@ Web http://localhost:3000, admin http://localhost:5173, API http://localhost:300
 
 Full guide: [`docs/local-development.md`](docs/local-development.md). All commands are listed in
 [`CLAUDE.md`](CLAUDE.md#commands).
+
+## Repository layout
+
+```
+apps/web        Next.js PWA for patients and providers
+apps/admin      React (Vite) admin panel, desktop first
+apps/api        NestJS API
+packages/       config, ui, i18n, types, crypto, logger (shared)
+docs/           requirements, guideline, local development, ADRs
+```
+
+## Contributing
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before your first change. Run `pnpm check` before opening
+a pull request. Security issues: [`SECURITY.md`](SECURITY.md).
