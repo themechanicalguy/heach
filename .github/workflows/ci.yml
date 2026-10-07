@@ -111,6 +111,50 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3001/readyz)" = 503
           docker stop api
 
+  deploy-smoke:
+    name: Deploy bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build web, admin and API images
+        run: |
+          for app in web admin api; do
+            docker build -f "apps/$app/Dockerfile" -t "local/heach/$app:ci" .
+          done
+      - name: Images run as non-root
+        run: |
+          test "$(docker run --rm --entrypoint whoami local/heach/web:ci)" = node
+          test "$(docker run --rm --entrypoint whoami local/heach/admin:ci)" = nobody
+      # Same compose file and Caddyfile as the dev host, with throwaway CI-only passwords.
+      - name: Start the dev stack behind Caddy
+        working-directory: deploy/dev
+        run: |
+          {
+            echo "REGISTRY=local"
+            echo "IMAGE_TAG=ci"
+            echo "PUBLIC_HOST=127.0.0.1"
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+            echo "REDIS_PASSWORD=$(openssl rand -hex 16)"
+          } > .env
+          docker compose up -d --wait --wait-timeout 180 postgres redis
+          docker compose up -d
+      - name: HTTPS checks through Caddy (self-signed, so -k)
+        run: |
+          for i in $(seq 1 60); do curl -fsSk https://127.0.0.1:9443/readyz && break; sleep 2; done
+          curl -fsSk https://127.0.0.1:9443/readyz | grep -q '"postgres":"ok"'
+          curl -fsSk https://127.0.0.1/ | grep -q 'heach-button'
+          curl -fsSk https://127.0.0.1:8443/ | grep -q '<div id="root">'
+          curl -fsSk https://127.0.0.1/healthz | grep -q '"status":"ok"'
+          curl -sSkI https://127.0.0.1/ | grep -qi '^strict-transport-security'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5432 || true)" = 000
+      - name: Logs on failure
+        if: failure()
+        working-directory: deploy/dev
+        run: docker compose logs --no-color | tail -200
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest

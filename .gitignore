@@ -21,6 +21,15 @@ blob-report/
 .env.*
 !.env.example
 
+# OpenTofu: state holds generated passwords; backend.hcl holds the account's bucket name.
+# .terraform.lock.hcl (provider checksums) IS committed.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+backend.hcl
+crash.log
+
 # Logs
 *.log
 logs/

@@ -1,0 +1,37 @@
+# TLS for every port (EN-01). No domain yet, so Caddy's internal CA issues a certificate for the
+# host's IP address and browsers show a warning. With a domain, replace `tls internal` and the
+# addresses below with the domain names to get publicly trusted certificates.
+{
+	default_sni {$PUBLIC_HOST}
+	auto_https disable_redirects
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+}
+
+https://{$PUBLIC_HOST}:443 {
+	tls internal
+	import security_headers
+	reverse_proxy web:3000
+}
+
+https://{$PUBLIC_HOST}:8443 {
+	tls internal
+	import security_headers
+	header Cache-Control "no-store"
+	reverse_proxy admin:8080
+}
+
+https://{$PUBLIC_HOST}:9443 {
+	tls internal
+	import security_headers
+	reverse_proxy api:3001
+}

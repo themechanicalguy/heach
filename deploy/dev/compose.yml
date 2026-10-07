@@ -1,0 +1,76 @@
+# Runs on the dev host (and in CI's deploy smoke test). Synthetic data only.
+# Only Caddy publishes ports; PostgreSQL and Redis are reachable only inside this network.
+# Values come from /opt/heach/.env, written by deploy.sh (never committed).
+name: heach
+
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    ports:
+      - 443:443 # web
+      - 8443:8443 # admin (security group allows only admin_allowed_cidrs)
+      - 9443:9443 # API
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [web, admin, api]
+    restart: unless-stopped
+
+  web:
+    image: ${REGISTRY:?}/heach/web:${IMAGE_TAG:?}
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  admin:
+    image: ${REGISTRY}/heach/admin:${IMAGE_TAG}
+    restart: unless-stopped
+
+  api:
+    image: ${REGISTRY}/heach/api:${IMAGE_TAG}
+    environment:
+      NODE_ENV: production
+      API_PORT: '3001'
+      BUILD_VERSION: ${IMAGE_TAG}
+      DATABASE_URL: postgresql://heach:${POSTGRES_PASSWORD:?}@postgres:5432/heach
+      REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: heach
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: heach
+    volumes:
+      - pg-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U heach -d heach']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.8.3-alpine
+    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}', '--appendonly', 'yes']
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  pg-data:
+  redis-data:
