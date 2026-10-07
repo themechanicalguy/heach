@@ -108,10 +108,8 @@ pnpm install          # install all workspaces
 pnpm dev:up           # .env + free ports + Docker services (Postgres, Redis, S3, Mailpit) + all apps
 pnpm dev:down         # stop the Docker services (data kept); services:reset wipes it
 pnpm dev              # run every app in dev mode (services must already be up)
-pnpm build            # build everything (Turborepo, cached)
-pnpm lint             # ESLint (typescript-eslint strict + sonarjs)
-pnpm typecheck        # tsc --noEmit in every workspace
-pnpm test             # unit tests
+pnpm check            # lint + typecheck + unit tests + build: what CI runs; run before a PR
+pnpm lint | typecheck | test | build   # each step of check on its own (Turborepo, cached)
 pnpm format           # Prettier write; format:check to verify only
 pnpm secrets:scan     # gitleaks over the whole git history (also runs in CI)
 pnpm --filter <pkg> <script>   # run one workspace's script

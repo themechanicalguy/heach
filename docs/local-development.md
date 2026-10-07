@@ -78,13 +78,17 @@ OTPs and notifications can be read in the inbox.
 
 | Hook | Checks |
 | --- | --- |
-| `pre-commit` | No `.env` files staged (only `.env.example`); no secrets in staged changes (gitleaks, findings redacted); Prettier on staged files; lint and typecheck of changed packages |
+| `pre-commit` | No `.env` files staged (only `.env.example`); no secrets in staged changes (gitleaks, findings redacted); Prettier and ESLint on staged files only; typecheck of the packages those files belong to and the packages that depend on them (TypeScript cannot check single files) |
 | `commit-msg` | [Conventional Commits](https://www.conventionalcommits.org): `<type>(<scope>): <summary>`, for example `fix(api): close Redis on shutdown` |
 | `pre-push` | Blocks pushing to `main`; push a branch and open a pull request |
 
 The secret scan uses gitleaks if it is installed, otherwise its pinned Docker image (Docker must
 be running). CI scans the whole history again, so a skipped hook does not skip the check.
-`pnpm secrets:scan` runs the full-history scan locally.
+`pnpm secrets:scan` runs the full-history scan locally. Before opening a pull request, run
+`pnpm check`: the same lint, typecheck, unit tests and build that CI runs.
+
+ESLint warns about hard-coded user-facing text in JSX (`<p>Hello</p>`, `alt="…"`); use
+`t(key)` instead. It becomes an error in Step 2.
 
 If a hook blocks you, fix the cause. `--no-verify` skips hooks; never use it to commit a secret.
 If a secret was ever committed, treat it as leaked: rotate it, even after removing it.
