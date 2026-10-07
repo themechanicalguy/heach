@@ -112,4 +112,5 @@ pnpm typecheck        # tsc --noEmit in every workspace
 pnpm test             # unit tests
 pnpm format           # Prettier write; format:check to verify only
 pnpm --filter <pkg> <script>   # run one workspace's script
+pnpm --filter @heach/types generate   # after changing API routes or DTOs; CI runs `check`
 ```

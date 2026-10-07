@@ -39,6 +39,8 @@ jobs:
       - run: pnpm build
       - name: API integration tests
         run: pnpm --filter @heach/api test:e2e
+      - name: Generated API types are up to date
+        run: pnpm --filter @heach/types check
       - name: Dependency audit (high and critical block the merge)
         run: pnpm audit --prod --audit-level high
 

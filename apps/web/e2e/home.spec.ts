@@ -5,6 +5,7 @@ test('home page renders the heading at 360 px without horizontal scroll', async 
   await page.goto('/');
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.home.title);
+  await expect(page.getByRole('button', { name: en.home.findCare })).toBeVisible();
 
   const overflows = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,

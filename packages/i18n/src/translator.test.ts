@@ -1,4 +1,4 @@
-import { createTranslator, type MessageKey } from './index';
+import { createTranslator, type MessageKey } from './translator.js';
 
 const messages = { home: { title: 'Hello' }, empty: {} } as const;
 const t = createTranslator(messages);

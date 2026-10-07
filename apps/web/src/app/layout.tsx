@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { t } from '../i18n/messages';
+import '@heach/ui/ui.css';
 import './globals.css';
 
 export const metadata: Metadata = {
