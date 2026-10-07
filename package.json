@@ -16,12 +16,14 @@
     "services:up": "node scripts/dev-up.mjs --services-only",
     "services:reset": "docker compose --profile init down --volumes",
     "build": "turbo run build",
-    "lint": "turbo run lint && eslint scripts",
+    "lint": "turbo run lint && pnpm lint:scripts",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "secrets:scan": "node scripts/scan-secrets.mjs"
+    "secrets:scan": "node scripts/scan-secrets.mjs",
+    "lint:scripts": "eslint scripts",
+    "check": "turbo run lint typecheck test build && pnpm lint:scripts"
   },
   "devDependencies": {
     "@heach/config": "workspace:*",

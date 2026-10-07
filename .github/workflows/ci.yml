@@ -54,10 +54,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
-      - run: pnpm typecheck
-      - run: pnpm lint
-      - run: pnpm test
-      - run: pnpm build
+      - name: Lint, typecheck, unit tests and build (same as local pnpm check)
+        run: pnpm check
       - name: API integration tests
         run: pnpm --filter @heach/api test:e2e
       - name: Generated API types are up to date

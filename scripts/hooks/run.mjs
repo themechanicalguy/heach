@@ -3,8 +3,8 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import process from 'node:process';
 
 /** Runs a command with inherited output; returns true when it exits 0. */
-export function run(cmd, args) {
-  return spawnSync(cmd, args, { stdio: 'inherit' }).status === 0;
+export function run(cmd, args, cwd = '.') {
+  return spawnSync(cmd, args, { stdio: 'inherit', cwd }).status === 0;
 }
 
 /** Runs a command and returns its stdout, or null if it fails. */
