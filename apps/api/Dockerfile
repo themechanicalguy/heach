@@ -10,8 +10,8 @@ WORKDIR /repo
 FROM base AS build
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --frozen-lockfile --filter @heach/api...
-RUN pnpm --filter @heach/api build \
+    pnpm install --frozen-lockfile --filter "@heach/api..."
+RUN pnpm --filter "@heach/api..." --filter "!@heach/types" build \
  && pnpm --filter @heach/api deploy --prod --legacy /out \
  && cp -r apps/api/dist /out/dist
 

@@ -1,7 +1,9 @@
 {
-  "extends": "@heach/config/tsconfig/base.json",
+  "extends": "@heach/config/tsconfig/library.json",
   "compilerOptions": {
-    "types": ["vitest/globals"]
+    "rootDir": ".",
+    "outDir": "dist",
+    "types": ["node", "vitest/globals"]
   },
   "include": ["src", "*.ts"]
 }

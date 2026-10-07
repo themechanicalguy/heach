@@ -12,6 +12,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "placeholder": "Admin features arrive in later steps."
+    "placeholder": "Admin features arrive in later steps.",
+    "refresh": "Refresh"
   }
 }

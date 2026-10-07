@@ -5,6 +5,7 @@ test('landing page shows sidebar beside content at 1280 px', async ({ page }) =>
   await page.goto('/');
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.dashboard.title);
+  await expect(page.getByRole('button', { name: en.dashboard.refresh })).toBeVisible();
 
   const sidebar = await page.locator('aside').boundingBox();
   const main = await page.getByRole('main').boundingBox();

@@ -1,1 +1,3 @@
-export { default } from '@heach/config/eslint';
+import base from '@heach/config/eslint';
+
+export default [{ ignores: ['dist/**'] }, ...base];

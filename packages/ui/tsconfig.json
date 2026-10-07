@@ -1,0 +1,11 @@
+{
+  "extends": "@heach/config/tsconfig/library.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "rootDir": ".",
+    "outDir": "dist",
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src", "*.ts"]
+}

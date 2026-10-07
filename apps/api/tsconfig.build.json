@@ -3,7 +3,9 @@
   "compilerOptions": {
     "rootDir": "src",
     "types": ["node"],
-    "sourceMap": false
+    "sourceMap": false,
+    "incremental": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": ["src"],
   "exclude": ["src/**/*.spec.ts"]

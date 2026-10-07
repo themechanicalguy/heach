@@ -1,3 +1,4 @@
+import type { HealthStatus } from '@heach/types';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
@@ -23,7 +24,8 @@ describe('API (integration)', () => {
 
     const response = await request(app.getHttpServer()).get('/healthz').expect(200);
 
-    expect(response.body).toEqual({ status: 'ok', version: 'dev' });
+    const expected: HealthStatus = { status: 'ok', version: 'dev' };
+    expect(response.body).toEqual(expected);
     expect(response.headers['cache-control']).toBe('no-store');
   });
 
