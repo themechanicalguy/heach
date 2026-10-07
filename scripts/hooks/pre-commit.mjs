@@ -39,6 +39,13 @@ if (
   fail('Formatting issues. Run: pnpm format');
 }
 
+const rootScripts = staged.filter((file) => /^scripts\/.*\.mjs$/.test(file));
+if (rootScripts.length > 0) {
+  step('Linting root scripts');
+  if (!run('pnpm', ['exec', 'eslint', ...rootScripts]))
+    fail('Lint failed in scripts/ (see above).');
+}
+
 step('Lint and typecheck of changed packages');
 if (
   !run('pnpm', [
