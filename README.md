@@ -18,8 +18,19 @@ pnpm dev:down    # stops the services (after Ctrl+C on the apps)
 Web http://localhost:3000, admin http://localhost:5173, API http://localhost:3001
 (`/readyz`, `/docs`), mail and SMS inbox http://localhost:8025.
 
-Full guide: [`docs/local-development.md`](docs/local-development.md). All commands are listed in
-[`CLAUDE.md`](CLAUDE.md#commands).
+Full guide: [`docs/local-development.md`](docs/local-development.md).
+
+## Commands
+
+```sh
+pnpm dev                                # run every app (services must already be up)
+pnpm check                              # lint + typecheck + unit tests + build, as CI runs it
+pnpm lint | typecheck | test | build    # one step of check on its own
+pnpm format                             # Prettier write; format:check to verify only
+pnpm secrets:scan                       # gitleaks over the whole git history
+pnpm --filter @heach/types generate     # after changing API routes or DTOs
+pnpm --filter <pkg> <script>            # one workspace's script
+```
 
 ## Repository layout
 
