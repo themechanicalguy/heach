@@ -23,7 +23,7 @@ Nothing here is created until you run `tofu apply` yourself.
 Roughly **US$16–18 a month**, paid from the new-account credits while they last. AWS changed its
 free tier in July 2025: new accounts get credits (about US$100, up to US$200) for 6 months on the
 Free plan instead of 12 months of free instances. Check the current terms when signing up.
-To stop all charges: `tofu destroy` in `infra/envs/dev`, then in `infra/bootstrap`.
+To stop almost all charges: `tofu destroy` in `infra/envs/dev`. The state bucket stays (cents a month).
 
 ## Security in this setup
 
@@ -48,38 +48,52 @@ To stop all charges: `tofu destroy` in `infra/envs/dev`, then in `infra/bootstra
 
 ```sh
 brew install opentofu awscli
-aws configure sso          # or: aws configure, for an IAM user (keys stay on your machine)
+aws login --region ap-south-1 --profile heach-dev   # browser sign-in, no keys on disk
+export AWS_PROFILE=heach-dev
 aws sts get-caller-identity
 ```
 
 Never paste AWS keys into chat, code, `.env.example` or an issue.
 
-### 3. Bootstrap (state bucket, deploy role, budget)
+### 3. Bootstrap (state bucket)
 
 ```sh
 cd infra/bootstrap
 tofu init
-tofu apply -var budget_email=you@example.com
-tofu output
+tofu plan -out plan.tfplan
+tofu apply plan.tfplan
+tofu output state_bucket
 ```
 
-Confirm the budget email AWS sends you. Keep `infra/bootstrap/terraform.tfstate` safe and out
-of git (it is git-ignored); it is needed to change or destroy the bootstrap later.
+Keep `infra/bootstrap/terraform.tfstate` safe and out of git (it is git-ignored); it is needed
+to change the bootstrap later. The bucket is protected from `tofu destroy`.
 
-### 4. Dev environment
+### 4. Deploy role, budget and dev environment
 
 ```sh
-cd ../envs/dev
-cp backend.hcl.example backend.hcl            # set bucket from `tofu output state_bucket`
+cp infra/backend.hcl.example infra/github-oidc/backend.hcl   # set bucket from step 3
+cp infra/backend.hcl.example infra/envs/dev/backend.hcl
+
+cd infra/github-oidc
 tofu init -backend-config=backend.hcl
-tofu apply -var 'admin_allowed_cidrs=["<your-ip>/32"]'   # omit to keep admin closed
+tofu plan -out plan.tfplan -var budget_email=you@example.com
+tofu apply plan.tfplan
+tofu output github_deploy_role_arn
+
+cd ../envs/dev
+tofu init -backend-config=backend.hcl
+tofu plan -out plan.tfplan -var 'admin_allowed_cidrs=["<your-ip>/32"]'   # omit to keep admin closed
+tofu apply plan.tfplan
 tofu output
 ```
+
+Confirm the budget email AWS sends you. More on each stack and who may apply it:
+[`infra/README.md`](../infra/README.md).
 
 ### 5. Turn on deploys
 
 In GitHub: **Settings → Secrets and variables → Actions → Variables**, add
-`AWS_DEPLOY_ROLE_ARN` = the `github_deploy_role_arn` output from step 3.
+`AWS_DEPLOY_ROLE_ARN` = the `github_deploy_role_arn` output from step 4.
 
 From then on, every merge to `main` that passes CI deploys to dev (workflow **Deploy dev**).
 You can also run it by hand from the Actions tab.

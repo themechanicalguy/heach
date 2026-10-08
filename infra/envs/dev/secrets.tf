@@ -13,13 +13,13 @@ resource "random_password" "redis" {
 }
 
 resource "aws_ssm_parameter" "postgres_password" {
-  name  = "/heach/dev/POSTGRES_PASSWORD"
+  name  = "${local.parameter_path}/POSTGRES_PASSWORD"
   type  = "SecureString"
   value = random_password.postgres.result
 }
 
 resource "aws_ssm_parameter" "redis_password" {
-  name  = "/heach/dev/REDIS_PASSWORD"
+  name  = "${local.parameter_path}/REDIS_PASSWORD"
   type  = "SecureString"
   value = random_password.redis.result
 }

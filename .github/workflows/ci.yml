@@ -161,6 +161,27 @@ jobs:
         working-directory: deploy/dev
         run: docker compose logs --no-color | tail -200
 
+  infra:
+    name: Infra (fmt, validate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: 1.13.1
+          tofu_wrapper: false
+      - run: tofu fmt -check -recursive infra
+      # No AWS credentials: backends are skipped; providers come from the committed lock files.
+      - name: Validate every stack
+        run: |
+          for dir in infra/bootstrap infra/github-oidc infra/envs/*/; do
+            tofu -chdir="$dir" init -backend=false -input=false -lockfile=readonly
+            tofu -chdir="$dir" validate
+          done
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest
