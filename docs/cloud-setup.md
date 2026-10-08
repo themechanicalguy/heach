@@ -1,5 +1,8 @@
 # Cloud setup (AWS, dev only)
 
+> **Deferred.** Cloud initialisation is on hold ([ADR 0007](adr/0007-defer-cloud-track-b.md)).
+> Nothing here has been applied; re-plan before using it.
+
 Step 1 runs one **dev** environment on AWS in Mumbai (`ap-south-1`) with **synthetic data only**.
 Staging, production, managed databases and the Hyderabad backup region come later
 ([ADR 0005](adr/0005-aws-dev-environment.md)). Infrastructure is code in [`infra/`](../infra/),

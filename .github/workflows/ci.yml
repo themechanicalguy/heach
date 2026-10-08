@@ -117,15 +117,17 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3001/readyz)" = 503
           docker stop api
 
-  deploy-smoke:
-    name: Deploy bundle
+  # Builds the web, admin and API images on every pull request (never pushed), then runs them
+  # together behind Caddy with the same compose file as deploy/dev.
+  images:
+    name: Docker images and deploy bundle
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Build web, admin and API images
+      - name: Build web, admin and API images (not pushed)
         run: |
           for app in web admin api; do
             docker build -f "apps/$app/Dockerfile" -t "local/heach/$app:ci" .

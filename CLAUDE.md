@@ -18,6 +18,18 @@ Read these before planning any work. Do not copy their content here; link to req
 - `docs/mvp-v1-implementation-guideline.md` — in what order: 10 steps with exit criteria
 - `docs/local-development.md` — running everything locally, git hooks. Current: **Step 1**.
 
+## Cloud: deferred (Step 1 Track B)
+
+Cloud initialisation is deferred ([ADR 0007](docs/adr/0007-defer-cloud-track-b.md)). Until Track B
+is done:
+
+- Everything runs locally with Docker Compose and passes in CI.
+- Anything that will later use a cloud service (key management, secrets manager, object storage,
+  tracing backend) goes behind an interface with a local implementation clearly marked
+  "development only", which refuses to start when `NODE_ENV=production`.
+- Never write code that assumes a specific cloud provider: no provider SDKs, URLs or resource
+  names outside `infra/` and `deploy/`. `infra/` (OpenTofu, AWS) stays unapplied.
+
 ## Stack
 
 | Layer                    | Choice                                                                                |

@@ -1,6 +1,6 @@
 # 0005. Start with one AWS dev host in Mumbai, managed with OpenTofu
 
-- **Status:** Accepted
+- **Status:** Accepted; not applied, deferred by [0007](0007-defer-cloud-track-b.md)
 - **Date:** 2026-10-07
 - **Requirements:** PR-06, EN-01, EN-02, EN-12, SE-04, SO-06, SO-07
 

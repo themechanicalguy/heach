@@ -1,6 +1,6 @@
 # 0006. Split infrastructure into modules and per-environment stacks with one state each
 
-- **Status:** Accepted
+- **Status:** Accepted; not applied, deferred by [0007](0007-defer-cloud-track-b.md)
 - **Date:** 2026-10-08
 - **Requirements:** PR-06, EN-01, EN-02, EN-12
 
