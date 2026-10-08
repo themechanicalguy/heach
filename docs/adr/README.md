@@ -10,3 +10,4 @@ Start from [the template](0000-template.md) and take the next number.
 | [0003](0003-quality-gates-without-new-dependencies.md) | Quality gates with git hooks, gitleaks and CI | Accepted |
 | [0004](0004-github-free-no-branch-protection.md) | GitHub Free, private, no branch protection | Accepted |
 | [0005](0005-aws-dev-environment.md) | One AWS dev host in Mumbai, managed with OpenTofu | Accepted |
+| [0006](0006-infra-layout-and-state.md) | Infra modules, per-environment stacks, one state each | Accepted |

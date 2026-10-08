@@ -1,7 +1,7 @@
 terraform {
-  required_version = ">= 1.10"
+  required_version = "~> 1.13.0"
 
-  # Partial configuration: bucket comes from backend.hcl (see backend.hcl.example).
+  # Partial configuration: bucket comes from backend.hcl (see infra/backend.hcl.example).
   # use_lockfile = S3-native state locking, no DynamoDB table needed.
   backend "s3" {
     key          = "envs/dev/terraform.tfstate"
@@ -13,18 +13,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "6.68.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.6"
+      version = "3.9.1"
     }
-  }
-}
-
-provider "aws" {
-  region = var.region
-  default_tags {
-    tags = { Project = "heach", Environment = "dev", ManagedBy = "opentofu" }
   }
 }

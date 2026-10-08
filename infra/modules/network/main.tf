@@ -6,10 +6,10 @@ data "aws_availability_zones" "available" {
 }
 
 resource "aws_vpc" "main" {
-  cidr_block           = "10.20.0.0/16"
+  cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags                 = { Name = "heach-dev" }
+  tags                 = { Name = var.name }
 }
 
 resource "aws_internet_gateway" "main" {
@@ -18,9 +18,9 @@ resource "aws_internet_gateway" "main" {
 
 resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.20.1.0/24"
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 1)
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags              = { Name = "heach-dev-public" }
+  tags              = { Name = "${var.name}-public" }
 }
 
 resource "aws_route_table" "public" {
@@ -42,8 +42,8 @@ resource "aws_default_security_group" "default" {
 }
 
 resource "aws_security_group" "host" {
-  name        = "heach-dev-host"
-  description = "HEACH dev host: HTTPS for web and API; admin only from allow-listed ranges"
+  name        = "${var.name}-host"
+  description = "HEACH app host: HTTPS for web and API; admin only from allow-listed ranges"
   vpc_id      = aws_vpc.main.id
 }
 

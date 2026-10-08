@@ -1,0 +1,3 @@
+# Copy to backend.hcl (git-ignored) in each stack folder, with the bucket from
+# `tofu -chdir=infra/bootstrap output -raw state_bucket`. Then: tofu init -backend-config=backend.hcl
+bucket = "heach-shared-tofu-state-<account-id>"

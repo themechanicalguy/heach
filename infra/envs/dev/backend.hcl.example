@@ -1,3 +1,0 @@
-# Copy to backend.hcl (git-ignored) and set the bucket from `tofu output state_bucket`
-# in infra/bootstrap. Then: tofu init -backend-config=backend.hcl
-bucket = "heach-tofu-state-<account-id>"

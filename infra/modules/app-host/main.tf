@@ -1,7 +1,8 @@
-# The dev host: one ARM instance running the apps, PostgreSQL and Redis in Docker, behind Caddy.
+# The app host: one ARM instance running the apps, PostgreSQL and Redis in Docker, behind Caddy.
 # Synthetic data only (SO-07). Managed RDS and ElastiCache replace the containers before real data.
 
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 # Latest Amazon Linux 2023 for ARM, from AWS's public parameter.
 data "aws_ssm_parameter" "al2023_arm" {
@@ -9,7 +10,7 @@ data "aws_ssm_parameter" "al2023_arm" {
 }
 
 resource "aws_iam_role" "host" {
-  name = "heach-dev-host"
+  name = "${var.name}-host"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -37,27 +38,27 @@ resource "aws_iam_role_policy" "host" {
       {
         Effect   = "Allow"
         Action   = ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer", "ecr:BatchCheckLayerAvailability"]
-        Resource = [for repo in aws_ecr_repository.app : repo.arn]
+        Resource = var.ecr_repository_arns
       },
       {
         Effect   = "Allow"
         Action   = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"]
-        Resource = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/heach/dev/*"
+        Resource = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.parameter_path}/*"
       },
     ]
   })
 }
 
 resource "aws_iam_instance_profile" "host" {
-  name = "heach-dev-host"
+  name = "${var.name}-host"
   role = aws_iam_role.host.name
 }
 
 resource "aws_instance" "host" {
   ami                    = data.aws_ssm_parameter.al2023_arm.value
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.host.id]
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [var.security_group_id]
   iam_instance_profile   = aws_iam_instance_profile.host.name
   user_data              = file("${path.module}/user-data.sh")
 
@@ -73,7 +74,7 @@ resource "aws_instance" "host" {
     delete_on_termination = true
   }
 
-  tags = { Name = "heach-dev" }
+  tags = { Name = var.name }
 
   lifecycle {
     ignore_changes = [ami] # new AMIs do not replace the host; rebuild deliberately
@@ -83,5 +84,5 @@ resource "aws_instance" "host" {
 resource "aws_eip" "host" {
   instance = aws_instance.host.id
   domain   = "vpc"
-  tags     = { Name = "heach-dev" }
+  tags     = { Name = var.name }
 }

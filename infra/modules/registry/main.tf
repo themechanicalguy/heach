@@ -1,14 +1,10 @@
 # Private image repositories, scanned on push, tags immutable, old images expire.
 
-locals {
-  apps = toset(["web", "admin", "api"])
-}
-
 resource "aws_ecr_repository" "app" {
-  for_each             = local.apps
-  name                 = "heach/${each.key}"
+  for_each             = toset(var.apps)
+  name                 = "${var.project}/${each.key}"
   image_tag_mutability = "IMMUTABLE"
-  force_delete         = true # dev only: lets `tofu destroy` remove repositories with images
+  force_delete         = var.force_delete
 
   image_scanning_configuration {
     scan_on_push = true
