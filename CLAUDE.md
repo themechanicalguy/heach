@@ -84,7 +84,8 @@ Package scope: `@heach/*` (for example `@heach/ui`).
   pull request: the item's status (Done, Partial, Not started), what exists and what is missing,
   the module counts, and the "Last updated" line. Mark Done only when the requirement is met as
   written; otherwise Partial with the gap stated. A doc gap found along the way goes in its
-  "Documentation gaps" list.
+  "Documentation gaps" list. CI fails a PR that changes `apps/`, `packages/` or `infra/` without
+  touching that file, unless it carries the `no-status-change` label.
 - A feature is done only when the definition of done in the requirements doc is met.
 - Do not write application code beyond the current step without asking.
 
