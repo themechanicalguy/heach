@@ -6,7 +6,8 @@
 This page separates what is built from what is only specified. The
 [requirements](mvp-v1-requirements.md) say _what_ to build and the
 [guideline](mvp-v1-implementation-guideline.md) says _in what order_; neither tracks progress.
-Update this page in the same pull request that changes a status.
+Update this page in the same pull request that changes a status; the pull request template
+checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 
 | Status | Meaning |
 | --- | --- |

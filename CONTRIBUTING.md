@@ -15,6 +15,8 @@ before starting any work.
    or DTOs, run `pnpm --filter @heach/types generate` and commit the result.
 5. **Open a pull request.** Fill in the template, including every definition-of-done item that
    applies. Link requirement IDs (`BK-03`, `EN-07`).
+   Update [implementation status](docs/implementation-status.md) for every step item or
+   requirement ID the change builds, extends or removes.
 6. **Merge only when all CI jobs pass**: Checks, E2E smoke, API image, Secret scan. The repository
    is on GitHub Free, so nothing enforces this except us
    ([ADR 0004](docs/adr/0004-github-free-no-branch-protection.md)).
