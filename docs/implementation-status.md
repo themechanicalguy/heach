@@ -100,7 +100,7 @@ affects at the latest (for example item 6 in the Step 2 spec).
    text (for example backups in Step 2, pen tests in Step 6) but not by ID, so they can be missed.
 2. **Data classification (DC) has no requirement IDs**, unlike every other module, so it cannot
    be referenced the way CLAUDE.md asks.
-3. ✅ _Resolved: the requirements point to the guideline as the only plan; deviation noted in the guideline; working name HEACH; all six packages listed._ **Two delivery plans disagree.** The requirements' "Delivery plan" has 8 phases (0 to 7) and a
+3. ✅ _Resolved: the requirements now point to the guideline as the only plan._ **Two delivery plans disagree.** The requirements' "Delivery plan" has 8 phases (0 to 7) and a
    "Sprint 0" list; the guideline has 10 steps. Lengths and grouping differ (for example the
    requirements put IC, LB and MV in one phase; the guideline splits them into Steps 7 and 8).
    The requirements should point to the guideline instead of keeping their own plan.
