@@ -16,6 +16,7 @@ Read these before planning any work. Do not copy their content here; link to req
 
 - `docs/mvp-v1-requirements.md` — what to build: roles, journeys, requirement IDs, security, stack
 - `docs/mvp-v1-implementation-guideline.md` — in what order: 10 steps with exit criteria
+- `docs/implementation-status.md` — what is built, partial or not started, per step and requirement ID
 - `docs/local-development.md` — running everything locally, git hooks. Current: **Step 1**.
 
 ## Stack
@@ -78,6 +79,13 @@ Package scope: `@heach/*` (for example `@heach/ui`).
 - **Classify every new data field** (Restricted, Confidential, Internal, Public) as in the
   requirements' data classification section; Restricted fields are encrypted at field level.
 - **Authorisation on the server** for every request and every object; never rely on the UI.
+- **Track implementation status.** Any pull request that builds, extends or removes something a
+  requirement ID or guideline step describes updates `docs/implementation-status.md` in the same
+  pull request: the item's status (Done, Partial, Not started), what exists and what is missing,
+  the module counts, and the "Last updated" line. Mark Done only when the requirement is met as
+  written; otherwise Partial with the gap stated. A doc gap found along the way goes in its
+  "Documentation gaps" list. CI fails a PR that changes `apps/`, `packages/` or `infra/` without
+  touching that file, unless it carries the `no-status-change` label.
 - A feature is done only when the definition of done in the requirements doc is met.
 - Do not write application code beyond the current step without asking.
 

@@ -1,0 +1,41 @@
+name: Implementation status
+
+# Separate from CI so adding or removing the label re-runs only this check.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: status-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  status:
+    name: Implementation status updated
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # For changes that move no step item or requirement ID (refactors, dependency bumps, tests).
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-status-change') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Code changes come with a docs/implementation-status.md update
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          changed=$(git diff --name-only "$BASE_SHA"...HEAD)
+          if ! printf '%s\n' "$changed" | grep -qE '^(apps|packages|infra)/'; then
+            echo "No changes under apps/, packages/ or infra/."
+            exit 0
+          fi
+          if printf '%s\n' "$changed" | grep -qx 'docs/implementation-status.md'; then
+            echo "docs/implementation-status.md updated."
+            exit 0
+          fi
+          echo "::error::This pull request changes apps/, packages/ or infra/ without updating docs/implementation-status.md. Update it, or add the 'no-status-change' label if no step item or requirement ID changes."
+          exit 1

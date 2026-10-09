@@ -25,4 +25,5 @@ From `docs/mvp-v1-requirements.md`. Tick what applies; explain any unticked item
 - [ ] Reads of Restricted data write an audit entry; consent captured where the feature needs it
 - [ ] API changes reflected in OpenAPI spec; component documented in Storybook
 - [ ] Behind a feature flag if not ready for all users
+- [ ] `docs/implementation-status.md` updated for every step item or requirement ID this changes
 - [ ] No secrets in code; no new dependency outside the stack without approval
