@@ -11,3 +11,4 @@ Start from [the template](0000-template.md) and take the next number.
 | [0004](0004-github-free-no-branch-protection.md) | GitHub Free, private, no branch protection | Accepted |
 | [0005](0005-aws-dev-environment.md) | One AWS dev host in Mumbai, managed with OpenTofu | Accepted |
 | [0006](0006-infra-layout-and-state.md) | Infra modules, per-environment stacks, one state each | Accepted |
+| [0007](0007-spec-driven-development.md) | Build every step from a written, approved spec | Accepted |

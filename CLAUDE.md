@@ -16,6 +16,7 @@ Read these before planning any work. Do not copy their content here; link to req
 
 - `docs/mvp-v1-requirements.md` — what to build: roles, journeys, requirement IDs, security, stack
 - `docs/mvp-v1-implementation-guideline.md` — in what order: 10 steps with exit criteria
+- `docs/specs/` — one approved spec per step: acceptance criteria, data, API, threat model
 - `docs/implementation-status.md` — what is built, partial or not started, per step and requirement ID
 - `docs/local-development.md` — running everything locally, git hooks. Current: **Step 1**.
 
@@ -63,6 +64,17 @@ Package scope: `@heach/*` (for example `@heach/ui`).
 
 ## Working rules
 
+- **Spec-driven development** ([ADR 0007](docs/adr/0007-spec-driven-development.md)). The spec
+  leads; code follows it:
+  - No code for a step until its spec in `docs/specs/` is merged as Approved. If asked to build
+    without one, write or update the spec first and get it approved.
+  - Behaviour that differs from the spec changes the spec (requirements, guideline or step spec)
+    in the same PR or an earlier one, never afterwards. Never silently implement something the
+    spec does not say.
+  - Every acceptance criterion (`EN-03.1`) has a test whose `describe` or `it` title starts with
+    its ID, or a manual check recorded in the spec.
+  - Endpoints, data fields and their classes are defined in the step spec before they are built;
+    review checks the generated OpenAPI against it.
 - **TypeScript strict** everywhere. No `any` without a comment explaining why; no `@ts-ignore`.
 - **No hard-coded user-facing strings.** Every visible string comes from `packages/i18n`, with keys
   in Odia, English and Hindi. Admin is English only but still uses keys.

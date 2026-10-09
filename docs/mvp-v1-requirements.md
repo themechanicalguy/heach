@@ -20,7 +20,7 @@
 
 ## Summary
 
-This document sets out the requirements for the Minimum Viable Product (MVP): the first release of a mobile-first web application that lets patients in Odisha find, book and pay verified care providers. "MVP" here is the release stage, not the product name. The application has no name yet, so this document calls it "the application".
+This document sets out the requirements for the Minimum Viable Product (MVP): the first release of a mobile-first web application that lets patients in Odisha find, book and pay verified care providers. "MVP" here is the release stage, not the product name. Its working name is HEACH (the final name is an open question); this document calls it "the application".
 
 The first release covers six services: online doctor consultation, physiotherapy at home, nursing procedures at home, bedside attendant care, in-clinic appointments for dental and skin treatment, and lab test booking. An e-medical report vault keeps each patient's prescriptions, reports and medical history in one encrypted place. Subscriptions, care packages and referral rewards sit across all six services.
 
@@ -632,7 +632,7 @@ All three front ends call one API; the API alone talks to the database, the key 
 
 | Layer | Recommendation | Why |
 | --- | --- | --- |
-| Repository | Monorepo (pnpm workspaces + Turborepo): `apps/web`, `apps/admin`, `apps/api`, `packages/ui`, `packages/i18n`, `packages/config` | Shared design system, types, translations and lint rules across apps |
+| Repository | Monorepo (pnpm workspaces + Turborepo): `apps/web`, `apps/admin`, `apps/api`, `packages/ui`, `packages/i18n`, `packages/config`, `packages/types`, `packages/crypto`, `packages/logger` | Shared design system, types, translations and lint rules across apps |
 | Patient and provider app | Next.js (React, TypeScript), installable PWA with service worker | Server rendering for fast first load and SEO; one codebase with role-based routes |
 | Admin panel | React + TypeScript single-page app with a data-grid library | Desktop-first, table-heavy screens; isolated deploy and stricter access |
 | UI | Design tokens, Tailwind CSS, accessible headless components, Storybook | Consistent responsive UI with accessibility built into primitives |
@@ -676,34 +676,14 @@ A feature is done only when every item below is ticked; the list goes into the p
 - [ ] API changes reflected in OpenAPI spec; component documented in Storybook
 - [ ] Behind a feature flag if not ready for all users
 
-### Sprint 0 foundation
+### Foundation before the first feature
 
-These are built before the first feature so the checklist can be enforced from day one:
-
-1. Key management service, envelope encryption library, secrets manager, data classification tags in the schema, audit log service.
-1. Security scanning in CI and the authorisation test harness.
-1. Monorepo, linting, formatting, commit hooks, TypeScript strict mode.
-2. CI pipeline: type check, lint, unit tests, E2E smoke, accessibility, Lighthouse, bundle budget, dependency scan.
-3. Design tokens, base components, responsive grid, Storybook.
-4. i18n framework with three locales, missing-key check, Odia font pipeline.
-5. Logger, correlation IDs, error tracking, tracing, dashboards, one alert wired end to end.
-6. Environments (dev, staging, production), preview deploys, feature flags, secrets management.
-7. Auth skeleton with OTP and role-based access; test doubles for SMS, payment, video and identity verification.
+The items that make this checklist enforceable from day one are built in Steps 1 and 2 of the
+[implementation guideline](mvp-v1-implementation-guideline.md).
 
 ## Delivery plan, metrics, risks and open questions
 
-The first release is built in eight phases and launched in three stages, so that each added service goes live on a foundation that is already secure and proven. Durations are indicative for a team of about eight to ten people and need estimating by the actual team; the added services roughly double the earlier estimate.
-
-| Phase | Indicative length | Delivers | Exit gate |
-| --- | --- | --- | --- |
-| 0. Secure foundation | 3 to 4 weeks | Sprint 0 items: encryption and key management, audit log, CI security and quality gates, design system basics | A sample Restricted record is encrypted, access-controlled and audited end to end; all gates pass in three languages |
-| 1. Onboarding and identity | 5 weeks | AC, PO, KY modules; admin verification queue | All provider types can verify identity, onboard and be approved |
-| 2. Listings, search, booking, payment | 5 to 6 weeks | SL, AV, SD, BK, PY, NT modules; admin catalogue and bookings console | A patient can find, book and pay for a consultation or home service |
-| 3. Consultation and home services | 4 to 5 weeks | OC and HS modules, prescriptions, visit notes, ratings, complaints | Journeys J2, J3 and J4 work end to end |
-| 4. Stage A pilot | 3 weeks | Penetration test, load test, usability tests, legal pages | Stage A live in one or two districts (for example Khordha and Cuttack): online consultation, physiotherapy, nursing, attendants |
-| 5. In-clinic, lab tests and medical report vault | 8 to 9 weeks | IC, LB and MV modules, clinic and lab admin | Stage B live: journeys J6, J7 and J9 work with pilot clinics and labs; vault sharing passes its penetration test |
-| 6. Plans and referrals | 4 to 5 weeks | PK and RR modules, mandates, coupons, finance admin | Journey J8 works; plan entitlements and payments reconcile daily |
-| 7. Hardening and full launch | 3 weeks | Second penetration test, fraud review, performance tuning, support readiness | Stage C live: all six services with the vault, plans and referrals |
+The first release is built in 10 steps and launched in three stages (A, B, C), so that each added service goes live on a foundation that is already secure and proven. The steps, their lengths and exit gates are in the [implementation guideline](mvp-v1-implementation-guideline.md), which is the only delivery plan. Each step starts from an approved step spec in [`docs/specs/`](specs/README.md).
 
 ### Success metrics for the pilot
 

@@ -6,6 +6,9 @@ before starting any work.
 
 ## Workflow
 
+0. **Start from the spec.** A step's code starts only after its spec in
+   [`docs/specs/`](docs/specs/README.md) is approved. A change of behaviour updates the spec first
+   ([ADR 0007](docs/adr/0007-spec-driven-development.md)).
 1. **Branch from `main`.** Names: `feat/…`, `fix/…`, `chore/…`, `docs/…` (Step 1 parts used
    `step1/…`). Never commit or push to `main`; the pre-push hook blocks it.
 2. **Run it locally**: `pnpm dev:up` (see [local development](docs/local-development.md)).

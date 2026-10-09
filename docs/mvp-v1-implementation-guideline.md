@@ -37,8 +37,9 @@ The 10 steps run in order and total roughly 38 to 43 weeks for a team of eight t
 | 9. Plans, referrals and admin completion | Care packages, subscriptions, coupons, remaining admin screens | PK, RR, AD-08 to AD-10, AD-14, AD-16, AD-17 | 4 to 5 weeks | Journey J8 works; entitlements reconcile daily |
 | 10. Hardening and go-live | Security and load testing, legal, support, launch and hypercare | All | 3 weeks plus 4 weeks of hypercare | Stage C live: full MVP Version 1 |
 
-Three rules apply to every step:
+Four rules apply to every step:
 
+- **The spec comes first.** A step's code starts only after its spec, with testable acceptance criteria and a threat model, is approved in [`docs/specs/`](specs/README.md) ([ADR 0007](adr/0007-spec-driven-development.md)).
 - **The definition of done is the gate.** No feature merges without encryption of sensitive fields, authorisation tests, translations in three languages, unit and E2E tests, accessibility and performance checks, and logging.
 - **Third-party onboarding starts early.** Payment gateway, SMS (DLT registration), Aadhaar and DigiLocker partner, and video provider approvals can take weeks, so applications go in during steps 1 and 2.
 - **Each step ends with a demo on a real mid-range Android phone**, in Odia, over a throttled network.
@@ -49,7 +50,7 @@ Goal: a working monorepo where three empty apps build, test and deploy through o
 
 ### Build
 
-1. Create the Git repository with branch protection on `main`: pull requests only, one review, passing checks required, signed commits.
+1. Create the Git repository with branch protection on `main`: pull requests only, one review, passing checks required, signed commits. _Deviation:_ GitHub Free cannot protect branches; `main` is protected by process and a pre-push hook until the Stage A pilot ([ADR 0004](adr/0004-github-free-no-branch-protection.md)).
 2. Set up the monorepo with pnpm workspaces and Turborepo, Node LTS pinned, TypeScript in strict mode.
 3. Scaffold the apps: `apps/web` (Next.js, patients and providers), `apps/admin` (React single-page app), `apps/api` (NestJS).
 4. Scaffold shared packages: `packages/ui`, `packages/i18n`, `packages/config` (ESLint, Prettier, tsconfig), `packages/types` (API client generated from OpenAPI), `packages/crypto`, `packages/logger`.
