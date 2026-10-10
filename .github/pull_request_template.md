@@ -6,6 +6,13 @@
 
 <!-- Commands or steps a reviewer can run. -->
 
+## Spec
+
+<!-- Link the approved step spec and the acceptance criteria IDs this PR satisfies (for example EN-03.1). Spec-only PRs: say so. -->
+
+- [ ] Built from an approved spec in `docs/specs/`; any change of behaviour is in the spec in this or an earlier PR
+- [ ] Each satisfied acceptance criterion has a test titled with its ID
+
 ## Definition of done
 
 From `docs/mvp-v1-requirements.md`. Tick what applies; explain any unticked item.

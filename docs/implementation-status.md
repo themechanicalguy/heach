@@ -1,11 +1,12 @@
 # Implementation status
 
-- **Last updated:** 9 October 2026, after PR #9 (Step 1, B1)
+- **Last updated:** 10 October 2026, spec-driven development ([ADR 0007](adr/0007-spec-driven-development.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
 [requirements](mvp-v1-requirements.md) say _what_ to build and the
-[guideline](mvp-v1-implementation-guideline.md) says _in what order_; neither tracks progress.
+[guideline](mvp-v1-implementation-guideline.md) says _in what order_; neither tracks progress. Step specs in [`docs/specs/`](specs/README.md) define when an item is
+Done: every acceptance criterion passes.
 Update this page in the same pull request that changes a status; the pull request template
 checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 
@@ -89,7 +90,9 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 
 ## Documentation gaps found in review
 
-Found while building this page; each needs a decision before it is changed in the source docs.
+Found while building this page. Open items need a decision before the source docs change; under
+[ADR 0007](adr/0007-spec-driven-development.md) each is settled in the spec of the step it
+affects at the latest (for example item 6 in the Step 2 spec).
 
 1. **37 requirement IDs are not assigned to any guideline step:** all of A11Y-01 to 07; EN-01, 02,
    07, 10, 13; SE-01, 03, 04; PR-02, 03, 05, 06, 07; SO-02, 04, 06, 07, 09, 10; TS-08, 09;
@@ -97,12 +100,12 @@ Found while building this page; each needs a decision before it is changed in th
    text (for example backups in Step 2, pen tests in Step 6) but not by ID, so they can be missed.
 2. **Data classification (DC) has no requirement IDs**, unlike every other module, so it cannot
    be referenced the way CLAUDE.md asks.
-3. **Two delivery plans disagree.** The requirements' "Delivery plan" has 8 phases (0 to 7) and a
+3. ✅ _Resolved: the requirements now point to the guideline as the only plan._ **Two delivery plans disagree.** The requirements' "Delivery plan" has 8 phases (0 to 7) and a
    "Sprint 0" list; the guideline has 10 steps. Lengths and grouping differ (for example the
    requirements put IC, LB and MV in one phase; the guideline splits them into Steps 7 and 8).
    The requirements should point to the guideline instead of keeping their own plan.
-4. **"Sprint 0 foundation" list is mis-numbered** (`1, 1, 1, 2, …`) in the requirements.
-5. **Branch protection and signed commits** (guideline Step 1 item 1 and exit criterion) conflict
+4. ✅ _Resolved._ **"Sprint 0 foundation" list is mis-numbered** (`1, 1, 1, 2, …`) in the requirements.
+5. ✅ _Resolved._ **Branch protection and signed commits** (guideline Step 1 item 1 and exit criterion) conflict
    with [ADR 0004](adr/0004-github-free-no-branch-protection.md). The guideline should note the
    accepted deviation.
 6. **Backups to a second India region** (EN-10, guideline Step 2 item 3, SO-10 drill in Step 10)
@@ -111,9 +114,9 @@ Found while building this page; each needs a decision before it is changed in th
    outcome in an ADR.
 7. **AD-04 lists four catalogue types**, but guideline Step 4 says the catalogue covers all six
    services (adds dental and skin treatments, lab tests). AD-04 should match.
-8. **Product name:** the requirements say the application "has no name yet" and keep it as an
+8. ✅ _Resolved._ **Product name:** the requirements say the application "has no name yet" and keep it as an
    open question; the repo and CLAUDE.md call it HEACH.
-9. **Repository row of the stack table** in the requirements lists three packages; the
+9. ✅ _Resolved._ **Repository row of the stack table** in the requirements lists three packages; the
    monorepo has six (`types`, `crypto`, `logger` missing).
 10. **Open questions have no owner or due step.** Several block specific steps (load targets block
     TS-08 and Step 4 load tests; the Aadhaar route blocks Step 3; Hindi at launch affects I18N).
