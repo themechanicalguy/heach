@@ -17,7 +17,7 @@ Background: [ADR 0005](../docs/adr/0005-aws-dev-environment.md),
 
 ```
 bootstrap/       state bucket only; local state; applied once per account by a human
-github-oidc/     GitHub Actions deploy role and the monthly budget (account-wide)
+github-oidc/     GitHub Actions deploy role, budgets and credit-expiry reminders (account-wide)
 modules/
   naming/        names and tags; validates environment and region
   network/       VPC, public subnet, security groups

@@ -1,6 +1,6 @@
 # Account-wide CI access and cost guard, applied by a human after bootstrap:
 #   - GitHub Actions OIDC provider and a deploy role (no long-lived AWS keys in GitHub)
-#   - monthly budget with email alerts
+#   - budgets and credit alerts (budgets.tf)
 
 provider "aws" {
   region = "ap-south-1" # Mumbai, pinned: never from a variable or default (PR-06)
@@ -79,33 +79,4 @@ resource "aws_iam_role_policy" "github_deploy" {
       },
     ]
   })
-}
-
-# --- Budget alerts --------------------------------------------------------------------------
-
-resource "aws_budgets_budget" "monthly" {
-  name         = "${module.naming.project}-monthly"
-  budget_type  = "COST"
-  limit_amount = tostring(var.monthly_budget_usd)
-  limit_unit   = "USD"
-  time_unit    = "MONTHLY"
-
-  dynamic "notification" {
-    for_each = var.alert_thresholds_usd
-    content {
-      comparison_operator        = "GREATER_THAN"
-      threshold                  = notification.value
-      threshold_type             = "ABSOLUTE_VALUE"
-      notification_type          = "ACTUAL"
-      subscriber_email_addresses = [var.budget_email]
-    }
-  }
-
-  notification {
-    comparison_operator        = "GREATER_THAN"
-    threshold                  = 100
-    threshold_type             = "PERCENTAGE"
-    notification_type          = "FORECASTED"
-    subscriber_email_addresses = [var.budget_email]
-  }
 }
