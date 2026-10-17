@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, Step 1 review ([step-1-review.md](step-1-review.md))
+- **Last updated:** 17 October 2026, Step 1 review ([step-1-review.md](step-1-review.md)); runtime images upgrade Alpine packages so the ECR scan gate passes
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
