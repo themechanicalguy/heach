@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, credit-expiry alerts, sleep and wake, tag check in CI (playbook B4)
+- **Last updated:** 17 October 2026, Step 1 exit criteria walked through; ADR 0009; environments (playbook B5)
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -33,12 +33,16 @@ checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 
 ### Step 1 exit criteria
 
-| Criterion | Status |
-| --- | --- |
-| New developer runs all three apps locally within 30 minutes | ✅ Done |
-| Merged PR reaches staging without manual steps | ⬜ Not started (reaches dev only) |
-| `main` protected; pipeline blocks a failing build | 🟡 Partial (process, not enforced; see ADR 0004) |
-| Third-party applications submitted and tracked | ⬜ Unknown: not recorded in the repo |
+Walked through on 17 October 2026, with the changes in [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md).
+
+| Criterion | Status | Evidence |
+| --- | --- | --- |
+| New developer runs all three apps locally within 30 minutes | ✅ Done | `pnpm dev:up` ([local development](local-development.md)); CI's E2E smoke job starts all three from a clean checkout. Not yet timed on a fresh machine |
+| Merged PR reaches staging without manual steps | 🔁 Replaced by dev only, see ADR 0009 | Deploy dev runs after CI on `main`: first deploy of `52272c8990c8` answered on `https://15.252.65.98/api/readyz` (PostgreSQL and Redis ok). Scan gate, smoke test and rollback added in B3 (PR #17) |
+| `main` protected; pipeline blocks a failing build | 🟡 Partial | CI fails on a failing build (7 jobs). GitHub branch protection returns HTTP 403 on the private Free repository ([ADR 0004](adr/0004-github-free-no-branch-protection.md)); commands ready in [environments](environments.md#branch-protection-on-main) |
+| Third-party applications submitted and tracked | 🟡 Partial | Tracked: issues #19 to #25 (label `partner-onboarding`). Submitting them is the account holder's task |
+| Credit-expiry alerts active and tested, including simulated levels (playbook) | 🟡 Partial | Built in B4 (PR #18): credit watch, budgets, reminders. Active and tested once the github-oidc plan is applied and the simulations run |
+| ADR lists every requirement relaxed for the pilot (playbook) | ✅ Done | [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md) |
 
 ## Requirements by module
 

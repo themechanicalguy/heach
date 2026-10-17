@@ -70,7 +70,7 @@ Goal: a working monorepo where three empty apps build, test and deploy through o
 ### Exit criteria
 
 - [ ] A new developer can clone, run one command and see all three apps locally within 30 minutes
-- [ ] A merged pull request reaches staging without manual steps
+- [ ] A merged pull request reaches staging without manual steps (Step 1: replaced by dev only, see [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md))
 - [ ] `main` is protected and the pipeline blocks a failing build
 - [ ] Third-party applications are submitted and tracked
 

@@ -12,4 +12,5 @@ Start from [the template](0000-template.md) and take the next number.
 | [0005](0005-aws-dev-environment.md) | One AWS dev host in Mumbai, managed with OpenTofu | Accepted |
 | [0006](0006-infra-layout-and-state.md) | Infra modules, per-environment stacks, one state each | Accepted |
 | [0007](0007-spec-driven-development.md) | Build every step from a written, approved spec | Accepted |
-| [0008](0008-lean-single-host-on-credits.md) | One lean EC2 host on AWS credits until the paid plan | Proposed |
+| [0008](0008-lean-single-host-on-credits.md) | One lean EC2 host on AWS credits until the paid plan | Accepted |
+| [0009](0009-aws-credits-and-restricted-pilot.md) | Free plan credits, upgrade at the Act level, pilot on an IP address | Accepted |

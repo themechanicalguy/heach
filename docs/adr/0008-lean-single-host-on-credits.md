@@ -1,6 +1,6 @@
 # 0008. Run on one lean EC2 host, paid from AWS credits, until the paid plan
 
-- **Status:** Proposed
+- **Status:** Accepted (merged in PR #14; see also [0009](0009-aws-credits-and-restricted-pilot.md))
 - **Date:** 2026-10-17
 - **Requirements:** EN-01, EN-04, EN-06, EN-07, EN-10, EN-12, SE-04, SO-06, SO-07, SO-08, LM-01,
   LM-07, LM-08, LM-09
