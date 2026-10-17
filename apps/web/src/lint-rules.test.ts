@@ -1,27 +1,37 @@
 // @vitest-environment node
 import { ESLint } from 'eslint';
 
-async function lint(code: string): Promise<{ rule: string | null; severity: number }[]> {
-  const eslint = new ESLint({ cwd: process.cwd() });
-  const [result] = await eslint.lintText(code, { filePath: 'src/app/[locale]/page.tsx' });
-  return result?.messages.map((m) => ({ rule: m.ruleId, severity: m.severity })) ?? [];
+// Type-aware linting is slow on a busy CI runner; one lint run, generous timeout.
+const TIMEOUT_MS = 120_000;
+
+const FIXTURE = `console.log('x');
+export default function P() {
+  return (
+    <div>
+      <p>Hello</p>
+      <img alt="Doctor" src="/x.png" />
+    </div>
+  );
 }
+`;
 
 describe('Lint rules for web code', () => {
-  it('I18N-02.1 a hard-coded string in JSX or a component prop fails lint', async () => {
-    const text = await lint('export default function P() {\n  return <p>Hello</p>;\n}\n');
-    const prop = await lint(
-      'export default function P() {\n  return <img alt="Doctor" src="/x.png" />;\n}\n',
-    );
-    for (const messages of [text, prop]) {
-      expect(messages).toContainEqual({ rule: 'no-restricted-syntax', severity: 2 });
-    }
-  }, 60_000);
-
-  it('LM-02.2 console.* fails lint in app code', async () => {
-    expect(await lint("console.log('x');\nexport {};\n")).toContainEqual({
-      rule: 'no-console',
-      severity: 2,
-    });
-  }, 60_000);
+  it(
+    'I18N-02.1 LM-02.2 hard-coded JSX text, text props and console.* fail lint',
+    async () => {
+      const eslint = new ESLint({ cwd: process.cwd() });
+      const [result] = await eslint.lintText(FIXTURE, { filePath: 'src/app/[locale]/page.tsx' });
+      const errors = (result?.messages ?? [])
+        .filter((m) => m.severity === 2)
+        .map((m) => `${String(m.line)}:${m.ruleId ?? ''}`);
+      expect(errors).toEqual(
+        expect.arrayContaining([
+          '1:no-console',
+          '5:no-restricted-syntax',
+          '6:no-restricted-syntax',
+        ]),
+      );
+    },
+    TIMEOUT_MS,
+  );
 });
