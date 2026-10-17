@@ -13,7 +13,8 @@ Nothing here is created until you run `tofu apply` yourself.
 | --- | --- | --- |
 | S3 bucket for OpenTofu state | Versioned, encrypted, TLS-only, private | A few cents a month |
 | GitHub OIDC provider and deploy role | CI deploys without stored AWS keys (EN-12) | Free |
-| Monthly budget with alerts at US$1, 5, 20 | Early warning of any spend | Free (first two budgets) |
+| Monthly usage budget (alerts at US$10, 20, 30) and a credit-pool budget (50, 80, 90% of US$100) | Both count usage before credits, so they fire while credits pay | Free (first two budgets) |
+| Email reminders 30 and 7 days before the credits expire (EventBridge Scheduler, SNS) | Upgrade to the paid plan before the account closes | Free |
 | VPC, one public subnet, no NAT gateway | Avoids NAT's ~US$32/month | Free |
 | `t4g.small` ARM instance, 20 GB encrypted disk | Runs Caddy, web, admin, API, PostgreSQL, Redis | ~US$12–13/month |
 | Elastic IP | Stable address | ~US$3.60/month |
