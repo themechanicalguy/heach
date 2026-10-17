@@ -129,3 +129,17 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 - The Collector exposes request metrics in Prometheus format on http://localhost:8889/metrics.
 - Unset `OTEL_EXPORTER_OTLP_ENDPOINT` to turn telemetry off. The dev host runs without it
   (ADR 0010): there, logs are the record.
+
+## Web app shell and the sample note (Step 2)
+
+- Pages live under `/or`, `/en` and `/hi`; `/` redirects by browser language, Odia by default.
+- With `pnpm dev:up` running, open http://localhost:3000/or/sign-in, choose a synthetic patient,
+  and write a note at `/or/notes`. The note is encrypted before it reaches PostgreSQL and every
+  read is in `audit.entry`. The pages exist only while `sample-patient-note` is on (FF-01).
+- `pnpm --filter @heach/web test:e2e` runs the browser suites on mobile, tablet and desktop.
+  Add `E2E_API=1` to include the full sample-note flow (needs the API running).
+- Visual baselines (`apps/web/e2e/__screenshots__`) are Linux renders. To update them after an
+  intended change, run the suite in the Playwright container against your local server:
+  `docker run --rm --network host -v "$PWD:$PWD" -w "$PWD/apps/web" -e E2E_BASE_URL=http://host.docker.internal:3100 mcr.microsoft.com/playwright:v1.63.0-noble node node_modules/@playwright/test/cli.js test -g "TS-07.1|UX-03.1" --update-snapshots=all`.
+- `pnpm --filter @heach/web lighthouse` runs Lighthouse CI on the shell (mobile, at least 90).
+- Front-end errors go to GlitchTip only when `NEXT_PUBLIC_GLITCHTIP_DSN` is set at build time.

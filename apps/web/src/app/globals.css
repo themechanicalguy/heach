@@ -24,3 +24,72 @@ h1 {
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
+
+body {
+  background: var(--heach-background);
+  color: var(--heach-text);
+  /* Room for the fixed bottom navigation on phones (UX-03). */
+  padding-bottom: calc(var(--heach-bottom-nav-height) + env(safe-area-inset-bottom));
+}
+
+.shell-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--heach-surface);
+  border-bottom: 1px solid var(--heach-border);
+}
+
+.shell-header__name {
+  font-weight: 700;
+  color: var(--heach-primary);
+  text-decoration: none;
+}
+
+.language-switch {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.language-switch a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--heach-touch);
+  padding-inline: 0.5rem;
+  color: var(--heach-primary);
+}
+
+.language-switch a[aria-current='true'] {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.note {
+  margin-block: 0.75rem;
+}
+
+.note__body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.note__date {
+  margin: 0;
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 600px) {
+  body {
+    padding-bottom: 0;
+  }
+}

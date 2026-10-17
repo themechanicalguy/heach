@@ -72,12 +72,28 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @heach/web --filter @heach/admin... build
+      - run: pnpm --filter @heach/web... --filter @heach/admin... build
       - name: Install Chromium
         run: pnpm --filter @heach/web exec playwright install --with-deps chromium
+      # Mobile, tablet and desktop (TS-05.1): locale routes, CSP, PWA offline (PF-07.1), visual
+      # baselines in or/en/hi (TS-07.1), thumb zone (UX-03.1), fonts (I18N-06.1), bundle budget
+      # (PF-02.1) and route splitting (PF-05.1). The API flow runs in the deploy bundle job.
       - run: pnpm --filter @heach/web test:e2e
         env:
           CI: true
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-web
+          path: apps/web/test-results
+          retention-days: 7
+      - name: Lighthouse mobile performance 90 or more on the shell (PF-03.1)
+        run: |
+          export CHROME_PATH="$(cd apps/web && node -e "import('@playwright/test').then(m=>console.log(m.chromium.executablePath()))")"
+          pnpm --filter @heach/web lighthouse
+        env:
+          APP_ENV: test
       - run: pnpm --filter @heach/admin test:e2e
         env:
           CI: true
@@ -166,6 +182,33 @@ jobs:
           curl -sSkI https://127.0.0.1/or | grep -qi "^content-security-policy: .*'nonce-"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/)" = 301
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5432 || true)" = 000
+      # The Step 2 exit flow through Caddy, web, API, PostgreSQL and KMS double: an Odia note is
+      # encrypted, owner-only and audited (EN-13.1, SE-02.3, I18N-04.1, LM-01.1).
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Full-stack E2E against the deploy bundle
+        run: |
+          pnpm install --frozen-lockfile --filter @heach/web...
+          pnpm --filter @heach/web... --filter '!@heach/web' build
+          pnpm --filter @heach/web exec playwright install --with-deps chromium
+          pnpm --filter @heach/web exec playwright test e2e/notes-flow.spec.ts e2e/home.spec.ts
+        env:
+          CI: true
+          E2E_API: 1
+          E2E_BASE_URL: https://127.0.0.1
+      - name: The note is ciphertext in PostgreSQL and its reads are audited
+        working-directory: deploy/dev
+        run: |
+          sql() { docker compose exec -T postgres sh -c "PGPASSWORD=\"\$POSTGRES_PASSWORD\" psql -U heach -d heach -Atc \"$1\""; }
+          test "$(sql "select count(*) > 0 from app.patient_note where body->>'algorithm' = 'AES-256-GCM'")" = t
+          ! sql "select body::text from app.patient_note" | grep -q 'ମୁଣ୍ଡ'
+          test "$(sql "select count(*) > 0 from audit.entry where action = 'sample_note.create'")" = t
+          test "$(sql "select count(*) > 0 from audit.entry where action = 'sample_note.list'")" = t
+          test "$(sql 'select audit.verify_chain() is null')" = t
+          ! docker compose logs api | grep -q 'ମୁଣ୍ଡ'
       - name: PostgreSQL and Redis refuse plaintext inside the network (EN-01.1)
         working-directory: deploy/dev
         run: |

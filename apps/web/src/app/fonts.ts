@@ -8,12 +8,14 @@ const odia = Noto_Sans_Oriya({
   variable: '--font-odia',
   display: 'swap',
   preload: false,
+  adjustFontFallback: false,
 });
 const devanagari = Noto_Sans_Devanagari({
   subsets: ['devanagari'],
   variable: '--font-devanagari',
   display: 'swap',
   preload: false,
+  adjustFontFallback: false,
 });
 
 export const fontClassNames = [latin.variable, odia.variable, devanagari.variable].join(' ');
