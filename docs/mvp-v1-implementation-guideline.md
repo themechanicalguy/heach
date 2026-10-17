@@ -82,7 +82,7 @@ Goal: every cross-cutting requirement exists as shared code and a CI check befor
 
 1. **Encryption.** Set up the key management service with separate keys per environment and data domain. Build the envelope-encryption library in `packages/crypto`, with field-level encryption, key versioning and blind indexes (EN-03 to EN-06, EN-09).
 2. **Data classification.** Add class tags (Restricted, Confidential, Internal, Public) to the schema definition, and a check that fails when a field has no class.
-3. **Database.** Set up PostgreSQL with migrations, encrypted connections, least-privilege database roles, encrypted backups to a second region.
+3. **Database.** Set up PostgreSQL with migrations, encrypted connections, least-privilege database roles, encrypted backups in the project Region plus an encrypted copy outside the cloud account (EN-10).
 4. **Audit log.** Build the tamper-evident audit service and the helper every Restricted read and write must call (SE-05).
 5. **Auth skeleton.** Token and session handling, role-based and object-level authorisation guards, and the authorisation test harness that tries every endpoint as every role (SE-02, SE-07).
 6. **Secrets and security scanning.** Secrets manager, plus static analysis, dependency, container and secret scanning in CI (EN-12, SO-03).
@@ -343,7 +343,7 @@ Goal: prove the whole application is secure, fast and supportable at full scope,
 3. Full E2E regression of journeys J1 to J9 on all viewports and in all three languages; visual regression review.
 4. Accessibility audit against WCAG 2.2 AA with manual screen-reader passes on TalkBack, VoiceOver and NVDA.
 5. Real-device performance check of Core Web Vitals on low-end Android over 3G and 4G.
-6. Disaster recovery drill: restore from backup in the second region within the 4-hour target; key rotation drill.
+6. Disaster recovery drill: restore from the off-account backup within the 4-hour target; key rotation drill.
 7. Access review: remove unused accounts and permissions; confirm no production data outside production.
 8. Fraud review of referral, coupon and refund paths.
 
