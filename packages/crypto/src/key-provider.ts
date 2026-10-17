@@ -45,6 +45,9 @@ export class LocalKeyProvider implements KeyProvider {
       'aes-256-gcm',
       this.master(domain),
       wrapped.subarray(0, IV_BYTES),
+      {
+        authTagLength: TAG_BYTES,
+      },
     );
     decipher.setAuthTag(wrapped.subarray(IV_BYTES, IV_BYTES + TAG_BYTES));
     return Promise.resolve(

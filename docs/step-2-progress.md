@@ -16,7 +16,9 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 5 | feat/step2-observability | Logger context and masking, OpenTelemetry, Collector and Jaeger, error-rate alert, web-vitals endpoint | Merged #38 |
 | 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Merged #39 |
 | 7 | feat/step2-ui-kit | Tokens, accessible components, Storybook, axe on every component and story | Merged #40 |
-| 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Open |
+| 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Merged #41 |
+| 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep rules. TODO: Semgrep and Trivy CI jobs with runtime fixtures (SO-03.1), changed-lines coverage gate (TS-01.1), adapter ports and doubles with lint boundary (TS-06.1) | Draft, WIP |
+| 10 | (not started) | Backup KMS key and bucket, nightly pg_dump, off-account copy script, Terraform checks EN-02.1/EN-05.2/EN-04.2, restore record EN-10.4, infra apply | Not started |
 
 ## Evidence by criterion
 

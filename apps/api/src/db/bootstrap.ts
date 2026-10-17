@@ -23,7 +23,9 @@ export async function bootstrapDatabase(env: Record<string, string | undefined>)
     await setPassword(client, 'heach_app', requireEnv(env, 'DATABASE_PASSWORD'));
     const { rows } = await client.query<{ db: string }>('SELECT current_database() AS db');
     const db = client.escapeIdentifier(rows[0]?.db ?? '');
+    // nosemgrep: heach-no-raw-sql-concatenation -- DDL takes no parameters; identifier escaped
     await client.query(`REVOKE ALL ON DATABASE ${db} FROM PUBLIC`);
+    // nosemgrep: heach-no-raw-sql-concatenation -- DDL takes no parameters; identifier escaped
     await client.query(`GRANT CONNECT ON DATABASE ${db} TO heach_migrator, heach_app`);
   } finally {
     await client.end();
@@ -31,6 +33,7 @@ export async function bootstrapDatabase(env: Record<string, string | undefined>)
 }
 
 async function setPassword(client: pg.Client, role: string, password: string): Promise<void> {
+  // nosemgrep: heach-no-raw-sql-concatenation -- DDL takes no parameters; values escaped
   await client.query(
     `ALTER ROLE ${client.escapeIdentifier(role)} PASSWORD ${client.escapeLiteral(password)}`,
   );
