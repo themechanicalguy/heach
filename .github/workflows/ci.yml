@@ -175,10 +175,12 @@ jobs:
           tofu_version: 1.13.1
           tofu_wrapper: false
       - run: tofu fmt -check -recursive infra
+      - name: Every stack carries the Project, Environment and Owner tags
+        run: node scripts/check-tags.mjs
       # No AWS credentials: backends are skipped; providers come from the committed lock files.
       - name: Validate every stack
         run: |
-          for dir in infra/bootstrap infra/github-oidc infra/envs/*/; do
+          for dir in infra/bootstrap infra/github-oidc infra/paid-plan-budgets infra/envs/*/; do
             tofu -chdir="$dir" init -backend=false -input=false -lockfile=readonly
             tofu -chdir="$dir" validate
           done

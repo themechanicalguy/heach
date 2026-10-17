@@ -1,0 +1,6 @@
+{
+  "signUpDate": "2026-10-17",
+  "creditsGranted": 120,
+  "planEndDate": "2027-04-17",
+  "notes": "Read from Billing > Credits. creditsGranted is every credit received so far ($100 at sign-up plus $20 earned through activities on 2026-10-17); raise it when AWS grants more. Percent left = remaining / creditsGranted."
+}

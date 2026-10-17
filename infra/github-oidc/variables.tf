@@ -22,9 +22,9 @@ variable "alert_thresholds_usd" {
 }
 
 variable "credit_pool_usd" {
-  description = "Free plan credits shown on the Billing Credits page. Raise to 200 if AWS grants more."
+  description = "Credits granted so far (Billing > Credits; keep equal to creditsGranted in docs/credit-baseline.json)."
   type        = number
-  default     = 100
+  default     = 120
 }
 
 variable "credits_start_date" {

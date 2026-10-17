@@ -1,0 +1,23 @@
+name: AWS credentials via OIDC
+description: Exchanges the job's GitHub OIDC token for short-lived AWS credentials (no stored keys, EN-12).
+inputs:
+  role-arn:
+    description: IAM role to assume; it must trust this repository's immutable OIDC subject.
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        ROLE_ARN: ${{ inputs.role-arn }}
+      run: |
+        token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+        creds=$(aws sts assume-role-with-web-identity --role-arn "$ROLE_ARN" \
+          --role-session-name "gh-${GITHUB_RUN_ID}" --web-identity-token "$token" \
+          --duration-seconds 3600 --query Credentials --output json)
+        for pair in AWS_ACCESS_KEY_ID:AccessKeyId AWS_SECRET_ACCESS_KEY:SecretAccessKey AWS_SESSION_TOKEN:SessionToken; do
+          value=$(echo "$creds" | jq -r ".${pair#*:}")
+          echo "::add-mask::$value"
+          echo "${pair%%:*}=$value" >> "$GITHUB_ENV"
+        done

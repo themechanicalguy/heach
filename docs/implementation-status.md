@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, deploy pipeline with image scan gate, smoke test and rollback (playbook B3)
+- **Last updated:** 17 October 2026, credit-expiry alerts, sleep and wake, tag check in CI (playbook B4)
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The

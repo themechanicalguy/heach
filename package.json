@@ -23,7 +23,9 @@
     "format:check": "prettier --check .",
     "secrets:scan": "node scripts/scan-secrets.mjs",
     "lint:scripts": "eslint scripts",
-    "check": "turbo run lint typecheck test build && pnpm lint:scripts"
+    "test:scripts": "node --test scripts",
+    "credit:status": "node scripts/credit-status.mjs",
+    "check": "turbo run lint typecheck test build && pnpm lint:scripts && pnpm test:scripts"
   },
   "devDependencies": {
     "@heach/config": "workspace:*",

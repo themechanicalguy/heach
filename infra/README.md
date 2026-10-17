@@ -17,7 +17,9 @@ Background: [ADR 0005](../docs/adr/0005-aws-dev-environment.md),
 
 ```
 bootstrap/       state bucket only; local state; applied once per account by a human
-github-oidc/     GitHub Actions deploy role, budgets and credit-expiry reminders (account-wide)
+github-oidc/     GitHub deploy role, read-only credit-watch role, budgets and expiry reminders
+paid-plan-budgets/ net-cost budget and stop-the-hosts budget action; apply only after the
+                 upgrade to the Paid plan (playbook B6, docs/credit-expiry-plan.md)
 modules/
   naming/        names and tags; validates environment and region
   network/       VPC, public subnet, security groups
