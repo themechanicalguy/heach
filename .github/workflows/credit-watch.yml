@@ -1,0 +1,66 @@
+name: Credit watch
+
+# Daily check of the AWS Free plan credits (playbook part B4). Raises a GitHub issue and an email
+# when the alert level rises, when the plan is not ACTIVE, or when the check itself fails.
+# Run it by hand with "simulate" (for example remaining=10,daysLeft=40) to test the alerts.
+on:
+  schedule:
+    - cron: '30 3 * * *' # 09:00 IST
+  workflow_dispatch:
+    inputs:
+      simulate:
+        description: 'Fake values, e.g. remaining=50,daysLeft=90 (empty = real check)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  id-token: write # OIDC to the read-only credit-watch role
+  issues: write
+
+concurrency:
+  group: credit-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    name: Check credits
+    if: vars.AWS_CREDIT_WATCH_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CREDIT_ALERT_TOPIC_ARN: ${{ vars.CREDIT_ALERT_TOPIC_ARN }}
+      SIMULATE: ${{ inputs.simulate }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: AWS credentials via OIDC
+        uses: ./.github/actions/aws-oidc
+        with:
+          role-arn: ${{ vars.AWS_CREDIT_WATCH_ROLE_ARN }}
+
+      - name: Credit status
+        id: status
+        run: |
+          if [ -n "$SIMULATE" ]; then
+            node scripts/credit-status.mjs --json --simulate "$SIMULATE" > result.json
+          else
+            node scripts/credit-status.mjs --json > result.json
+          fi
+          jq . result.json
+
+      - name: Raise alerts
+        if: always() && steps.status.outcome != 'skipped'
+        run: |
+          if [ "${{ steps.status.outcome }}" = success ]; then
+            scripts/credit-alert.sh result.json
+          else
+            scripts/credit-alert.sh FAILED
+          fi

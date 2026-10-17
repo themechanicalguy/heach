@@ -1,0 +1,18 @@
+#!/bin/bash
+# Stops the dev host to save credits (playbook part B4). Data on the encrypted disk is kept.
+# Usage: scripts/dev-sleep    (uses AWS_PROFILE; region pinned to ap-south-1)
+set -euo pipefail
+source "$(dirname "$0")/lib/dev-host.sh"
+
+id=$(dev_instance_id running)
+[ -n "$id" ] || { echo "Dev host is not running; nothing to stop."; exit 0; }
+aws ec2 stop-instances --region "$REGION" --instance-ids "$id" >/dev/null
+aws ec2 wait instance-stopped --region "$REGION" --instance-ids "$id"
+cat <<MSG
+Dev host $id stopped. While it sleeps, these still cost (estimates, Mumbai):
+  - Elastic IP (public IPv4, idle)        about \$3.65 a month
+  - 20 GB encrypted gp3 disk              about \$1.82 a month
+  - 4 KMS keys                            \$4.00 a month
+  - nightly snapshots (taken while off)   about \$0.50 a month
+Compute (about \$8.18 a month) stops. Deploys fail until you run scripts/dev-wake.
+MSG

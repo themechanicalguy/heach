@@ -1,0 +1,14 @@
+#!/bin/bash
+# Starts the dev host again and waits until the application answers (playbook part B4).
+# Usage: scripts/dev-wake    (uses AWS_PROFILE; region pinned to ap-south-1)
+set -euo pipefail
+source "$(dirname "$0")/lib/dev-host.sh"
+
+id=$(dev_instance_id stopped)
+[ -n "$id" ] || { echo "No stopped dev host; it may already be running."; exit 0; }
+aws ec2 start-instances --region "$REGION" --instance-ids "$id" >/dev/null
+aws ec2 wait instance-running --region "$REGION" --instance-ids "$id"
+ip=$(aws ec2 describe-instances --region "$REGION" --instance-ids "$id" \
+  --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+echo "Dev host $id running at $ip; waiting for the application (Docker restarts the containers)."
+"$(dirname "$0")/smoke-test.sh" "$ip"
