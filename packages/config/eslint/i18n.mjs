@@ -1,9 +1,9 @@
 /**
  * Flags user-facing text written directly in JSX instead of coming from messages (I18N-02).
- * Warn mode in Step 1; Step 2 switches `level` to 'error' when ICU catalogues arrive.
+ * Error since Step 2 (I18N-02.1), now that ICU catalogues exist.
  * Built on ESLint's no-restricted-syntax, so no extra plugin is needed.
  */
-const level = 'warn';
+const level = 'error';
 
 const TEXT_ATTRIBUTES = ['alt', 'aria-label', 'aria-description', 'placeholder', 'title', 'label'];
 const MESSAGE = 'User-facing text must come from messages via t(key), not be hard-coded (I18N-02).';

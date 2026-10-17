@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 in progress: logging, tracing, error-rate alert ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 in progress: ICU catalogues and locale routes ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -89,7 +89,7 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 | SO-06 | Access only through SSM Session Manager, no SSH | Bastion or zero-trust proxy for production, quarterly review |
 | SO-07 | Synthetic-data rule in docs and CLAUDE.md | Enforcement once real data exists |
 | I18N-01 | Locales `or`, `en`, `hi` defined; Odia default | Locale-prefixed routing, adding a language without code change |
-| I18N-02 | ESLint warns on hard-coded JSX strings | ICU catalogues; rule becomes an error in Step 2 |
+| I18N-02 | ESLint fails on hard-coded JSX strings and text props; ICU catalogues for or, en, hi with plurals; locale routes `/or`, `/en`, `/hi`; bundled Odia and Devanagari fonts | Native Odia review of the text (I18N-07) |
 | TS-01 | Vitest in every package and app | 80% coverage threshold on changed code |
 | TS-03 | API integration tests against real PostgreSQL and Redis in CI (`/healthz`, `/readyz`) | Every endpoint (none beyond health yet) |
 | TS-05 | E2E smoke for web and admin on every PR (Chromium) | Nightly full suite; mobile and tablet projects |

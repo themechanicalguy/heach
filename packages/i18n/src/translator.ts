@@ -1,8 +1,7 @@
-/**
- * Temporary message lookup so no user-facing string is hard-coded.
- * Step 2 replaces the internals with ICU catalogues for or, en and hi; callers keep using `t(key)`.
- */
-interface MessageTree {
+import { formatIcu, type MessageValues } from './icu.js';
+import type { Locale } from './locales.js';
+
+export interface MessageTree {
   readonly [key: string]: string | MessageTree;
 }
 
@@ -11,10 +10,14 @@ export type MessageKey<T, P extends string = ''> = {
   [K in keyof T & string]: T[K] extends string ? `${P}${K}` : MessageKey<T[K], `${P}${K}.`>;
 }[keyof T & string];
 
-export type Translator<T> = (key: MessageKey<T> & string) => string;
+export type Translator<T> = (key: MessageKey<T> & string, values?: MessageValues) => string;
 
-export function createTranslator<T extends MessageTree>(messages: T): Translator<T> {
-  return (key) => {
+/** Looks up a key and formats it as ICU for the locale. Throws on a missing key. */
+export function createTranslator<T extends MessageTree>(
+  messages: T,
+  locale: Locale = 'en',
+): Translator<T> {
+  return (key, values = {}) => {
     const value = key
       .split('.')
       .reduce<unknown>(
@@ -24,6 +27,6 @@ export function createTranslator<T extends MessageTree>(messages: T): Translator
     if (typeof value !== 'string') {
       throw new Error(`Missing message: ${key}`);
     }
-    return value;
+    return formatIcu(value, values, locale);
   };
 }

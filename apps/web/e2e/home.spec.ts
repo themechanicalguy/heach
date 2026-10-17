@@ -1,16 +1,35 @@
+import { CATALOGUES, LOCALES } from '@heach/i18n';
 import { expect, test } from '@playwright/test';
-import en from '../messages/en.json' with { type: 'json' };
 
-test('home page renders the heading at 360 px without horizontal scroll', async ({ page }) => {
-  await page.goto('/');
+for (const locale of LOCALES) {
+  test(`I18N-01.1 /${locale} serves the shell in its language without horizontal scroll`, async ({
+    page,
+  }) => {
+    await page.goto(`/${locale}`);
 
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.home.title);
-  await expect(page.getByRole('button', { name: en.home.findCare })).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('lang', locale);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(CATALOGUES[locale].home.title);
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(overflows).toBe(false);
+  });
+}
 
-  const overflows = await page.evaluate(
-    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-  );
-  expect(overflows).toBe(false);
+test.describe('with a Hindi browser', () => {
+  test.use({ locale: 'hi-IN' });
+
+  test('I18N-01.1 / redirects to the browser language', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/hi$/);
+  });
+});
+
+test('SO-05.1 pages carry a nonce CSP without unsafe-inline scripts', async ({ request }) => {
+  const response = await request.get('/en');
+  const csp = response.headers()['content-security-policy'] ?? '';
+  expect(csp).toMatch(/script-src 'self' 'nonce-[\w+/=]+' 'strict-dynamic'/);
+  expect(csp).not.toContain('unsafe-inline');
 });
 
 test('/healthz reports status and version', async ({ request }) => {

@@ -1,8 +1,13 @@
-import { t } from './messages';
-import en from '../../messages/en.json';
+import { CATALOGUES } from '@heach/i18n';
+import { translatorFor } from './messages';
 
 describe('web messages', () => {
-  it('resolves the home title from messages/en.json', () => {
-    expect(t('home.title')).toBe(en.home.title);
+  it('I18N-01.1 resolves messages for each locale', () => {
+    expect(translatorFor('or').t('home.title')).toBe(CATALOGUES.or.home.title);
+    expect(translatorFor('hi').t('home.title')).toBe(CATALOGUES.hi.home.title);
+  });
+
+  it('falls back to Odia for an unknown locale', () => {
+    expect(translatorFor('fr').locale).toBe('or');
   });
 });
