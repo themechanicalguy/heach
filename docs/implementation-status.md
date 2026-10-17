@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 in progress: ICU catalogues and locale routes ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 in progress: design system and Storybook ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -94,7 +94,7 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 | TS-03 | API integration tests against real PostgreSQL and Redis in CI (`/healthz`, `/readyz`) | Every endpoint (none beyond health yet) |
 | TS-05 | E2E smoke for web and admin on every PR (Chromium) | Nightly full suite; mobile and tablet projects |
 | LM-02 | `@heach/logger` masks personal and Restricted keys and mobile numbers in values; ESLint fails on `console.*`; correlation and trace IDs on every API line; OpenTelemetry traces to Jaeger locally | Dashboard (LM-05) needs an owner decision; nothing central on the dev host (ADR 0010) |
-| UX-01 | `@heach/ui` with a `Button` and tokens | Storybook, the remaining base components |
+| UX-01 | `@heach/ui`: tokens with three breakpoints, Button, TextField, OtpField, Card, Sheet, Table, Toast, BottomNav, loading/empty/error/offline states; Storybook built in CI; axe on every component and story | Tailwind not yet used (plain CSS on tokens); colour contrast checked only in the browser |
 
 ## Documentation gaps found in review
 

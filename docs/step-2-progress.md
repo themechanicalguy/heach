@@ -14,7 +14,8 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 3 | feat/step2-db-tls-migrations | Data TLS, roles, audit schema, migrations, KMS adapter, SSM secrets, DC check | Merged #36; dev deploy waits for infra apply |
 | 4 | feat/step2-auth-audit-notes | Sessions, roles guard, audit helper, sample notes, headers, rate limits, alerts, flags, re-encryption | Merged #37 |
 | 5 | feat/step2-observability | Logger context and masking, OpenTelemetry, Collector and Jaeger, error-rate alert, web-vitals endpoint | Merged #38 |
-| 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Open |
+| 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Merged #39 |
+| 7 | feat/step2-ui-kit | Tokens, accessible components, Storybook, axe on every component and story | Open |
 
 ## Evidence by criterion
 
@@ -57,6 +58,12 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | I18N-03.1 | ✅ | `packages/i18n/src/format.test.ts` |
 | I18N-07.1 | ✅ | `packages/i18n/src/catalogues.test.ts` (real catalogues and failing fixture) |
 | SO-05.1 (pages) | ✅ | `apps/web/e2e/home.spec.ts`, `src/security/csp.test.ts` (nonce CSP from `proxy.ts`) |
+| UX-01.1 | ✅ | Button, TextField, OtpField, Card, Sheet, Table, Toast, BottomNav (+ states) with stories; CI builds Storybook |
+| UX-01.2 | ✅ | `packages/ui/src/stories.test.tsx`: every story rendered and checked with axe (contrast checked in browser by Lighthouse) |
+| UX-02.1 | ✅ | `packages/ui/src/tokens.test.ts` |
+| UX-04.1 | ✅ | `States.tsx` stories and `States.test.tsx` |
+| UX-05.1 | ✅ | `OtpField.test.tsx` |
+| TS-02.1 | ✅ | `coverage-of-components.test.ts` fails when a component lacks an axe test |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions

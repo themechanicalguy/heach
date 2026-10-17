@@ -5,7 +5,7 @@
     "jsx": "react-jsx",
     "rootDir": ".",
     "outDir": "dist",
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals", "vite/client"]
   },
-  "include": ["src", "*.ts"]
+  "include": ["src", "*.ts", ".storybook/*.ts"]
 }
