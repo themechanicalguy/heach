@@ -1,4 +1,4 @@
-/* Minimal mobile-first base. Replaced by design tokens and Tailwind in Step 2. */
+/* Mobile-first base. Components and tokens come from @heach/ui. */
 *,
 *::before,
 *::after {
@@ -7,7 +7,8 @@
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  /* Bundled fonts first (I18N-06.1); each script falls through to the font that has it. */
+  font-family: var(--font-latin), var(--font-odia), var(--font-devanagari), system-ui, sans-serif;
   line-height: 1.5;
 }
 

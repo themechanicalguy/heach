@@ -1,0 +1,43 @@
+{
+  "app": { "name": "HEACH" },
+  "home": {
+    "title": "Care at home, verified and close to you",
+    "findCare": "Find care"
+  },
+  "nav": { "label": "Main", "home": "Home", "notes": "Notes", "account": "Account" },
+  "offline": { "banner": "You are offline. Saved pages still work; changes need a connection." },
+  "state": {
+    "loading": "Loading",
+    "empty": "No notes yet",
+    "error": "Something went wrong. Please try again.",
+    "retry": "Try again"
+  },
+  "locale": { "label": "Language", "or": "ଓଡ଼ିଆ", "en": "English", "hi": "हिन्दी" },
+  "auth": {
+    "test": {
+      "title": "Test sign-in",
+      "hint": "Development only. Uses synthetic people, never real patients.",
+      "patientA": "Synthetic patient A",
+      "patientB": "Synthetic patient B",
+      "signIn": "Sign in"
+    },
+    "signOut": "Sign out",
+    "signedOut": "You are signed out."
+  },
+  "sample": {
+    "note": {
+      "title": "My notes",
+      "label": "New note",
+      "hint": "Up to 2,000 characters. Only you can read it.",
+      "save": "Save note",
+      "saved": "Note saved",
+      "tooLong": "Keep the note under 2,000 characters.",
+      "count": "{count, plural, =0 {No notes} one {# note} other {# notes}}",
+      "createdAt": "Written on {date}"
+    }
+  },
+  "ui": {
+    "close": "Close",
+    "otp": { "label": "One-time password", "digit": "Digit {index} of {total}" }
+  }
+}

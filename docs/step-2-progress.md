@@ -13,7 +13,8 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 2 | feat/step2-crypto | `@heach/crypto` envelope encryption, blind indexes | Merged #35 |
 | 3 | feat/step2-db-tls-migrations | Data TLS, roles, audit schema, migrations, KMS adapter, SSM secrets, DC check | Merged #36; dev deploy waits for infra apply |
 | 4 | feat/step2-auth-audit-notes | Sessions, roles guard, audit helper, sample notes, headers, rate limits, alerts, flags, re-encryption | Merged #37 |
-| 5 | feat/step2-observability | Logger context and masking, OpenTelemetry, Collector and Jaeger, error-rate alert, web-vitals endpoint | Open |
+| 5 | feat/step2-observability | Logger context and masking, OpenTelemetry, Collector and Jaeger, error-rate alert, web-vitals endpoint | Merged #38 |
+| 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Open |
 
 ## Evidence by criterion
 
@@ -50,6 +51,12 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | LM-04.1 | 🟡 | `POST /v1/rum` logs vitals per route and device; browser reporting in the web PR |
 | LM-05.1 | 🟡 | Traces in OpenTelemetry and Jaeger; request metrics on the Collector's Prometheus endpoint. One dashboard for rate, errors and p50/p95/p99 needs Prometheus and Grafana, outside D4: owner decision |
 | LM-07.1 | 🟡 | `error-rate.monitor.spec.ts` (in-process 5-minute window, SNS publisher); live test alert after infra apply |
+| I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
+| I18N-02.1 | ✅ | `apps/web/src/lint-rules.test.ts` (JSX text and `alt` fail at error level) |
+| I18N-02.2 | ✅ | `packages/i18n/src/icu.test.ts`, `translator.test.ts` |
+| I18N-03.1 | ✅ | `packages/i18n/src/format.test.ts` |
+| I18N-07.1 | ✅ | `packages/i18n/src/catalogues.test.ts` (real catalogues and failing fixture) |
+| SO-05.1 (pages) | ✅ | `apps/web/e2e/home.spec.ts`, `src/security/csp.test.ts` (nonce CSP from `proxy.ts`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions
