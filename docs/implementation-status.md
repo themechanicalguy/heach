@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, Step 1 exit criteria walked through; ADR 0009; environments (playbook B5)
+- **Last updated:** 17 October 2026, runtime images upgrade Alpine packages so the ECR scan gate passes
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
