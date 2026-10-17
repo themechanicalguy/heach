@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 in progress: data TLS, database roles, migrations, KMS adapter ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 in progress: sessions, authorisation, audit, sample note, security middleware ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The

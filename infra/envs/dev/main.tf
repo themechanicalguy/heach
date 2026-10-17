@@ -62,4 +62,6 @@ module "host" {
   parameter_path      = local.parameter_path
   kms_key_arns        = values(module.keys.key_arns)
   uploads_bucket_arn  = module.uploads.arn
+  # Created by infra/github-oidc (D5: the existing heach-credit-reminders topic).
+  alert_topic_arn = "arn:aws:sns:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${module.naming.project}-credit-reminders"
 }
