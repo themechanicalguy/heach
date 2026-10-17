@@ -9,6 +9,7 @@ import { CryptoModule } from './crypto/crypto.module.js';
 import { DataStoresModule } from './data-stores/data-stores.module.js';
 import { FlagsModule } from './flags/flags.module.js';
 import { HealthController } from './health/health.controller.js';
+import { ObservabilityModule } from './observability/observability.module.js';
 import { ReadinessService } from './health/readiness.service.js';
 import { SampleNotesModule } from './sample-notes/sample-notes.module.js';
 import { SecurityModule } from './security/security.module.js';
@@ -28,6 +29,7 @@ export class AppModule {
         FlagsModule,
         SecurityModule,
         AuthModule.register(appEnv),
+        ObservabilityModule,
         SampleNotesModule,
       ],
       controllers: [HealthController],

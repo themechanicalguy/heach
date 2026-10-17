@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { trace } from '@opentelemetry/api';
 import type { NextFunction, Request, Response } from 'express';
 import { runWithContext } from './request-context.js';
 
@@ -14,5 +15,7 @@ export function correlationMiddleware(
   const incoming = request.header(CORRELATION_HEADER);
   const correlationId = incoming && VALID_ID.test(incoming) ? incoming : randomUUID();
   response.setHeader(CORRELATION_HEADER, correlationId);
+  // The trace carries the correlation ID, so one search finds the request, its queries and logs.
+  trace.getActiveSpan()?.setAttribute('heach.correlation_id', correlationId);
   runWithContext({ correlationId }, next);
 }

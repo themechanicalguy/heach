@@ -1,0 +1,38 @@
+# OpenTelemetry Collector for local development and CI (ADR 0010: not on the dev host).
+# Traces go to Jaeger. Metrics (request rate, errors, latency histograms) are exposed for
+# scraping on :8889 and printed by the debug exporter.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+  # Defence in depth: drop any attribute that could carry personal data.
+  attributes/scrub:
+    actions:
+      - { key: http.request.header.authorization, action: delete }
+      - { key: http.request.header.cookie, action: delete }
+      - { key: url.query, action: delete }
+
+exporters:
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true # same Docker network, local only
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/scrub, batch]
+      exporters: [otlp/jaeger]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, debug]

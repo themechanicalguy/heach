@@ -37,7 +37,7 @@ jobs:
       - name: Start PostgreSQL and Redis (TLS)
         run: |
           node scripts/setup.mjs
-          docker compose up -d --wait postgres redis
+          docker compose up -d --wait postgres redis otel-collector jaeger
       # Local Turborepo cache only; no remote cache service. Restores the newest run for this lockfile.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
