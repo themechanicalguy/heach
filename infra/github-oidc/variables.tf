@@ -1,7 +1,7 @@
-variable "github_repository" {
-  description = "owner/name of the GitHub repository allowed to deploy."
+variable "github_oidc_subject_prefix" {
+  description = "Subject prefix GitHub sends for this repository (immutable form). Read it with: gh api repos/<owner>/<repo>/actions/oidc/customization/sub --jq .sub_claim_prefix"
   type        = string
-  default     = "themechanicalguy/heach"
+  default     = "repo:themechanicalguy@83498199/heach@1403303617"
 }
 
 variable "budget_email" {
