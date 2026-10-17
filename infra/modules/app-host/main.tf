@@ -49,7 +49,7 @@ resource "aws_iam_role_policy" "host" {
       # sees the master keys (EN-04). No key administration.
       {
         Effect   = "Allow"
-        Action   = ["kms:GenerateDataKey", "kms:Decrypt", "kms:Encrypt", "kms:DescribeKey"]
+        Action   = ["kms:GenerateDataKey", "kms:Decrypt"] # only these two (EN-04.2)
         Resource = var.kms_key_arns
       },
       {

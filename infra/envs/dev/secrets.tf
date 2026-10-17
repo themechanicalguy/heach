@@ -23,3 +23,37 @@ resource "aws_ssm_parameter" "redis_password" {
   type  = "SecureString"
   value = random_password.redis.result
 }
+
+# Step 2 (EN-10.2, EN-09, EN-12.1): passwords for the migrations and API database roles, and the
+# root key for blind indexes. The API reads these at start-up; nothing else holds them.
+resource "random_password" "db_app" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "db_migrator" {
+  length  = 32
+  special = false
+}
+
+resource "random_id" "blind_index_key" {
+  byte_length = 32
+}
+
+resource "aws_ssm_parameter" "db_app_password" {
+  name  = "${local.parameter_path}/DB_APP_PASSWORD"
+  type  = "SecureString"
+  value = random_password.db_app.result
+}
+
+resource "aws_ssm_parameter" "db_migrator_password" {
+  name  = "${local.parameter_path}/DB_MIGRATOR_PASSWORD"
+  type  = "SecureString"
+  value = random_password.db_migrator.result
+}
+
+resource "aws_ssm_parameter" "blind_index_key" {
+  name  = "${local.parameter_path}/BLIND_INDEX_KEY"
+  type  = "SecureString"
+  value = random_id.blind_index_key.hex
+}

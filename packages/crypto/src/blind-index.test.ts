@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { BlindIndexer } from './blind-index.js';
+import { BlindIndexer, deriveBlindIndexKeys } from './blind-index.js';
 
 const keys = {
   health: randomBytes(32),
@@ -26,5 +26,14 @@ describe('BlindIndexer', () => {
     expect(() =>
       new BlindIndexer({ ...keys, health: Buffer.alloc(8) }).index('health', 'x'),
     ).toThrow();
+  });
+});
+
+describe('deriveBlindIndexKeys', () => {
+  it('EN-09.1 derives a distinct 32-byte key per domain, stable for one root key', () => {
+    const root = randomBytes(32);
+    const derived = deriveBlindIndexKeys(root);
+    expect(new Set(Object.values(derived).map((k) => k.toString('hex'))).size).toBe(4);
+    expect(deriveBlindIndexKeys(root).health.equals(derived.health)).toBe(true);
   });
 });

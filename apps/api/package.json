@@ -11,9 +11,14 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit",
     "test:e2e": "vitest run --project integration",
-    "openapi:export": "node dist/openapi.export.js"
+    "openapi:export": "node dist/openapi.export.js",
+    "db:bootstrap": "node --env-file-if-exists=../../.env dist/db/bootstrap.js",
+    "db:migrate": "node --env-file-if-exists=../../.env dist/db/migrate.js",
+    "db:check-classes": "node --env-file-if-exists=../../.env dist/db/check-classification.js"
   },
   "dependencies": {
+    "@aws-sdk/client-kms": "3.1146.0",
+    "@aws-sdk/client-ssm": "3.1146.0",
     "@heach/crypto": "workspace:*",
     "@heach/logger": "workspace:*",
     "@nestjs/common": "12.1.2",
@@ -23,6 +28,7 @@
     "class-transformer": "0.5.1",
     "class-validator": "0.15.1",
     "ioredis": "6.0.0",
+    "node-pg-migrate": "9.0.0",
     "pg": "8.23.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"

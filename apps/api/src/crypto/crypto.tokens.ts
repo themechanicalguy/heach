@@ -1,9 +1,9 @@
-import type { FieldEncryptor } from '@heach/crypto';
+import type { BlindIndexer, FieldEncryptor } from '@heach/crypto';
 
-/**
- * Injection token for field-level encryption of Restricted data. No provider is registered
- * until Step 2 brings the real implementation; injecting it before then fails at startup.
- */
+/** Injection token for field-level encryption of Restricted data (EN-03 to EN-06). */
 export const FIELD_ENCRYPTOR = Symbol('FIELD_ENCRYPTOR');
 
-export type { FieldEncryptor };
+/** Injection token for blind indexes of searchable Restricted fields (EN-09). */
+export const BLIND_INDEXER = Symbol('BLIND_INDEXER');
+
+export type { BlindIndexer, FieldEncryptor };

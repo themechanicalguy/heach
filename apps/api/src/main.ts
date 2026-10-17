@@ -2,8 +2,10 @@ import 'reflect-metadata';
 import { createLogger } from '@heach/logger';
 import { createApp } from './app.factory.js';
 import { EnvVars } from './config/env.schema.js';
+import { loadSecrets } from './secrets/load-secrets.js';
 
 const logger = createLogger({ name: 'api' });
+await loadSecrets(process.env);
 const app = await createApp();
 const env = app.get(EnvVars);
 await app.listen(env.API_PORT);

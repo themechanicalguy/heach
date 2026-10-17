@@ -105,3 +105,16 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 - **`Cannot connect to the Docker daemon`**: start Docker Desktop.
 - **`/readyz` returns 503**: run `docker compose ps`; the check marked `down` names the service.
 - **Start completely fresh**: `pnpm services:reset`, then `pnpm dev:up`.
+
+## Database TLS, roles and migrations (Step 2)
+
+- PostgreSQL and Redis accept TLS only (EN-01.1). `pnpm setup` creates a local CA and server
+  certificate in `.certs/` (git-ignored) and writes `DATA_TLS_CA_FILE` to `.env`. Existing
+  `.env` files are upgraded to `rediss://` and the API database role.
+- `pnpm dev:up` runs `db:bootstrap` (roles, schemas, audit log, as the superuser) and
+  `db:migrate` (as `heach_migrator`). Run them alone with `pnpm --filter @heach/api db:bootstrap`
+  and `db:migrate`; add a migration as `apps/api/migrations/NNNN_name.sql`.
+- Every column needs `COMMENT ON COLUMN … IS 'class=<class>'`; Restricted columns use the
+  `app.encrypted_field` type. `pnpm --filter @heach/api db:check-classes` checks this (DC-01).
+- After pulling Step 2, run `pnpm services:reset` only if PostgreSQL fails to start with the new
+  TLS entrypoint; it wipes local data.

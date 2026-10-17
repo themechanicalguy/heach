@@ -5,7 +5,12 @@ import { readEnv, updateEnv } from './env-file.mjs';
 
 /** Port keys in .env, their defaults, and the URL keys whose port must follow them. */
 export const PORTS = [
-  { key: 'POSTGRES_PORT', fallback: 5433, url: 'DATABASE_URL', label: 'PostgreSQL' },
+  {
+    key: 'POSTGRES_PORT',
+    fallback: 5433,
+    url: ['DATABASE_URL', 'DATABASE_MIGRATOR_URL', 'DATABASE_ADMIN_URL'],
+    label: 'PostgreSQL',
+  },
   { key: 'REDIS_PORT', fallback: 6379, url: 'REDIS_URL', label: 'Redis' },
   { key: 'S3_PORT', fallback: 8333, url: 'S3_ENDPOINT', label: 'S3 store' },
   { key: 'SMTP_PORT', fallback: 1025, label: 'Mailpit SMTP' },
@@ -31,7 +36,9 @@ export async function resolvePorts(envPath) {
     if (port === wanted) continue;
     moves.push(`${label}: ${String(wanted)} is in use, using ${String(port)}`);
     changes[key] = String(port);
-    if (url && env[url]) changes[url] = withPort(env[url], port);
+    for (const name of [url ?? []].flat()) {
+      if (env[name]) changes[name] = withPort(env[name], port);
+    }
   }
   if (moves.length > 0) updateEnv(envPath, changes);
   return { moves, env: readEnv(envPath) };

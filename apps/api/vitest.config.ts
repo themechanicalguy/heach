@@ -15,6 +15,7 @@ export default defineConfig({
           name: 'integration',
           include: ['test/**/*.int-spec.ts'],
           setupFiles: ['./test/load-env.ts'],
+          globalSetup: ['./test/db-setup.ts'],
           // One app at a time: the suites share the local PostgreSQL and Redis.
           fileParallelism: false,
         },
