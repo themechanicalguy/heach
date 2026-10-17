@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: deploy on merge passed (PR #30); sleep/wake recovery retested; burn-rate warning now alerts on its own
+- **Last updated:** 18 October 2026: Step 2 spec merged (PR #33); ADR 0010 records D1–D3; Step 2 in progress ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The

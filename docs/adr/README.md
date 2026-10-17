@@ -14,3 +14,4 @@ Start from [the template](0000-template.md) and take the next number.
 | [0007](0007-spec-driven-development.md) | Build every step from a written, approved spec | Accepted |
 | [0008](0008-lean-single-host-on-credits.md) | One lean EC2 host on AWS credits until the paid plan | Accepted |
 | [0009](0009-aws-credits-and-restricted-pilot.md) | Free plan credits, upgrade at the Act level, pilot on an IP address | Accepted |
+| [0010](0010-step-2-backups-secrets-waf.md) | Step 2: one-Region backups, Parameter Store secrets, WAF at the pilot | Accepted |
