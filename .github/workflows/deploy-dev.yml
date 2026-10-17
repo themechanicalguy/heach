@@ -1,6 +1,7 @@
 name: Deploy dev
 
-# Deploys main to the AWS dev host after CI passes on main.
+# Deploys main to the AWS dev host after CI passes on main: build, scan, deploy through SSM,
+# smoke test, and roll back to the previous tag if the deploy or smoke test fails.
 # Disabled until the repository variable AWS_DEPLOY_ROLE_ARN is set (see docs/cloud-setup.md).
 on:
   workflow_run:
@@ -51,39 +52,64 @@ jobs:
             echo "${pair%%:*}=$value" >> "$GITHUB_ENV"
           done
 
-      - name: Registry and image tag
+      - name: Registry, image tag and dev host
         run: |
           account=$(aws sts get-caller-identity --query Account --output text)
           echo "REGISTRY=${account}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> "$GITHUB_ENV"
           echo "IMAGE_TAG=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_ENV"
+          read -r instance ip < <(aws ec2 describe-instances \
+            --filters Name=tag:Project,Values=heach Name=tag:Environment,Values=dev \
+              Name=instance-state-name,Values=running \
+            --query 'Reservations[0].Instances[0].[InstanceId,PublicIpAddress]' --output text)
+          test "$instance" != None || { echo "::error::No running dev host (asleep? run scripts/dev-wake)"; exit 1; }
+          echo "INSTANCE_ID=$instance" >> "$GITHUB_ENV"
+          echo "PUBLIC_IP=$ip" >> "$GITHUB_ENV"
 
+      # Plain image manifests (no provenance index), so ECR scan on push can scan them.
       - name: Build and push ARM images
         run: |
           aws ecr get-login-password | docker login --username AWS --password-stdin "$REGISTRY"
           docker buildx create --use
           for app in web admin api; do
-            docker buildx build --platform linux/arm64 -f "apps/$app/Dockerfile" \
-              -t "$REGISTRY/heach/$app:$IMAGE_TAG" --push .
+            docker buildx build --platform linux/arm64 --provenance=false --sbom=false \
+              -f "apps/$app/Dockerfile" -t "$REGISTRY/heach/$app:$IMAGE_TAG" --push .
           done
 
-      - name: Deploy through SSM
+      - name: Image scan gate (high and critical findings block the deploy)
         run: |
-          instance=$(aws ec2 describe-instances \
-            --filters Name=tag:Project,Values=heach Name=tag:Environment,Values=dev \
-              Name=instance-state-name,Values=running \
-            --query 'Reservations[0].Instances[0].InstanceId' --output text)
-          bundle=$(tar -C deploy/dev -czf - . | base64 -w0)
-          params=$(jq -n --arg b "$bundle" --arg r "$REGISTRY" --arg t "$IMAGE_TAG" '{commands: [
-            "set -euo pipefail",
-            "cd /opt/heach",
-            ("echo " + $b + " | base64 -d | tar -xzf -"),
-            ("bash deploy.sh " + $r + " " + $t)
-          ]}')
-          id=$(aws ssm send-command --instance-ids "$instance" --document-name AWS-RunShellScript \
-            --comment "heach dev $IMAGE_TAG" --parameters "$params" \
-            --query Command.CommandId --output text)
-          aws ssm wait command-executed --command-id "$id" --instance-id "$instance" || true
-          aws ssm get-command-invocation --command-id "$id" --instance-id "$instance" \
-            --query '{status: Status, output: StandardOutputContent, errors: StandardErrorContent}'
-          test "$(aws ssm get-command-invocation --command-id "$id" --instance-id "$instance" \
-            --query Status --output text)" = Success
+          blocked=0
+          for app in web admin api; do
+            aws ecr wait image-scan-complete --repository-name "heach/$app" --image-id "imageTag=$IMAGE_TAG"
+            counts=$(aws ecr describe-image-scan-findings --repository-name "heach/$app" \
+              --image-id "imageTag=$IMAGE_TAG" --query 'imageScanFindings.findingSeverityCounts' --output json)
+            echo "heach/$app: ${counts}"
+            serious=$(echo "${counts:-null}" | jq '(.HIGH // 0) + (.CRITICAL // 0)')
+            if [ "$serious" -gt 0 ]; then
+              echo "::error::heach/$app has $serious high or critical findings"
+              blocked=1
+            fi
+          done
+          exit "$blocked"
+
+      - name: Remember the running tag for rollback
+        run: |
+          out=$(scripts/ssm-run.sh "$INSTANCE_ID" "heach dev read tag" \
+            '{"commands":["cat /opt/heach/DEPLOYED_TAG 2>/dev/null || true"]}')
+          previous=$(echo "$out" | head -1 | grep -E '^[0-9a-f]{12}$' || true)
+          echo "Previous tag: ${previous:-none}"
+          echo "PREVIOUS_TAG=$previous" >> "$GITHUB_ENV"
+
+      - name: Deploy through SSM
+        id: deploy
+        run: scripts/ssm-run.sh "$INSTANCE_ID" "heach dev $IMAGE_TAG" "$(scripts/deploy-params.sh "$REGISTRY" "$IMAGE_TAG")"
+
+      - name: Smoke test /healthz and /api/readyz
+        id: smoke
+        run: scripts/smoke-test.sh "$PUBLIC_IP"
+
+      - name: Roll back to the previous tag
+        if: failure() && env.PREVIOUS_TAG != '' && (steps.deploy.outcome == 'failure' || steps.smoke.outcome == 'failure')
+        run: |
+          echo "::warning::Rolling back dev to $PREVIOUS_TAG"
+          scripts/ssm-run.sh "$INSTANCE_ID" "heach dev rollback $PREVIOUS_TAG" "$(scripts/deploy-params.sh "$REGISTRY" "$PREVIOUS_TAG")"
+          scripts/smoke-test.sh "$PUBLIC_IP"

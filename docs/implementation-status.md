@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, deploy role trusts GitHub's immutable OIDC subject
+- **Last updated:** 17 October 2026, deploy pipeline with image scan gate, smoke test and rollback (playbook B3)
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -28,7 +28,7 @@ checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 | 6 | Commit hooks and conventional commits | ✅ Done | [ADR 0003](adr/0003-quality-gates-without-new-dependencies.md) |
 | 7 | CI pipeline with caching; PR template with definition of done | ✅ Done | `.github/workflows/ci.yml`, `.github/pull_request_template.md` |
 | 8 | Cloud in an India region with IaC: dev, staging, production | 🟡 Partial | Dev stack applied (one lean host, ADR 0008): ports 80/443 only, admin via Session Manager, 4 KMS keys, uploads bucket, nightly snapshots. Region pinned to `ap-south-1`. No managed databases, load balancer or separate accounts ([cloud setup](cloud-setup.md), ADRs [0005](adr/0005-aws-dev-environment.md), [0006](adr/0006-infra-layout-and-state.md)). Staging and production folders exist but are not provisioned |
-| 9 | Auto-deploy to dev and staging; preview deploy per PR | 🟡 Partial | Deploy to dev on merge (inert until `AWS_DEPLOY_ROLE_ARN` is set). No staging, no previews |
+| 9 | Auto-deploy to dev and staging; preview deploy per PR | 🟡 Partial | Deploy to dev on merge: OIDC, image scan gate, SSM deploy, smoke test, rollback to the previous tag. No staging, no previews (replaced by dev only, playbook) |
 | 10 | README, contributing guide, ADR template, `docs/` | ✅ Done | |
 
 ### Step 1 exit criteria

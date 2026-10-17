@@ -14,3 +14,9 @@ variable "force_delete" {
   type        = bool
   default     = false
 }
+
+variable "keep_images" {
+  description = "Images kept per repository; older ones are deleted automatically."
+  type        = number
+  default     = 5
+}
