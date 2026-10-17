@@ -81,7 +81,7 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 | EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
 | EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
 | EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations (node-pg-migrate) run forward from empty in CI; separate migrator, API and audit-owner roles | Backup key, bucket, off-account copy and restore record (ADR 0010) |
-| EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys | Secrets manager with rotation |
+| EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys; the API reads its secrets from Parameter Store at start-up; rotation runbook | Rotation run once in dev (EN-12.2), blocked on the infra apply; Secrets Manager revisited at the pilot (D2) |
 | SE-04 | Admin has no public port; reached only through Session Manager port forwarding (IAM sign-in with MFA) | In-app MFA, short sessions, export controls (no admin login exists yet) |
 | PR-06 | `naming` module rejects regions outside India; everything in `ap-south-1` | Data processing agreements with third parties |
 | PR-07 | Logger redacts personal keys | No analytics or monitoring tools yet |
@@ -130,3 +130,6 @@ affects at the latest (for example item 6 in the Step 2 spec).
     TS-08 and Step 4 load tests; the Aadhaar route blocks Step 3; Hindi at launch affects I18N).
 11. **Third-party applications** (payment gateway, SMS DLT, Aadhaar partner, video) must start in
     Step 1, but their status is not tracked anywhere in the repo.
+12. **SO-08.2 asks for a Caddy rate limit, but stock Caddy has none.** It needs the third-party
+   `caddy-ratelimit` module and a custom Caddy build, which is not in the Step 2 dependency list
+   (D4). The API rate limit (SO-08.1) is on. Owner decision: add the module to D4, or reword SO-08.2.
