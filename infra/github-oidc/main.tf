@@ -59,6 +59,7 @@ resource "aws_iam_role_policy" "github_deploy" {
         Action = [
           "ecr:BatchCheckLayerAvailability", "ecr:InitiateLayerUpload", "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload", "ecr:PutImage", "ecr:BatchGetImage",
+          "ecr:DescribeImages", "ecr:DescribeImageScanFindings", # scan gate in Deploy dev
         ]
         Resource = "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/heach/*"
       },

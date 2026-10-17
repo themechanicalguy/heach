@@ -103,6 +103,25 @@ In GitHub: **Settings → Secrets and variables → Actions → Variables**, add
 From then on, every merge to `main` that passes CI deploys to dev (workflow **Deploy dev**).
 You can also run it by hand from the Actions tab.
 
+Settings made by hand, outside OpenTofu:
+
+| Where | Setting | Value |
+| --- | --- | --- |
+| GitHub, Actions variables | `AWS_DEPLOY_ROLE_ARN` | `github_deploy_role_arn` output of `infra/github-oidc` |
+| GitHub, OIDC subject | Immutable subject (repository default) | Read it with `gh api repos/<owner>/<repo>/actions/oidc/customization/sub`; it must equal `github_oidc_subject_prefix` in `infra/github-oidc` |
+| AWS console | Nothing | Every AWS resource comes from OpenTofu |
+
+What one deploy does (`.github/workflows/deploy-dev.yml`):
+
+1. Signs in to AWS with GitHub's OIDC token (no stored keys) as `heach-github-deploy`.
+2. Builds `web`, `admin` and `api` for ARM, tagged with the 12-character commit SHA, and pushes
+   them to ECR. Each repository keeps the 5 newest images.
+3. Waits for the ECR scan; any HIGH or CRITICAL finding stops the deploy.
+4. Reads the running tag from the host (`/opt/heach/DEPLOYED_TAG`), then deploys the new tag
+   through SSM Run Command (`deploy/dev/deploy.sh`): no SSH.
+5. Smoke test from the runner: `/healthz`, `/api/healthz`, `/api/readyz` (PostgreSQL and Redis).
+6. If the deploy or smoke test fails, redeploys the previous tag and marks the run failed.
+
 ## Using dev
 
 | What | Where |

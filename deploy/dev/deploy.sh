@@ -38,6 +38,7 @@ docker compose up -d --remove-orphans
 
 for _ in $(seq 1 60); do
   if docker compose exec -T api wget -qO- http://127.0.0.1:3001/readyz >/dev/null 2>&1; then
+    echo "$IMAGE_TAG" > DEPLOYED_TAG # read by the workflow to roll back; not a secret
     echo "Deployed $IMAGE_TAG: API ready"
     docker image prune -af --filter "until=168h" >/dev/null
     exit 0
