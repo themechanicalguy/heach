@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, Step 1 review ([step-1-review.md](step-1-review.md)); runtime images upgrade Alpine packages so the ECR scan gate passes
+- **Last updated:** 18 October 2026, B2R to B5 verification: github-oidc and dev plans show no changes, simulations passed, Deploy dev re-runs reuse an existing image tag
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -28,7 +28,7 @@ checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 | 6 | Commit hooks and conventional commits | ✅ Done | [ADR 0003](adr/0003-quality-gates-without-new-dependencies.md) |
 | 7 | CI pipeline with caching; PR template with definition of done | ✅ Done | `.github/workflows/ci.yml`, `.github/pull_request_template.md` |
 | 8 | Cloud in an India region with IaC: dev, staging, production | 🟡 Partial | Dev stack applied (one lean host, ADR 0008): ports 80/443 only, admin via Session Manager, 4 KMS keys, uploads bucket, nightly snapshots. Region pinned to `ap-south-1`. No managed databases, load balancer or separate accounts ([cloud setup](cloud-setup.md), ADRs [0005](adr/0005-aws-dev-environment.md), [0006](adr/0006-infra-layout-and-state.md)). Staging and production folders exist but are not provisioned |
-| 9 | Auto-deploy to dev and staging; preview deploy per PR | 🟡 Partial | Deploy to dev on merge: OIDC, image scan gate, SSM deploy, smoke test, rollback to the previous tag. No staging, no previews (replaced by dev only, playbook) |
+| 9 | Auto-deploy to dev and staging; preview deploy per PR | 🟡 Partial | Deploy to dev on merge: OIDC, image scan gate, SSM deploy, smoke test, rollback to the previous tag. No staging, no previews (replaced by dev only, ADR 0009). Re-runs of the same commit skip the build because ECR tags are immutable. Pending: one green Deploy dev run (all runs since 17 October failed: missing scan permission, then the immutable tag on a re-run) |
 | 10 | README, contributing guide, ADR template, `docs/` | ✅ Done | |
 
 ### Step 1 exit criteria
@@ -41,7 +41,7 @@ Walked through on 17 October 2026, with the changes in [ADR 0009](adr/0009-aws-c
 | Merged PR reaches staging without manual steps | 🔁 Replaced by dev only, see ADR 0009 | Deploy dev runs after CI on `main`: first deploy of `52272c8990c8` answered on `https://15.252.65.98/api/readyz` (PostgreSQL and Redis ok). Scan gate, smoke test and rollback added in B3 (PR #17) |
 | `main` protected; pipeline blocks a failing build | 🟡 Partial | CI fails on a failing build (7 jobs). GitHub branch protection returns HTTP 403 on the private Free repository ([ADR 0004](adr/0004-github-free-no-branch-protection.md)); commands ready in [environments](environments.md#branch-protection-on-main) |
 | Third-party applications submitted and tracked | 🟡 Partial | Tracked: issues #19 to #25 (label `partner-onboarding`). Submitting them is the account holder's task |
-| Credit-expiry alerts active and tested, including simulated levels (playbook) | 🟡 Partial | Built in B4 (PR #18): credit watch, budgets, reminders. Active and tested once the github-oidc plan is applied and the simulations run |
+| Credit-expiry alerts active and tested, including simulated levels (playbook) | 🟡 Partial | github-oidc applied (18 October plan: no changes); GitHub variables set; real run reports ok, $120 of $120; simulated Watch, Plan, Act and Emergency each updated issue #29. Pending: SNS email subscription confirmation (owner), email receipt, three scheduled daily runs, `dev-sleep`/`dev-wake` test (needs approval, disruptive) |
 | ADR lists every requirement relaxed for the pilot (playbook) | ✅ Done | [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md) |
 
 ## Requirements by module

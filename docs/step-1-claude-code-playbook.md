@@ -566,7 +566,7 @@ Part B5: protection and docs. Branch step1/b5-docs. Plan first.
    main: pull requests only, one approving review, required status checks from
    our CI workflow, no force pushes, signed commits. Do not run them until I
    confirm.
-2. Write docs/adr/0002-aws-credits-and-restricted-pilot.md recording: the
+2. Write docs/adr/0009-aws-credits-and-restricted-pilot.md recording: the
    decision to run on AWS free credits, the decision to stay on the Free plan
    until it ends and upgrade no later than the Act alert level, the
    single-instance lean design, the decision to host the pilot on an IP
@@ -576,7 +576,7 @@ Part B5: protection and docs. Branch step1/b5-docs. Plan first.
    back, how to sleep and wake dev.
 4. Walk through the Step 1 exit criteria in
    docs/mvp-v1-implementation-guideline.md one by one with evidence, and mark
-   the staging criterion as "replaced by dev only, see ADR 0002".
+   the staging criterion as "replaced by dev only, see ADR 0009".
 ```
 
 Check: `main` rejects a direct push; the ADR lists every relaxed requirement.
@@ -620,7 +620,7 @@ plan.
    Emergency messages with "credits nearly gone: charges to the card begin
    soon".
 4. Update docs/credit-expiry-plan.md with everything that changed after the
-   upgrade, and record the upgrade date in docs/adr/0002.
+   upgrade, and record the upgrade date in docs/adr/0009.
 ```
 
 Check:
@@ -798,17 +798,17 @@ Partners and business (start early, they take weeks):
 From the implementation guideline, with the changes this revision makes:
 
 - [ ] A new developer can clone, run one command and see all three apps locally within 30 minutes
-- [ ] A merged pull request reaches **dev** without manual steps (the original "staging" criterion is replaced by dev only, recorded in ADR 0002)
+- [ ] A merged pull request reaches **dev** without manual steps (the original "staging" criterion is replaced by dev only, recorded in ADR 0009)
 - [ ] `main` is protected and the pipeline blocks a failing build
 - [ ] Third-party applications are submitted and tracked
 - [ ] Credit-expiry alerts are active and tested, including simulated Watch, Plan, Act and Emergency levels (new). Budgets follow at the upgrade (part B6)
-- [ ] ADR 0002 lists every requirement relaxed for the pilot (new)
+- [ ] ADR 0009 lists every requirement relaxed for the pilot (new)
 
 Final prompt to close Step 1:
 
 ```text
 Step 1 review. Read docs/mvp-v1-implementation-guideline.md, section Step 1,
-and docs/adr/0002-aws-credits-and-restricted-pilot.md. Audit this repository
+and docs/adr/0009-aws-credits-and-restricted-pilot.md. Audit this repository
 and our AWS setup against every build item and exit criterion. For each, give
 pass or fail with the file or command that proves it. Then list risks or
 shortcuts we took that Step 2 (secure foundation) must fix first, and the

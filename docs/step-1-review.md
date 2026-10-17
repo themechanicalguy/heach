@@ -33,14 +33,16 @@ exit check").
 
 ## Open actions (owner: account holder)
 
-1. Apply the saved plans: `AWS_PROFILE=saurav-heach-admin tofu -chdir=infra/github-oidc apply plan.tfplan`
-   (credit-watch role, deploy-role scan permissions, $120 pool) and
-   `tofu -chdir=infra/envs/dev apply plan.tfplan` (ECR keeps 5 images).
-2. Then set `AWS_CREDIT_WATCH_ROLE_ARN` and `CREDIT_ALERT_TOPIC_ARN` (outputs of
-   `infra/github-oidc`), run Credit watch once for real and once per simulated level, and let it
-   run three days.
-3. Confirm the SNS subscription email (status is PendingConfirmation).
+Verified 18 October 2026: items 1 and 2 are done (fresh plans for `infra/github-oidc` and
+`infra/envs/dev` show no changes; variables set; issue #29 shows Watch, Plan, Act and Emergency).
+
+1. ✅ Apply the github-oidc and dev plans.
+2. ✅ Set the GitHub variables and run the simulations. Pending: three scheduled daily runs in a row.
+3. Confirm the SNS subscription email (still PendingConfirmation on 18 October), then re-run one
+   simulation and check the email arrives (not in spam).
 4. Calendar reminders 60, 30, 15 and 7 days before 17 April 2027; submit the partner applications.
+5. After merging the deploy re-run fix, confirm one green Deploy dev run on `main`.
+6. Approve a `scripts/dev-sleep` / `scripts/dev-wake` test (stops dev for a few minutes).
 
 ## Risks and shortcuts Step 2 must fix first
 
