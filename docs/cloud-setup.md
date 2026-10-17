@@ -15,7 +15,10 @@ Nothing here is created until you run `tofu apply` yourself.
 | GitHub OIDC provider and deploy role | CI deploys without stored AWS keys (EN-12) | Free |
 | Monthly budget with alerts at US$1, 5, 20 | Early warning of any spend | Free (first two budgets) |
 | VPC, one public subnet, no NAT gateway | Avoids NAT's ~US$32/month | Free |
-| `t4g.small` ARM instance, 20 GB encrypted disk | Runs Caddy, web, admin, API, PostgreSQL, Redis | ~US$12–13/month |
+| `t4g.small` ARM instance, 20 GB encrypted disk | Runs Caddy, web, admin, API, PostgreSQL, Redis | ~US$10/month |
+| 4 KMS keys (health, identity, payments, documents) | Envelope encryption per data domain (EN-06) | US$4/month |
+| Nightly EBS snapshots, 7 kept | Recovery from a bad deploy or disk loss | ~US$0.50/month |
+| Uploads bucket (SSE-KMS) | Private file storage | Cents |
 | Elastic IP | Stable address | ~US$3.60/month |
 | 3 ECR repositories, scan on push | Private images, last 10 kept | Free up to 500 MB |
 | 2 SSM SecureString parameters | Generated database and Redis passwords | Free |
@@ -30,7 +33,8 @@ To stop almost all charges: `tofu destroy` in `infra/envs/dev`. The state bucket
 - Data stays in India (PR-06). Disks, state and images are encrypted at rest (EN-02).
 - TLS on every port (EN-01): Caddy's internal CA until a domain exists, so browsers warn.
 - No SSH and no open admin ports: access through **Session Manager** (SO-06).
-- The admin panel (port 8443) is closed unless you list your IP in `admin_allowed_cidrs` (SE-04).
+- Only ports 80 and 443 are open. The API is under `/api`. The admin panel has no public port:
+  reach it through Session Manager port forwarding (SE-04). Estimated costs: [ADR 0008](adr/0008-lean-single-host-on-credits.md).
 - PostgreSQL and Redis are not reachable from outside the host.
 - Instance metadata v2 only. Least-privilege roles for the host and for GitHub.
 - Generated passwords live in SSM Parameter Store and in the OpenTofu state, never in git.
@@ -82,7 +86,7 @@ tofu output github_deploy_role_arn
 
 cd ../envs/dev
 tofu init -backend-config=backend.hcl
-tofu plan -out plan.tfplan -var 'admin_allowed_cidrs=["<your-ip>/32"]'   # omit to keep admin closed
+tofu plan -out plan.tfplan
 tofu apply plan.tfplan
 tofu output
 ```
@@ -103,8 +107,8 @@ You can also run it by hand from the Actions tab.
 | What | Where |
 | --- | --- |
 | Web | `https://<host_ip>` |
-| API | `https://<host_ip>:9443/healthz`, `/readyz` |
-| Admin | `https://<host_ip>:8443` (only from allow-listed IPs) |
+| API | `https://<host_ip>/api/healthz`, `/api/readyz` |
+| Admin | `aws ssm start-session --target <instance_id> --document-name AWS-StartPortForwardingSession --parameters portNumber=8443,localPortNumber=8443`, then `https://localhost:8443` |
 | Shell on the host | `aws ssm start-session --target <instance_id>` |
 
 `/docs` (OpenAPI) is off in this environment because it runs with `NODE_ENV=production`.

@@ -9,9 +9,3 @@ variable "root_volume_gb" {
   type        = number
   default     = 20
 }
-
-variable "admin_allowed_cidrs" {
-  description = "IPv4 ranges allowed to reach the admin panel (SE-04). Empty = admin closed to everyone."
-  type        = list(string)
-  default     = []
-}
