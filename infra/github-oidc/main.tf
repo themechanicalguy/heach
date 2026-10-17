@@ -3,16 +3,18 @@
 #   - monthly budget with email alerts
 
 provider "aws" {
-  region = var.region
+  region = "ap-south-1" # Mumbai, pinned: never from a variable or default (PR-06)
   default_tags {
     tags = merge(module.naming.tags, { Stack = "github-oidc" })
   }
 }
 
+data "aws_region" "current" {}
+
 module "naming" {
   source      = "../modules/naming"
   environment = "shared"
-  region      = var.region
+  region      = data.aws_region.current.region
 }
 
 data "aws_caller_identity" "current" {}
@@ -57,17 +59,17 @@ resource "aws_iam_role_policy" "github_deploy" {
           "ecr:BatchCheckLayerAvailability", "ecr:InitiateLayerUpload", "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload", "ecr:PutImage", "ecr:BatchGetImage",
         ]
-        Resource = "arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/heach/*"
+        Resource = "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/heach/*"
       },
       {
         Effect   = "Allow"
         Action   = "ssm:SendCommand"
-        Resource = "arn:aws:ssm:${var.region}::document/AWS-RunShellScript"
+        Resource = "arn:aws:ssm:${data.aws_region.current.region}::document/AWS-RunShellScript"
       },
       {
         Effect    = "Allow"
         Action    = "ssm:SendCommand"
-        Resource  = "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:instance/*"
+        Resource  = "arn:aws:ec2:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:instance/*"
         Condition = { StringEquals = { "aws:ResourceTag/Project" = "heach" } }
       },
       {

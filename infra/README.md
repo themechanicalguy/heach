@@ -1,7 +1,14 @@
 # Infrastructure
 
-OpenTofu (MPL-2.0, Terraform-compatible HCL) for HEACH on AWS. Every stack runs in an India
-region (`ap-south-1` Mumbai, `ap-south-2` Hyderabad); the `naming` module rejects any other.
+OpenTofu (MPL-2.0, Terraform-compatible HCL) for HEACH on AWS. All data and state stay in India
+(PR-06): primary region `ap-south-1` (Mumbai); `ap-south-2` (Hyderabad) only for disaster
+recovery, if ever needed.
+
+Every `provider "aws"` block sets `region = "ap-south-1"` as a literal. There is no `region`
+variable, so a flag, `.tfvars` file or `AWS_REGION` cannot move a stack. Modules take the region
+from the provider (`data "aws_region"`), and `naming` fails the plan for any region outside India.
+A future DR stack declares its own provider explicitly:
+`provider "aws" { alias = "dr"  region = "ap-south-2" }`.
 Background: [ADR 0005](../docs/adr/0005-aws-dev-environment.md),
 [ADR 0006](../docs/adr/0006-infra-layout-and-state.md). First-time account setup:
 [`docs/cloud-setup.md`](../docs/cloud-setup.md).
@@ -76,7 +83,7 @@ tofu plan -out plan.tfplan
 tofu apply plan.tfplan
 ```
 
-Use your own AWS profile (`AWS_PROFILE=heach-dev`); never long-lived keys in files or chat.
+Use your own AWS profile, signed in as an IAM or Identity Center user with MFA, never root (`AWS_PROFILE=<your-profile>`); never long-lived keys in files or chat.
 CI runs `tofu fmt -check` and `tofu validate` on every stack without AWS access.
 
 ## Who may apply

@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 10 October 2026, spec-driven development ([ADR 0007](adr/0007-spec-driven-development.md))
+- **Last updated:** 17 October 2026, region pinned in every OpenTofu provider block
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -27,7 +27,7 @@ checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 | 5 | Local services with one command | ✅ Done | `pnpm dev:up` ([local development](local-development.md), [ADR 0002](adr/0002-local-services.md)) |
 | 6 | Commit hooks and conventional commits | ✅ Done | [ADR 0003](adr/0003-quality-gates-without-new-dependencies.md) |
 | 7 | CI pipeline with caching; PR template with definition of done | ✅ Done | `.github/workflows/ci.yml`, `.github/pull_request_template.md` |
-| 8 | Cloud in an India region with IaC: dev, staging, production | 🟡 Partial | Dev stack only, one account ([cloud setup](cloud-setup.md), ADRs [0005](adr/0005-aws-dev-environment.md), [0006](adr/0006-infra-layout-and-state.md)). Staging and production folders exist but are not provisioned |
+| 8 | Cloud in an India region with IaC: dev, staging, production | 🟡 Partial | Dev stack only, one account; region pinned to `ap-south-1` in every provider block, no override ([cloud setup](cloud-setup.md), ADRs [0005](adr/0005-aws-dev-environment.md), [0006](adr/0006-infra-layout-and-state.md)). Staging and production folders exist but are not provisioned |
 | 9 | Auto-deploy to dev and staging; preview deploy per PR | 🟡 Partial | Deploy to dev on merge (inert until `AWS_DEPLOY_ROLE_ARN` is set). No staging, no previews |
 | 10 | README, contributing guide, ADR template, `docs/` | ✅ Done | |
 

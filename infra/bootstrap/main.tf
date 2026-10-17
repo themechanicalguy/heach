@@ -3,16 +3,18 @@
 # See infra/README.md. Never commit the local terraform.tfstate this creates.
 
 provider "aws" {
-  region = var.region
+  region = "ap-south-1" # Mumbai, pinned: never from a variable or default (PR-06)
   default_tags {
     tags = merge(module.naming.tags, { Stack = "bootstrap" })
   }
 }
 
+data "aws_region" "current" {}
+
 module "naming" {
   source      = "../modules/naming"
   environment = "shared"
-  region      = var.region
+  region      = data.aws_region.current.region
 }
 
 data "aws_caller_identity" "current" {}

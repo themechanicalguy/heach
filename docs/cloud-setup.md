@@ -48,8 +48,8 @@ To stop almost all charges: `tofu destroy` in `infra/envs/dev`. The state bucket
 
 ```sh
 brew install opentofu awscli
-aws login --region ap-south-1 --profile heach-dev   # browser sign-in, no keys on disk
-export AWS_PROFILE=heach-dev
+aws login --region ap-south-1 --profile <your-profile>   # IAM user with MFA, not root
+export AWS_PROFILE=<your-profile>
 aws sts get-caller-identity
 ```
 
