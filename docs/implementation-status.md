@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 spec merged (PR #33); ADR 0010 records D1–D3; Step 2 in progress ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 in progress: ADR 0010, `@heach/crypto` envelope encryption ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -77,7 +77,7 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 | --- | --- | --- |
 | EN-01 | TLS on 443 through Caddy's internal CA, HSTS header, port 80 redirects to HTTPS | Publicly trusted certificate; TLS to PostgreSQL and Redis (ADR 0008) |
 | EN-02 | Encrypted EBS disk and snapshots, state bucket, uploads bucket (SSE-KMS), ECR images | Encrypted log store; queues and search do not exist yet |
-| EN-04 | Customer managed KMS keys in Mumbai; host role may only generate and decrypt data keys | `@heach/crypto` envelope encryption not implemented (Step 2) |
+| EN-04 | Customer managed KMS keys in Mumbai; host role may only generate and decrypt data keys. `@heach/crypto` envelope encryption (AES-256-GCM, versioned wrapped data keys, KMS test double) and HMAC blind indexes | API KMS adapter and `data_key` table (Step 2 in progress) |
 | EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
 | EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
 | EN-10 | Nightly EBS snapshots kept 7 days, encrypted | Separate backup keys, copy to Hyderabad, quarterly restore test (ADR 0008) |
