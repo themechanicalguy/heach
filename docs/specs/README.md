@@ -10,7 +10,7 @@ the requirements in the same pull request.
 
 | Spec | Step | Status |
 | --- | --- | --- |
-| [Secure foundation and quality gates](step-02-secure-foundation.md) | 2 | Draft |
+| [Secure foundation and quality gates](step-02-secure-foundation.md) | 2 | Approved on merge |
 
 Step 1 was built before this rule; its record is in [implementation status](../implementation-status.md).
 

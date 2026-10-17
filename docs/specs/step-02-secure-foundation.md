@@ -1,6 +1,6 @@
 # Step 2: Secure foundation and quality gates
 
-- **Status:** Draft
+- **Status:** Approved (on merge)
 - **Guideline:** [Step 2](../mvp-v1-implementation-guideline.md#step-2-secure-foundation-and-quality-gates)
 - **Requirements in scope:** EN-01 to EN-06, EN-09 to EN-13, SE-02, SE-05, SE-07, SE-09, SO-01,
   SO-03, SO-05, SO-08, LM-01 to LM-05, LM-07, LM-09, I18N-01 to I18N-04, I18N-06, I18N-07, UX-01
@@ -23,10 +23,10 @@ the `sample-patient-note` feature flag, off outside dev and test, and is removed
 - Lean single host on credits ([ADR 0008](../adr/0008-lean-single-host-on-credits.md)):
   PostgreSQL, Redis and observability run as containers on the dev host; no managed database,
   NAT gateway or load balancer.
-- One AWS Region (ap-south-1) for every Regional resource; no cross-Region replication. This
-  conflicts with EN-10 as written; see open question Q1.
-- No new paid AWS service without an approved plan (Q2, Q3). No dependency outside the stack
-  without approval (Q4).
+- One AWS Region (ap-south-1) for every Regional resource; no cross-Region replication. EN-10 is
+  reworded accordingly (decision D1).
+- No new paid AWS service: secrets stay in Parameter Store (D2); the WAF moves to the pilot (D3).
+- New dependencies are free, open source and self-hosted only, listed under Dependencies (D4).
 
 ## Acceptance criteria
 
@@ -66,14 +66,14 @@ is its source.
 | --- | --- | --- |
 | EN-10.1 | Migrations run forward from an empty database and are checked in CI | CI job |
 | EN-10.2 | The API connects as a role that can read and write application tables only; migrations use a separate role; neither can change the audit schema | Integration test |
-| EN-10.3 | A nightly backup is encrypted with its own key and copied to the target that Q1 decides | Manual: object listing in the PR |
+| EN-10.3 | A nightly backup is encrypted with its own KMS key and stored in a private ap-south-1 bucket; a weekly encrypted copy is stored outside the AWS account | Manual: object listing in the PR |
 | EN-10.4 | A backup is restored to an empty database and the sample note decrypts | Manual restore record in `docs/` |
 
 ### Secrets (EN-12)
 
 | ID | Given / when / then | Proof |
 | --- | --- | --- |
-| EN-12.1 | The API reads secrets from the store that Q2 decides at start-up; none are in the image, Compose file or environment of the image build | Container scan plus review |
+| EN-12.1 | The API reads secrets from Parameter Store SecureString at start-up; none are in the image, Compose file or environment of the image build | Container scan plus review |
 | EN-12.2 | A rotation procedure is written and run once in dev for the database password | Manual record in `docs/` |
 | EN-12.3 | A commit that contains a secret is blocked by the pre-commit hook and by CI | Existing gitleaks job plus a fixture test |
 
@@ -108,7 +108,7 @@ is its source.
 | SO-05.1 | Every response carries CSP (no `unsafe-inline` scripts), HSTS, `X-Frame-Options: DENY`, `Referrer-Policy` and `X-Content-Type-Options` | Integration test |
 | SO-05.2 | Every request body and parameter is validated against its DTO; unknown fields are rejected with 400 and no echo of the input | Integration test |
 | SO-08.1 | More than the configured requests per minute from one IP or user returns 429 | Integration test |
-| SO-08.2 | A web application firewall or its replacement, decided in Q3, blocks a sample SQL injection request | Manual record |
+| SO-08.2 | Caddy and the API rate limits are on, and input validation rejects a sample SQL injection request with 400. A WAF follows at the pilot (D3) | Integration test |
 | SO-08.3 | Ten authorisation failures from one user within five minutes raise an alert | Integration test against the alert rule |
 
 ### Logging and monitoring (LM-01 to LM-05, LM-07)
@@ -121,7 +121,7 @@ is its source.
 | LM-03.1 | A thrown front-end error is recorded with source map, release tag and role, and no user identity | Manual record |
 | LM-04.1 | Core Web Vitals are reported per route and device class | Manual record |
 | LM-05.1 | API request rate, error rate and p50, p95, p99 latency appear on one dashboard; traces use OpenTelemetry | Manual record |
-| LM-07.1 | An API error rate above 5 percent for five minutes sends one alert to the on-call address | Manual: test alert record |
+| LM-07.1 | An API error rate above 5 percent for five minutes sends one alert to the `heach-credit-reminders` SNS topic | Manual: test alert record |
 
 ### Internationalisation (I18N-01 to I18N-04, I18N-06, I18N-07)
 
@@ -227,15 +227,40 @@ patient who is not the owner gets 404.
 - New keys: `nav.*`, `offline.banner`, `state.empty`, `state.error`, `sample.note.*`. A native
   Odia speaker reviews the Odia text (I18N-07).
 
+## Dependencies (D4)
+
+Free, open source and self-hosted only. Each is added in the PR that first needs it, with its
+version pinned.
+
+| Need | Choice | Licence | In-stack alternative |
+| --- | --- | --- | --- |
+| Migrations | node-pg-migrate | MIT | Hand-written SQL run by a script |
+| Security headers | helmet | MIT | Hand-written middleware |
+| Rate limiting | @nestjs/throttler | MIT | Hand-written Redis counter |
+| Tracing and metrics | OpenTelemetry JS SDK and Collector | Apache-2.0 | Logs only |
+| Trace viewer | Jaeger, on the dev host | Apache-2.0 | Collector file export |
+| Error tracking | GlitchTip, on the dev host, with the Sentry browser SDK | MIT | Errors as logs |
+| Real-user monitoring | web-vitals, reported to the API | Apache-2.0 | Lighthouse only |
+| Performance gate | Lighthouse CI | Apache-2.0 | None |
+| Component docs | Storybook | MIT | None |
+| Static analysis | Semgrep CE in CI | LGPL-2.1 | ESLint security rules only |
+
+Containers added to the dev host must fit its memory; if they do not, the PR says so and asks
+before resizing.
+
+## Decisions
+
+Recorded 18 October 2026 by the owner.
+
+| # | Question | Decision |
+| --- | --- | --- |
+| D1 | EN-10 second Region in a one-Region project | Encrypted backups in ap-south-1 with their own key, plus a weekly encrypted copy outside the AWS account. EN-10 reworded; ADR 0010 records it in the first Step 2 PR |
+| D2 | Secrets Manager or Parameter Store | Parameter Store SecureString with a written rotation procedure; revisit at the pilot |
+| D3 | WAF now or later | At the pilot; rate limiting and validation now; ADR 0010 records the deferral |
+| D4 | New dependencies | Free, open source, self-hosted only; see Dependencies |
+| D5 | On-call address | The existing `heach-credit-reminders` SNS topic |
+| D6 | Lawyer review | Stays a Step 2 exit criterion only; owner action |
+
 ## Open questions
 
-The spec is not Approved while one is open.
-
-| # | Question | Owner |
-| --- | --- | --- |
-| Q1 | EN-10 asks for backups in a second India Region, but the AWS project allows one Region only. Proposal: encrypted backups to an S3 bucket in ap-south-1 with its own key, plus a weekly encrypted copy outside the AWS account (already in the credit-expiry plan); change EN-10 to match | Owner |
-| Q2 | Secrets: Secrets Manager (about $0.40 a secret a month) or Parameter Store SecureString (free) with a written rotation procedure until the pilot | Owner |
-| Q3 | SO-08 WAF: AWS WAF needs a load balancer or CloudFront (ADR 0008 has neither) and costs about $5 a month plus rules. Proposal: rate limiting in the API and Caddy now, WAF at the pilot with an ADR | Owner |
-| Q4 | New dependencies to approve, with licence and alternatives: migration tool and query layer for PostgreSQL, OpenTelemetry SDK and a self-hosted collector and viewer on the dev host, front-end error tracking and RUM tool, Lighthouse CI, Storybook, static analysis (CodeQL needs GitHub Advanced Security on a private repo; Semgrep CE is the free alternative) | Owner |
-| Q5 | On-call address for LM-07.1: the SNS topic used by credit watch, or a separate one | Owner |
-| Q6 | Exit criterion "lawyer's first review of consent wording and the Aadhaar route" depends on engaging the lawyer (Step 1 owner action) | Owner |
+None.

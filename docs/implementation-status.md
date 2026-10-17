@@ -119,7 +119,7 @@ affects at the latest (for example item 6 in the Step 2 spec).
 6. **Backups to a second India region** (EN-10, guideline Step 2 item 3, SO-10 drill in Step 10)
    assume cross-region copies to Hyderabad. If the AWS project is limited to a single Region,
    this is not possible; confirm the project's allowed Regions before Step 2 and record the
-   outcome in an ADR. Raised as Q1 in the draft [Step 2 spec](specs/step-02-secure-foundation.md).
+   outcome in an ADR. Resolved by decision D1 in the [Step 2 spec](specs/step-02-secure-foundation.md); EN-10 reworded.
 7. **AD-04 lists four catalogue types**, but guideline Step 4 says the catalogue covers all six
    services (adds dental and skin treatments, lab tests). AD-04 should match.
 8. ✅ _Resolved._ **Product name:** the requirements say the application "has no name yet" and keep it as an

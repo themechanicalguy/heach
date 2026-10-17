@@ -136,7 +136,7 @@ Every field in the data model carries one of four classes; the class decides enc
 | EN-07 | Uploaded files (reports, prescriptions, identity and qualification documents) are encrypted per object, stored in private buckets, virus-scanned, and served only through short-lived signed URLs after an access check. |
 | EN-08 | Video and audio consultation media are encrypted in transit (DTLS-SRTP); calls are not recorded; the video provider must not store media. |
 | EN-09 | Searchable Restricted fields (for example mobile number lookup) use keyed hashes (blind indexes), not plaintext copies. |
-| EN-10 | Backups are encrypted with separate keys, stored in a second India region, and restore-tested quarterly. |
+| EN-10 | Backups are encrypted with separate keys, stored in the project's India Region with a further encrypted copy outside the cloud account, and restore-tested quarterly. |
 | EN-11 | On the device: no Restricted data (including vault records) in localStorage, service-worker caches or URLs; offline data is limited to non-sensitive booking summaries and is wiped at logout. |
 | EN-12 | Secrets (API keys, credentials) live in a secrets manager, are rotated, and are never in source code, images or logs; CI blocks commits containing secrets. |
 | EN-13 | Automated tests assert that Restricted fields are ciphertext in the database and absent from logs and API responses to unauthorised roles. |
