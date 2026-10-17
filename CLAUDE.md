@@ -18,7 +18,8 @@ Read these before planning any work. Do not copy their content here; link to req
 - `docs/mvp-v1-implementation-guideline.md` — in what order: 10 steps with exit criteria
 - `docs/specs/` — one approved spec per step: acceptance criteria, data, API, threat model
 - `docs/implementation-status.md` — what is built, partial or not started, per step and requirement ID
-- `docs/local-development.md` — running everything locally, git hooks. Current: **Step 1**.
+- `docs/local-development.md` — running everything locally, git hooks. Current: **Step 1 closing; Step 2 next**.
+- `docs/step-1-review.md` — Step 1 audit: what passed, open actions, risks Step 2 must fix first
 
 ## Stack
 
