@@ -10,10 +10,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    # TLS only over TCP (EN-01.1); certificates from `pnpm setup` (deploy/dev/make-certs.sh).
+    entrypoint: ['/bin/sh', '/etc/postgresql/pg-tls.sh']
     ports:
       - 127.0.0.1:${POSTGRES_PORT:-5433}:5432
     volumes:
       - pg-data:/var/lib/postgresql
+      - ./.certs:/certs:ro
+      - ./deploy/dev/db/pg-tls.sh:/etc/postgresql/pg-tls.sh:ro
+      - ./deploy/dev/db/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
       interval: 2s
@@ -22,15 +27,19 @@ services:
 
   redis:
     image: redis:8.8.3-alpine
-    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}']
+    # TLS port only (EN-01.1).
+    entrypoint: ['/bin/sh', '/usr/local/bin/redis-tls.sh']
+    command: ['--requirepass', '${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}']
     environment:
       REDISCLI_AUTH: ${REDIS_PASSWORD}
     ports:
       - 127.0.0.1:${REDIS_PORT:-6379}:6379
     volumes:
       - redis-data:/data
+      - ./.certs:/certs:ro
+      - ./deploy/dev/db/redis-tls.sh:/usr/local/bin/redis-tls.sh:ro
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '--tls', '--cacert', '/certs/ca.crt', 'ping']
       interval: 2s
       timeout: 3s
       retries: 30

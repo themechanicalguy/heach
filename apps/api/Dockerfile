@@ -13,7 +13,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --filter "@heach/api..."
 RUN pnpm --filter "@heach/api..." --filter "!@heach/types" build \
  && pnpm --filter @heach/api deploy --prod --legacy /out \
- && cp -r apps/api/dist /out/dist
+ && cp -r apps/api/dist /out/dist \
+ && cp -r apps/api/migrations apps/api/sql /out/
 
 # Runtime: production dependencies and compiled output only, as the non-root node user.
 FROM node:24-alpine AS runtime
@@ -25,6 +26,8 @@ WORKDIR /app
 COPY --from=build --chown=node:node /out/package.json ./package.json
 COPY --from=build --chown=node:node /out/node_modules ./node_modules
 COPY --from=build --chown=node:node /out/dist ./dist
+COPY --from=build --chown=node:node /out/migrations ./migrations
+COPY --from=build --chown=node:node /out/sql ./sql
 USER node
 EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \

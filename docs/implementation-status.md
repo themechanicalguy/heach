@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 in progress: ADR 0010, `@heach/crypto` envelope encryption ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 in progress: data TLS, database roles, migrations, KMS adapter ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -75,12 +75,12 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 
 | ID | What exists | What is missing |
 | --- | --- | --- |
-| EN-01 | TLS on 443 through Caddy's internal CA, HSTS header, port 80 redirects to HTTPS | Publicly trusted certificate; TLS to PostgreSQL and Redis (ADR 0008) |
+| EN-01 | TLS on 443 through Caddy's internal CA, HSTS header, port 80 redirects to HTTPS. PostgreSQL and Redis accept TLS only (private CA, `deploy/dev/make-certs.sh`); plaintext refused locally, in CI and on the dev host bundle | Publicly trusted certificate; `openssl s_client` record on the dev host (EN-01.3) |
 | EN-02 | Encrypted EBS disk and snapshots, state bucket, uploads bucket (SSE-KMS), ECR images | Encrypted log store; queues and search do not exist yet |
-| EN-04 | Customer managed KMS keys in Mumbai; host role may only generate and decrypt data keys. `@heach/crypto` envelope encryption (AES-256-GCM, versioned wrapped data keys, KMS test double) and HMAC blind indexes | API KMS adapter and `data_key` table (Step 2 in progress) |
+| EN-04 | Customer managed KMS keys in Mumbai; host role limited to `GenerateDataKey` and `Decrypt`. `@heach/crypto` envelope encryption, API KMS adapter, `app.data_key` table | Infra change not yet applied (AWS sign-in pending) |
 | EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
 | EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
-| EN-10 | Nightly EBS snapshots kept 7 days, encrypted | Separate backup keys, copy to Hyderabad, quarterly restore test (ADR 0008) |
+| EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations (node-pg-migrate) run forward from empty in CI; separate migrator, API and audit-owner roles | Backup key, bucket, off-account copy and restore record (ADR 0010) |
 | EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys | Secrets manager with rotation |
 | SE-04 | Admin has no public port; reached only through Session Manager port forwarding (IAM sign-in with MFA) | In-app MFA, short sessions, export controls (no admin login exists yet) |
 | PR-06 | `naming` module rejects regions outside India; everything in `ap-south-1` | Data processing agreements with third parties |

@@ -2,13 +2,14 @@ import { Global, Inject, Logger, Module, type OnApplicationShutdown } from '@nes
 import { Redis } from 'ioredis';
 import pg from 'pg';
 import { EnvVars } from '../config/env.schema.js';
+import { dataTls, pgClientConfig } from '../db/connection.js';
 import { PG_POOL, REDIS_CLIENT } from './data-stores.tokens.js';
 
 const CONNECT_TIMEOUT_MS = 1_000;
 
-function createPool(env: EnvVars): pg.Pool {
+export function createPool(env: EnvVars): pg.Pool {
   const pool = new pg.Pool({
-    connectionString: env.DATABASE_URL,
+    ...pgClientConfig(env.DATABASE_URL, env.DATABASE_PASSWORD, env.DATA_TLS_CA_FILE),
     max: 10,
     connectionTimeoutMillis: CONNECT_TIMEOUT_MS,
   });
@@ -21,6 +22,8 @@ function createPool(env: EnvVars): pg.Pool {
 
 function createRedis(env: EnvVars): Redis {
   const redis = new Redis(env.REDIS_URL, {
+    ...(env.REDIS_PASSWORD ? { password: env.REDIS_PASSWORD } : {}),
+    tls: { ...dataTls(env), rejectUnauthorized: true },
     connectTimeout: CONNECT_TIMEOUT_MS,
     // Commands wait for the connection; callers bound the wait (readiness uses 1 s).
     maxRetriesPerRequest: 1,

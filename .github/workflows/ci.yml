@@ -22,27 +22,6 @@ jobs:
     name: Checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Real PostgreSQL and Redis for API integration tests (TS-03). CI-only throwaway credentials.
-    services:
-      postgres:
-        image: postgres:18.6-alpine
-        env:
-          POSTGRES_USER: heach_ci
-          POSTGRES_PASSWORD: ci-only-not-a-secret
-          POSTGRES_DB: heach_ci
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd "pg_isready -U heach_ci -d heach_ci"
-          --health-interval 2s --health-timeout 3s --health-retries 30
-      redis:
-        image: redis:8.8.3-alpine
-        ports: ['6379:6379']
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 2s --health-timeout 3s --health-retries 30
-    env:
-      DATABASE_URL: postgresql://heach_ci:ci-only-not-a-secret@localhost:5432/heach_ci
-      REDIS_URL: redis://localhost:6379/0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -53,6 +32,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Real PostgreSQL and Redis over TLS for API integration tests (TS-03, EN-01.1), from the
+      # same compose file as local development. `pnpm setup` writes .env with throwaway values.
+      - name: Start PostgreSQL and Redis (TLS)
+        run: |
+          node scripts/setup.mjs
+          docker compose up -d --wait postgres redis
       # Local Turborepo cache only; no remote cache service. Restores the newest run for this lockfile.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -62,8 +47,10 @@ jobs:
       - run: pnpm format:check
       - name: Lint, typecheck, unit tests and build (same as local pnpm check)
         run: pnpm check
-      - name: API integration tests
+      - name: API integration tests (bootstrap and migrations from an empty database, EN-10.1)
         run: pnpm --filter @heach/api test:e2e
+      - name: Every column has a data class; Restricted columns are encrypted (DC-01)
+        run: pnpm --filter @heach/api db:check-classes
       - name: Generated API types are up to date
         run: pnpm --filter @heach/types check
       - name: Dependency audit (high and critical block the merge)
@@ -106,9 +93,14 @@ jobs:
       # No data stores here: the URLs point nowhere, so /healthz is 200 and /readyz is 503.
       - name: Image runs as non-root, passes /healthz, reports not ready without data stores
         run: |
+          bash deploy/dev/make-certs.sh "$RUNNER_TEMP/certs"
           docker run -d --name api -p 3001:3001 \
+            -v "$RUNNER_TEMP/certs/ca.crt:/certs/ca.crt:ro" \
+            -e APP_ENV=test -e DATA_TLS_CA_FILE=/certs/ca.crt \
+            -e KEY_PROVIDER=local -e LOCAL_KEY_SEED="$(openssl rand -hex 32)" \
+            -e BLIND_INDEX_KEY="$(openssl rand -hex 32)" \
             -e DATABASE_URL=postgresql://none@127.0.0.1:1/none \
-            -e REDIS_URL=redis://127.0.0.1:1/0 \
+            -e REDIS_URL=rediss://127.0.0.1:1/0 \
             heach-api:ci
           for i in $(seq 1 20); do curl -fsS localhost:3001/healthz && break; sleep 1; done
           curl -fsS localhost:3001/healthz
@@ -138,14 +130,28 @@ jobs:
       - name: Start the dev stack behind Caddy
         working-directory: deploy/dev
         run: |
+          # No Parameter Store or KMS in CI: secrets via .env and the local key double, APP_ENV test.
+          redis_password=$(openssl rand -hex 16)
           {
             echo "REGISTRY=local"
             echo "IMAGE_TAG=ci"
             echo "PUBLIC_HOST=127.0.0.1"
+            echo "APP_ENV=test"
+            echo "SECRETS_SOURCE=env"
+            echo "KEY_PROVIDER=local"
+            echo "LOCAL_KEY_SEED=$(openssl rand -hex 32)"
+            echo "BLIND_INDEX_KEY=$(openssl rand -hex 32)"
             echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
-            echo "REDIS_PASSWORD=$(openssl rand -hex 16)"
+            echo "DB_APP_PASSWORD=$(openssl rand -hex 16)"
+            echo "DB_MIGRATOR_PASSWORD=$(openssl rand -hex 16)"
+            echo "REDIS_PASSWORD=$redis_password"
+            echo "CI_REDIS_PASSWORD=$redis_password"
           } > .env
+          grep '^POSTGRES_PASSWORD=' .env | sed 's/^POSTGRES_PASSWORD=/DB_ADMIN_PASSWORD=/' >> .env
+          bash make-certs.sh certs
           docker compose up -d --wait --wait-timeout 180 postgres redis
+          docker compose run --rm --no-deps api node dist/db/bootstrap.js
+          docker compose run --rm --no-deps api node dist/db/migrate.js
           docker compose up -d
       - name: HTTPS checks through Caddy (self-signed, so -k)
         run: |
@@ -157,6 +163,11 @@ jobs:
           curl -sSkI https://127.0.0.1/ | grep -qi '^strict-transport-security'
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/)" = 301
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5432 || true)" = 000
+      - name: PostgreSQL and Redis refuse plaintext inside the network (EN-01.1)
+        working-directory: deploy/dev
+        run: |
+          docker compose exec -T postgres sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" psql "host=postgres user=heach dbname=heach sslmode=disable" -c "select 1"' 2>&1 | grep -q 'no encryption'
+          ! docker compose exec -T redis redis-cli -h redis ping
       - name: Logs on failure
         if: failure()
         working-directory: deploy/dev

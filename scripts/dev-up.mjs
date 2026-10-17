@@ -18,6 +18,10 @@ for (const move of moves) process.stdout.write(`Port moved. ${move}\n`);
 
 run('docker', ['compose', 'up', '-d', '--wait', 'postgres', 'redis', 's3', 'mailpit']);
 run('docker', ['compose', 'run', '--rm', 's3-init']);
+// Database roles, audit schema and migrations (EN-10), as a deploy does.
+run('pnpm', ['--filter', '@heach/api...', 'build']);
+run('pnpm', ['--filter', '@heach/api', 'db:bootstrap']);
+run('pnpm', ['--filter', '@heach/api', 'db:migrate']);
 printUrls(env);
 
 if (!servicesOnly) {

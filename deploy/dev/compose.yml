@@ -28,14 +28,34 @@ services:
     image: ${REGISTRY}/heach/admin:${IMAGE_TAG}
     restart: unless-stopped
 
+  # Secrets are read from Parameter Store at start-up (EN-12.1); none are set here. Keys come
+  # from KMS through the instance role (EN-04). One-off tasks: `run --rm api node dist/db/…`.
   api:
     image: ${REGISTRY}/heach/api:${IMAGE_TAG}
     environment:
       NODE_ENV: production
+      APP_ENV: ${APP_ENV:-dev}
       API_PORT: '3001'
       BUILD_VERSION: ${IMAGE_TAG}
-      DATABASE_URL: postgresql://heach:${POSTGRES_PASSWORD:?}@postgres:5432/heach
-      REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/0
+      AWS_REGION: ap-south-1
+      SECRETS_SOURCE: ${SECRETS_SOURCE:-ssm}
+      SSM_PARAMETER_PATH: /heach/dev
+      KEY_PROVIDER: ${KEY_PROVIDER:-kms}
+      KMS_ALIAS_PREFIX: alias/heach-dev
+      LOCAL_KEY_SEED: ${LOCAL_KEY_SEED:-}
+      DATA_TLS_CA_FILE: /certs/ca.crt
+      DATABASE_URL: postgresql://heach_app@postgres:5432/heach
+      DATABASE_MIGRATOR_URL: postgresql://heach_migrator@postgres:5432/heach
+      DATABASE_ADMIN_URL: postgresql://heach@postgres:5432/heach
+      REDIS_URL: rediss://redis:6379/0
+      # Only for the CI deploy smoke test, which has no Parameter Store; empty on the host.
+      DATABASE_PASSWORD: ${DB_APP_PASSWORD:-}
+      DATABASE_MIGRATOR_PASSWORD: ${DB_MIGRATOR_PASSWORD:-}
+      DATABASE_ADMIN_PASSWORD: ${DB_ADMIN_PASSWORD:-}
+      REDIS_PASSWORD: ${CI_REDIS_PASSWORD:-}
+      BLIND_INDEX_KEY: ${BLIND_INDEX_KEY:-}
+    volumes:
+      - ./certs/ca.crt:/certs/ca.crt:ro
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -43,12 +63,17 @@ services:
 
   postgres:
     image: postgres:18.6-alpine
+    # TLS only over TCP (EN-01.1); certificates from make-certs.sh in /opt/heach/certs.
+    entrypoint: ['/bin/sh', '/etc/postgresql/pg-tls.sh']
     environment:
       POSTGRES_USER: heach
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
       POSTGRES_DB: heach
     volumes:
       - pg-data:/var/lib/postgresql
+      - ./certs:/certs:ro
+      - ./db/pg-tls.sh:/etc/postgresql/pg-tls.sh:ro
+      - ./db/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U heach -d heach']
       interval: 5s
@@ -58,13 +83,17 @@ services:
 
   redis:
     image: redis:8.8.3-alpine
-    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}', '--appendonly', 'yes']
+    # TLS port only (EN-01.1).
+    entrypoint: ['/bin/sh', '/usr/local/bin/redis-tls.sh']
+    command: ['--requirepass', '${REDIS_PASSWORD:?}', '--appendonly', 'yes']
     environment:
       REDISCLI_AUTH: ${REDIS_PASSWORD}
     volumes:
       - redis-data:/data
+      - ./certs:/certs:ro
+      - ./db/redis-tls.sh:/usr/local/bin/redis-tls.sh:ro
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '--tls', '--cacert', '/certs/ca.crt', 'ping']
       interval: 5s
       timeout: 3s
       retries: 30

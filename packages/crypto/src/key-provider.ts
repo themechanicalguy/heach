@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from 'node:crypto';
 import type { DataDomain } from './types.js';
 
 /** A fresh data key: the plaintext stays in memory, only the wrapped form is stored (EN-04). */
@@ -19,10 +19,16 @@ export interface KeyProvider {
 const IV_BYTES = 12;
 const TAG_BYTES = 16;
 
-/** Test double for KMS: one random master key per domain, held only in this process. */
+/**
+ * Test double for KMS, for local development and tests only. Without a seed each domain gets a
+ * random master key held in this process; with a seed the master keys are derived from it, so
+ * local data survives a restart.
+ */
 export class LocalKeyProvider implements KeyProvider {
   private readonly masters = new Map<DataDomain, Buffer>();
   readonly calls: { op: 'generate' | 'decrypt'; domain: DataDomain }[] = [];
+
+  constructor(private readonly seed?: string) {}
 
   generateDataKey(domain: DataDomain): Promise<GeneratedDataKey> {
     this.calls.push({ op: 'generate', domain });
@@ -49,7 +55,9 @@ export class LocalKeyProvider implements KeyProvider {
   private master(domain: DataDomain): Buffer {
     let key = this.masters.get(domain);
     if (!key) {
-      key = randomBytes(32);
+      key = this.seed
+        ? Buffer.from(hkdfSync('sha256', this.seed, 'heach-local-kms', domain, 32))
+        : randomBytes(32);
       this.masters.set(domain, key);
     }
     return key;

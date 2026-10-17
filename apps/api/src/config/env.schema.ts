@@ -1,5 +1,16 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Matches,
+  Max,
+  Min,
+  MinLength,
+  ValidateIf,
+} from 'class-validator';
 
 export enum NodeEnv {
   Development = 'development',
@@ -7,10 +18,17 @@ export enum NodeEnv {
   Production = 'production',
 }
 
+export const APP_ENVS = ['local', 'test', 'dev', 'staging', 'production'] as const;
+export type AppEnv = (typeof APP_ENVS)[number];
+
 /** Every environment variable the API reads. Add new ones here so they are validated at startup. */
 export class EnvVars {
   @IsEnum(NodeEnv)
   NODE_ENV!: NodeEnv;
+
+  /** Deployment environment, separate from NODE_ENV: the dev host runs production builds. */
+  @IsIn(APP_ENVS)
+  APP_ENV!: AppEnv;
 
   @Type(() => Number)
   @IsInt()
@@ -22,11 +40,52 @@ export class EnvVars {
   @IsString()
   BUILD_VERSION?: string;
 
-  /** postgresql:// URL. Staging and production must require TLS (EN-01). */
-  @Matches(/^postgres(ql)?:\/\//)
+  /** postgresql:// URL for the application role. TLS is always on (EN-01.1); see DATA_TLS_CA_FILE. */
+  @Matches(/^postgres(ql)?:\/\/[^?]*$/, {
+    message: 'no query string: TLS settings come from DATA_TLS_CA_FILE',
+  })
   DATABASE_URL!: string;
 
-  /** redis:// (local) or rediss:// (TLS, staging and production). */
-  @Matches(/^rediss?:\/\//)
+  /** Overrides the password in DATABASE_URL; filled from Parameter Store on hosts (EN-12.1). */
+  @IsOptional()
+  @IsString()
+  DATABASE_PASSWORD?: string;
+
+  /** rediss:// only: plaintext Redis is refused (EN-01.1). */
+  @Matches(/^rediss:\/\//)
   REDIS_URL!: string;
+
+  @IsOptional()
+  @IsString()
+  REDIS_PASSWORD?: string;
+
+  /** PEM file of the CA that signed the PostgreSQL and Redis certificates. */
+  @IsString()
+  DATA_TLS_CA_FILE!: string;
+
+  /** `ssm` reads secrets from Parameter Store at start-up (EN-12.1); `env` is local only. */
+  @IsIn(['env', 'ssm'])
+  SECRETS_SOURCE: 'env' | 'ssm' = 'env';
+
+  @ValidateIf((env: EnvVars) => env.SECRETS_SOURCE === 'ssm')
+  @Matches(/^\/[\w/-]+$/)
+  SSM_PARAMETER_PATH?: string;
+
+  /** `kms` on hosts; `local` (deterministic test double from LOCAL_KEY_SEED) in dev and test only. */
+  @IsIn(['kms', 'local'])
+  KEY_PROVIDER!: 'kms' | 'local';
+
+  /** KMS alias prefix; the domain is appended, for example alias/heach-dev-health. */
+  @ValidateIf((env: EnvVars) => env.KEY_PROVIDER === 'kms')
+  @Matches(/^alias\/[\w-]+$/)
+  KMS_ALIAS_PREFIX?: string;
+
+  @ValidateIf((env: EnvVars) => env.KEY_PROVIDER === 'local')
+  @IsString()
+  @MinLength(32)
+  LOCAL_KEY_SEED?: string;
+
+  /** Hex HMAC key from which per-domain blind index keys are derived (EN-09.1). */
+  @Matches(/^[0-9a-f]{64}$/)
+  BLIND_INDEX_KEY!: string;
 }

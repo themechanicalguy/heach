@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto';
+import { createHmac, hkdfSync } from 'node:crypto';
 import type { DataDomain } from './types.js';
 
 /**
@@ -17,4 +17,16 @@ export class BlindIndexer {
       .update(value.normalize('NFC').trim().toLowerCase(), 'utf8')
       .digest('hex');
   }
+}
+
+/** Derives one blind index key per domain from a single root key (EN-09.1). */
+export function deriveBlindIndexKeys(rootKey: Buffer): Record<DataDomain, Buffer> {
+  const derive = (domain: DataDomain) =>
+    Buffer.from(hkdfSync('sha256', rootKey, 'heach-blind-index', domain, 32));
+  return {
+    health: derive('health'),
+    identity: derive('identity'),
+    payments: derive('payments'),
+    documents: derive('documents'),
+  };
 }

@@ -74,3 +74,15 @@ describe('EnvelopeEncryptor', () => {
     );
   });
 });
+
+describe('LocalKeyProvider with a seed', () => {
+  it('unwraps keys after a restart when seeded', async () => {
+    const store = new InMemoryDataKeyStore();
+    const seed = 'local-only-seed-of-at-least-32-chars!';
+    const field = await new EnvelopeEncryptor(new LocalKeyProvider(seed), store).encrypt(
+      'x',
+      'health',
+    );
+    expect(await new EnvelopeEncryptor(new LocalKeyProvider(seed), store).decrypt(field)).toBe('x');
+  });
+});
