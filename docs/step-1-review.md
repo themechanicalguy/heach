@@ -41,8 +41,8 @@ Verified 18 October 2026: items 1 and 2 are done (fresh plans for `infra/github-
 3. Confirm the SNS subscription email (still PendingConfirmation on 18 October), then re-run one
    simulation and check the email arrives (not in spam).
 4. Calendar reminders 60, 30, 15 and 7 days before 17 April 2027; submit the partner applications.
-5. After merging the deploy re-run fix, confirm one green Deploy dev run on `main`.
-6. Approve a `scripts/dev-sleep` / `scripts/dev-wake` test (stops dev for a few minutes).
+5. ✅ Green Deploy dev on `main` (`5f5c956`, 18 October). The first run failed because dev was asleep during the sleep test.
+6. ✅ `scripts/dev-sleep` / `scripts/dev-wake` tested 18 October; smoke test passed after wake.
 
 ## Risks and shortcuts Step 2 must fix first
 
