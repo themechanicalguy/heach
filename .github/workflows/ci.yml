@@ -94,6 +94,8 @@ jobs:
           pnpm --filter @heach/web lighthouse
         env:
           APP_ENV: test
+          # The runner has no user namespace sandbox for Chrome; CI only.
+          LHCI_COLLECT__SETTINGS__CHROME_FLAGS: --headless=new --no-sandbox
       - run: pnpm --filter @heach/admin test:e2e
         env:
           CI: true
