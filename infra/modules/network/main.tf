@@ -1,5 +1,5 @@
-# One public subnet, no NAT gateway (cost). The host is reachable only on the ports below;
-# administration is through SSM Session Manager, never SSH (SO-06).
+# One public subnet, no NAT gateway and no load balancer (cost, ADR 0008). The host is reachable
+# only on 80 and 443; administration is through SSM Session Manager, never SSH (SO-06).
 
 data "aws_availability_zones" "available" {
   state = "available"
@@ -43,35 +43,27 @@ resource "aws_default_security_group" "default" {
 
 resource "aws_security_group" "host" {
   name        = "${var.name}-host"
-  description = "HEACH app host: HTTPS for web and API; admin only from allow-listed ranges"
+  description = "HEACH app host: HTTPS for web and API; admin only from allow-listed ranges" # stale, but changing it replaces the group
   vpc_id      = aws_vpc.main.id
+}
+
+# Only 80 (redirect to HTTPS) and 443 from the internet. The API is served under /api on 443;
+# the admin panel has no public port and is reached through Session Manager port forwarding (SE-04).
+resource "aws_vpc_security_group_ingress_rule" "http" {
+  security_group_id = aws_security_group.host.id
+  description       = "HTTP, redirected to HTTPS"
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "web" {
   security_group_id = aws_security_group.host.id
-  description       = "Web (HTTPS)"
+  description       = "HTTPS: web, and the API under /api"
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 443
   to_port           = 443
-  ip_protocol       = "tcp"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "api" {
-  security_group_id = aws_security_group.host.id
-  description       = "API (HTTPS)"
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 9443
-  to_port           = 9443
-  ip_protocol       = "tcp"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "admin" {
-  for_each          = toset(var.admin_allowed_cidrs)
-  security_group_id = aws_security_group.host.id
-  description       = "Admin (HTTPS), allow-listed (SE-04)"
-  cidr_ipv4         = each.value
-  from_port         = 8443
-  to_port           = 8443
   ip_protocol       = "tcp"
 }
 

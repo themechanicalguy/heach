@@ -22,6 +22,9 @@ modules/
   naming/        names and tags; validates environment and region
   network/       VPC, public subnet, security groups
   registry/      ECR repositories
+  kms-keys/      one key per data domain, yearly rotation
+  private-bucket/ private, versioned, SSE-KMS bucket (uploads)
+  snapshots/     nightly EBS snapshots of tagged instances
   app-host/      EC2 host, its IAM role, Elastic IP
 envs/
   dev/           one host (ADR 0005)

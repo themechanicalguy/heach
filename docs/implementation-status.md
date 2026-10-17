@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, credit and budget alerts that count usage before credits
+- **Last updated:** 17 October 2026, lean single host on credits (ADR 0008); credit and budget alerts that count usage before credits
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -27,7 +27,7 @@ checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 | 5 | Local services with one command | ✅ Done | `pnpm dev:up` ([local development](local-development.md), [ADR 0002](adr/0002-local-services.md)) |
 | 6 | Commit hooks and conventional commits | ✅ Done | [ADR 0003](adr/0003-quality-gates-without-new-dependencies.md) |
 | 7 | CI pipeline with caching; PR template with definition of done | ✅ Done | `.github/workflows/ci.yml`, `.github/pull_request_template.md` |
-| 8 | Cloud in an India region with IaC: dev, staging, production | 🟡 Partial | Dev stack only, one account; region pinned to `ap-south-1` in every provider block, no override ([cloud setup](cloud-setup.md), ADRs [0005](adr/0005-aws-dev-environment.md), [0006](adr/0006-infra-layout-and-state.md)). Staging and production folders exist but are not provisioned |
+| 8 | Cloud in an India region with IaC: dev, staging, production | 🟡 Partial | Dev stack applied (one lean host, ADR 0008): ports 80/443 only, admin via Session Manager, 4 KMS keys, uploads bucket, nightly snapshots. Region pinned to `ap-south-1`. No managed databases, load balancer or separate accounts ([cloud setup](cloud-setup.md), ADRs [0005](adr/0005-aws-dev-environment.md), [0006](adr/0006-infra-layout-and-state.md)). Staging and production folders exist but are not provisioned |
 | 9 | Auto-deploy to dev and staging; preview deploy per PR | 🟡 Partial | Deploy to dev on merge (inert until `AWS_DEPLOY_ROLE_ARN` is set). No staging, no previews |
 | 10 | README, contributing guide, ADR template, `docs/` | ✅ Done | |
 
@@ -47,7 +47,7 @@ Every module not listed under "Partial" below is ⬜ Not started.
 | Module | IDs | Done | Partial | Not started | Planned in step |
 | --- | --- | --- | --- | --- | --- |
 | DC Data classification | (no IDs) | | | all | 2 |
-| EN Encryption | 13 | 0 | 3 | 10 | 2 |
+| EN Encryption | 13 | 0 | 7 | 6 | 2 |
 | SE Access control and audit | 9 | 0 | 1 | 8 | 2, 3, 6 |
 | PR Privacy and consent | 7 | 0 | 2 | 5 | 3 |
 | SO Secure development and operations | 10 | 0 | 3 | 7 | 2, 6, 10 |
@@ -71,10 +71,14 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 
 | ID | What exists | What is missing |
 | --- | --- | --- |
-| EN-01 | TLS on every dev port through Caddy's internal CA | Public certificate, HSTS, TLS to managed database and cache |
-| EN-02 | Encrypted EBS disk, state bucket and ECR images | Customer KMS keys, encrypted backups |
+| EN-01 | TLS on 443 through Caddy's internal CA, HSTS header, port 80 redirects to HTTPS | Publicly trusted certificate; TLS to PostgreSQL and Redis (ADR 0008) |
+| EN-02 | Encrypted EBS disk and snapshots, state bucket, uploads bucket (SSE-KMS), ECR images | Encrypted log store; queues and search do not exist yet |
+| EN-04 | Customer managed KMS keys in Mumbai; host role may only generate and decrypt data keys | `@heach/crypto` envelope encryption not implemented (Step 2) |
+| EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
+| EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
+| EN-10 | Nightly EBS snapshots kept 7 days, encrypted | Separate backup keys, copy to Hyderabad, quarterly restore test (ADR 0008) |
 | EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys | Secrets manager with rotation |
-| SE-04 | Admin port closed unless an IP is allow-listed | MFA, short sessions, export controls (no admin login exists yet) |
+| SE-04 | Admin has no public port; reached only through Session Manager port forwarding (IAM sign-in with MFA) | In-app MFA, short sessions, export controls (no admin login exists yet) |
 | PR-06 | `naming` module rejects regions outside India; everything in `ap-south-1` | Data processing agreements with third parties |
 | PR-07 | Logger redacts personal keys | No analytics or monitoring tools yet |
 | SO-03 | Secret scan, `pnpm audit` (high blocks), ECR scan on push | Static analysis (SAST) and container scanning in CI |

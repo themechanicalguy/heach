@@ -7,9 +7,9 @@ services:
   caddy:
     image: caddy:2.10.2-alpine
     ports:
-      - 443:443 # web
-      - 8443:8443 # admin (security group allows only admin_allowed_cidrs)
-      - 9443:9443 # API
+      - 80:80 # redirect to HTTPS
+      - 443:443 # web, and the API under /api
+      - 127.0.0.1:8443:8443 # admin: loopback only, reached through Session Manager
     environment:
       PUBLIC_HOST: ${PUBLIC_HOST:?}
     volumes:
