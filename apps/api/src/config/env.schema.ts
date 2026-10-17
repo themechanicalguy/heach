@@ -1,3 +1,4 @@
+import { APP_ENVS, type AppEnv } from '@heach/flags';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -18,8 +19,7 @@ export enum NodeEnv {
   Production = 'production',
 }
 
-export const APP_ENVS = ['local', 'test', 'dev', 'staging', 'production'] as const;
-export type AppEnv = (typeof APP_ENVS)[number];
+export { APP_ENVS, type AppEnv };
 
 /** Every environment variable the API reads. Add new ones here so they are validated at startup. */
 export class EnvVars {

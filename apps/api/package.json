@@ -22,6 +22,7 @@
     "@aws-sdk/client-sns": "3.1146.0",
     "@aws-sdk/client-ssm": "3.1146.0",
     "@heach/crypto": "workspace:*",
+    "@heach/flags": "workspace:*",
     "@heach/logger": "workspace:*",
     "@nestjs/common": "12.1.2",
     "@nestjs/core": "12.1.2",

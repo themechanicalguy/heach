@@ -22,6 +22,9 @@ services:
     image: ${REGISTRY:?}/heach/web:${IMAGE_TAG:?}
     environment:
       NODE_ENV: production
+      APP_ENV: ${APP_ENV:-dev}
+      # The Step 2 sample note and test sign-in exist in dev and test only (FF-01).
+      FEATURE_FLAGS: sample-patient-note
     restart: unless-stopped
 
   admin:

@@ -45,3 +45,4 @@ Thumbs.db
 .certs/
 certs/
 storybook-static/
+.lighthouseci/

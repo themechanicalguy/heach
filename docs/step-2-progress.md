@@ -15,7 +15,8 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 4 | feat/step2-auth-audit-notes | Sessions, roles guard, audit helper, sample notes, headers, rate limits, alerts, flags, re-encryption | Merged #37 |
 | 5 | feat/step2-observability | Logger context and masking, OpenTelemetry, Collector and Jaeger, error-rate alert, web-vitals endpoint | Merged #38 |
 | 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Merged #39 |
-| 7 | feat/step2-ui-kit | Tokens, accessible components, Storybook, axe on every component and story | Open |
+| 7 | feat/step2-ui-kit | Tokens, accessible components, Storybook, axe on every component and story | Merged #40 |
+| 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Open |
 
 ## Evidence by criterion
 
@@ -46,10 +47,10 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-08.1 | ✅ | `test/security.int-spec.ts` (@nestjs/throttler, per token or IP) |
 | SO-08.2 | 🟡 | SQL injection sample → 400 proven; Caddy rate limit needs a plugin outside D4 (owner decision) |
 | SO-08.3 | 🟡 | `test/security.int-spec.ts` with the alert double; live SNS test after infra apply |
-| LM-01.1 | 🟡 | API to DB to logs: `test/tracing.int-spec.ts` (Jaeger search by correlation ID finds the pg spans; the log line has the trace ID). Browser leg in the web PR |
+| LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
 | LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
-| LM-04.1 | 🟡 | `POST /v1/rum` logs vitals per route and device; browser reporting in the web PR |
+| LM-04.1 | 🟡 | `WebVitals.tsx` sends LCP, INP, CLS, FCP, TTFB per route template and device class to `POST /v1/rum`, which logs them. Manual record on the dev host pending its next deploy |
 | LM-05.1 | 🟡 | Traces in OpenTelemetry and Jaeger; request metrics on the Collector's Prometheus endpoint. One dashboard for rate, errors and p50/p95/p99 needs Prometheus and Grafana, outside D4: owner decision |
 | LM-07.1 | 🟡 | `error-rate.monitor.spec.ts` (in-process 5-minute window, SNS publisher); live test alert after infra apply |
 | I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
@@ -64,9 +65,21 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | UX-04.1 | ✅ | `States.tsx` stories and `States.test.tsx` |
 | UX-05.1 | ✅ | `OtpField.test.tsx` |
 | TS-02.1 | ✅ | `coverage-of-components.test.ts` fails when a component lacks an axe test |
+| EN-13.1 (end to end) | ✅ local, CI pending | `e2e/notes-flow.spec.ts` on mobile, tablet, desktop against web + API + PostgreSQL (local run: pass). CI runs it against the deploy bundle behind Caddy and checks ciphertext, audit and logs in SQL |
+| PF-07.1 | ✅ | `e2e/pwa.spec.ts`: manifest, service worker, offline shell with banner, no `/api` entry in any cache |
+| TS-05.1 | ✅ | `playwright.config.ts`: mobile 360, tablet 768, desktop 1280 projects on every PR |
+| TS-07.1 | ✅ | `e2e/shell.spec.ts` with Linux baselines for or, en, hi on each project |
+| UX-03.1 | ✅ | `e2e/shell.spec.ts`: nav bottom edge equals viewport bottom at 360 px, plus baseline |
+| I18N-06.1 | ✅ | `e2e/shell.spec.ts`: self-hosted, unicode-range subset faces cover Odia and Devanagari; 140 percent text has no overflow |
+| PF-02.1 | ✅ | `e2e/bundle-budget.spec.ts` (largest entry about 143 KB gzipped of 170 KB), fixture `src/bundle-budget.test.ts` |
+| PF-03.1 | ✅ local | Lighthouse CI mobile: or 97 to 98, en 99, hi 99 (local, 3 runs each); CI step asserts at least 90 |
+| PF-05.1 | ✅ | `e2e/bundle-budget.spec.ts` (route-specific chunks), `src/next-config.test.ts` (AVIF, WebP) |
+| LM-03.1 | 🟡 | Sentry browser SDK to GlitchTip, release and role tags, no identity (`ErrorTracking.tsx`). Manual record and source maps pending: uploading source maps needs `@sentry/cli`, outside D4 (owner decision) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions
+
+- LM-03.1 source maps: approve `@sentry/cli` (BSD-3, CI only) to upload source maps to GlitchTip, or accept stack traces without them.
 
 - LM-05.1 dashboard: approve Prometheus and Grafana (Apache-2.0 / AGPL-3.0, local only) as D4 additions, or accept Jaeger plus the raw metrics endpoint.
 

@@ -1,6 +1,6 @@
 import { type CanActivate, Global, Injectable, Module, NotFoundException } from '@nestjs/common';
 import { EnvVars } from '../config/env.schema.js';
-import { FeatureFlags, type FlagName } from './feature-flags.js';
+import { FeatureFlags, type FlagName } from '@heach/flags';
 
 @Global()
 @Module({

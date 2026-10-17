@@ -1,4 +1,4 @@
-import { FeatureFlags } from './feature-flags.js';
+import { FeatureFlags } from './index.js';
 
 describe('FeatureFlags', () => {
   it('FF-01.1 defaults to off when unset', () => {

@@ -2,6 +2,14 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { isLocale, LOCALES } from '@heach/i18n';
+import { ErrorTracking } from '../../components/ErrorTracking';
+import { LanguageSwitch } from '../../components/LanguageSwitch';
+import { OfflineStatus } from '../../components/OfflineStatus';
+import { ServiceWorker } from '../../components/ServiceWorker';
+import { ShellNav } from '../../components/ShellNav';
+import { WebVitals } from '../../components/WebVitals';
+import { I18nProvider } from '../../lib/i18n-context';
+import { SessionProvider } from '../../lib/session';
 import { fontClassNames } from '../fonts';
 import { translatorFor } from '../../i18n/messages';
 import '@heach/ui/ui.css';
@@ -21,7 +29,7 @@ export function generateStaticParams(): { locale: string }[] {
 
 export async function generateMetadata({ params }: Omit<Props, 'children'>): Promise<Metadata> {
   const { t } = translatorFor((await params).locale);
-  return { title: t('app.name'), description: t('home.title') };
+  return { title: t('app.name'), description: t('home.title'), manifest: '/manifest.webmanifest' };
 }
 
 export const viewport: Viewport = {
@@ -33,9 +41,27 @@ export const viewport: Viewport = {
 export default async function LocaleLayout({ children, params }: Readonly<Props>) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const { t } = translatorFor(locale);
   return (
     <html lang={locale} className={fontClassNames}>
-      <body>{children}</body>
+      <body>
+        <I18nProvider locale={locale}>
+          <SessionProvider>
+            <header className="shell-header">
+              <a href={`/${locale}`} className="shell-header__name">
+                {t('app.name')}
+              </a>
+              <LanguageSwitch />
+            </header>
+            <OfflineStatus />
+            {children}
+            <ShellNav />
+            <ErrorTracking />
+          </SessionProvider>
+          <ServiceWorker />
+          <WebVitals />
+        </I18nProvider>
+      </body>
     </html>
   );
 }

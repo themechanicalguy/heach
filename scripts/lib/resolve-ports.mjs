@@ -23,7 +23,7 @@ export const PORTS = [
   },
   { key: 'OTEL_METRICS_PORT', fallback: 8889, label: 'OTel metrics' },
   { key: 'JAEGER_UI_PORT', fallback: 16686, label: 'Jaeger' },
-  { key: 'API_PORT', fallback: 3001, label: 'API' },
+  { key: 'API_PORT', fallback: 3001, url: 'API_ORIGIN', label: 'API' },
   { key: 'WEB_PORT', fallback: 3000, label: 'Web' },
   { key: 'ADMIN_PORT', fallback: 5173, label: 'Admin' },
 ];
