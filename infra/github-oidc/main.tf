@@ -35,10 +35,11 @@ resource "aws_iam_role" "github_deploy" {
       Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
-        StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
-        # Only workflows on main of this repository can deploy.
-        StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:ref:refs/heads/main"
+        # Only workflows on main of this repository can deploy. GitHub sends the immutable
+        # subject (owner and repository IDs), so a renamed or re-created repository cannot.
+        StringEquals = {
+          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          "token.actions.githubusercontent.com:sub" = "${var.github_oidc_subject_prefix}:ref:refs/heads/main"
         }
       }
     }]

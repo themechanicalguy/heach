@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 17 October 2026, lean single host on credits (ADR 0008); credit and budget alerts that count usage before credits
+- **Last updated:** 17 October 2026, deploy role trusts GitHub's immutable OIDC subject
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
