@@ -1,16 +1,18 @@
 # Dev: one host running the apps, PostgreSQL and Redis in Docker (ADR 0005). Synthetic data only.
 
 provider "aws" {
-  region = var.region
+  region = "ap-south-1" # Mumbai, pinned: never from a variable or default (PR-06)
   default_tags {
     tags = module.naming.tags
   }
 }
 
+data "aws_region" "current" {}
+
 module "naming" {
   source      = "../../modules/naming"
   environment = "dev"
-  region      = var.region
+  region      = data.aws_region.current.region
 }
 
 locals {
