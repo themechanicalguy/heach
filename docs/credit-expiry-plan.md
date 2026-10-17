@@ -38,7 +38,7 @@ ends), a **plan status** other than `ACTIVE`, and a **failed check**.
 | Source | When |
 | --- | --- |
 | AWS (email to the account contact) | 50, 25 and 10% of credits left; 15, 7 and 2 days left; after the plan ends |
-| Credit watch (GitHub issue and email via SNS) | When our level rises, the plan is not ACTIVE, or the check fails |
+| Credit watch (GitHub issue and email via SNS) | When our level rises, the plan is not ACTIVE, the burn rate runs out credits before the plan ends, or the check fails |
 | `heach-free-credits` budget (email) | Usage before credits passes 50, 80, 90% of the pool, or is forecast to pass 100% |
 | Expiry reminders (email via SNS) | 18 March and 10 April 2027, 09:00 IST |
 | Your calendar (set by hand) | 60, 30, 15 and 7 days before 17 April 2027: "check scripts/credit-status" |
