@@ -12,6 +12,9 @@ RUN pnpm --filter "@heach/web..." build
 
 # Runtime: Next.js standalone server only, as the non-root node user.
 FROM node:24-alpine AS runtime
+# Patched OS packages: base image tags lag behind Alpine security fixes, which the ECR scan
+# gate in Deploy dev blocks on (HIGH and CRITICAL).
+RUN apk upgrade --no-cache
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
 WORKDIR /app
 COPY --from=build --chown=node:node /repo/apps/web/.next/standalone ./
