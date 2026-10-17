@@ -107,7 +107,7 @@ affects at the latest (for example item 6 in the Step 2 spec).
    LM-08, 09; UX-06, 07, 08; AC-05; BK-06; LB-09; RR-07. Some are covered implicitly by step
    text (for example backups in Step 2, pen tests in Step 6) but not by ID, so they can be missed.
 2. **Data classification (DC) has no requirement IDs**, unlike every other module, so it cannot
-   be referenced the way CLAUDE.md asks.
+   be referenced the way CLAUDE.md asks. The draft [Step 2 spec](specs/step-02-secure-foundation.md) proposes DC-01.
 3. ✅ _Resolved: the requirements now point to the guideline as the only plan._ **Two delivery plans disagree.** The requirements' "Delivery plan" has 8 phases (0 to 7) and a
    "Sprint 0" list; the guideline has 10 steps. Lengths and grouping differ (for example the
    requirements put IC, LB and MV in one phase; the guideline splits them into Steps 7 and 8).
@@ -119,7 +119,7 @@ affects at the latest (for example item 6 in the Step 2 spec).
 6. **Backups to a second India region** (EN-10, guideline Step 2 item 3, SO-10 drill in Step 10)
    assume cross-region copies to Hyderabad. If the AWS project is limited to a single Region,
    this is not possible; confirm the project's allowed Regions before Step 2 and record the
-   outcome in an ADR.
+   outcome in an ADR. Raised as Q1 in the draft [Step 2 spec](specs/step-02-secure-foundation.md).
 7. **AD-04 lists four catalogue types**, but guideline Step 4 says the catalogue covers all six
    services (adds dental and skin treatments, lab tests). AD-04 should match.
 8. ✅ _Resolved._ **Product name:** the requirements say the application "has no name yet" and keep it as an
