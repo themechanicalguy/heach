@@ -135,3 +135,20 @@ pnpm secrets:scan     # gitleaks over the whole git history (also runs in CI)
 pnpm --filter <pkg> <script>   # run one workspace's script
 pnpm --filter @heach/types generate   # after changing API routes or DTOs; CI runs `check`
 ```
+
+Cloud (AWS, dev only, account on Free plan credits; [ADR 0009](docs/adr/0009-aws-credits-and-restricted-pilot.md),
+[environments](docs/environments.md), [credit expiry plan](docs/credit-expiry-plan.md),
+[playbook](docs/step-1-claude-code-playbook.md)):
+
+```sh
+export AWS_PROFILE=<your-profile>   # IAM user with MFA; never root
+scripts/credit-status                # credits left, days left, alert level (pnpm credit:status)
+scripts/dev-sleep | scripts/dev-wake # stop or start the dev host to save credits
+scripts/smoke-test.sh <ip>           # /healthz, /api/healthz, /api/readyz
+pnpm test:scripts                    # unit tests for scripts/ (node --test)
+tofu -chdir=infra/<stack> plan -out plan.tfplan   # always plan; a human approves every apply
+```
+
+Infrastructure changes: show the `tofu plan`; never apply without the user's approval for
+anything that costs money, destroys or replaces. Keep the lean design (no NAT gateway, load
+balancer or managed databases) until an ADR replaces ADR 0008.

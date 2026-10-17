@@ -2,7 +2,7 @@
 # Prints the SSM Run Command parameters that unpack deploy/dev on the host and deploy one tag.
 # Usage: deploy-params.sh <registry> <image-tag>
 set -euo pipefail
-bundle=$(tar -C deploy/dev -czf - . | base64 -w0)
+bundle=$(tar -C deploy/dev -czf - . | base64 | tr -d "\n") # portable: GNU and macOS base64
 jq -n --arg b "$bundle" --arg r "$1" --arg t "$2" '{commands: [
   "set -euo pipefail",
   "cd /opt/heach",
