@@ -1,5 +1,7 @@
 import 'reflect-metadata';
-import { writeFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createApp } from './app.factory.js';
 import { buildOpenApiDocument } from './openapi.js';
 
@@ -15,8 +17,15 @@ if (!outFile) {
 process.env.NODE_ENV = 'development';
 process.env.API_PORT ??= '3001';
 // Building the document never touches the data stores; these only satisfy env validation.
-process.env.DATABASE_URL ??= 'postgresql://openapi-export@127.0.0.1:1/none';
-process.env.REDIS_URL ??= 'redis://127.0.0.1:1/0';
+process.env.DATABASE_URL = 'postgresql://openapi-export@127.0.0.1:1/none';
+process.env.REDIS_URL = 'rediss://127.0.0.1:1/0';
+process.env.APP_ENV = 'test';
+process.env.KEY_PROVIDER = 'local';
+process.env.LOCAL_KEY_SEED = 'openapi-export-never-encrypts-anything';
+process.env.BLIND_INDEX_KEY = '0'.repeat(64);
+const emptyCa = join(mkdtempSync(join(tmpdir(), 'openapi-')), 'ca.crt');
+writeFileSync(emptyCa, '');
+process.env.DATA_TLS_CA_FILE = emptyCa;
 
 const app = await createApp({ logger: false });
 writeFileSync(outFile, `${JSON.stringify(buildOpenApiDocument(app, 'contract'), null, 2)}\n`);
