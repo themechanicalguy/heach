@@ -51,6 +51,8 @@ jobs:
         run: pnpm --filter @heach/api test:e2e
       - name: Every column has a data class; Restricted columns are encrypted (DC-01)
         run: pnpm --filter @heach/api db:check-classes
+      - name: Storybook builds (UX-01.1); each story passes axe in the ui unit tests (UX-01.2)
+        run: pnpm --filter @heach/ui build-storybook
       - name: Generated API types are up to date
         run: pnpm --filter @heach/types check
       - name: Dependency audit (high and critical block the merge)

@@ -44,3 +44,4 @@ Thumbs.db
 # Local TLS certificates for PostgreSQL and Redis (deploy/dev/make-certs.sh)
 .certs/
 certs/
+storybook-static/

@@ -1,22 +1,315 @@
-/* Placeholder until design tokens and Tailwind arrive in Step 2. */
+/*
+ * @heach/ui styles. Tokens mirror src/tokens.ts (a test checks the breakpoints). Mobile first:
+ * the base rules are for 360 to 599 px; tablet and desktop rules follow in media queries (UX-02).
+ */
+:root {
+  --heach-primary: #1f4e79;
+  --heach-on-primary: #ffffff;
+  --heach-focus: #f5a623;
+  --heach-text: #1a1a1a;
+  --heach-muted: #4a5560;
+  --heach-surface: #ffffff;
+  --heach-background: #f6f8fa;
+  --heach-border: #c9d1d9;
+  --heach-danger: #a61b1b;
+  --heach-success: #1b6e3a;
+  --heach-warning: #7a4b00;
+  --heach-touch: 48px; /* A11Y-03 */
+  --heach-radius: 0.5rem;
+  --heach-space: 1rem;
+  --heach-bottom-nav-height: 64px;
+}
+
+.heach-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Buttons */
 .heach-button {
-  min-height: 48px; /* A11Y-03 touch target */
-  min-width: 48px;
+  min-height: var(--heach-touch);
+  min-width: var(--heach-touch);
   padding: 0.5rem 1.25rem;
-  border: 1px solid #1f4e79;
-  border-radius: 0.5rem;
-  background: #1f4e79;
-  color: #fff;
+  border: 1px solid var(--heach-primary);
+  border-radius: var(--heach-radius);
+  background: var(--heach-primary);
+  color: var(--heach-on-primary);
   font: inherit;
   cursor: pointer;
 }
 
-.heach-button:focus-visible {
-  outline: 3px solid #f5a623;
+.heach-button--ghost {
+  background: transparent;
+  color: var(--heach-primary);
+}
+
+.heach-button:focus-visible,
+.heach-input:focus-visible,
+.heach-bottom-nav a:focus-visible {
+  outline: 3px solid var(--heach-focus);
   outline-offset: 2px;
 }
 
 .heach-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Form fields */
+.heach-field {
+  display: grid;
+  gap: 0.25rem;
+  margin-block: var(--heach-space);
+}
+
+.heach-field__label {
+  font-weight: 600;
+}
+
+.heach-field__hint {
+  margin: 0;
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+}
+
+.heach-field__error {
+  margin: 0;
+  color: var(--heach-danger);
+  font-size: 0.875rem;
+}
+
+.heach-input {
+  width: 100%;
+  min-height: var(--heach-touch);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--heach-border);
+  border-radius: var(--heach-radius);
+  background: var(--heach-surface);
+  color: var(--heach-text);
+  font: inherit;
+}
+
+.heach-input[aria-invalid='true'] {
+  border-color: var(--heach-danger);
+}
+
+.heach-input--multiline {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.heach-otp {
+  max-width: 12rem;
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+/* Card, table */
+.heach-card {
+  padding: var(--heach-space);
+  border: 1px solid var(--heach-border);
+  border-radius: var(--heach-radius);
+  background: var(--heach-surface);
+}
+
+.heach-card__title {
+  margin-block-start: 0;
+  font-size: 1.125rem;
+}
+
+.heach-table-wrap {
+  overflow-x: auto;
+}
+
+.heach-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.heach-table caption {
+  text-align: start;
+  font-weight: 600;
+  padding-block: 0.5rem;
+}
+
+.heach-table th,
+.heach-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--heach-border);
+  text-align: start;
+}
+
+/* Sheet: slides up from the bottom on phones, centred from tablet up */
+.heach-sheet {
+  width: 100%;
+  max-width: 100%;
+  margin: auto 0 0;
+  padding: var(--heach-space);
+  border: none;
+  border-radius: var(--heach-radius) var(--heach-radius) 0 0;
+}
+
+.heach-sheet::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.heach-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--heach-space);
+}
+
+.heach-sheet__title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+/* Toast */
+.heach-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--heach-space);
+  padding: 0.75rem var(--heach-space);
+  border-radius: var(--heach-radius);
+  color: var(--heach-on-primary);
+  background: var(--heach-primary);
+}
+
+.heach-toast--success {
+  background: var(--heach-success);
+}
+
+.heach-toast--error {
+  background: var(--heach-danger);
+}
+
+.heach-toast .heach-button--ghost {
+  color: var(--heach-on-primary);
+  border-color: var(--heach-on-primary);
+}
+
+/* Bottom navigation: fixed in the thumb zone on phones (UX-03) */
+.heach-bottom-nav {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 10;
+  height: var(--heach-bottom-nav-height);
+  border-top: 1px solid var(--heach-border);
+  background: var(--heach-surface);
+}
+
+.heach-bottom-nav ul {
+  display: flex;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.heach-bottom-nav li {
+  flex: 1;
+}
+
+.heach-bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: var(--heach-touch);
+  color: var(--heach-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.heach-bottom-nav a[aria-current='page'] {
+  color: var(--heach-primary);
+  font-weight: 700;
+}
+
+/* States (UX-04) */
+.heach-skeleton {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.heach-skeleton__line {
+  height: 1rem;
+  border-radius: var(--heach-radius);
+  background: var(--heach-border);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .heach-skeleton__line {
+    animation: heach-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes heach-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.heach-state {
+  padding: var(--heach-space);
+  text-align: center;
+  color: var(--heach-muted);
+}
+
+.heach-state--error {
+  color: var(--heach-danger);
+}
+
+.heach-offline {
+  padding: 0.5rem var(--heach-space);
+  background: #fff4d6;
+  color: var(--heach-warning);
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .heach-sheet {
+    max-width: 32rem;
+    margin: auto;
+    border-radius: var(--heach-radius);
+  }
+
+  .heach-bottom-nav {
+    position: static;
+    height: auto;
+    border-top: none;
+    border-bottom: 1px solid var(--heach-border);
+  }
+
+  .heach-bottom-nav ul {
+    justify-content: flex-start;
+    gap: var(--heach-space);
+    padding-inline: var(--heach-space);
+  }
+
+  .heach-bottom-nav li {
+    flex: none;
+  }
+
+  .heach-bottom-nav a {
+    flex-direction: row;
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .heach-card {
+    padding: calc(var(--heach-space) * 1.5);
+  }
 }
