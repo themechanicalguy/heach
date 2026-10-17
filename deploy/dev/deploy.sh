@@ -38,6 +38,7 @@ umask 077
   echo "REGISTRY=$REGISTRY"
   echo "IMAGE_TAG=$IMAGE_TAG"
   echo "PUBLIC_HOST=$PUBLIC_HOST"
+  echo "ALERT_TOPIC_ARN=arn:aws:sns:$REGION:$(aws sts get-caller-identity --query Account --output text):heach-credit-reminders"
   echo "POSTGRES_PASSWORD=$(param POSTGRES_PASSWORD)"
   echo "REDIS_PASSWORD=$(param REDIS_PASSWORD)"
 } > .env

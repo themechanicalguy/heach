@@ -11,7 +11,8 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | --- | --- | --- | --- |
 | 1 | docs/adr-0010-step2-security-decisions | ADR 0010, this log | Merged #34 |
 | 2 | feat/step2-crypto | `@heach/crypto` envelope encryption, blind indexes | Merged #35 |
-| 3 | feat/step2-db-tls-migrations | Data TLS, roles, audit schema, migrations, KMS adapter, SSM secrets, DC check | Open; dev deploy needs infra apply |
+| 3 | feat/step2-db-tls-migrations | Data TLS, roles, audit schema, migrations, KMS adapter, SSM secrets, DC check | Merged #36; dev deploy waits for infra apply |
+| 4 | feat/step2-auth-audit-notes | Sessions, roles guard, audit helper, sample notes, headers, rate limits, alerts, flags, re-encryption | #37 |
 
 ## Evidence by criterion
 
@@ -27,8 +28,26 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | DC-01.1, DC-01.2 | ✅ | `classification.int-spec.ts` fixture; CI `db:check-classes` |
 | EN-12.1 | 🟡 | `load-secrets.spec.ts`; live run after infra apply |
 | EN-04.2 | 🟡 | Policy narrowed in code; `tofu plan` pending AWS sign-in |
+| EN-03.1, EN-13.1, I18N-04.1 | ✅ | `test/sample-notes.int-spec.ts` (ciphertext in DB, not in logs, not in another user's response; Odia round trip) |
+| EN-05.3 | ✅ | `test/crypto.int-spec.ts`; [runbook](runbooks/key-rotation.md) |
+| EN-09.2 | ✅ | `test/crypto.int-spec.ts` (fixture table; real searchable fields arrive in Step 3) |
+| EN-12.2 | 🧑 | [Runbook](runbooks/secret-rotation.md) written; run in dev after infra apply |
+| SE-02.1 | ✅ | `src/auth/route-roles.spec.ts`; the guard also refuses undeclared routes |
+| SE-02.2 | ✅ | `test/authz-matrix.int-spec.ts` (25 cases) |
+| SE-02.3, SE-05.1, SE-05.2 | ✅ | `notes.repository.spec.ts`, `sample-notes.int-spec.ts` |
+| SE-07.1 to SE-07.3 | ✅ | `test/auth.int-spec.ts` |
+| SE-07.4 | ✅ | `test-identity.adapter.spec.ts`; `AuthModule.register` throws at start-up |
+| SE-09.1 | ✅ | `sample-notes.int-spec.ts` |
+| SO-05.1, EN-01.2 | ✅ | `test/security.int-spec.ts` (helmet; Caddy also sets HSTS) |
+| SO-05.2 | ✅ | `sample-notes.int-spec.ts` (generic 400, no echo) |
+| SO-08.1 | ✅ | `test/security.int-spec.ts` (@nestjs/throttler, per token or IP) |
+| SO-08.2 | 🟡 | SQL injection sample → 400 proven; Caddy rate limit needs a plugin outside D4 (owner decision) |
+| SO-08.3 | 🟡 | `test/security.int-spec.ts` with the alert double; live SNS test after infra apply |
+| FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions
+
+- Decide SO-08.2's Caddy rate limit: add `caddy-ratelimit` (custom Caddy build) to D4, or reword.
 
 - Run `aws login --profile saurav-heach-admin` so the dev infra (SSM parameters, narrower KMS
   policy) can be planned and applied; until then Deploy dev stops at its preflight and dev keeps

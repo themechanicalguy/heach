@@ -44,6 +44,8 @@ services:
       KMS_ALIAS_PREFIX: alias/heach-dev
       LOCAL_KEY_SEED: ${LOCAL_KEY_SEED:-}
       DATA_TLS_CA_FILE: /certs/ca.crt
+      FEATURE_FLAGS: sample-patient-note
+      ALERT_TOPIC_ARN: ${ALERT_TOPIC_ARN:-}
       DATABASE_URL: postgresql://heach_app@postgres:5432/heach
       DATABASE_MIGRATOR_URL: postgresql://heach_migrator@postgres:5432/heach
       DATABASE_ADMIN_URL: postgresql://heach@postgres:5432/heach

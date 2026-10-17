@@ -88,4 +88,20 @@ export class EnvVars {
   /** Hex HMAC key from which per-domain blind index keys are derived (EN-09.1). */
   @Matches(/^[0-9a-f]{64}$/)
   BLIND_INDEX_KEY!: string;
+
+  /** Comma-separated server feature flags switched on in this environment (FF-01.1). */
+  @IsOptional()
+  @IsString()
+  FEATURE_FLAGS?: string;
+
+  /** Requests per minute per user, or per IP when signed out (SO-08.1). */
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  RATE_LIMIT_PER_MINUTE = 120;
+
+  /** SNS topic for alerts (D5); unset means alerts are logged only. */
+  @IsOptional()
+  @Matches(/^arn:aws:sns:ap-south-1:\d{12}:[\w-]+$/)
+  ALERT_TOPIC_ARN?: string;
 }

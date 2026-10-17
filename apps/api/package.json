@@ -14,10 +14,12 @@
     "openapi:export": "node dist/openapi.export.js",
     "db:bootstrap": "node --env-file-if-exists=../../.env dist/db/bootstrap.js",
     "db:migrate": "node --env-file-if-exists=../../.env dist/db/migrate.js",
-    "db:check-classes": "node --env-file-if-exists=../../.env dist/db/check-classification.js"
+    "db:check-classes": "node --env-file-if-exists=../../.env dist/db/check-classification.js",
+    "job:reencrypt": "node --env-file-if-exists=../../.env dist/jobs/reencrypt.js"
   },
   "dependencies": {
     "@aws-sdk/client-kms": "3.1146.0",
+    "@aws-sdk/client-sns": "3.1146.0",
     "@aws-sdk/client-ssm": "3.1146.0",
     "@heach/crypto": "workspace:*",
     "@heach/logger": "workspace:*",
@@ -25,8 +27,10 @@
     "@nestjs/core": "12.1.2",
     "@nestjs/platform-express": "12.1.2",
     "@nestjs/swagger": "12.0.2",
+    "@nestjs/throttler": "6.7.1",
     "class-transformer": "0.5.1",
     "class-validator": "0.15.1",
+    "helmet": "8.3.0",
     "ioredis": "6.0.0",
     "node-pg-migrate": "9.0.0",
     "pg": "8.23.1",

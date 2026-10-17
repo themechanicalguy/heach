@@ -40,3 +40,8 @@ variable "uploads_bucket_arn" {
   description = "Bucket for uploaded files."
   type        = string
 }
+
+variable "alert_topic_arn" {
+  description = "SNS topic the API publishes security alerts to (Step 2 decision D5)."
+  type        = string
+}

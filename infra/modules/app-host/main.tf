@@ -62,6 +62,12 @@ resource "aws_iam_role_policy" "host" {
         Action   = "s3:ListBucket"
         Resource = var.uploads_bucket_arn
       },
+      # Security alerts from the API (SO-08.3) to the on-call topic (D5).
+      {
+        Effect   = "Allow"
+        Action   = "sns:Publish"
+        Resource = var.alert_topic_arn
+      },
     ]
   })
 }

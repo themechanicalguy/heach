@@ -1,12 +1,16 @@
 import { Controller, Get, Header, HttpStatus, Res } from '@nestjs/common';
 import { ApiOkResponse, ApiServiceUnavailableResponse, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
+import { Public } from '../auth/roles.decorator.js';
 import { EnvVars } from '../config/env.schema.js';
 import { HealthStatusDto, ReadinessDto } from './health.dto.js';
 import { ReadinessService } from './readiness.service.js';
 
 @ApiTags('health')
 @Controller()
+@Public('Liveness and readiness probes')
+@SkipThrottle()
 export class HealthController {
   constructor(
     private readonly env: EnvVars,
