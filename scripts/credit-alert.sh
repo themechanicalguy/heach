@@ -3,7 +3,7 @@
 # Usage: credit-alert.sh <result.json | FAILED>
 # Needs: gh (GH_TOKEN), aws credentials, CREDIT_ALERT_TOPIC_ARN.
 # One open issue labelled credit-alert per mode (real or simulated) holds the current level in
-# its title. A rise in level, a plan status other than ACTIVE, or a failed status call opens or
+# its title. A rise in level, any warning (plan not ACTIVE, burn rate), or a failed status call opens or
 # updates that issue (GitHub emails watchers) and publishes to the SNS topic (email).
 set -euo pipefail
 
@@ -20,7 +20,7 @@ else
   level=$(jq -r .level "$source_file")
   summary=$(jq -r '"Credits: $\(.remainingUsd) of $\(.creditsGrantedUsd) left (\(.percentLeft)%); plan \(.planStatus), ends \(.expiryDate) (\(.daysLeft) days); level \(.level)."' "$source_file")
   body=$(jq -r '"\(.action)\n\n- Remaining: $\(.remainingUsd) of $\(.creditsGrantedUsd) (\(.percentLeft)%)\n- Plan: \(.planType) \(.planStatus), ends \(.expiryDate) (\(.daysLeft) days)\n- Daily usage before credits: \(.dailySpendUsd // "no data yet")\n- Credits run out at this rate: \(.runOutDate // "not projected")\n" + ([.warnings[] | "- WARNING: \(.)"] | join("\n"))' "$source_file")
-  urgent=$(jq -r '.planStatus != "ACTIVE"' "$source_file")
+  urgent=$(jq -r '.warnings | length > 0' "$source_file")
 fi
 
 prefix="Credit alert"

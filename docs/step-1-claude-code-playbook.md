@@ -25,7 +25,8 @@
 | Session 0 and A1 to A8 (local setup) | Done |
 | B1 Cloud bootstrap | Done |
 | B2 Dev environment | Done, but built before the credit limit was known. Review its cost first (B2R) |
-| B2R, B3, B4, B5 | Next, in this order. B4 now builds the credit-expiry alerts |
+| B2R, B3, B5 | Done (B5: branch protection accepted as unmet, ADR 0004) |
+| B4 | Built and tested; waiting on SNS email confirmation and three scheduled daily runs |
 | B6 Upgrade to the Paid plan and set budgets | When an alert says so, and no later than 15 days before the Free plan ends |
 | Track P (restricted pilot on an IP address) | Later, when development is complete |
 
@@ -149,9 +150,9 @@ estimated monthly cost.
 | B1 | Cloud bootstrap: Terraform layout and remote state | Done |
 | B2 | First dev environment | Done, to be right-sized |
 | B2R | Cost review; replace costly parts with the lean single-instance design | Next |
-| B3 | Build and deploy pipeline to dev | Next |
-| B4 | Credit-expiry alerts, credit status report, sleep and wake routine | Next |
-| B5 | Branch protection, ADR for the credit decisions, environment docs | Next |
+| B3 | Build and deploy pipeline to dev | Done |
+| B4 | Credit-expiry alerts, credit status report, sleep and wake routine | Partial: email and scheduled runs pending |
+| B5 | Branch protection, ADR for the credit decisions, environment docs | Done; branch protection unmet (accepted, ADR 0004) |
 | B6 | Upgrade to the Paid plan and set budgets | When an alert says so (Act level at the latest) |
 | P1 | Pilot environment built from the same Terraform | After development |
 | P2 | HTTPS on the IP address with automatic renewal | After development |
@@ -485,6 +486,8 @@ through a first deploy.
 
 Check: merging a small change reaches the dev instance with no manual steps, and the smoke test passes.
 
+Result (18 October 2026): ✅ the merge of PR #30 deployed `5f5c956ff9a2` automatically; scan gate, SSM deploy and smoke test passed, rollback skipped ([run](https://github.com/themechanicalguy/heach/actions/runs/39063937336)).
+
 ### B4. Credit-expiry alerts and sleep routine
 
 Goal: know early, from two independent sources, when the Free plan is about to end, and keep development spend low in the meantime. Budgets and the upgrade come later, in B6.
@@ -551,10 +554,10 @@ Do not apply anything until I approve the plan.
 Check:
 
 - [ ] `scripts/credit-status` prints numbers that match the Billing console "Credits" page
-- [ ] Simulated Watch, Plan, Act and Emergency each open or update a GitHub issue and you receive the email
+- [ ] Simulated Watch, Plan, Act and Emergency each open or update a GitHub issue and you receive the email (issue part done: #29; email waits for SNS confirmation)
 - [ ] The AWS account contact email and the SNS addresses are ones you read daily, and AWS emails are not going to spam
-- [ ] The credit-watch workflow has run on its own for three days in a row
-- [ ] `scripts/dev-sleep` and `scripts/dev-wake` work, and the application answers again after wake
+- [ ] The credit-watch workflow has run on its own for three days in a row (first scheduled runs due 18, 19 and 20 October 2026, 09:00 IST)
+- [x] `scripts/dev-sleep` and `scripts/dev-wake` work, and the application answers again after wake (18 October 2026: stop 18 s, start plus smoke test 20 s, same IP)
 - [ ] You have set calendar reminders as a backup (see the list at the end)
 
 ### B5. Branch protection and documentation
@@ -798,11 +801,11 @@ Partners and business (start early, they take weeks):
 From the implementation guideline, with the changes this revision makes:
 
 - [ ] A new developer can clone, run one command and see all three apps locally within 30 minutes
-- [ ] A merged pull request reaches **dev** without manual steps (the original "staging" criterion is replaced by dev only, recorded in ADR 0009)
-- [ ] `main` is protected and the pipeline blocks a failing build
+- [x] A merged pull request reaches **dev** without manual steps (the original "staging" criterion is replaced by dev only, recorded in ADR 0009)
+- [ ] `main` is protected and the pipeline blocks a failing build (accepted as unmet: GitHub Free, ADR 0004; CI blocks by process)
 - [ ] Third-party applications are submitted and tracked
 - [ ] Credit-expiry alerts are active and tested, including simulated Watch, Plan, Act and Emergency levels (new). Budgets follow at the upgrade (part B6)
-- [ ] ADR 0009 lists every requirement relaxed for the pilot (new)
+- [x] ADR 0009 lists every requirement relaxed for the pilot (new)
 
 Final prompt to close Step 1:
 

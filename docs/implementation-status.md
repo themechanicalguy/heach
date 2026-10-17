@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: first green Deploy dev on `main` (`5f5c956`); `dev-sleep` and `dev-wake` tested
+- **Last updated:** 18 October 2026: deploy on merge passed (PR #30); sleep/wake recovery retested; burn-rate warning now alerts on its own
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -38,10 +38,10 @@ Walked through on 17 October 2026, with the changes in [ADR 0009](adr/0009-aws-c
 | Criterion | Status | Evidence |
 | --- | --- | --- |
 | New developer runs all three apps locally within 30 minutes | ✅ Done | `pnpm dev:up` ([local development](local-development.md)); CI's E2E smoke job starts all three from a clean checkout. Not yet timed on a fresh machine |
-| Merged PR reaches staging without manual steps | 🔁 Replaced by dev only, see ADR 0009 | Deploy dev runs after CI on `main`: first deploy of `52272c8990c8` answered on `https://15.252.65.98/api/readyz` (PostgreSQL and Redis ok). Scan gate, smoke test and rollback added in B3 (PR #17) |
+| Merged PR reaches staging without manual steps | 🔁 Replaced by dev only, see ADR 0009 | Deploy dev runs after CI on `main`: first deploy of `52272c8990c8` answered on `https://15.252.65.98/api/readyz` (PostgreSQL and Redis ok). Scan gate, smoke test and rollback added in B3 (PR #17). Merge of PR #30 deployed `5f5c956ff9a2` with scan, deploy and smoke test passing ([run](https://github.com/themechanicalguy/heach/actions/runs/39063937336)) |
 | `main` protected; pipeline blocks a failing build | 🟡 Partial | CI fails on a failing build (7 jobs). GitHub branch protection returns HTTP 403 on the private Free repository ([ADR 0004](adr/0004-github-free-no-branch-protection.md)); commands ready in [environments](environments.md#branch-protection-on-main) |
 | Third-party applications submitted and tracked | 🟡 Partial | Tracked: issues #19 to #25 (label `partner-onboarding`). Submitting them is the account holder's task |
-| Credit-expiry alerts active and tested, including simulated levels (playbook) | 🟡 Partial | github-oidc applied (18 October plan: no changes); GitHub variables set; real run reports ok, $120 of $120; simulated Watch, Plan, Act and Emergency each updated issue #29. Pending: SNS email subscription confirmation (owner), email receipt, three scheduled daily runs. `dev-sleep`/`dev-wake` tested 18 October: host stopped and `/api/healthz` stopped answering; after wake the smoke test passed |
+| Credit-expiry alerts active and tested, including simulated levels (playbook) | 🟡 Partial | github-oidc applied (18 October plan: no changes); GitHub variables set; real run reports ok, $120 of $120; simulated Watch, Plan, Act and Emergency each updated issue #29. All alert paths (levels, plan not ACTIVE, burn rate, failed check) verified locally with stubbed `gh`/`aws`; burn rate now alerts on its own. SNS subscription confirmed; labelled test alert sent 18 October ([run](https://github.com/themechanicalguy/heach/actions/runs/39065434862)). Pending: email receipt (owner), second address, three scheduled daily runs (18–20 October). `dev-sleep`/`dev-wake` tested 18 October: host stopped and `/api/healthz` stopped answering; after wake the smoke test passed |
 | ADR lists every requirement relaxed for the pilot (playbook) | ✅ Done | [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md) |
 
 ## Requirements by module

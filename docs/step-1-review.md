@@ -25,10 +25,10 @@ exit check").
 | Criterion | Result | Evidence |
 | --- | --- | --- |
 | Clone, one command, three apps within 30 minutes | ✅ Pass | `pnpm dev:up`; CI E2E smoke from a clean checkout. Not timed on a fresh machine |
-| Merged PR reaches dev without manual steps (replaces staging) | 🟡 Partial | First automatic deploy of `52272c8990c8` live. The B3 pipeline needs the `infra/github-oidc` apply (scan permissions) before it can pass |
-| `main` protected; pipeline blocks a failing build | 🟡 Partial | CI blocks by process only (item 1) |
+| Merged PR reaches dev without manual steps (replaces staging) | ✅ Pass | Merge of PR #30 deployed `5f5c956ff9a2` with no manual step: scan gate, SSM deploy, smoke test passed ([run](https://github.com/themechanicalguy/heach/actions/runs/39063937336)) |
+| `main` protected; pipeline blocks a failing build | ❌ Fail (accepted) | CI blocks a failing build by process only; GitHub Free cannot protect branches (item 1, ADR 0004) |
 | Third-party applications submitted and tracked | 🟡 Partial | Tracked as issues #19–#25; not yet submitted |
-| Credit-expiry alerts active and tested | 🟡 Partial | Budgets and expiry reminders live; credit watch needs the github-oidc apply, the GitHub variables and the simulations; email subscription pending confirmation |
+| Credit-expiry alerts active and tested | 🟡 Partial | Credit watch live; simulated Watch, Plan, Act and Emergency updated issue #29. Every alert path (four levels, plan not ACTIVE, burn rate, failed check) verified locally with stubbed `gh` and `aws`. Pending: SNS confirmation, email receipt, three scheduled runs (18–20 October) |
 | ADR lists every relaxed requirement | ✅ Pass | [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md) |
 
 ## Open actions (owner: account holder)
@@ -38,8 +38,13 @@ Verified 18 October 2026: items 1 and 2 are done (fresh plans for `infra/github-
 
 1. ✅ Apply the github-oidc and dev plans.
 2. ✅ Set the GitHub variables and run the simulations. Pending: three scheduled daily runs in a row.
-3. Confirm the SNS subscription email (still PendingConfirmation on 18 October), then re-run one
-   simulation and check the email arrives (not in spam).
+3. ✅ SNS subscription confirmed by the owner 18 October; one labelled test alert sent
+   (`status=TEST_ALERT`, [run](https://github.com/themechanicalguy/heach/actions/runs/39065434862)).
+   Pending: owner confirms the email arrived (not in spam). Only one address is subscribed; the
+   second needs `infra/github-oidc` to take a list of addresses and an approved apply.
+7. ✅ Burn-rate warning now raises an alert on its own (before, only a level rise or a plan status
+   other than ACTIVE did). Fixed in `scripts/credit-alert.sh`.
+8. Credit watch must run on its own on 18, 19 and 20 October (09:00 IST); manual runs do not count.
 4. Calendar reminders 60, 30, 15 and 7 days before 17 April 2027; submit the partner applications.
 5. ✅ Green Deploy dev on `main` (`5f5c956`, 18 October). The first run failed because dev was asleep during the sleep test.
 6. ✅ `scripts/dev-sleep` / `scripts/dev-wake` tested 18 October; smoke test passed after wake.
