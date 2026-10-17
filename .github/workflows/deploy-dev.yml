@@ -61,6 +61,11 @@ jobs:
           aws ecr get-login-password | docker login --username AWS --password-stdin "$REGISTRY"
           docker buildx create --use
           for app in web admin api; do
+            # Tags are immutable: a re-run of the same commit reuses the image already pushed.
+            if aws ecr describe-images --repository-name "heach/$app" --image-ids "imageTag=$IMAGE_TAG" >/dev/null 2>&1; then
+              echo "heach/$app:$IMAGE_TAG already in the registry; skipping build"
+              continue
+            fi
             docker buildx build --platform linux/arm64 --provenance=false --sbom=false \
               -f "apps/$app/Dockerfile" -t "$REGISTRY/heach/$app:$IMAGE_TAG" --push .
           done
