@@ -38,8 +38,9 @@ Verified 18 October 2026: items 1 and 2 are done (fresh plans for `infra/github-
 
 1. ✅ Apply the github-oidc and dev plans.
 2. ✅ Set the GitHub variables and run the simulations. Pending: three scheduled daily runs in a row.
-3. Confirm the SNS subscription email (still PendingConfirmation on 18 October), then re-run one
-   simulation and check the email arrives (not in spam). Only one address is subscribed; the
+3. ✅ SNS subscription confirmed by the owner 18 October; one labelled test alert sent
+   (`status=TEST_ALERT`, [run](https://github.com/themechanicalguy/heach/actions/runs/39065434862)).
+   Pending: owner confirms the email arrived (not in spam). Only one address is subscribed; the
    second needs `infra/github-oidc` to take a list of addresses and an approved apply.
 7. ✅ Burn-rate warning now raises an alert on its own (before, only a level rise or a plan status
    other than ACTIVE did). Fixed in `scripts/credit-alert.sh`.
