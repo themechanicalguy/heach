@@ -7,3 +7,5 @@ allowBuilds:
   '@swc/core': true
   # Install-time telemetry from swagger-ui-dist; not needed.
   '@scarf/scarf': false
+  # Post-install script only prints a version notice; the library works without it.
+  protobufjs: false

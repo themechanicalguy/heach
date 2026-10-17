@@ -84,6 +84,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/rum': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['RumController_record'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/sample/notes': {
     parameters: {
       query?: never;
@@ -149,6 +165,7 @@ export interface components {
     LogoutDto: {
       allDevices: boolean;
     };
+    WebVitalDto: Record<string, never>;
     CreateNoteDto: {
       /** @description Restricted: encrypted at rest */
       body: string;
@@ -274,6 +291,27 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['LogoutDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RumController_record: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['WebVitalDto'];
       };
     };
     responses: {

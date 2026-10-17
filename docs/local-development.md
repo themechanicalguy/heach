@@ -118,3 +118,14 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
   `app.encrypted_field` type. `pnpm --filter @heach/api db:check-classes` checks this (DC-01).
 - After pulling Step 2, run `pnpm services:reset` only if PostgreSQL fails to start with the new
   TLS entrypoint; it wipes local data.
+
+## Logs, traces and metrics (Step 2, LM-01 to LM-05)
+
+- The API logs JSON lines through `@heach/logger`: every line carries `correlationId` and, when
+  tracing is on, `traceId`. Names, mobile numbers and Restricted fields are masked (LM-02).
+- `pnpm dev:up` starts the OpenTelemetry Collector and Jaeger. Open http://localhost:16686 and
+  search service `heach-api`, or tag `heach.correlation_id=<id>` from a response's
+  `x-correlation-id` header, to see the request with its PostgreSQL and Redis spans.
+- The Collector exposes request metrics in Prometheus format on http://localhost:8889/metrics.
+- Unset `OTEL_EXPORTER_OTLP_ENDPOINT` to turn telemetry off. The dev host runs without it
+  (ADR 0010): there, logs are the record.

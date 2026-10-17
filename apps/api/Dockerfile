@@ -32,4 +32,4 @@ USER node
 EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD wget -qO- "http://127.0.0.1:${API_PORT}/healthz" >/dev/null || exit 1
-CMD ["node", "dist/main.js"]
+CMD ["node", "--import", "./dist/telemetry.js", "dist/main.js"]

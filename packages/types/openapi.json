@@ -124,6 +124,28 @@
         "tags": ["auth"]
       }
     },
+    "/v1/rum": {
+      "post": {
+        "operationId": "RumController_record",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebVitalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": ["observability"]
+      }
+    },
     "/v1/sample/notes": {
       "post": {
         "operationId": "NotesController_create",
@@ -299,6 +321,10 @@
           }
         },
         "required": ["allDevices"]
+      },
+      "WebVitalDto": {
+        "type": "object",
+        "properties": {}
       },
       "CreateNoteDto": {
         "type": "object",

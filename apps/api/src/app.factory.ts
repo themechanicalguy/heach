@@ -10,7 +10,10 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
+import { NestAppLogger } from './common/app-logger.js';
 import { correlationMiddleware } from './common/correlation.middleware.js';
+import { requestLog } from './common/request-log.middleware.js';
+import { ErrorRateMonitor } from './observability/error-rate.monitor.js';
 import { HttpExceptionFilter } from './common/http-exception.filter.js';
 import { EnvVars, NodeEnv } from './config/env.schema.js';
 import { validateEnv } from './config/env.validate.js';
@@ -23,7 +26,7 @@ export async function createApp(
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule.forEnv(validateEnv(process.env).APP_ENV),
     {
-      logger: options.logger ?? ['error', 'warn', 'log'],
+      logger: options.logger ?? new NestAppLogger(),
     },
   );
   const env = app.get(EnvVars);
@@ -32,6 +35,12 @@ export async function createApp(
   // One proxy (Caddy) in front: req.ip is the client address, used for rate limits (SO-08.1).
   app.set('trust proxy', 1);
   app.use(correlationMiddleware);
+  const errorRate = app.get(ErrorRateMonitor);
+  app.use(
+    requestLog((status) => {
+      errorRate.record(status);
+    }),
+  );
   app.use(securityHeaders());
   app.useGlobalPipes(
     new ValidationPipe({

@@ -12,7 +12,8 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 1 | docs/adr-0010-step2-security-decisions | ADR 0010, this log | Merged #34 |
 | 2 | feat/step2-crypto | `@heach/crypto` envelope encryption, blind indexes | Merged #35 |
 | 3 | feat/step2-db-tls-migrations | Data TLS, roles, audit schema, migrations, KMS adapter, SSM secrets, DC check | Merged #36; dev deploy waits for infra apply |
-| 4 | feat/step2-auth-audit-notes | Sessions, roles guard, audit helper, sample notes, headers, rate limits, alerts, flags, re-encryption | #37 |
+| 4 | feat/step2-auth-audit-notes | Sessions, roles guard, audit helper, sample notes, headers, rate limits, alerts, flags, re-encryption | Merged #37 |
+| 5 | feat/step2-observability | Logger context and masking, OpenTelemetry, Collector and Jaeger, error-rate alert, web-vitals endpoint | Open |
 
 ## Evidence by criterion
 
@@ -43,9 +44,17 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-08.1 | ✅ | `test/security.int-spec.ts` (@nestjs/throttler, per token or IP) |
 | SO-08.2 | 🟡 | SQL injection sample → 400 proven; Caddy rate limit needs a plugin outside D4 (owner decision) |
 | SO-08.3 | 🟡 | `test/security.int-spec.ts` with the alert double; live SNS test after infra apply |
+| LM-01.1 | 🟡 | API to DB to logs: `test/tracing.int-spec.ts` (Jaeger search by correlation ID finds the pg spans; the log line has the trace ID). Browser leg in the web PR |
+| LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
+| LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
+| LM-04.1 | 🟡 | `POST /v1/rum` logs vitals per route and device; browser reporting in the web PR |
+| LM-05.1 | 🟡 | Traces in OpenTelemetry and Jaeger; request metrics on the Collector's Prometheus endpoint. One dashboard for rate, errors and p50/p95/p99 needs Prometheus and Grafana, outside D4: owner decision |
+| LM-07.1 | 🟡 | `error-rate.monitor.spec.ts` (in-process 5-minute window, SNS publisher); live test alert after infra apply |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions
+
+- LM-05.1 dashboard: approve Prometheus and Grafana (Apache-2.0 / AGPL-3.0, local only) as D4 additions, or accept Jaeger plus the raw metrics endpoint.
 
 - Decide SO-08.2's Caddy rate limit: add `caddy-ratelimit` (custom Caddy build) to D4, or reword.
 

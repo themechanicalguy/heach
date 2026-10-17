@@ -41,3 +41,26 @@ describe('createLogger', () => {
     expect(JSON.stringify(line)).not.toMatch(/9876543210|Asha|diabetic/);
   });
 });
+
+describe('LM-02.1 masking', () => {
+  it('LM-02.1 masks names, mobile numbers and Restricted fields', () => {
+    const { stream, lines } = captureLines();
+    createLogger({ name: 'test', destination: stream }).warn(
+      { name: 'Asha Das', body: 'ଜ୍ୱର ଅଛି', detail: 'call +91 9876543210 now' },
+      'patient 9876543211 called',
+    );
+    const text = JSON.stringify(lines());
+    expect(text).not.toMatch(/Asha|ଜ୍ୱର|9876543210|9876543211/);
+    expect(text).toContain('[MOBILE]');
+  });
+
+  it('LM-01 adds context fields such as the correlation ID to every line', () => {
+    const { stream, lines } = captureLines();
+    createLogger({
+      name: 'test',
+      destination: stream,
+      context: () => ({ correlationId: 'c-1' }),
+    }).info('hi');
+    expect(lines()[0]).toMatchObject({ correlationId: 'c-1', msg: 'hi' });
+  });
+});
