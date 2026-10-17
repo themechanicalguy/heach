@@ -149,12 +149,13 @@ jobs:
           docker compose up -d
       - name: HTTPS checks through Caddy (self-signed, so -k)
         run: |
-          for i in $(seq 1 60); do curl -fsSk https://127.0.0.1:9443/readyz && break; sleep 2; done
-          curl -fsSk https://127.0.0.1:9443/readyz | grep -q '"postgres":"ok"'
+          for i in $(seq 1 60); do curl -fsSk https://127.0.0.1/api/readyz && break; sleep 2; done
+          curl -fsSk https://127.0.0.1/api/readyz | grep -q '"postgres":"ok"'
           curl -fsSk https://127.0.0.1/ | grep -q 'heach-button'
           curl -fsSk https://127.0.0.1:8443/ | grep -q '<div id="root">'
           curl -fsSk https://127.0.0.1/healthz | grep -q '"status":"ok"'
           curl -sSkI https://127.0.0.1/ | grep -qi '^strict-transport-security'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/)" = 301
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5432 || true)" = 000
       - name: Logs on failure
         if: failure()

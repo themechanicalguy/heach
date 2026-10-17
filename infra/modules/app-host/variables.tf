@@ -30,3 +30,13 @@ variable "parameter_path" {
   description = "SSM parameter path the host may read, for example /heach/dev."
   type        = string
 }
+
+variable "kms_key_arns" {
+  description = "Data-domain keys the host may use for envelope encryption."
+  type        = list(string)
+}
+
+variable "uploads_bucket_arn" {
+  description = "Bucket for uploaded files."
+  type        = string
+}

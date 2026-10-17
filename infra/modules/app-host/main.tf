@@ -45,6 +45,23 @@ resource "aws_iam_role_policy" "host" {
         Action   = ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"]
         Resource = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.parameter_path}/*"
       },
+      # Envelope encryption with the data-domain keys: the app asks KMS for data keys, never
+      # sees the master keys (EN-04). No key administration.
+      {
+        Effect   = "Allow"
+        Action   = ["kms:GenerateDataKey", "kms:Decrypt", "kms:Encrypt", "kms:DescribeKey"]
+        Resource = var.kms_key_arns
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Resource = "${var.uploads_bucket_arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = var.uploads_bucket_arn
+      },
     ]
   })
 }
@@ -74,7 +91,7 @@ resource "aws_instance" "host" {
     delete_on_termination = true
   }
 
-  tags = { Name = var.name }
+  tags = { Name = var.name, Snapshot = "daily" } # picked up by the snapshots module
 
   lifecycle {
     ignore_changes = [ami] # new AMIs do not replace the host; rebuild deliberately
