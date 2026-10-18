@@ -50,7 +50,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
 | LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
-| LM-04.1 | 🟡 | `WebVitals.tsx` sends LCP, INP, CLS, FCP, TTFB per route template and device class to `POST /v1/rum`, which logs them. Manual record on the dev host pending its next deploy |
+| LM-04.1 | ✅ local | Record 2026-10-18: Playwright on mobile and desktop visited `/or`, `/en/notes`, `/hi/sign-in`; the API logged `web-vital` lines for each route template (`/[locale]`, `/[locale]/notes`, `/[locale]/sign-in`) and device class (FCP, TTFB, CLS, LCP), no URL IDs or identity. Dev-host record after its next deploy |
 | LM-05.1 | 🟡 | Traces in OpenTelemetry and Jaeger; request metrics on the Collector's Prometheus endpoint. One dashboard for rate, errors and p50/p95/p99 needs Prometheus and Grafana, outside D4: owner decision |
 | LM-07.1 | 🟡 | `error-rate.monitor.spec.ts` (in-process 5-minute window, SNS publisher); live test alert after infra apply |
 | I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
@@ -75,9 +75,17 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | PF-03.1 | ✅ local | Lighthouse CI mobile: or 97 to 98, en 99, hi 99 (local, 3 runs each); CI step asserts at least 90 |
 | PF-05.1 | ✅ | `e2e/bundle-budget.spec.ts` (route-specific chunks), `src/next-config.test.ts` (AVIF, WebP) |
 | LM-03.1 | 🟡 | Sentry browser SDK to GlitchTip, release and role tags, no identity (`ErrorTracking.tsx`). Manual record and source maps pending: uploading source maps needs `@sentry/cli`, outside D4 (owner decision) |
+| EN-02.1 | ✅ code | `scripts/check-infra-security.mjs` in CI with fixtures; it found the state bucket on SSE-S3, now SSE-KMS in code (bootstrap apply is an owner action) |
+| EN-05.2 | ✅ | Same check: every `aws_kms_key` has yearly rotation |
+| EN-04.2 | 🟡 | Same check limits host KMS actions to GenerateDataKey and Decrypt; `tofu plan` pending AWS sign-in |
+| EN-10.3 | 🟡 | Code: backup key, bucket, host timer, pull script. Object listing pending infra apply and first nightly run |
+| EN-10.4 | 🟡 | Local restore record in [runbook](runbooks/backup-restore.md); dev-host dump restore pending |
+| SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions
+
+- After `aws login`: apply `infra/envs/dev` (new: backup KMS key about US$1 a month, backups bucket, three SSM parameters, host role changes) and `infra/bootstrap` (state bucket to SSE-KMS, in place). Then run Deploy dev, `scripts/backup-pull.sh` once, and record EN-01.3, EN-10.3, EN-10.4, EN-12.2, SO-08.3 and LM-07.1 live checks.
 
 - LM-03.1 source maps: approve `@sentry/cli` (BSD-3, CI only) to upload source maps to GlitchTip, or accept stack traces without them.
 

@@ -29,3 +29,8 @@ output "kms_key_aliases" {
   description = "Data-domain key aliases (EN-06)."
   value       = [for domain in keys(module.keys.key_arns) : "alias/${module.naming.prefix}-${domain}"]
 }
+
+output "backups_bucket" {
+  description = "Nightly encrypted database dumps (EN-10.3)."
+  value       = module.backups.name
+}

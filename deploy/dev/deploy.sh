@@ -54,6 +54,11 @@ docker compose run --rm --no-deps api node dist/db/bootstrap.js
 docker compose run --rm --no-deps api node dist/db/migrate.js
 docker compose up -d --remove-orphans
 
+# Nightly backup timer (EN-10.3); Persistent=true catches up after the host sleeps.
+install -m 644 heach-backup.service heach-backup.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now heach-backup.timer >/dev/null
+
 for _ in $(seq 1 60); do
   if docker compose exec -T api wget -qO- http://127.0.0.1:3001/readyz >/dev/null 2>&1; then
     echo "$IMAGE_TAG" > DEPLOYED_TAG # read by the workflow to roll back; not a secret

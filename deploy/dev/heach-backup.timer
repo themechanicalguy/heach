@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the HEACH database backup every night
+
+[Timer]
+# 21:00 UTC is 02:30 in India.
+OnCalendar=*-*-* 21:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

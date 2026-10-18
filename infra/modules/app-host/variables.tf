@@ -45,3 +45,8 @@ variable "alert_topic_arn" {
   description = "SNS topic the API publishes security alerts to (Step 2 decision D5)."
   type        = string
 }
+
+variable "backups_bucket_arn" {
+  description = "Bucket for nightly database dumps; the host may write and read, never delete."
+  type        = string
+}
