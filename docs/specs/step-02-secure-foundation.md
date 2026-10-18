@@ -244,6 +244,9 @@ version pinned.
 | Performance gate | Lighthouse CI | Apache-2.0 | None |
 | Component docs | Storybook | MIT | None |
 | Static analysis | Semgrep CE in CI | LGPL-2.1 | ESLint security rules only |
+| Edge rate limit (SO-08.2) | caddy-ratelimit, compiled into the Caddy build, pinned commit | Apache-2.0 | API throttler only |
+| Metrics dashboard (LM-05.1) | Prometheus and Grafana OSS, local Docker only | Apache-2.0 / AGPL-3.0 (unmodified) | Raw Collector metrics endpoint |
+| Source-map upload (LM-03.1) | @sentry/cli, dev and CI only, never in a runtime image | BSD-3-Clause | Stack traces without source maps |
 
 Containers added to the dev host must fit its memory; if they do not, the PR says so and asks
 before resizing.

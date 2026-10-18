@@ -4,6 +4,7 @@
 {
 	default_sni {$PUBLIC_HOST}
 	auto_https disable_redirects
+	order rate_limit before basic_auth
 }
 
 (security_headers) {
@@ -26,6 +27,15 @@ https://{$PUBLIC_HOST}:443 {
 	tls internal
 	import security_headers
 	handle_path /api/* {
+		# Per client IP, before the API's own per-user limits (SO-08.2). Pages and static
+		# assets are not limited here.
+		rate_limit {
+			zone api_per_ip {
+				key {remote_host}
+				events 300
+				window 1m
+			}
+		}
 		reverse_proxy api:3001
 	}
 	handle {
