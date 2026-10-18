@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: approved dependency additions built (Caddy rate limit, local Prometheus and Grafana dashboard, GlitchTip source maps); live dev checks wait for the infra apply ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: logger keeps hex trace IDs whole while masking mobiles; approved dependency additions built (Caddy rate limit, local Prometheus and Grafana dashboard, GlitchTip source maps); live dev checks wait for the infra apply ([log](step-2-progress.md))
 - **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
@@ -118,7 +118,7 @@ written today, not just its Step 2 part.
 | TS-01 | Vitest in every package and app | 80% coverage threshold on changed code |
 | TS-03 | API integration tests against real PostgreSQL and Redis in CI (`/healthz`, `/readyz`) | Every endpoint (none beyond health yet) |
 | TS-05 | E2E smoke for web and admin on every PR (Chromium) | Nightly full suite; mobile and tablet projects |
-| LM-02 | `@heach/logger` masks personal and Restricted keys and mobile numbers in values; ESLint fails on `console.*`; correlation and trace IDs on every API line; OpenTelemetry traces to Jaeger locally; Grafana dashboard and GlitchTip in the local `observability` profile | Nothing central on the dev host (ADR 0010) |
+| LM-02 | `@heach/logger` masks personal and Restricted keys and mobile numbers in values (whole trace, span and UUID hex IDs kept intact); ESLint fails on `console.*`; correlation and trace IDs on every API line; OpenTelemetry traces to Jaeger locally; Grafana dashboard and GlitchTip in the local `observability` profile | Nothing central on the dev host (ADR 0010) |
 | UX-01 | App shell with header, language switch, offline banner and bottom navigation on `/or`, `/en`, `/hi`. `@heach/ui`: tokens with three breakpoints, Button, TextField, OtpField, Card, Sheet, Table, Toast, BottomNav, loading/empty/error/offline states; Storybook built in CI; axe on every component and story | Tailwind not yet used (plain CSS on tokens); colour contrast checked only in the browser |
 
 ## Documentation gaps found in review
