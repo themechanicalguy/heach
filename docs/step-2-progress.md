@@ -100,5 +100,5 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
   policy) can be planned and applied; until then Deploy dev stops at its preflight and dev keeps
   the previous version.
 
-- Lawyer review (D6), Step 2 exit criterion.
-- Native Odia speaker review of new keys (I18N-07).
+- Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md) to a lawyer you choose.
+- Native Odia speaker review of new keys (I18N-07): [review sheet](reviews/odia-review-step-2.md) with all 34 keys.
