@@ -50,7 +50,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
 | LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
-| LM-04.1 | 🟡 | `WebVitals.tsx` sends LCP, INP, CLS, FCP, TTFB per route template and device class to `POST /v1/rum`, which logs them. Manual record on the dev host pending its next deploy |
+| LM-04.1 | ✅ local | Record 2026-10-18: Playwright on mobile and desktop visited `/or`, `/en/notes`, `/hi/sign-in`; the API logged `web-vital` lines for each route template (`/[locale]`, `/[locale]/notes`, `/[locale]/sign-in`) and device class (FCP, TTFB, CLS, LCP), no URL IDs or identity. Dev-host record after its next deploy |
 | LM-05.1 | 🟡 | Traces in OpenTelemetry and Jaeger; request metrics on the Collector's Prometheus endpoint. One dashboard for rate, errors and p50/p95/p99 needs Prometheus and Grafana, outside D4: owner decision |
 | LM-07.1 | 🟡 | `error-rate.monitor.spec.ts` (in-process 5-minute window, SNS publisher); live test alert after infra apply |
 | I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
