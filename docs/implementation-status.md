@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: API reads Parameter Store secrets by name; logger keeps hex trace IDs whole while masking mobiles; approved dependency additions built (Caddy rate limit, local Prometheus and Grafana dashboard, GlitchTip source maps); live dev checks wait for the infra apply ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 live dev checks recorded (deploy green, TLS, KMS, secrets, rotation, backup and restore, alerts published, vitals); remaining: SNS subscription confirmation, lawyer and Odia reviews ([log](step-2-progress.md))
 - **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
@@ -91,7 +91,7 @@ written today, not just its Step 2 part.
 | Part | Status | Notes |
 | --- | --- | --- |
 | Engineering (code, tests, CI gates, ADR 0010, runbooks) | ✅ Done | PRs #34 to #43 merged with CI green. The Odia note flow runs end to end in CI behind Caddy: encrypted, owner only, audited, absent from logs |
-| Infra apply and live dev checks | 🟡 In progress | 18 Oct: dev and bootstrap applied; EN-01.3 TLS and EN-04.2 KMS verified live. Deploy dev fixes: Redis certificate copy, rollback target check, and the API reading its secrets by name (the by-path read was denied by the host policy). Pending: green deploy, EN-12.2 rotation, EN-10.3/10.4 backup and restore, SO-08.3 and LM-07.1 live alerts |
+| Infra apply and live dev checks | ✅ Done | 18 Oct: dev and bootstrap applied, and Deploy dev is green ([run 39117175524](https://github.com/themechanicalguy/heach/actions/runs/39117175524)). Verified live: EN-01.3 TLS, EN-04.2 KMS, EN-12.1 secret loading, EN-12.2 rotation (with recovery), EN-10.3 backup storage and off-account copy, EN-10.4 isolated restore and decryption, and LM-04.1 vitals. SO-08.3 and LM-07.1 alerts were published to SNS; email delivery waits on the owner confirming the subscription |
 | Owner decisions on dependencies | ✅ Done | Approved 18 October and built: `caddy-ratelimit` (SO-08.2, CI floods the deploy bundle), Prometheus and Grafana local only (LM-05.1 record), source maps to GlitchTip (LM-03.1 record). `@sentry/cli` not used: its maintained versions are FSL-1.1-MIT, not open source (D4); `scripts/upload-source-maps.mjs` uses GlitchTip's API instead |
 | Native Odia review (I18N-07) | ⬜ Owner | [Review sheet](reviews/odia-review-step-2.md) ready (34 keys, questions); reviewer not yet engaged |
 | Lawyer review (D6) | ⬜ Owner | Step 2 exit criterion. [Review pack](reviews/lawyer-review-step-2.md) ready: Aadhaar route, DPDP questions, draft consent wording; lawyer not yet engaged |
@@ -100,13 +100,13 @@ written today, not just its Step 2 part.
 
 | ID | What exists | What is missing |
 | --- | --- | --- |
-| EN-01 | TLS on 443 through Caddy's internal CA, HSTS header, port 80 redirects to HTTPS. PostgreSQL and Redis accept TLS only (private CA, `deploy/dev/make-certs.sh`); plaintext refused locally, in CI and on the dev host bundle | Publicly trusted certificate; `openssl s_client` record on the dev host (EN-01.3) |
+| EN-01 | TLS on 443 through Caddy's internal CA, HSTS header, port 80 redirects to HTTPS. PostgreSQL and Redis accept TLS only (private CA, `deploy/dev/make-certs.sh`); plaintext refused locally, in CI and on the dev host bundle | Publicly trusted certificate (internal CA on the dev host; EN-01.3 recorded: TLS 1.2 and 1.3 only) |
 | EN-02 | Encrypted EBS disk and snapshots, state bucket, uploads bucket (SSE-KMS), ECR images | Encrypted log store; queues and search do not exist yet |
 | EN-04 | Customer managed KMS keys in Mumbai; host role limited to `GenerateDataKey` and `Decrypt`. `@heach/crypto` envelope encryption, API KMS adapter, `app.data_key` table | Infra change not yet applied (AWS sign-in pending) |
 | EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
 | EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
-| EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations run forward from empty in CI; separate migrator, API and audit-owner roles. Code for a backup KMS key, private backups bucket, nightly dump timer, weekly off-account pull script and restore check; local restore record | Infra not applied (AWS sign-in); no dev-host dump or restore record yet |
-| EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys; the API reads its secrets by name from Parameter Store at start-up (only the three it needs); rotation runbook | Rotation run once in dev (EN-12.2), blocked on the infra apply; Secrets Manager revisited at the pilot (D2) |
+| EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations run forward from empty in CI; separate migrator, API and audit-owner roles. Backup KMS key, private backups bucket and nightly dump timer live on dev; off-account encrypted copy on the owner's Mac; local and dev-host restore records (EN-10.3, EN-10.4) | Second-Region or managed backups revisited at the pilot (D1); SO-10 drill in Step 10 |
+| EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys; the API reads its secrets by name from Parameter Store at start-up (only the three it needs); rotation runbook | Rotation run once in dev (EN-12.2, recorded); Secrets Manager revisited at the pilot (D2) |
 | SE-04 | Admin has no public port; reached only through Session Manager port forwarding (IAM sign-in with MFA) | In-app MFA, short sessions, export controls (no admin login exists yet) |
 | PR-06 | `naming` module rejects regions outside India; everything in `ap-south-1` | Data processing agreements with third parties |
 | PR-07 | Logger redacts personal keys | No analytics or monitoring tools yet |

@@ -28,13 +28,14 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | ID | Status | Evidence |
 | --- | --- | --- |
 | EN-01.1 | ✅ | `test/data-tls.int-spec.ts`; CI deploy-bundle step refuses plaintext |
+| EN-01.3 | ✅ | Live on 2026-10-18 against the dev host (`openssl s_client`, OpenSSL 3.6.4): TLS 1.0 and 1.1 refused with `alert protocol version`; TLS 1.2 negotiates ECDHE-ECDSA-AES128-GCM-SHA256; the default negotiates TLSv1.3 (TLS_AES_128_GCM_SHA256) |
 | EN-03.2, EN-04.1, EN-05.1, EN-06.1, EN-09.1 | ✅ | `packages/crypto/src/*.test.ts`, `kms-key-provider.spec.ts` |
 | EN-10.1 | ✅ | CI runs bootstrap and migrations on an empty database; `db-roles.int-spec.ts` |
 | EN-10.2, SE-05.4 | ✅ | `db-roles.int-spec.ts` |
 | SE-05.2, SE-05.3 | ✅ (SQL) | `audit-chain.int-spec.ts`; API helper in PR 4 |
 | DC-01.1, DC-01.2 | ✅ | `classification.int-spec.ts` fixture; CI `db:check-classes` |
 | EN-12.1 | ✅ | `load-secrets.spec.ts`. Live on 2026-10-18 at tag `16d9b037834e`: with `SECRETS_SOURCE=ssm`, every secret variable in the API container is empty and the image environment has none, yet `/api/readyz` answers postgres ok and redis ok, so the secrets came from Parameter Store by name |
-| EN-04.2 | 🟡 | Policy narrowed in code; `tofu plan` pending AWS sign-in |
+| EN-04.2 | ✅ | `scripts/check-infra-security.mjs` in CI. Live on 2026-10-18: the `heach-dev-host` policy allows only `kms:GenerateDataKey` and `kms:Decrypt` on the five `alias/heach-dev-*` keys. `iam simulate-principal-policy` gives implicit deny for Encrypt, ReEncryptFrom, CreateGrant, ScheduleKeyDeletion, PutKeyPolicy and for any other key. The keys are AWS_KMS origin, customer-managed, single-Region, with rotation on |
 | EN-03.1, EN-13.1, I18N-04.1 | ✅ | `test/sample-notes.int-spec.ts` (ciphertext in DB, not in logs, not in another user's response; Odia round trip) |
 | EN-05.3 | ✅ | `test/crypto.int-spec.ts`; [runbook](runbooks/key-rotation.md) |
 | EN-09.2 | ✅ | `test/crypto.int-spec.ts` (fixture table; real searchable fields arrive in Step 3) |
@@ -49,13 +50,13 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-05.2 | ✅ | `sample-notes.int-spec.ts` (generic 400, no echo) |
 | SO-08.1 | ✅ | `test/security.int-spec.ts` (@nestjs/throttler, per token or IP) |
 | SO-08.2 | ✅ | SQL injection sample → 400 (`security.int-spec.ts`). Caddy: `caddy-ratelimit` zone of 300 requests a minute per client IP on `/api/*`; the CI deploy-bundle job floods `/api/healthz` (which the API throttler skips) and requires 429s from Caddy while pages still answer 200. Local record 18 October: 20-event test zone gave 20 × 200 then 429 with `Retry-After: 60` |
-| SO-08.3 | 🟡 | `test/security.int-spec.ts` with the alert double; live SNS test after infra apply |
+| SO-08.3 | ✅ publish | `test/security.int-spec.ts`. Live on 2026-10-18 at 10:17:21 UTC: synthetic user `…0003` made 10 denied requests over HTTPS and SNS `NumberOfMessagesPublished` on `heach-credit-reminders` rose in that minute. Email delivery waits on the owner confirming the subscription (it shows PendingConfirmation) |
 | LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
 | LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
-| LM-04.1 | ✅ local | Record 2026-10-18: Playwright on mobile and desktop visited `/or`, `/en/notes`, `/hi/sign-in`; the API logged `web-vital` lines for each route template (`/[locale]`, `/[locale]/notes`, `/[locale]/sign-in`) and device class (FCP, TTFB, CLS, LCP), no URL IDs or identity. Dev-host record after its next deploy |
-| LM-05.1 | ✅ local | Traces in OpenTelemetry and Jaeger. Grafana dashboard `HEACH API (LM-05.1)` (provisioned, `deploy/observability/grafana`) over Prometheus: request rate, 5xx share, p50/p95/p99. Record 18 October, local API: 37.6 requests/s, p50 2.5 ms, p95 4.8 ms, p99 5.0 ms; synthetic outage (PostgreSQL stopped, `/readyz` 503) showed 18 % 5xx share. `scripts/observability-dashboard.test.mjs` keeps the three panels. Local only (ADR 0010) |
-| LM-07.1 | 🟡 | `error-rate.monitor.spec.ts` (in-process 5-minute window, SNS publisher); live test alert after infra apply |
+| LM-04.1 | ✅ | Local record, plus dev host on 2026-10-18: Pixel 7 and Desktop Chrome visited `/or`, `/en/notes` and `/hi/sign-in` on https://15.252.65.98. The API logged CLS, FCP, INP, LCP and TTFB for each of `/[locale]`, `/[locale]/notes` and `/[locale]/sign-in` × mobile and desktop. Lines carry only vital, value, route template, device class and a random request correlation ID |
+| LM-05.1 | ✅ (local dashboard, ADR 0010) | Traces in OpenTelemetry and Jaeger. Grafana dashboard `HEACH API (LM-05.1)` (provisioned, `deploy/observability/grafana`) over Prometheus: request rate, 5xx share, p50/p95/p99. Record 18 October, local API: 37.6 requests/s, p50 2.5 ms, p95 4.8 ms, p99 5.0 ms; synthetic outage (PostgreSQL stopped, `/readyz` 503) showed 18 % 5xx share. `scripts/observability-dashboard.test.mjs` keeps the three panels. Local only (ADR 0010) |
+| LM-07.1 | ✅ publish | `error-rate.monitor.spec.ts`. Live on 2026-10-18 at 10:17:51 UTC: the API's own `ErrorRateMonitor` and `SnsAlertPublisher` ran in a one-off API container on the host (host role, real topic) with the subject `[SYNTHETIC TEST LM-07.1]`. A 10 percent rate sent 1 alert; a second evaluation sent none. The request path into the monitor is covered by the spec, not live. One more message was published at 10:11 UTC, during the rotation outage, probably a genuine alert; nothing was delivered, so its content is unconfirmed. Delivery waits on the subscription |
 | I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
 | I18N-02.1 | ✅ | `apps/web/src/lint-rules.test.ts` (JSX text and `alt` fail at error level) |
 | I18N-02.2 | ✅ | `packages/i18n/src/icu.test.ts`, `translator.test.ts` |
@@ -68,7 +69,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | UX-04.1 | ✅ | `States.tsx` stories and `States.test.tsx` |
 | UX-05.1 | ✅ | `OtpField.test.tsx` |
 | TS-02.1 | ✅ | `coverage-of-components.test.ts` fails when a component lacks an axe test |
-| EN-13.1 (end to end) | ✅ local, CI pending | `e2e/notes-flow.spec.ts` on mobile, tablet, desktop against web + API + PostgreSQL (local run: pass). CI runs it against the deploy bundle behind Caddy and checks ciphertext, audit and logs in SQL |
+| EN-13.1 (end to end) | ✅ | `e2e/notes-flow.spec.ts` on mobile, tablet, desktop against web + API + PostgreSQL (local run: pass); CI deploy bundle on main: 24 passed, [run 39116519674](https://github.com/themechanicalguy/heach/actions/runs/39116519674). CI runs it against the deploy bundle behind Caddy and checks ciphertext, audit and logs in SQL |
 | PF-07.1 | ✅ | `e2e/pwa.spec.ts`: manifest, service worker, offline shell with banner, no `/api` entry in any cache |
 | TS-05.1 | ✅ | `playwright.config.ts`: mobile 360, tablet 768, desktop 1280 projects on every PR |
 | TS-07.1 | ✅ | `e2e/shell.spec.ts` with Linux baselines for or, en, hi on each project |
@@ -77,7 +78,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | PF-02.1 | ✅ | `e2e/bundle-budget.spec.ts` (largest entry about 143 KB gzipped of 170 KB), fixture `src/bundle-budget.test.ts` |
 | PF-03.1 | ✅ local | Lighthouse CI mobile: or 97 to 98, en 99, hi 99 (local, 3 runs each); CI step asserts at least 90 |
 | PF-05.1 | ✅ | `e2e/bundle-budget.spec.ts` (route-specific chunks), `src/next-config.test.ts` (AVIF, WebP) |
-| LM-03.1 | ✅ local | `e2e/error-tracking.spec.ts` against local GlitchTip 6.2.6, release `lm03-ddde2d6-1792296475`: a labelled synthetic error thrown in `OfflineStatus` arrived with frames mapped to `apps/web/src/components/OfflineStatus.tsx:21`, tags `release` and `role=anonymous`, `user`, cookies, headers and query empty. Maps uploaded by `scripts/upload-source-maps.mjs` and deleted; CI checks the web image has no `.map`. Found and fixed: the page CSP blocked reports to the GlitchTip origin. [Runbook](runbooks/error-tracking.md) |
+| LM-03.1 | ✅ (local GlitchTip, ADR 0010) | `e2e/error-tracking.spec.ts` against local GlitchTip 6.2.6, release `lm03-ddde2d6-1792296475`: a labelled synthetic error thrown in `OfflineStatus` arrived with frames mapped to `apps/web/src/components/OfflineStatus.tsx:21`, tags `release` and `role=anonymous`, `user`, cookies, headers and query empty. Maps uploaded by `scripts/upload-source-maps.mjs` and deleted; CI checks the web image has no `.map`. Found and fixed: the page CSP blocked reports to the GlitchTip origin. [Runbook](runbooks/error-tracking.md) |
 | SO-03.1 | ✅ | CI: Semgrep CE (registry packs plus `security/semgrep/heach.yml`), `pnpm audit` high, Trivy on web/admin/api images, gitleaks; `scripts/security/scanner-fixtures.sh` proves each blocks a planted high finding (local run: all four block) |
 | EN-12.3 | ✅ | Pre-commit gitleaks hook (existing) and CI; fixture: generated token blocked by gitleaks |
 | SO-03.1 finding | ✅ | The container scan found critical and high CVEs in Caddy 2.10.2 (admin image and the internet-facing edge proxy). Caddy 2.11.6 is now rebuilt from source with patched Go and x/net in `apps/admin/Dockerfile`; the edge proxy runs that image. Trivy: clean |
@@ -86,9 +87,9 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | TS-06.1 | ✅ | `apps/api/src/adapters/*.port.ts` and `fakes.ts`; lint boundary proven in `lint-rules.spec.ts` |
 | EN-02.1 | ✅ code | `scripts/check-infra-security.mjs` in CI with fixtures; it found the state bucket on SSE-S3, now SSE-KMS in code (bootstrap apply is an owner action) |
 | EN-05.2 | ✅ | Same check: every `aws_kms_key` has yearly rotation |
-| EN-04.2 | 🟡 | Same check limits host KMS actions to GenerateDataKey and Decrypt; `tofu plan` pending AWS sign-in |
-| EN-10.3 | 🟡 | Code: backup key, bucket, host timer, pull script. Object listing pending infra apply and first nightly run |
-| EN-10.4 | 🟡 | Local restore record in [runbook](runbooks/backup-restore.md); dev-host dump restore pending |
+| EN-04.2 | ✅ | `scripts/check-infra-security.mjs` in CI. Live on 2026-10-18: the `heach-dev-host` policy allows only `kms:GenerateDataKey` and `kms:Decrypt` on the five `alias/heach-dev-*` keys. `iam simulate-principal-policy` gives implicit deny for Encrypt, ReEncryptFrom, CreateGrant, ScheduleKeyDeletion, PutKeyPolicy and for any other key. The keys are AWS_KMS origin, customer-managed, single-Region, with rotation on |
+| EN-10.3 | ✅ | Live on 2026-10-18. `pg/2026-10-18T1018Z.dump` and `…1019Z.dump` are in private bucket `heach-dev-backups-667291759252` (ap-south-1, all four public-access blocks on), SSE-KMS with the backup key `alias/heach-dev-backup`. The host timer fires at 21:00 UTC (02:30 IST). The off-account copy is in `~/HEACH-backups` on the owner's Mac: AES-256 with a Keychain passphrase, mode 600, SHA-256 verified. Decrypted without AWS, it is byte-identical to the S3 object |
+| EN-10.4 | ✅ | Local record and dev-host record in the [runbook](runbooks/backup-restore.md). On 2026-10-18 `…1019Z.dump` was restored into a new database `heach_restore_1792318811` on the host: 1 synthetic note, stored as AES-256-GCM ciphertext. A separate API container decrypted it through KMS for its owner. The database was then dropped; the active `heach` database was never written |
 | SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
@@ -103,13 +104,13 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
   - Deploy dev uses the previous tag as a rollback target only if all three images still exist in the registry, and warns otherwise.
 - 18 October 2026, [Deploy dev run 39114431672](https://github.com/themechanicalguy/heach/actions/runs/39114431672): the rollback guard worked ("heach/web:fa191982f4ad is no longer in the registry; no rollback target"). Redis was still crash-looping on the old wrapper when the deploy checked it, and came up healthy on its next restart. [Run 39115637234](https://github.com/themechanicalguy/heach/actions/runs/39115637234): bootstrap failed with `AccessDeniedException … ssm:GetParametersByPath on parameter/heach/dev`. The host policy grants `parameter/heach/dev/*`, but a by-path read is authorised on the path itself. Fixed in code: the loader asks `GetParameters` for the wanted names only and fails start-up if any is missing. That is also least privilege per process. The policy needed no change. Follow-up (owner, permission change): drop the now-unused `ssm:GetParametersByPath` from the host policy.
 
+- 18 October 2026, rotation: see the [secret-rotation runbook](runbooks/secret-rotation.md) record; fixed in #51.
+- 18 October 2026: Deploy dev [run 39117175524](https://github.com/themechanicalguy/heach/actions/runs/39117175524) for `16d9b03` is green: image build, scan gate, deploy and smoke test passed, no rollback. After #51, the next deploy also recreates the API.
+
 ## Owner actions
 
-- After `aws login`: apply `infra/envs/dev` (new: backup KMS key about US$1 a month, backups bucket, three SSM parameters, host role changes) and `infra/bootstrap` (state bucket to SSE-KMS, in place). Then run Deploy dev, `scripts/backup-pull.sh` once, and record EN-01.3, EN-10.3, EN-10.4, EN-12.2, SO-08.3 and LM-07.1 live checks.
-
-- Run `aws login --profile saurav-heach-admin` so the dev infra (SSM parameters, narrower KMS
-  policy) can be planned and applied; until then Deploy dev stops at its preflight and dev keeps
-  the previous version.
-
+- Confirm the SNS email subscription on `heach-credit-reminders` (AWS sent a confirmation email; it shows PendingConfirmation). Until then SO-08.3, LM-07.1 and credit alerts are published but not delivered.
+- Copy the Keychain item `heach-backup-passphrase` into your password manager; the off-account copies cannot be decrypted without it.
+- Optional, a permission narrowing: remove the now-unused `ssm:GetParametersByPath` from the host policy in `infra/modules/app-host/main.tf` and apply.
 - Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md) to a lawyer you choose.
 - Native Odia speaker review of new keys (I18N-07): [review sheet](reviews/odia-review-step-2.md) with all 34 keys.

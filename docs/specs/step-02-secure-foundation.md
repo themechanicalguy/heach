@@ -167,6 +167,21 @@ is its source.
 | --- | --- | --- |
 | FF-01.1 | A flag read on the server defaults to off when unset; flags are set per environment | Unit test |
 
+## Manual check records
+
+The manual checks above were run on 18 October 2026, mostly against the dev host. The full evidence is in the
+[Step 2 log](../step-2-progress.md):
+
+- EN-01.3 TLS: 1.0 and 1.1 refused, 1.2 accepted, 1.3 by default.
+- EN-04.2 KMS: the host role is limited to GenerateDataKey and Decrypt on its own keys.
+- EN-10.3 backups: object listing and the off-account copy.
+- EN-10.4 restore: an isolated restore on the host, with the note decrypted. The [backup runbook](../runbooks/backup-restore.md) also has the record.
+- EN-12.2 rotation: recorded in the [secret-rotation runbook](../runbooks/secret-rotation.md).
+- LM-07.1 alert: a labelled synthetic test alert, published to SNS.
+- LM-03.1, LM-04.1 and LM-05.1: local records (ADR 0010), plus a dev-host LM-04.1 record.
+
+Email delivery of SNS alerts waits on the owner confirming the topic subscription.
+
 ## Data
 
 | Entity | Field | Class | Notes |
