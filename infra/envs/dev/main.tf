@@ -40,6 +40,16 @@ module "uploads" {
   kms_key_arn = module.keys.key_arns["documents"]
 }
 
+# Nightly encrypted database dumps, with their own key (EN-10.3, D1). One Region only; the weekly
+# off-account copy is pulled to the owner's computer (scripts/backup-pull.sh, ADR 0010).
+module "backups" {
+  source                  = "../../modules/private-bucket"
+  name                    = "${module.naming.prefix}-backups-${data.aws_caller_identity.current.account_id}"
+  kms_key_arn             = module.keys.key_arns["backup"]
+  noncurrent_version_days = 7
+  current_version_days    = 35 # nightly dumps kept five weeks
+}
+
 module "snapshots" {
   source = "../../modules/snapshots"
   name   = module.naming.prefix
@@ -62,6 +72,7 @@ module "host" {
   parameter_path      = local.parameter_path
   kms_key_arns        = values(module.keys.key_arns)
   uploads_bucket_arn  = module.uploads.arn
+  backups_bucket_arn  = module.backups.arn
   # Created by infra/github-oidc (D5: the existing heach-credit-reminders topic).
   alert_topic_arn = "arn:aws:sns:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${module.naming.project}-credit-reminders"
 }

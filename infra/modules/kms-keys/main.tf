@@ -7,9 +7,9 @@ variable "name" {
 }
 
 variable "domains" {
-  description = "Data domains from the requirements (EN-06)."
+  description = "Data domains from the requirements (EN-06), plus backup: its own key for database backups (EN-10, D1)."
   type        = list(string)
-  default     = ["health", "identity", "payments", "documents"]
+  default     = ["health", "identity", "payments", "documents", "backup"]
 }
 
 variable "deletion_window_days" {

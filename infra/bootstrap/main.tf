@@ -38,8 +38,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
   bucket = aws_s3_bucket.state.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256" # EN-02; SSE-KMS is added with the KMS keys in Step 2
+      # EN-02.1: SSE-KMS with the AWS managed key (no extra cost). A customer managed key here
+      # would have to exist before the state that creates it.
+      sse_algorithm = "aws:kms"
     }
+    bucket_key_enabled = true
   }
 }
 
