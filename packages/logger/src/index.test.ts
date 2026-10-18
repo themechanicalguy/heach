@@ -1,5 +1,5 @@
 import { Writable } from 'node:stream';
-import { createLogger } from './index.js';
+import { createLogger, maskValue } from './index.js';
 
 function captureLines(): { stream: Writable; lines: () => Record<string, unknown>[] } {
   const chunks: string[] = [];
@@ -52,6 +52,15 @@ describe('LM-02.1 masking', () => {
     const text = JSON.stringify(lines());
     expect(text).not.toMatch(/Asha|ଜ୍ୱର|9876543210|9876543211/);
     expect(text).toContain('[MOBILE]');
+  });
+
+  it('LM-02.1 keeps trace IDs, span IDs and UUIDs that contain ten digits, still masking mobiles', () => {
+    const traceId = '1844611d9b9876543210bf4afd157080';
+    const spanId = 'ab98765432101234';
+    const uuid = 'e2a185e8-57c8-45ef-b956-2b9876543210';
+    const masked = maskValue(`${traceId} ${spanId} ${uuid} call 9876543210, x9876543210`);
+    expect(masked).toBe(`${traceId} ${spanId} ${uuid} call [MOBILE], x[MOBILE]`);
+    expect(maskValue('id-9876543210abcdef12')).not.toContain('9876543210');
   });
 
   it('LM-01 adds context fields such as the correlation ID to every line', () => {
