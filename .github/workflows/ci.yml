@@ -185,6 +185,8 @@ jobs:
           } > .env
           grep '^POSTGRES_PASSWORD=' .env | sed 's/^POSTGRES_PASSWORD=/DB_ADMIN_PASSWORD=/' >> .env
           bash make-certs.sh certs
+          # As on the dev host: certificates root-owned in a directory only root can enter.
+          sudo chown -R root:root certs && sudo chmod 700 certs
           docker compose up -d --wait --wait-timeout 180 postgres redis
           docker compose run --rm --no-deps api node dist/db/bootstrap.js
           docker compose run --rm --no-deps api node dist/db/migrate.js
