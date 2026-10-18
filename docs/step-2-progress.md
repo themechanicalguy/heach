@@ -92,6 +92,10 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
+## Deploy and rollback record
+
+- 18 October 2026, [Deploy dev run 39097648102](https://github.com/themechanicalguy/heach/actions/runs/39097648102) for `e1da8b2`: stopped at the host preflight ("Parameter /heach/dev/DB_APP_PASSWORD is missing … Nothing changed"), because the dev apply was not yet done. The rollback then ran and stopped at the same preflight. Defect: a preflight failure changes nothing, so rolling back is pointless and hides the cause. Fixed in `deploy-dev.yml`: the rollback is skipped only when the host reports "Nothing changed"; the run still fails. Dev kept serving its previous version.
+
 ## Owner actions
 
 - After `aws login`: apply `infra/envs/dev` (new: backup KMS key about US$1 a month, backups bucket, three SSM parameters, host role changes) and `infra/bootstrap` (state bucket to SSE-KMS, in place). Then run Deploy dev, `scripts/backup-pull.sh` once, and record EN-01.3, EN-10.3, EN-10.4, EN-12.2, SO-08.3 and LM-07.1 live checks.

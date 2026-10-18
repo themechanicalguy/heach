@@ -91,7 +91,7 @@ written today, not just its Step 2 part.
 | Part | Status | Notes |
 | --- | --- | --- |
 | Engineering (code, tests, CI gates, ADR 0010, runbooks) | ✅ Done | PRs #34 to #43 merged with CI green. The Odia note flow runs end to end in CI behind Caddy: encrypted, owner only, audited, absent from logs |
-| Infra apply and live dev checks | ⬜ Blocked | AWS sign-in expired. Pending: dev and bootstrap applies, then EN-01.3, EN-04.2 plan, EN-10.3 listing, EN-10.4 host restore, EN-12.2 rotation, SO-08.3 and LM-07.1 live alerts. Until then Deploy dev stops at its preflight and dev keeps its previous version |
+| Infra apply and live dev checks | ⬜ Blocked | AWS sign-in expired. Pending: dev and bootstrap applies, then EN-01.3, EN-04.2 plan, EN-10.3 listing, EN-10.4 host restore, EN-12.2 rotation, SO-08.3 and LM-07.1 live alerts. Until then Deploy dev stops at its preflight and dev keeps its previous version; the pointless rollback after such a stop is now skipped |
 | Owner decisions on dependencies | ✅ Done | Approved 18 October and built: `caddy-ratelimit` (SO-08.2, CI floods the deploy bundle), Prometheus and Grafana local only (LM-05.1 record), source maps to GlitchTip (LM-03.1 record). `@sentry/cli` not used: its maintained versions are FSL-1.1-MIT, not open source (D4); `scripts/upload-source-maps.mjs` uses GlitchTip's API instead |
 | Native Odia review (I18N-07) | ⬜ Owner | [Review sheet](reviews/odia-review-step-2.md) ready (34 keys, questions); reviewer not yet engaged |
 | Lawyer review (D6) | ⬜ Owner | Step 2 exit criterion. [Review pack](reviews/lawyer-review-step-2.md) ready: Aadhaar route, DPDP questions, draft consent wording; lawyer not yet engaged |
