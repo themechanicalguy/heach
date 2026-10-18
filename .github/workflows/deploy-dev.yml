@@ -96,14 +96,23 @@ jobs:
 
       - name: Deploy through SSM
         id: deploy
-        run: scripts/ssm-run.sh "$INSTANCE_ID" "heach dev $IMAGE_TAG" "$(scripts/deploy-params.sh "$REGISTRY" "$IMAGE_TAG")"
+        # A failed preflight on the host changes nothing, so there is nothing to roll back; the
+        # rollback would also stop at the same preflight and hide the real cause.
+        run: |
+          status=0
+          output=$(scripts/ssm-run.sh "$INSTANCE_ID" "heach dev $IMAGE_TAG" "$(scripts/deploy-params.sh "$REGISTRY" "$IMAGE_TAG")") || status=$?
+          echo "$output"
+          if [ "$status" -ne 0 ] && grep -q 'Nothing changed\.' <<<"$output"; then
+            echo "unchanged=true" >> "$GITHUB_OUTPUT"
+          fi
+          exit "$status"
 
       - name: Smoke test /healthz and /api/readyz
         id: smoke
         run: scripts/smoke-test.sh "$PUBLIC_IP"
 
       - name: Roll back to the previous tag
-        if: failure() && env.PREVIOUS_TAG != '' && (steps.deploy.outcome == 'failure' || steps.smoke.outcome == 'failure')
+        if: failure() && env.PREVIOUS_TAG != '' && steps.deploy.outputs.unchanged != 'true' && (steps.deploy.outcome == 'failure' || steps.smoke.outcome == 'failure')
         run: |
           echo "::warning::Rolling back dev to $PREVIOUS_TAG"
           scripts/ssm-run.sh "$INSTANCE_ID" "heach dev rollback $PREVIOUS_TAG" "$(scripts/deploy-params.sh "$REGISTRY" "$PREVIOUS_TAG")"
