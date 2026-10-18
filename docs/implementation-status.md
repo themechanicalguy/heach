@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: logger keeps hex trace IDs whole while masking mobiles; approved dependency additions built (Caddy rate limit, local Prometheus and Grafana dashboard, GlitchTip source maps); live dev checks wait for the infra apply ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: API reads Parameter Store secrets by name; logger keeps hex trace IDs whole while masking mobiles; approved dependency additions built (Caddy rate limit, local Prometheus and Grafana dashboard, GlitchTip source maps); live dev checks wait for the infra apply ([log](step-2-progress.md))
 - **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
@@ -91,7 +91,7 @@ written today, not just its Step 2 part.
 | Part | Status | Notes |
 | --- | --- | --- |
 | Engineering (code, tests, CI gates, ADR 0010, runbooks) | ✅ Done | PRs #34 to #43 merged with CI green. The Odia note flow runs end to end in CI behind Caddy: encrypted, owner only, audited, absent from logs |
-| Infra apply and live dev checks | ⬜ Blocked | AWS sign-in expired. Pending: dev and bootstrap applies, then EN-01.3, EN-04.2 plan, EN-10.3 listing, EN-10.4 host restore, EN-12.2 rotation, SO-08.3 and LM-07.1 live alerts. Until then Deploy dev stops at its preflight and dev keeps its previous version; the pointless rollback after such a stop is now skipped |
+| Infra apply and live dev checks | 🟡 In progress | 18 Oct: dev and bootstrap applied; EN-01.3 TLS and EN-04.2 KMS verified live. Deploy dev fixes: Redis certificate copy, rollback target check, and the API reading its secrets by name (the by-path read was denied by the host policy). Pending: green deploy, EN-12.2 rotation, EN-10.3/10.4 backup and restore, SO-08.3 and LM-07.1 live alerts |
 | Owner decisions on dependencies | ✅ Done | Approved 18 October and built: `caddy-ratelimit` (SO-08.2, CI floods the deploy bundle), Prometheus and Grafana local only (LM-05.1 record), source maps to GlitchTip (LM-03.1 record). `@sentry/cli` not used: its maintained versions are FSL-1.1-MIT, not open source (D4); `scripts/upload-source-maps.mjs` uses GlitchTip's API instead |
 | Native Odia review (I18N-07) | ⬜ Owner | [Review sheet](reviews/odia-review-step-2.md) ready (34 keys, questions); reviewer not yet engaged |
 | Lawyer review (D6) | ⬜ Owner | Step 2 exit criterion. [Review pack](reviews/lawyer-review-step-2.md) ready: Aadhaar route, DPDP questions, draft consent wording; lawyer not yet engaged |
@@ -106,7 +106,7 @@ written today, not just its Step 2 part.
 | EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
 | EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
 | EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations run forward from empty in CI; separate migrator, API and audit-owner roles. Code for a backup KMS key, private backups bucket, nightly dump timer, weekly off-account pull script and restore check; local restore record | Infra not applied (AWS sign-in); no dev-host dump or restore record yet |
-| EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys; the API reads its secrets from Parameter Store at start-up; rotation runbook | Rotation run once in dev (EN-12.2), blocked on the infra apply; Secrets Manager revisited at the pilot (D2) |
+| EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys; the API reads its secrets by name from Parameter Store at start-up (only the three it needs); rotation runbook | Rotation run once in dev (EN-12.2), blocked on the infra apply; Secrets Manager revisited at the pilot (D2) |
 | SE-04 | Admin has no public port; reached only through Session Manager port forwarding (IAM sign-in with MFA) | In-app MFA, short sessions, export controls (no admin login exists yet) |
 | PR-06 | `naming` module rejects regions outside India; everything in `ap-south-1` | Data processing agreements with third parties |
 | PR-07 | Logger redacts personal keys | No analytics or monitoring tools yet |

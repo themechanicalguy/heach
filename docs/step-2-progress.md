@@ -101,6 +101,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
   - Redis now copies its certificate and CA as well, the same way the PostgreSQL wrapper does.
   - CI makes its certificate directory root-only, the same as the host. Locally the old wrapper failed with the host's error and the new one answered `PONG` over TLS.
   - Deploy dev uses the previous tag as a rollback target only if all three images still exist in the registry, and warns otherwise.
+- 18 October 2026, [Deploy dev run 39114431672](https://github.com/themechanicalguy/heach/actions/runs/39114431672): the rollback guard worked ("heach/web:fa191982f4ad is no longer in the registry; no rollback target"). Redis was still crash-looping on the old wrapper when the deploy checked it, and came up healthy on its next restart. [Run 39115637234](https://github.com/themechanicalguy/heach/actions/runs/39115637234): bootstrap failed with `AccessDeniedException … ssm:GetParametersByPath on parameter/heach/dev`. The host policy grants `parameter/heach/dev/*`, but a by-path read is authorised on the path itself. Fixed in code: the loader asks `GetParameters` for the wanted names only and fails start-up if any is missing. That is also least privilege per process. The policy needed no change. Follow-up (owner, permission change): drop the now-unused `ssm:GetParametersByPath` from the host policy.
 
 ## Owner actions
 

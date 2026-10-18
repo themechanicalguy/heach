@@ -1,4 +1,4 @@
-import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { GetParametersCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 /** Parameter names under SSM_PARAMETER_PATH, and the variable each one fills. */
 const SECRET_PARAMETERS = {
@@ -37,17 +37,19 @@ export async function loadSecrets(
   if (!path) {
     throw new Error('SSM_PARAMETER_PATH is required when SECRETS_SOURCE is ssm');
   }
-  let nextToken: string | undefined;
-  do {
-    const page = await client.send(
-      new GetParametersByPathCommand({ Path: path, WithDecryption: true, NextToken: nextToken }),
-    );
-    for (const parameter of page.Parameters ?? []) {
-      const name = parameter.Name?.slice(path.length + 1) as SecretName | undefined;
-      if (name && wanted.includes(name) && parameter.Value) {
-        env[SECRET_PARAMETERS[name]] = parameter.Value;
-      }
+  // By name, not by path: the process asks only for what it needs, and the host policy grants
+  // `parameter<path>/*`, which a by-path read (authorised on the path itself) does not match.
+  const names = wanted.map((name) => `${path}/${name}`);
+  const { Parameters = [], InvalidParameters = [] } = await client.send(
+    new GetParametersCommand({ Names: names, WithDecryption: true }),
+  );
+  if (InvalidParameters.length > 0) {
+    throw new Error(`Missing parameters: ${InvalidParameters.join(', ')}`);
+  }
+  for (const parameter of Parameters) {
+    const name = parameter.Name?.slice(path.length + 1) as SecretName | undefined;
+    if (name && wanted.includes(name) && parameter.Value) {
+      env[SECRET_PARAMETERS[name]] = parameter.Value;
     }
-    nextToken = page.NextToken;
-  } while (nextToken);
+  }
 }
