@@ -33,12 +33,12 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | EN-10.2, SE-05.4 | ✅ | `db-roles.int-spec.ts` |
 | SE-05.2, SE-05.3 | ✅ (SQL) | `audit-chain.int-spec.ts`; API helper in PR 4 |
 | DC-01.1, DC-01.2 | ✅ | `classification.int-spec.ts` fixture; CI `db:check-classes` |
-| EN-12.1 | 🟡 | `load-secrets.spec.ts`; live run after infra apply |
+| EN-12.1 | ✅ | `load-secrets.spec.ts`. Live on 2026-10-18 at tag `16d9b037834e`: with `SECRETS_SOURCE=ssm`, every secret variable in the API container is empty and the image environment has none, yet `/api/readyz` answers postgres ok and redis ok, so the secrets came from Parameter Store by name |
 | EN-04.2 | 🟡 | Policy narrowed in code; `tofu plan` pending AWS sign-in |
 | EN-03.1, EN-13.1, I18N-04.1 | ✅ | `test/sample-notes.int-spec.ts` (ciphertext in DB, not in logs, not in another user's response; Odia round trip) |
 | EN-05.3 | ✅ | `test/crypto.int-spec.ts`; [runbook](runbooks/key-rotation.md) |
 | EN-09.2 | ✅ | `test/crypto.int-spec.ts` (fixture table; real searchable fields arrive in Step 3) |
-| EN-12.2 | 🧑 | [Runbook](runbooks/secret-rotation.md) written; run in dev after infra apply |
+| EN-12.2 | ✅ | Run once in dev on 2026-10-18 and recorded in the [runbook](runbooks/secret-rotation.md), including a short outage and its recovery; `deploy.sh` now restarts the API after bootstrap (`scripts/deploy-script.test.mjs`) |
 | SE-02.1 | ✅ | `src/auth/route-roles.spec.ts`; the guard also refuses undeclared routes |
 | SE-02.2 | ✅ | `test/authz-matrix.int-spec.ts` (25 cases) |
 | SE-02.3, SE-05.1, SE-05.2 | ✅ | `notes.repository.spec.ts`, `sample-notes.int-spec.ts` |
