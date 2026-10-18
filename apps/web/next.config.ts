@@ -8,9 +8,14 @@ const standalone = process.env.NEXT_OUTPUT === 'standalone';
 // Locally the API runs on its own port; on hosts Caddy routes /api before Next sees it.
 const apiOrigin = process.env.API_ORIGIN;
 
+// Browser source maps only for an upload to GlitchTip, which then deletes them
+// (scripts/upload-source-maps.mjs, LM-03.1); never served or shipped in an image.
+const sourceMaps = process.env.SOURCE_MAPS === 'upload';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  productionBrowserSourceMaps: sourceMaps,
   // Modern formats only (PF-05.1).
   images: { formats: ['image/avif', 'image/webp'] },
   ...(standalone && {

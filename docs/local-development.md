@@ -143,3 +143,5 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
   `docker run --rm --network host -v "$PWD:$PWD" -w "$PWD/apps/web" -e E2E_BASE_URL=http://host.docker.internal:3100 mcr.microsoft.com/playwright:v1.63.0-noble node node_modules/@playwright/test/cli.js test -g "TS-07.1|UX-03.1" --update-snapshots=all`.
 - `pnpm --filter @heach/web lighthouse` runs Lighthouse CI on the shell (mobile, at least 90).
 - Front-end errors go to GlitchTip only when `NEXT_PUBLIC_GLITCHTIP_DSN` is set at build time.
+- `docker compose --profile observability up -d` adds GlitchTip, Prometheus and Grafana (the
+  LM-05.1 dashboard) locally; see [the runbook](runbooks/error-tracking.md).

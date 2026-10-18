@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 engineering built and merged (PRs #34 to #43); live dev checks wait for the infra apply ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: approved dependency additions built (Caddy rate limit, local Prometheus and Grafana dashboard, GlitchTip source maps); live dev checks wait for the infra apply ([log](step-2-progress.md))
 - **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
@@ -92,7 +92,7 @@ written today, not just its Step 2 part.
 | --- | --- | --- |
 | Engineering (code, tests, CI gates, ADR 0010, runbooks) | ✅ Done | PRs #34 to #43 merged with CI green. The Odia note flow runs end to end in CI behind Caddy: encrypted, owner only, audited, absent from logs |
 | Infra apply and live dev checks | ⬜ Blocked | AWS sign-in expired. Pending: dev and bootstrap applies, then EN-01.3, EN-04.2 plan, EN-10.3 listing, EN-10.4 host restore, EN-12.2 rotation, SO-08.3 and LM-07.1 live alerts. Until then Deploy dev stops at its preflight and dev keeps its previous version |
-| Owner decisions on dependencies | ⬜ Open | Caddy rate-limit module (SO-08.2), Prometheus and Grafana (LM-05.1 dashboard), `@sentry/cli` for source maps (LM-03.1) |
+| Owner decisions on dependencies | ✅ Done | Approved 18 October and built: `caddy-ratelimit` (SO-08.2, CI floods the deploy bundle), Prometheus and Grafana local only (LM-05.1 record), source maps to GlitchTip (LM-03.1 record). `@sentry/cli` not used: its maintained versions are FSL-1.1-MIT, not open source (D4); `scripts/upload-source-maps.mjs` uses GlitchTip's API instead |
 | Native Odia review (I18N-07) | ⬜ Owner | New keys in `packages/i18n/src/messages/or.json` |
 | Lawyer review (D6) | ⬜ Owner | Step 2 exit criterion |
 
@@ -118,7 +118,7 @@ written today, not just its Step 2 part.
 | TS-01 | Vitest in every package and app | 80% coverage threshold on changed code |
 | TS-03 | API integration tests against real PostgreSQL and Redis in CI (`/healthz`, `/readyz`) | Every endpoint (none beyond health yet) |
 | TS-05 | E2E smoke for web and admin on every PR (Chromium) | Nightly full suite; mobile and tablet projects |
-| LM-02 | `@heach/logger` masks personal and Restricted keys and mobile numbers in values; ESLint fails on `console.*`; correlation and trace IDs on every API line; OpenTelemetry traces to Jaeger locally | Dashboard (LM-05) needs an owner decision; nothing central on the dev host (ADR 0010) |
+| LM-02 | `@heach/logger` masks personal and Restricted keys and mobile numbers in values; ESLint fails on `console.*`; correlation and trace IDs on every API line; OpenTelemetry traces to Jaeger locally; Grafana dashboard and GlitchTip in the local `observability` profile | Nothing central on the dev host (ADR 0010) |
 | UX-01 | App shell with header, language switch, offline banner and bottom navigation on `/or`, `/en`, `/hi`. `@heach/ui`: tokens with three breakpoints, Button, TextField, OtpField, Card, Sheet, Table, Toast, BottomNav, loading/empty/error/offline states; Storybook built in CI; axe on every component and story | Tailwind not yet used (plain CSS on tokens); colour contrast checked only in the browser |
 
 ## Documentation gaps found in review
@@ -155,6 +155,6 @@ affects at the latest (for example item 6 in the Step 2 spec).
     TS-08 and Step 4 load tests; the Aadhaar route blocks Step 3; Hindi at launch affects I18N).
 11. **Third-party applications** (payment gateway, SMS DLT, Aadhaar partner, video) must start in
     Step 1, but their status is not tracked anywhere in the repo.
-12. **SO-08.2 asks for a Caddy rate limit, but stock Caddy has none.** It needs the third-party
+12. ✅ _Resolved 18 October: module approved and added to D4._ **SO-08.2 asks for a Caddy rate limit, but stock Caddy has none.** It needs the third-party
    `caddy-ratelimit` module and a custom Caddy build, which is not in the Step 2 dependency list
    (D4). The API rate limit (SO-08.1) is on. Owner decision: add the module to D4, or reword SO-08.2.

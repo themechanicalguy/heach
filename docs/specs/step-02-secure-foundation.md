@@ -239,11 +239,14 @@ version pinned.
 | Rate limiting | @nestjs/throttler | MIT | Hand-written Redis counter |
 | Tracing and metrics | OpenTelemetry JS SDK and Collector | Apache-2.0 | Logs only |
 | Trace viewer | Jaeger, on the dev host | Apache-2.0 | Collector file export |
-| Error tracking | GlitchTip, on the dev host, with the Sentry browser SDK | MIT | Errors as logs |
+| Error tracking | GlitchTip, locally (ADR 0010), with the Sentry browser SDK | MIT | Errors as logs |
 | Real-user monitoring | web-vitals, reported to the API | Apache-2.0 | Lighthouse only |
 | Performance gate | Lighthouse CI | Apache-2.0 | None |
 | Component docs | Storybook | MIT | None |
 | Static analysis | Semgrep CE in CI | LGPL-2.1 | ESLint security rules only |
+| Edge rate limit (SO-08.2) | caddy-ratelimit, compiled into the Caddy build, pinned commit | Apache-2.0 | API throttler only |
+| Metrics dashboard (LM-05.1) | Prometheus and Grafana OSS, local Docker only | Apache-2.0 / AGPL-3.0 (unmodified) | Raw Collector metrics endpoint |
+| Source-map upload (LM-03.1) | No dependency: `scripts/upload-source-maps.mjs` (GlitchTip artifact-bundle API). `@sentry/cli` was approved but its maintained versions are FSL-1.1-MIT, not open source | — | Stack traces without source maps |
 
 Containers added to the dev host must fit its memory; if they do not, the PR says so and asks
 before resizing.
