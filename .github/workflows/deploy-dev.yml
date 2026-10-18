@@ -91,6 +91,14 @@ jobs:
           out=$(scripts/ssm-run.sh "$INSTANCE_ID" "heach dev read tag" \
             '{"commands":["cat /opt/heach/DEPLOYED_TAG 2>/dev/null || true"]}')
           previous=$(echo "$out" | head -1 | grep -E '^[0-9a-f]{12}$' || true)
+          # Old images expire from the registry; a rollback to a tag that is gone cannot pull.
+          for app in web admin api; do
+            if [ -n "$previous" ] && ! aws ecr describe-images --repository-name "heach/$app" \
+              --image-ids "imageTag=$previous" >/dev/null 2>&1; then
+              echo "::warning::heach/$app:$previous is no longer in the registry; no rollback target"
+              previous=""
+            fi
+          done
           echo "Previous tag: ${previous:-none}"
           echo "PREVIOUS_TAG=$previous" >> "$GITHUB_ENV"
 

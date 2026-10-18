@@ -95,6 +95,12 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 ## Deploy and rollback record
 
 - 18 October 2026, [Deploy dev run 39097648102](https://github.com/themechanicalguy/heach/actions/runs/39097648102) for `e1da8b2`: stopped at the host preflight ("Parameter /heach/dev/DB_APP_PASSWORD is missing … Nothing changed"), because the dev apply was not yet done. The rollback then ran and stopped at the same preflight. Defect: a preflight failure changes nothing, so rolling back is pointless and hides the cause. Fixed in `deploy-dev.yml`: the rollback is skipped only when the host reports "Nothing changed"; the run still fails. Dev kept serving its previous version.
+- 18 October 2026: main CI [run 39099363168](https://github.com/themechanicalguy/heach/actions/runs/39099363168) failed LM-01.1 because the mobile mask rewrote a trace ID that contained ten digits in a row. Fixed in #48: whole hex trace, span and UUID IDs are kept, everything else is still masked, and a regression test was added. That red CI skipped Deploy dev [run 39099959504](https://github.com/themechanicalguy/heach/actions/runs/39099959504).
+- 18 October 2026: `infra/envs/dev` applied (15 added, 1 changed: SSM parameters, backup key and bucket, host policy) and `infra/bootstrap` applied (state bucket to SSE-KMS).
+- 18 October 2026, [Deploy dev run 39112202449](https://github.com/themechanicalguy/heach/actions/runs/39112202449) for `65cb9d0`: image build and scan gate passed and the preflight passed now that the parameters exist. Then Redis failed: "Failed to load certificate: /certs/server.crt: Permission denied". The host's `certs/` directory is root-only (700), and the Redis wrapper copied only the key. CI passed because its certificate directory was world-readable. The rollback then failed because `heach/admin:fa191982f4ad` had expired from ECR. The web, API and admin apps kept serving `fa191982f4ad`; only Redis was down. Fixes:
+  - Redis now copies its certificate and CA as well, the same way the PostgreSQL wrapper does.
+  - CI makes its certificate directory root-only, the same as the host. Locally the old wrapper failed with the host's error and the new one answered `PONG` over TLS.
+  - Deploy dev uses the previous tag as a rollback target only if all three images still exist in the registry, and warns otherwise.
 
 ## Owner actions
 
