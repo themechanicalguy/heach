@@ -80,6 +80,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | EN-04.2 | 🟡 | Same check limits host KMS actions to GenerateDataKey and Decrypt; `tofu plan` pending AWS sign-in |
 | EN-10.3 | 🟡 | Code: backup key, bucket, host timer, pull script. Object listing pending infra apply and first nightly run |
 | EN-10.4 | 🟡 | Local restore record in [runbook](runbooks/backup-restore.md); dev-host dump restore pending |
+| SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions
