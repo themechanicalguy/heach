@@ -53,6 +53,9 @@ docker compose up -d --wait postgres redis
 docker compose run --rm --no-deps api node dist/db/bootstrap.js
 docker compose run --rm --no-deps api node dist/db/migrate.js
 docker compose up -d --remove-orphans
+# The API reads its secrets only at start-up and bootstrap may have just changed the role
+# passwords (EN-12.2 rotation); a same-tag deploy would otherwise keep the old API running.
+docker compose up -d --no-deps --force-recreate api
 
 # Nightly backup timer (EN-10.3); Persistent=true catches up after the host sleeps.
 install -m 644 heach-backup.service heach-backup.timer /etc/systemd/system/
