@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 in progress: web shell, PWA, sample-note flow end to end ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 in progress: security scanning, coverage gate, adapters ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -85,7 +85,7 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 | SE-04 | Admin has no public port; reached only through Session Manager port forwarding (IAM sign-in with MFA) | In-app MFA, short sessions, export controls (no admin login exists yet) |
 | PR-06 | `naming` module rejects regions outside India; everything in `ap-south-1` | Data processing agreements with third parties |
 | PR-07 | Logger redacts personal keys | No analytics or monitoring tools yet |
-| SO-03 | Secret scan, `pnpm audit` (high blocks), ECR scan on push | Static analysis (SAST) and container scanning in CI |
+| SO-03 | Secret scan, `pnpm audit` (high blocks), ECR scan on push; Semgrep CE and Trivy in CI on every PR, each scanner proven by a fixture | Dynamic scan and penetration test (SO-04, before pilot) |
 | SO-06 | Access only through SSM Session Manager, no SSH | Bastion or zero-trust proxy for production, quarterly review |
 | SO-07 | Synthetic-data rule in docs and CLAUDE.md | Enforcement once real data exists |
 | I18N-01 | Locales `or`, `en`, `hi` defined; Odia default | Locale-prefixed routing, adding a language without code change |

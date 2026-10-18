@@ -17,7 +17,7 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Merged #39 |
 | 7 | feat/step2-ui-kit | Tokens, accessible components, Storybook, axe on every component and story | Merged #40 |
 | 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Merged #41 |
-| 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep rules. TODO: Semgrep and Trivy CI jobs with runtime fixtures (SO-03.1), changed-lines coverage gate (TS-01.1), adapter ports and doubles with lint boundary (TS-06.1) | Draft, WIP |
+| 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep and Trivy in CI with runtime fixtures per scanner, npm removed from runtime images, changed-line coverage gate, adapter ports and doubles with lint boundary | #42 |
 | 10 | (not started) | Backup KMS key and bucket, nightly pg_dump, off-account copy script, Terraform checks EN-02.1/EN-05.2/EN-04.2, restore record EN-10.4, infra apply | Not started |
 
 ## Evidence by criterion
@@ -77,6 +77,11 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | PF-03.1 | ✅ local | Lighthouse CI mobile: or 97 to 98, en 99, hi 99 (local, 3 runs each); CI step asserts at least 90 |
 | PF-05.1 | ✅ | `e2e/bundle-budget.spec.ts` (route-specific chunks), `src/next-config.test.ts` (AVIF, WebP) |
 | LM-03.1 | 🟡 | Sentry browser SDK to GlitchTip, release and role tags, no identity (`ErrorTracking.tsx`). Manual record and source maps pending: uploading source maps needs `@sentry/cli`, outside D4 (owner decision) |
+| SO-03.1 | ✅ | CI: Semgrep CE (registry packs plus `security/semgrep/heach.yml`), `pnpm audit` high, Trivy on web/admin/api images, gitleaks; `scripts/security/scanner-fixtures.sh` proves each blocks a planted high finding (local run: all four block) |
+| EN-12.3 | ✅ | Pre-commit gitleaks hook (existing) and CI; fixture: generated token blocked by gitleaks |
+| EN-03.2 (hardened) | ✅ | Semgrep found GCM decryption without a fixed tag length; fixed, `envelope.test.ts` rejects a truncated tag |
+| TS-01.1 | ✅ | `scripts/check-changed-coverage.mjs` in CI (unit plus API integration lcov); fixture test fails at 50 percent. Next route files are excluded because only Playwright runs them |
+| TS-06.1 | ✅ | `apps/api/src/adapters/*.port.ts` and `fakes.ts`; lint boundary proven in `lint-rules.spec.ts` |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions

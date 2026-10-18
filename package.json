@@ -30,6 +30,7 @@
   "devDependencies": {
     "@heach/config": "workspace:*",
     "@types/node": "24.19.1",
+    "@vitest/coverage-v8": "5.0.3",
     "eslint": "10.12.0",
     "prettier": "3.9.9",
     "turbo": "2.11.7",
