@@ -160,6 +160,8 @@ jobs:
         run: |
           test "$(docker run --rm --entrypoint whoami local/heach/web:ci)" = node
           test "$(docker run --rm --entrypoint whoami local/heach/admin:ci)" = nobody
+      - name: No source maps in the web image (LM-03.1, maps go to GlitchTip only)
+        run: test -z "$(docker run --rm --entrypoint find local/heach/web:ci /app -name '*.map' -path '*static*')"
       # Same compose file and Caddyfile as the dev host, with throwaway CI-only passwords.
       - name: Start the dev stack behind Caddy
         working-directory: deploy/dev

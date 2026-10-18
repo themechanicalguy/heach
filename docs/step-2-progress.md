@@ -19,6 +19,7 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Merged #41 |
 | 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep and Trivy in CI with runtime fixtures per scanner, npm removed from runtime images, patched Caddy, changed-line coverage gate, adapter ports and doubles with lint boundary | Merged #42 |
 | 10 | feat/step2-backups | Backup KMS key and bucket, nightly dump timer, off-account pull script, restore check, infra security check, state bucket to SSE-KMS, spec threat-model check | Merged #43; infra apply pending AWS sign-in |
+| 11 | feat/step2-approved-additions | Caddy rate limit (SO-08.2), local Prometheus, Grafana and GlitchTip profile with the LM-05.1 dashboard, source-map upload script and LM-03.1 test, CSP fix for error reports | Open |
 
 ## Evidence by criterion
 
@@ -47,13 +48,13 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-05.1, EN-01.2 | ✅ | `test/security.int-spec.ts` (helmet; Caddy also sets HSTS) |
 | SO-05.2 | ✅ | `sample-notes.int-spec.ts` (generic 400, no echo) |
 | SO-08.1 | ✅ | `test/security.int-spec.ts` (@nestjs/throttler, per token or IP) |
-| SO-08.2 | 🟡 | SQL injection sample → 400 proven; Caddy rate limit needs a plugin outside D4 (owner decision) |
+| SO-08.2 | ✅ | SQL injection sample → 400 (`security.int-spec.ts`). Caddy: `caddy-ratelimit` zone of 300 requests a minute per client IP on `/api/*`; the CI deploy-bundle job floods `/api/healthz` (which the API throttler skips) and requires 429s from Caddy while pages still answer 200. Local record 18 October: 20-event test zone gave 20 × 200 then 429 with `Retry-After: 60` |
 | SO-08.3 | 🟡 | `test/security.int-spec.ts` with the alert double; live SNS test after infra apply |
 | LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
 | LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
 | LM-04.1 | ✅ local | Record 2026-10-18: Playwright on mobile and desktop visited `/or`, `/en/notes`, `/hi/sign-in`; the API logged `web-vital` lines for each route template (`/[locale]`, `/[locale]/notes`, `/[locale]/sign-in`) and device class (FCP, TTFB, CLS, LCP), no URL IDs or identity. Dev-host record after its next deploy |
-| LM-05.1 | 🟡 | Traces in OpenTelemetry and Jaeger; request metrics on the Collector's Prometheus endpoint. One dashboard for rate, errors and p50/p95/p99 needs Prometheus and Grafana, outside D4: owner decision |
+| LM-05.1 | ✅ local | Traces in OpenTelemetry and Jaeger. Grafana dashboard `HEACH API (LM-05.1)` (provisioned, `deploy/observability/grafana`) over Prometheus: request rate, 5xx share, p50/p95/p99. Record 18 October, local API: 37.6 requests/s, p50 2.5 ms, p95 4.8 ms, p99 5.0 ms; synthetic outage (PostgreSQL stopped, `/readyz` 503) showed 18 % 5xx share. `scripts/observability-dashboard.test.mjs` keeps the three panels. Local only (ADR 0010) |
 | LM-07.1 | 🟡 | `error-rate.monitor.spec.ts` (in-process 5-minute window, SNS publisher); live test alert after infra apply |
 | I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
 | I18N-02.1 | ✅ | `apps/web/src/lint-rules.test.ts` (JSX text and `alt` fail at error level) |
@@ -76,7 +77,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | PF-02.1 | ✅ | `e2e/bundle-budget.spec.ts` (largest entry about 143 KB gzipped of 170 KB), fixture `src/bundle-budget.test.ts` |
 | PF-03.1 | ✅ local | Lighthouse CI mobile: or 97 to 98, en 99, hi 99 (local, 3 runs each); CI step asserts at least 90 |
 | PF-05.1 | ✅ | `e2e/bundle-budget.spec.ts` (route-specific chunks), `src/next-config.test.ts` (AVIF, WebP) |
-| LM-03.1 | 🟡 | Sentry browser SDK to GlitchTip, release and role tags, no identity (`ErrorTracking.tsx`). Manual record and source maps pending: uploading source maps needs `@sentry/cli`, outside D4 (owner decision) |
+| LM-03.1 | ✅ local | `e2e/error-tracking.spec.ts` against local GlitchTip 6.2.6, release `lm03-ddde2d6-1792296475`: a labelled synthetic error thrown in `OfflineStatus` arrived with frames mapped to `apps/web/src/components/OfflineStatus.tsx:21`, tags `release` and `role=anonymous`, `user`, cookies, headers and query empty. Maps uploaded by `scripts/upload-source-maps.mjs` and deleted; CI checks the web image has no `.map`. Found and fixed: the page CSP blocked reports to the GlitchTip origin. [Runbook](runbooks/error-tracking.md) |
 | SO-03.1 | ✅ | CI: Semgrep CE (registry packs plus `security/semgrep/heach.yml`), `pnpm audit` high, Trivy on web/admin/api images, gitleaks; `scripts/security/scanner-fixtures.sh` proves each blocks a planted high finding (local run: all four block) |
 | EN-12.3 | ✅ | Pre-commit gitleaks hook (existing) and CI; fixture: generated token blocked by gitleaks |
 | SO-03.1 finding | ✅ | The container scan found critical and high CVEs in Caddy 2.10.2 (admin image and the internet-facing edge proxy). Caddy 2.11.6 is now rebuilt from source with patched Go and x/net in `apps/admin/Dockerfile`; the edge proxy runs that image. Trivy: clean |
@@ -94,12 +95,6 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 ## Owner actions
 
 - After `aws login`: apply `infra/envs/dev` (new: backup KMS key about US$1 a month, backups bucket, three SSM parameters, host role changes) and `infra/bootstrap` (state bucket to SSE-KMS, in place). Then run Deploy dev, `scripts/backup-pull.sh` once, and record EN-01.3, EN-10.3, EN-10.4, EN-12.2, SO-08.3 and LM-07.1 live checks.
-
-- LM-03.1 source maps: approve `@sentry/cli` (BSD-3, CI only) to upload source maps to GlitchTip, or accept stack traces without them.
-
-- LM-05.1 dashboard: approve Prometheus and Grafana (Apache-2.0 / AGPL-3.0, local only) as D4 additions, or accept Jaeger plus the raw metrics endpoint.
-
-- Decide SO-08.2's Caddy rate limit: add `caddy-ratelimit` (custom Caddy build) to D4, or reword.
 
 - Run `aws login --profile saurav-heach-admin` so the dev infra (SSM parameters, narrower KMS
   policy) can be planned and applied; until then Deploy dev stops at its preflight and dev keeps

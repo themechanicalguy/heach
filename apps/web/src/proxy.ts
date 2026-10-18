@@ -17,7 +17,11 @@ export function proxy(request: NextRequest): NextResponse {
     );
   }
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  const csp = contentSecurityPolicy(nonce, process.env.NODE_ENV === 'development');
+  const csp = contentSecurityPolicy(
+    nonce,
+    process.env.NODE_ENV === 'development',
+    process.env.NEXT_PUBLIC_GLITCHTIP_DSN,
+  );
   const headers = new Headers(request.headers);
   headers.set('x-nonce', nonce);
   headers.set('Content-Security-Policy', csp);

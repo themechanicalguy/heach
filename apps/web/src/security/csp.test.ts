@@ -8,4 +8,15 @@ describe('contentSecurityPolicy', () => {
     expect(csp).not.toContain('unsafe-inline');
     expect(csp).toContain("frame-ancestors 'none'");
   });
+
+  it('LM-03.1 lets error reports reach only the configured GlitchTip origin', () => {
+    const connect = (dsn?: string) =>
+      contentSecurityPolicy('abc', false, dsn)
+        .split('; ')
+        .find((d) => d.startsWith('connect-src'));
+    expect(connect()).toBe("connect-src 'self'");
+    expect(connect('https://key@errors.example.test/3')).toBe(
+      "connect-src 'self' https://errors.example.test",
+    );
+  });
 });
