@@ -1,7 +1,7 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 in progress: security scanning, coverage gate, adapters, backups and infra checks in code; infra apply pending ([log](step-2-progress.md))
-- **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
+- **Last updated:** 18 October 2026: Step 2 engineering built and merged (PRs #34 to #43); live dev checks wait for the infra apply ([log](step-2-progress.md))
+- **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
 [requirements](mvp-v1-requirements.md) say _what_ to build and the
@@ -50,17 +50,17 @@ Every module not listed under "Partial" below is ⬜ Not started.
 
 | Module | IDs | Done | Partial | Not started | Planned in step |
 | --- | --- | --- | --- | --- | --- |
-| DC Data classification | (no IDs) | | | all | 2 |
-| EN Encryption | 13 | 0 | 7 | 6 | 2 |
-| SE Access control and audit | 9 | 0 | 1 | 8 | 2, 3, 6 |
+| DC Data classification | DC-01 (Step 2 spec) | 1 | 0 | 0 | 2 |
+| EN Encryption | 13 | 4 | 8 | 1 | 2 |
+| SE Access control and audit | 9 | 1 | 4 | 4 | 2, 3, 6 |
 | PR Privacy and consent | 7 | 0 | 2 | 5 | 3 |
-| SO Secure development and operations | 10 | 0 | 3 | 7 | 2, 6, 10 |
-| PF Performance | 7 | 0 | 0 | 7 | 2 |
+| SO Secure development and operations | 10 | 3 | 4 | 3 | 2, 6, 10 |
+| PF Performance | 7 | 4 | 2 | 1 | 2 |
 | A11Y Accessibility | 7 | 0 | 0 | 7 | not mapped (see gaps) |
-| I18N Multi-language | 7 | 0 | 2 | 5 | 2 |
-| TS Testing | 9 | 0 | 3 | 6 | 2 |
-| LM Logging and monitoring | 9 | 0 | 1 | 8 | 2 |
-| UX User experience | 8 | 0 | 1 | 7 | 2 |
+| I18N Multi-language | 7 | 5 | 1 | 1 | 2 |
+| TS Testing | 9 | 4 | 3 | 2 | 2 |
+| LM Logging and monitoring | 9 | 1 | 6 | 2 | 2 |
+| UX User experience | 8 | 5 | 0 | 3 | 2 |
 | AC, PO, KY, AD-01 to 03, 11, 12 | 6 + 7 + 9 + 5 | 0 | 0 | all | 3 |
 | SL, AV, SD, AD-04 | 9 + 4 + 5 + 1 | 0 | 0 | all | 4 |
 | BK, PY, NT, AD-05, AD-07 | 9 + 7 + 3 + 2 | 0 | 0 | all | 5 |
@@ -70,6 +70,31 @@ Every module not listed under "Partial" below is ⬜ Not started.
 | PK, RR, AD-08 to 10, 14, 16, 17 | 8 + 8 + 6 | 0 | 0 | all | 9 |
 
 No functional requirement (journeys J1 to J9) is implemented yet.
+
+Counts after Step 2 (18 October 2026), strict: Done only where the requirement is met as
+written today, not just its Step 2 part.
+- **EN:** Done 03, 06, 09, 13. Partial 01, 02, 04, 05, 07, 10, 11, 12 (live checks wait for the
+  apply). Not started 08.
+- **SE:** Done 02. Partial 04, 05, 07, 09.
+- **SO:** Done 01, 03, 05. Partial 06, 07, 08, 10.
+- **PF:** Done 02, 03, 05, 06. Partial 01, 07 (shell only, no queued actions).
+- **I18N:** Done 01, 02, 03, 04, 06. Partial 07 (native review). Not started 05.
+- **TS:** Done 01, 02, 03, 07. Partial 05, 06, 09.
+- **LM:** Done 02. Partial 01, 03, 04, 05, 07, 09.
+- **UX:** Done 01 to 05. Not started 06 to 08.
+
+## Step 2: Secure foundation and quality gates
+
+[Spec](specs/step-02-secure-foundation.md). Evidence per acceptance criterion is in the
+[Step 2 log](step-2-progress.md).
+
+| Part | Status | Notes |
+| --- | --- | --- |
+| Engineering (code, tests, CI gates, ADR 0010, runbooks) | ✅ Done | PRs #34 to #43 merged with CI green. The Odia note flow runs end to end in CI behind Caddy: encrypted, owner only, audited, absent from logs |
+| Infra apply and live dev checks | ⬜ Blocked | AWS sign-in expired. Pending: dev and bootstrap applies, then EN-01.3, EN-04.2 plan, EN-10.3 listing, EN-10.4 host restore, EN-12.2 rotation, SO-08.3 and LM-07.1 live alerts. Until then Deploy dev stops at its preflight and dev keeps its previous version |
+| Owner decisions on dependencies | ⬜ Open | Caddy rate-limit module (SO-08.2), Prometheus and Grafana (LM-05.1 dashboard), `@sentry/cli` for source maps (LM-03.1) |
+| Native Odia review (I18N-07) | ⬜ Owner | New keys in `packages/i18n/src/messages/or.json` |
+| Lawyer review (D6) | ⬜ Owner | Step 2 exit criterion |
 
 ### Partial requirements
 

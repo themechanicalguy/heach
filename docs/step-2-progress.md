@@ -17,7 +17,7 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Merged #39 |
 | 7 | feat/step2-ui-kit | Tokens, accessible components, Storybook, axe on every component and story | Merged #40 |
 | 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Merged #41 |
-| 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep and Trivy in CI with runtime fixtures per scanner, npm removed from runtime images, changed-line coverage gate, adapter ports and doubles with lint boundary | #42 |
+| 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep and Trivy in CI with runtime fixtures per scanner, npm removed from runtime images, patched Caddy, changed-line coverage gate, adapter ports and doubles with lint boundary | Merged #42 |
 | 10 | feat/step2-backups | Backup KMS key and bucket, nightly dump timer, off-account pull script, restore check, infra security check, state bucket to SSE-KMS, spec threat-model check | Merged #43; infra apply pending AWS sign-in |
 
 ## Evidence by criterion
