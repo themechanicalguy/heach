@@ -1,0 +1,27 @@
+# HEACH-specific Semgrep rules (SO-03), run with the registry packs in CI. ERROR blocks the PR.
+rules:
+  - id: heach-no-dangerously-set-inner-html
+    languages: [typescript]
+    severity: ERROR
+    message: dangerouslySetInnerHTML bypasses React escaping; render text or sanitise on the server.
+    pattern: <$EL dangerouslySetInnerHTML={...} />
+  - id: heach-no-raw-sql-concatenation
+    languages: [typescript]
+    severity: ERROR
+    message: Build SQL with parameters ($1, $2), never by concatenating or interpolating values.
+    patterns:
+      - pattern-either:
+          - pattern: $DB.query(`...${$X}...`, ...)
+          - pattern: $DB.query("..." + $X, ...)
+      - pattern-not: $DB.query(`...${String($N)}...`, ...)
+  - id: heach-no-console-in-app-code
+    languages: [typescript]
+    severity: ERROR
+    message: Use @heach/logger; console output skips masking (LM-02).
+    paths:
+      include: [apps/*/src/**]
+      exclude: ['**/*.test.ts', '**/*.spec.ts', '**/*.test.tsx']
+    pattern-either:
+      - pattern: console.log(...)
+      - pattern: console.error(...)
+      - pattern: console.warn(...)

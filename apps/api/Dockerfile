@@ -20,7 +20,10 @@ RUN pnpm --filter "@heach/api..." --filter "!@heach/types" build \
 FROM node:24-alpine AS runtime
 # Patched OS packages: base image tags lag behind Alpine security fixes, which the ECR scan
 # gate in Deploy dev blocks on (HIGH and CRITICAL).
-RUN apk upgrade --no-cache
+RUN apk upgrade --no-cache \
+ # The runtime never uses npm, npx or corepack; their bundled dependencies carry CVEs (SO-03).
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 ENV NODE_ENV=production API_PORT=3001
 WORKDIR /app
 COPY --from=build --chown=node:node /out/package.json ./package.json

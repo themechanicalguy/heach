@@ -27,6 +27,15 @@ describe('EnvelopeEncryptor', () => {
     await expect(encryptor.decrypt(tampered)).rejects.toBeInstanceOf(DecryptionError);
   });
 
+  it('EN-03.2 rejects a truncated auth tag', async () => {
+    const { encryptor } = setup();
+    const field = await encryptor.encrypt('synthetic', 'health');
+    const raw = Buffer.from(field.ciphertext, 'base64');
+    // Keep the IV and only 4 bytes of the 16-byte tag.
+    const truncated = { ...field, ciphertext: raw.subarray(0, 12 + 4).toString('base64') };
+    await expect(encryptor.decrypt(truncated)).rejects.toBeInstanceOf(DecryptionError);
+  });
+
   it('EN-04.1 uses a KMS data key with AES-256-GCM and stores only the wrapped key', async () => {
     const { encryptor, keys, store } = setup();
     const field = await encryptor.encrypt('synthetic', 'health');

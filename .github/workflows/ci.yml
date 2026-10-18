@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 2 # the PR merge commit and its base, for the coverage gate
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -49,6 +50,13 @@ jobs:
         run: pnpm check
       - name: API integration tests (bootstrap and migrations from an empty database, EN-10.1)
         run: pnpm --filter @heach/api test:e2e
+      - name: Coverage of changed lines is at least 80 percent (TS-01.1)
+        run: |
+          cov="--coverage.enabled --coverage.reporter=lcov --coverage.reportsDirectory"
+          pnpm -r --filter './apps/*' --filter './packages/*' --filter '!@heach/api' --filter '!@heach/config' \
+            exec vitest run $cov=coverage-unit
+          (cd apps/api && pnpm exec vitest run $cov=coverage-all)
+          node scripts/check-changed-coverage.mjs HEAD^1
       - name: Every column has a data class; Restricted columns are encrypted (DC-01)
         run: pnpm --filter @heach/api db:check-classes
       - name: Storybook builds (UX-01.1); each story passes axe in the ui unit tests (UX-01.2)
@@ -141,6 +149,12 @@ jobs:
         run: |
           for app in web admin api; do
             docker build -f "apps/$app/Dockerfile" -t "local/heach/$app:ci" .
+          done
+      - name: Container image scan, high and critical block the PR (SO-03.1)
+        run: |
+          for app in web admin api; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa \
+              image --quiet --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "local/heach/$app:ci"
           done
       - name: Images run as non-root
         run: |
@@ -247,6 +261,30 @@ jobs:
             tofu -chdir="$dir" init -backend=false -input=false -lockfile=readonly
             tofu -chdir="$dir" validate
           done
+
+  security:
+    name: Static analysis and scanner fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Semgrep CE (D4): registry packs plus HEACH rules; any ERROR finding blocks (SO-03.1).
+      - name: Semgrep
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.179.0@sha256:93963d9295a366f59e4850127b1550400ee7b388f04fe144e4a1f6325d96e01b \
+            semgrep scan --metrics=off --config p/typescript --config p/nodejs --config p/react \
+              --config security/semgrep/heach.yml --severity ERROR --error --quiet
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      # Each scanner must fail on a planted high finding (made at run time, never committed).
+      - name: Every scanner blocks its fixture (SO-03.1, EN-12.3)
+        run: |
+          gitleaks=$(grep -o 'zricethezav/gitleaks:[^ ]*' .github/workflows/ci.yml | head -1)
+          bash scripts/security/scanner-fixtures.sh semgrep/semgrep:1.179.0@sha256:93963d9295a366f59e4850127b1550400ee7b388f04fe144e4a1f6325d96e01b aquasec/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa "$gitleaks"
 
   secrets:
     name: Secret scan

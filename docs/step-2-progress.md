@@ -16,7 +16,9 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 5 | feat/step2-observability | Logger context and masking, OpenTelemetry, Collector and Jaeger, error-rate alert, web-vitals endpoint | Merged #38 |
 | 6 | feat/step2-web-i18n | ICU catalogues, locale routes, fonts, page CSP, hard-coded string lint as error | Merged #39 |
 | 7 | feat/step2-ui-kit | Tokens, accessible components, Storybook, axe on every component and story | Merged #40 |
-| 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Open |
+| 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Merged #41 |
+| 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep and Trivy in CI with runtime fixtures per scanner, npm removed from runtime images, changed-line coverage gate, adapter ports and doubles with lint boundary | #42 |
+| 10 | feat/step2-backups | Backup KMS key and bucket, nightly dump timer, off-account pull script, restore check, infra security check, state bucket to SSE-KMS, spec threat-model check | Merged #43; infra apply pending AWS sign-in |
 
 ## Evidence by criterion
 
@@ -75,6 +77,12 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | PF-03.1 | ✅ local | Lighthouse CI mobile: or 97 to 98, en 99, hi 99 (local, 3 runs each); CI step asserts at least 90 |
 | PF-05.1 | ✅ | `e2e/bundle-budget.spec.ts` (route-specific chunks), `src/next-config.test.ts` (AVIF, WebP) |
 | LM-03.1 | 🟡 | Sentry browser SDK to GlitchTip, release and role tags, no identity (`ErrorTracking.tsx`). Manual record and source maps pending: uploading source maps needs `@sentry/cli`, outside D4 (owner decision) |
+| SO-03.1 | ✅ | CI: Semgrep CE (registry packs plus `security/semgrep/heach.yml`), `pnpm audit` high, Trivy on web/admin/api images, gitleaks; `scripts/security/scanner-fixtures.sh` proves each blocks a planted high finding (local run: all four block) |
+| EN-12.3 | ✅ | Pre-commit gitleaks hook (existing) and CI; fixture: generated token blocked by gitleaks |
+| SO-03.1 finding | ✅ | The container scan found critical and high CVEs in Caddy 2.10.2 (admin image and the internet-facing edge proxy). Caddy 2.11.6 is now rebuilt from source with patched Go and x/net in `apps/admin/Dockerfile`; the edge proxy runs that image. Trivy: clean |
+| EN-03.2 (hardened) | ✅ | Semgrep found GCM decryption without a fixed tag length; fixed, `envelope.test.ts` rejects a truncated tag |
+| TS-01.1 | ✅ | `scripts/check-changed-coverage.mjs` in CI (unit plus API integration lcov); fixture test fails at 50 percent. Next route files are excluded because only Playwright runs them |
+| TS-06.1 | ✅ | `apps/api/src/adapters/*.port.ts` and `fakes.ts`; lint boundary proven in `lint-rules.spec.ts` |
 | EN-02.1 | ✅ code | `scripts/check-infra-security.mjs` in CI with fixtures; it found the state bucket on SSE-S3, now SSE-KMS in code (bootstrap apply is an owner action) |
 | EN-05.2 | ✅ | Same check: every `aws_kms_key` has yearly rotation |
 | EN-04.2 | 🟡 | Same check limits host KMS actions to GenerateDataKey and Decrypt; `tofu plan` pending AWS sign-in |

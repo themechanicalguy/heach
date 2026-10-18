@@ -47,7 +47,10 @@ export class EnvelopeEncryptor implements FieldEncryptor {
     try {
       const key = await this.dataKey(field.domain, version);
       const raw = Buffer.from(field.ciphertext, 'base64');
-      const decipher = createDecipheriv('aes-256-gcm', key, raw.subarray(0, IV_BYTES));
+      // A fixed tag length: a truncated tag must never verify (EN-03.2).
+      const decipher = createDecipheriv('aes-256-gcm', key, raw.subarray(0, IV_BYTES), {
+        authTagLength: TAG_BYTES,
+      });
       decipher.setAAD(aad(field.domain, version));
       decipher.setAuthTag(raw.subarray(IV_BYTES, IV_BYTES + TAG_BYTES));
       return Buffer.concat([

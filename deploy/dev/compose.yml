@@ -4,14 +4,20 @@
 name: heach
 
 services:
+  # Edge proxy: the admin image's patched Caddy (apps/admin/Dockerfile) with this folder's
+  # Caddyfile, as root to bind 80 and 443. Same binary the container scan checks (SO-03.1).
   caddy:
-    image: caddy:2.10.2-alpine
+    image: ${REGISTRY:?}/heach/admin:${IMAGE_TAG:?}
+    user: root
+    command: ['caddy', 'run', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile']
     ports:
       - 80:80 # redirect to HTTPS
       - 443:443 # web, and the API under /api
       - 127.0.0.1:8443:8443 # admin: loopback only, reached through Session Manager
     environment:
       PUBLIC_HOST: ${PUBLIC_HOST:?}
+      XDG_DATA_HOME: /data
+      XDG_CONFIG_HOME: /config
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
