@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 in progress: web shell, PWA, sample-note flow end to end ([log](step-2-progress.md))
+- **Last updated:** 18 October 2026: Step 2 in progress: backups and infra checks in code, apply pending ([log](step-2-progress.md))
 - **Current step:** Step 1 of the [implementation guideline](mvp-v1-implementation-guideline.md)
 
 This page separates what is built from what is only specified. The
@@ -80,7 +80,7 @@ No functional requirement (journeys J1 to J9) is implemented yet.
 | EN-04 | Customer managed KMS keys in Mumbai; host role limited to `GenerateDataKey` and `Decrypt`. `@heach/crypto` envelope encryption, API KMS adapter, `app.data_key` table | Infra change not yet applied (AWS sign-in pending) |
 | EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
 | EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
-| EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations (node-pg-migrate) run forward from empty in CI; separate migrator, API and audit-owner roles | Backup key, bucket, off-account copy and restore record (ADR 0010) |
+| EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations run forward from empty in CI; separate migrator, API and audit-owner roles. Code for a backup KMS key, private backups bucket, nightly dump timer, weekly off-account pull script and restore check; local restore record | Infra not applied (AWS sign-in); no dev-host dump or restore record yet |
 | EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys; the API reads its secrets from Parameter Store at start-up; rotation runbook | Rotation run once in dev (EN-12.2), blocked on the infra apply; Secrets Manager revisited at the pilot (D2) |
 | SE-04 | Admin has no public port; reached only through Session Manager port forwarding (IAM sign-in with MFA) | In-app MFA, short sessions, export controls (no admin login exists yet) |
 | PR-06 | `naming` module rejects regions outside India; everything in `ap-south-1` | Data processing agreements with third parties |

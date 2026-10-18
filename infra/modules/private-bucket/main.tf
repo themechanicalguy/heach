@@ -16,6 +16,12 @@ variable "noncurrent_version_days" {
   default     = 30
 }
 
+variable "current_version_days" {
+  description = "Days after which current objects expire; null keeps them until deleted."
+  type        = number
+  default     = null
+}
+
 resource "aws_s3_bucket" "this" {
   bucket = var.name
 }
@@ -46,6 +52,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
     filter {}
     noncurrent_version_expiration {
       noncurrent_days = var.noncurrent_version_days
+    }
+    dynamic "expiration" {
+      for_each = var.current_version_days == null ? [] : [var.current_version_days]
+      content {
+        days = expiration.value
+      }
     }
     abort_incomplete_multipart_upload {
       days_after_initiation = 7

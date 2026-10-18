@@ -62,6 +62,19 @@ resource "aws_iam_role_policy" "host" {
         Action   = "s3:ListBucket"
         Resource = var.uploads_bucket_arn
       },
+      # Nightly dumps (EN-10.3): write and read for restores; no delete, so a compromised host
+      # cannot erase the history (versioning keeps replaced objects).
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject"]
+        Resource = "${var.backups_bucket_arn}/pg/*"
+      },
+      {
+        Effect    = "Allow"
+        Action    = "s3:ListBucket"
+        Resource  = var.backups_bucket_arn
+        Condition = { StringLike = { "s3:prefix" = ["pg/*"] } }
+      },
       # Security alerts from the API (SO-08.3) to the on-call topic (D5).
       {
         Effect   = "Allow"

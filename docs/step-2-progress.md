@@ -75,9 +75,16 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | PF-03.1 | ✅ local | Lighthouse CI mobile: or 97 to 98, en 99, hi 99 (local, 3 runs each); CI step asserts at least 90 |
 | PF-05.1 | ✅ | `e2e/bundle-budget.spec.ts` (route-specific chunks), `src/next-config.test.ts` (AVIF, WebP) |
 | LM-03.1 | 🟡 | Sentry browser SDK to GlitchTip, release and role tags, no identity (`ErrorTracking.tsx`). Manual record and source maps pending: uploading source maps needs `@sentry/cli`, outside D4 (owner decision) |
+| EN-02.1 | ✅ code | `scripts/check-infra-security.mjs` in CI with fixtures; it found the state bucket on SSE-S3, now SSE-KMS in code (bootstrap apply is an owner action) |
+| EN-05.2 | ✅ | Same check: every `aws_kms_key` has yearly rotation |
+| EN-04.2 | 🟡 | Same check limits host KMS actions to GenerateDataKey and Decrypt; `tofu plan` pending AWS sign-in |
+| EN-10.3 | 🟡 | Code: backup key, bucket, host timer, pull script. Object listing pending infra apply and first nightly run |
+| EN-10.4 | 🟡 | Local restore record in [runbook](runbooks/backup-restore.md); dev-host dump restore pending |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 
 ## Owner actions
+
+- After `aws login`: apply `infra/envs/dev` (new: backup KMS key about US$1 a month, backups bucket, three SSM parameters, host role changes) and `infra/bootstrap` (state bucket to SSE-KMS, in place). Then run Deploy dev, `scripts/backup-pull.sh` once, and record EN-01.3, EN-10.3, EN-10.4, EN-12.2, SO-08.3 and LM-07.1 live checks.
 
 - LM-03.1 source maps: approve `@sentry/cli` (BSD-3, CI only) to upload source maps to GlitchTip, or accept stack traces without them.
 
