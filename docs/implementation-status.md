@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 18 October 2026: Step 2 live dev checks recorded (deploy green, TLS, KMS, secrets, rotation, backup and restore, alerts published, vitals); remaining: SNS subscription confirmation, lawyer and Odia reviews ([log](step-2-progress.md))
+- **Last updated:** 21 October 2026: Spec Kit adoption proposed (ADR 0011, constitution, feature-spec templates, spec CI checks); awaiting owner approval. Step 2 unchanged since 18 October: remaining SNS subscription confirmation, lawyer and Odia reviews ([log](step-2-progress.md))
 - **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
@@ -43,6 +43,12 @@ Walked through on 17 October 2026, with the changes in [ADR 0009](adr/0009-aws-c
 | Third-party applications submitted and tracked | 🟡 Partial | Tracked: issues #19 to #25 (label `partner-onboarding`). Submitting them is the account holder's task |
 | Credit-expiry alerts active and tested, including simulated levels (playbook) | 🟡 Partial | github-oidc applied (18 October plan: no changes); GitHub variables set; real run reports ok, $120 of $120; simulated Watch, Plan, Act and Emergency each updated issue #29. All alert paths (levels, plan not ACTIVE, burn rate, failed check) verified locally with stubbed `gh`/`aws`; burn rate now alerts on its own. SNS subscription confirmed; labelled test alert sent 18 October ([run](https://github.com/themechanicalguy/heach/actions/runs/39065434862)). Pending: email receipt (owner), second address, three scheduled daily runs (18–20 October). `dev-sleep`/`dev-wake` tested 18 October: host stopped and `/api/healthz` stopped answering; after wake the smoke test passed |
 | ADR lists every requirement relaxed for the pilot (playbook) | ✅ Done | [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md) |
+
+## Development process
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Spec-driven development with feature specs ([ADR 0011](adr/0011-spec-kit-feature-specs.md)) | 🟡 Partial | Built: Spec Kit 1.2.0 with the Claude Code skills, [constitution](../.specify/memory/constitution.md) derived from agreed rules, HEACH spec, plan and tasks templates, [workflow](spec-workflow.md), [specs index](specs/README.md), CI checks `check-specs` (sections, threat models, known and unique criterion IDs, index) and `check-pr-spec` (Spec linked job), PR template lines. Missing: owner acceptance of ADR 0011 and ratification of the constitution (both Proposed); decisions on proposed amendments PA-1 to PA-4 and the `spec-exempt` label; first feature spec (Step 3). The checks prove structure only, not content or approval |
 
 ## Requirements by module
 

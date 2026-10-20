@@ -1,5 +1,10 @@
 # Step N: Title from the guideline
 
+<!-- Step spec template (ADR 0007). From Step 3, a step spec may be a charter only: scope,
+     out of scope, cross-feature decisions, threat model, and a "Feature specs" list linking
+     specs/NNN-*/; criteria then live in those feature specs (ADR 0011). Each criterion ID is
+     defined in exactly one spec. -->
+
 - **Status:** Draft | Approved | Done
 - **Guideline:** [Step N](../mvp-v1-implementation-guideline.md#step-n-anchor)
 - **Requirements in scope:** IDs, for example EN-03, EN-04, SE-05
