@@ -1,9 +1,10 @@
 name: Implementation status
 
-# Separate from CI so adding or removing the label re-runs only this check.
+# Separate from CI so adding or removing a label, or editing the pull request body, re-runs only
+# these checks.
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
 
 permissions:
   contents: read
@@ -39,3 +40,21 @@ jobs:
           fi
           echo "::error::This pull request changes apps/, packages/ or infra/ without updating docs/implementation-status.md. Update it, or add the 'no-status-change' label if no step item or requirement ID changes."
           exit 1
+
+  spec:
+    name: Spec linked
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # Code changes name a spec Approved on the base branch and the criterion IDs they satisfy,
+      # or carry 'spec-exempt' with a reason (ADR 0011). Structure only: review judges content.
+      - name: Code changes link an approved spec and its criterion IDs
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: node scripts/check-pr-spec.mjs
