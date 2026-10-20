@@ -47,3 +47,8 @@ certs/
 storybook-static/
 .lighthouseci/
 coverage-*/
+
+# Claude Code: only the Spec Kit skills are shared; settings.local.json, credentials and other
+# per-machine state stay local. Spec Kit's own local state is ignored in .specify/.gitignore.
+.claude/*
+!.claude/skills/
