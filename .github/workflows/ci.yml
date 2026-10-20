@@ -264,7 +264,7 @@ jobs:
       - run: tofu fmt -check -recursive infra
       - name: Every stack carries the Project, Environment and Owner tags
         run: node scripts/check-tags.mjs
-      - name: Every step spec has a threat model (SO-01.1)
+      - name: Specs are structurally complete (threat models, sections, criterion IDs, index; SO-01.1, ADR 0011)
         run: node scripts/check-specs.mjs
       - name: KMS on buckets and disks, yearly key rotation, host KMS actions (EN-02.1, EN-05.2, EN-04.2)
         run: node scripts/check-infra-security.mjs

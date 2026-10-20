@@ -6,9 +6,12 @@ before starting any work.
 
 ## Workflow
 
-0. **Start from the spec.** A step's code starts only after its spec in
-   [`docs/specs/`](docs/specs/README.md) is approved. A change of behaviour updates the spec first
-   ([ADR 0007](docs/adr/0007-spec-driven-development.md)).
+0. **Start from the spec.** Code for a step or feature starts only after its spec is merged as
+   Approved: the step spec in [`docs/specs/`](docs/specs/README.md), or the feature's `spec.md`
+   and `plan.md` in `specs/`. A change of behaviour updates the spec first. Feature specs are
+   written with Spec Kit; follow the [spec workflow](docs/spec-workflow.md). Rules and gates are in
+   the [constitution](.specify/memory/constitution.md)
+   ([ADR 0007](docs/adr/0007-spec-driven-development.md), [ADR 0011](docs/adr/0011-spec-kit-feature-specs.md)).
 1. **Branch from `main`.** Names: `feat/…`, `fix/…`, `chore/…`, `docs/…` (Step 1 parts used
    `step1/…`). Never commit or push to `main`; the pre-push hook blocks it.
 2. **Run it locally**: `pnpm dev:up` (see [local development](docs/local-development.md)).
@@ -17,12 +20,14 @@ before starting any work.
 4. **Before opening a pull request** run `pnpm check` (what CI runs). If you changed API routes
    or DTOs, run `pnpm --filter @heach/types generate` and commit the result.
 5. **Open a pull request.** Fill in the template, including every definition-of-done item that
-   applies. Link requirement IDs (`BK-03`, `EN-07`).
+   applies. Link requirement IDs (`BK-03`, `EN-07`). A code PR names its approved spec and the
+   criterion IDs it satisfies on the `Spec:` and `Criteria:` lines; a change of no specified
+   behaviour takes the `spec-exempt` label and a `Spec exemption: <reason>` line instead.
    Update [implementation status](docs/implementation-status.md) for every step item or
    requirement ID the change builds, extends or removes. CI checks this; for a change that moves
    no item (refactor, dependency bump), add the `no-status-change` label instead.
 6. **Merge only when all CI jobs pass**: Checks, E2E smoke, API image, Deploy bundle, Infra,
-   Secret scan, Implementation status updated. The repository
+   Secret scan, Implementation status updated, Spec linked. The repository
    is on GitHub Free, so nothing enforces this except us
    ([ADR 0004](docs/adr/0004-github-free-no-branch-protection.md)).
 

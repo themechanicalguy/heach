@@ -2,7 +2,8 @@
 
 Healthcare services web application for Odisha, India: patients find, book and pay verified
 care providers. See [`docs/`](docs/) for the requirements and implementation guideline, and
-[`CLAUDE.md`](CLAUDE.md) for working rules.
+[`CLAUDE.md`](CLAUDE.md) for working rules ([`AGENTS.md`](AGENTS.md) for other coding agents). Specs
+are written with GitHub Spec Kit: see the [spec workflow](docs/spec-workflow.md).
 
 ## Getting started
 
