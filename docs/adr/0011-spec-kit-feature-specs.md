@@ -1,6 +1,6 @@
 # 0011. Write feature specs with GitHub Spec Kit under the step specs
 
-- **Status:** Proposed (accepted when the owner merges the adoption pull request)
+- **Status:** Accepted (owner merged the adoption pull request #53 on 2026-10-20)
 - **Date:** 2026-10-20
 - **Requirements:** SO-01, TS-01 to TS-09, all requirement IDs
 - **Amends:** [ADR 0007](0007-spec-driven-development.md) decisions 1 and 5
