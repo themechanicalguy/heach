@@ -1,0 +1,105 @@
+---
+description: 'Tasks for session-refresh reliability'
+---
+
+# Tasks: Session-refresh reliability
+
+**Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md),
+[data-model.md](data-model.md), [contracts/](contracts/)
+
+**Prerequisites**: spec.md and plan.md merged as Approved (constitution gate G2). Nothing below
+starts before that.
+
+**Tests**: every criterion SE-07.5 to SE-07.13 has a test task whose title starts with its ID.
+
+## Format: `[ID] [P?] [Story] Description`
+
+## Phase 1: Setup
+
+None: no flag, strings, migration or dependency.
+
+---
+
+## Phase 2: Foundational (blocks every story)
+
+- [ ] T001 Write failing tests first for the client contract in apps/web/src/lib/api.test.ts: a `fetch` stub with controllable timing, a `navigator.locks` double that records overlap, and a `BroadcastChannel` double
+- [ ] T002 Rework apps/web/src/lib/api.ts per [contracts/client-session.md](contracts/client-session.md): `refreshSession()` returning `ok`/`rejected`/`failed` with a shared in-flight promise, `startSession`, `endSession`, `settleRefresh`, `onSessionEnded`, epoch, Web Lock and `BroadcastChannel` with fallbacks; replace `setAccessToken`
+
+**Checkpoint**: api.ts contract in place; stories can start.
+
+---
+
+## Phase 3: User Story 1 - Parallel requests survive token expiry (P1) 🎯 MVP
+
+**Goal**: one refresh for any number of parallel 401s and for a double start.
+
+### Tests (write first; they fail before implementation)
+
+- [ ] T003 [P] [US1] `SE-07.5 parallel 401s share one refresh and each call retries once` and `SE-07.5 a 401 after another call refreshed retries without refreshing` in apps/web/src/lib/api.test.ts
+- [ ] T004 [P] [US1] `SE-07.6 a double start restores the session with one refresh` (StrictMode render) in apps/web/src/lib/session.test.tsx
+
+### Implementation
+
+- [ ] T005 [US1] Track the sent token in `api()` and retry without refreshing when it changed (research D6) in apps/web/src/lib/api.ts
+- [ ] T006 [US1] Restore through the shared `refreshSession()` and use `startSession` for sign-in in apps/web/src/lib/session.tsx
+
+**Checkpoint**: C-1 fixed within one tab.
+
+---
+
+## Phase 4: User Story 2 - Several tabs stay signed in (P1)
+
+### Tests
+
+- [ ] T007 [P] [US2] `SE-07.7 refreshes run inside the cross-tab lock, one at a time` (lock double) in apps/web/src/lib/api.test.ts
+- [ ] T008 [P] [US2] `SE-07.5 SE-07.7 parallel expired calls in two tabs keep the session` in apps/web/e2e/session-refresh.spec.ts: two pages in one context, the first calls to `/api/v1/sample/notes` answered 401 by `page.route` to simulate expiry, refreshes go to the real API; assert both pages load notes and a later refresh still succeeds (no revocation). Skipped unless `E2E_API`
+
+### Implementation
+
+- [ ] T009 [US2] Wrap the refresh request in `navigator.locks.request('heach-session-refresh', …)` when available in apps/web/src/lib/api.ts
+- [ ] T010 [US2] Add e2e/session-refresh.spec.ts to the deploy-bundle job's Playwright file list in .github/workflows/ci.yml
+
+**Checkpoint**: tabs coordinated.
+
+---
+
+## Phase 5: User Story 3 - Failures and logout are honest and final (P2)
+
+### Tests
+
+- [ ] T011 [P] [US3] `SE-07.8 a rejected refresh ends the session here and in other tabs` and `SE-07.8 the refresh endpoint is never refreshed` in apps/web/src/lib/api.test.ts; `SE-07.8 the provider shows signed out when a call's refresh is rejected` in apps/web/src/lib/session.test.tsx
+- [ ] T012 [P] [US3] `SE-07.9 a network or server failure keeps the session` (thrown fetch and 503) in apps/web/src/lib/api.test.ts
+- [ ] T013 [P] [US3] `SE-07.10 sign-out waits for the in-flight refresh` in apps/web/src/lib/session.test.tsx
+- [ ] T014 [P] [US3] `SE-07.10 logout after a refresh ends the rotated session` in apps/api/test/auth.int-spec.ts
+- [ ] T015 [P] [US3] `SE-07.11 results from an ended session are ignored` in apps/web/src/lib/api.test.ts and apps/web/src/lib/session.test.tsx
+- [ ] T016 [P] [US3] `SE-07.12 signing out in one tab signs out the other` in apps/web/e2e/session-refresh.spec.ts
+
+### Implementation
+
+- [ ] T017 [US3] Subscribe the provider to `onSessionEnded`; `signOut` = `settleRefresh` → logout → `endSession` in `finally` in apps/web/src/lib/session.tsx
+- [ ] T018 [US3] Distinguish `rejected` from `failed` in `refreshSession` and surface `failed` to the caller in apps/web/src/lib/api.ts
+
+---
+
+## Phase 6: User Story 4 - Stolen refresh tokens are still caught (P1)
+
+- [ ] T019 [P] [US4] `SE-07.13 a concurrent second use of a refresh token revokes every session` in apps/api/test/auth.int-spec.ts: two simultaneous refreshes with one cookie plus a second device: at most one 200, the other 401 with no `accessToken` and a cleared cookie; the second device's session and access token and the original token are rejected afterwards. Do not assert on the winner's new session (race, backlog item 3)
+- [ ] T020 [US4] Confirm no change to apps/api/src/auth/ (diff empty) and `pnpm --filter @heach/types check` passes
+
+---
+
+## Phase 7: Verification and status
+
+- [ ] T021 Run `pnpm check`, `pnpm test:scripts`, `node scripts/check-specs.mjs`; API integration and full-stack E2E locally or in CI
+- [ ] T022 SC-001: run the T008 test with `--repeat-each 50 --project desktop`; record the result
+- [ ] T023 Update docs/implementation-status.md: SE-07.5 to SE-07.13 rows with test evidence; spec index Status Done only when all pass
+- [ ] T024 Run /speckit-converge and resolve or record what it appends
+
+---
+
+## Dependencies & Execution Order
+
+- T001 → T002 → stories. US1 and US4 first (P1), then US2, then US3. T019 is independent of the
+  client work and can run first.
+- Within a story: tests first and failing, then implementation.
+- A task that changes behaviour not in spec.md stops; spec.md is changed and approved first.

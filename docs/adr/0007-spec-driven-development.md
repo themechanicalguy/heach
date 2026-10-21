@@ -1,7 +1,6 @@
 # 0007. Build every step from a written, approved spec
 
 - **Status:** Accepted. Decisions 1 and 5 amended by [ADR 0011](0011-spec-kit-feature-specs.md)
-  (Proposed) once it is accepted
 - **Date:** 2026-10-10
 - **Requirements:** SO-01, TS-01 to TS-09, all requirement IDs
 

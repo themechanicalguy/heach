@@ -23,7 +23,7 @@ Step 1 was built before ADR 0007; its record is in [implementation status](../im
 
 | Feature | Step | Requirement IDs | Status |
 | --- | --- | --- | --- |
-| None yet. The first is planned for Step 3. | | | |
+| [Session-refresh reliability](../../specs/001-session-refresh-reliability/spec.md) | 2 | SE-07 | Draft |
 
 <!-- Add a row per feature directory, for example:
 | [OTP login](../../specs/003-otp-login/spec.md) | 3 | AC-01, AC-02 | Draft |

@@ -5,13 +5,13 @@ Sync Impact Report
 - Principles added: I to IX (all derived; none is new policy)
 - Sections added: Gates, Exceptions, Governance, Proposed amendments (not in force)
 - Templates: .specify/templates/overrides/{spec,plan,tasks}-template.md written for HEACH
-- Deferred: RATIFICATION_DATE is set when the owner merges the adoption pull request
+- Ratified 2026-10-20 by the owner's merge of pull request #53
 -->
 
 # HEACH Constitution
 
-- **Status:** Proposed. In force once the owner merges the pull request that adds it
-  ([ADR 0011](../../docs/adr/0011-spec-kit-feature-specs.md)).
+- **Status:** In force since the owner merged pull request #53 on 2026-10-20
+  ([ADR 0011](../../docs/adr/0011-spec-kit-feature-specs.md)). Proposed amendments below are not.
 - **Owns:** the principles and gates every spec, plan, task list and pull request is checked
   against. It does not restate the detail it points to: product requirements and their IDs live
   in [the requirements](../../docs/mvp-v1-requirements.md), delivery order in
@@ -164,5 +164,4 @@ Listed in ADR 0011 for the owner to accept or reject. None is applied until acce
 - **PA-4** Custom checklists from `/speckit-checklist` are ticked only by a human reviewer and
   must be fully ticked before G2.
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): set when the owner merges the
-adoption pull request | **Last Amended**: 2026-10-20
+**Version**: 1.0.0 | **Ratified**: 2026-10-20 | **Last Amended**: 2026-10-20

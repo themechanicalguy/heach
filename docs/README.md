@@ -8,6 +8,7 @@
 | [Spec workflow](spec-workflow.md) | Spec Kit commands from idea to merged code, gates, resuming a feature |
 | [Constitution](../.specify/memory/constitution.md) | Principles and gates every spec, plan and PR is checked against |
 | [Implementation status](implementation-status.md) | What is built, partial or not started, per step and requirement ID |
+| [Backlog](backlog.md) | Ordered next pieces of work, linked to requirement IDs and review findings |
 | [Local development](local-development.md) | Running everything on your machine, ports, git hooks |
 | [Cloud setup](cloud-setup.md) | AWS account, OpenTofu, dev environment, deploys, costs |
 | [Architecture decisions](adr/README.md) | Why the stack and tooling are the way they are |
