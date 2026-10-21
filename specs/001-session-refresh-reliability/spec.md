@@ -1,12 +1,12 @@
 # Feature Specification: Session-refresh reliability
 
-**Status**: Draft
+**Status**: Approved
 
 **Step**: [Step 2 spec](../../docs/specs/step-02-secure-foundation.md) of the [guideline](../../docs/mvp-v1-implementation-guideline.md) (auth skeleton, guideline Step 2 item 5)
 
 **Requirements in scope**: SE-07 (sessions); SE-02 (server-side authorisation, unchanged); SO-01 (threat model, in plan.md); TS-01, TS-03, TS-05 (test evidence)
 
-**Approval**:
+**Approval**: Owner (Saurav Rath), 2026-10-21, merged in #54; Approved status recorded in this follow-up docs PR on the owner's instruction
 
 **Created**: 2026-10-21
 
