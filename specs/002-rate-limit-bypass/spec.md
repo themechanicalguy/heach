@@ -23,7 +23,7 @@ committed; confirmed on 21 October 2026: 20 requests with 20 random tokens again
 all passed the limiter, while requests without a token got 429 after 5). This feature counts
 requests by user only when the token belongs to a live session, and by client IP otherwise, so
 unknown, expired, revoked and malformed tokens cannot create new allowances, and one user's many
-tokens share one allowance.
+tokens share one allowance on each route (counters stay per route, as in Step 2; decision D-6).
 
 **Out of scope** (tracked in the [backlog](../../docs/backlog.md) or a later step):
 
@@ -121,6 +121,12 @@ session store that fails.
   page) share that address's allowance. With today's limit (120 a minute) this is acceptable for
   the restricted pilot; the limit is configurable.
 - IPv6 clients are counted per full address. Grouping by network prefix is not done here.
+- Allowances are per route, as in Step 2: a client that is limited on one route can still call
+  another route until it reaches N there. Caddy's 300 a minute per address bounds the total for
+  any one address (decision D-6).
+- The session store is slow rather than down: the request waits for the lookup, bounded by the
+  Redis client (1-second connect timeout, one retry), and is then counted by user or, on error,
+  by address. It is never let through uncounted while waiting (SO-08.11).
 
 ## Requirements _(mandatory)_
 
@@ -133,8 +139,8 @@ returns 429"), which stays in force.
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | SO-08.4  | Given one client address and a limit of N per window, when it sends more than N requests in one window, each with a different well-formed bearer token that resolves to no live session (random, unknown, expired or revoked), then every request after the Nth gets 429, on a public route (`auth/refresh`) and on a protected route alike | Integration test `apps/api/test/rate-limit.int-spec.ts`                                                   |
 | SO-08.5  | Given one client address, when requests carry an `Authorization` header that is not a well-formed bearer token (wrong scheme, too short, bad characters, empty), then they are counted by that address exactly like requests with no header                                                                                                 | Integration test `rate-limit.int-spec.ts`                                                                 |
-| SO-08.6  | Given a user with two or more valid access tokens, when their requests together exceed N in one window, then every request after the Nth gets 429 whichever of the tokens it carries                                                                                                                                                        | Integration test `rate-limit.int-spec.ts`                                                                 |
-| SO-08.7  | Given two signed-in users and anonymous requests from one client address, when one user or the anonymous traffic exceeds N, then the other user's requests within N are still served                                                                                                                                                        | Integration test `rate-limit.int-spec.ts`                                                                 |
+| SO-08.6  | Given a user with two or more valid access tokens, when their requests to one route together exceed N in one window, then every request after the Nth gets 429 whichever of the tokens it carries                                                                                                                                           | Integration test `rate-limit.int-spec.ts`                                                                 |
+| SO-08.7  | Given two signed-in users and anonymous requests from one client address, when one user or the anonymous traffic exceeds N on a route, then the other user's requests to that route within N are still served                                                                                                                               | Integration test `rate-limit.int-spec.ts`                                                                 |
 | SO-08.8  | Given M requests from one address each carrying a different token that resolves to no live session, when they have been handled, then the limiter holds at most one counter for that address per route and limit, not M                                                                                                                     | Unit test `apps/api/src/security/user-throttler.guard.spec.ts`; integration test `rate-limit.int-spec.ts` |
 | SO-08.9  | Given a client over the limit, when it gets 429, then the response carries `Retry-After` in whole seconds no longer than the window and the standard error body with no token, address or user ID; neither the 429 nor the request log line contains them; and once the window has passed, its next request is served                       | Integration test `rate-limit.int-spec.ts` (short configured window)                                       |
 | SO-08.10 | Given the API behind exactly one proxy, when a request arrives with a client-supplied `X-Forwarded-For` list, then the address used is the one the proxy appended (the last), not one the client chose; and through the deployed proxy, varying `X-Forwarded-For` and fake tokens on each request still reaches 429                         | Integration test `rate-limit.int-spec.ts`; deploy-bundle check `scripts/rate-limit-check.sh` in CI        |
@@ -202,6 +208,10 @@ owner question round; the owner confirms or changes each at review.
 - Q: One threshold or separate ones for users and addresses? → A: One, the existing
   `RATE_LIMIT_PER_MINUTE` (Step 2 SO-08.1 names one configured number). A window setting is added
   so tests can prove recovery quickly; its default stays one minute.
+- Q: Is the allowance per route or one across the whole API? → A: Per route, unchanged from
+  Step 2 (the throttler counts per controller handler). One allowance across all routes would let
+  a busy route such as RUM block sign-in for the same user; Caddy already bounds each address
+  across all `/api/*` routes. Added at the 22 October review as decision D-6 for the owner.
 - Q: Which address is trusted? → A: The one Caddy appends. The API trusts exactly one proxy hop
   (`trust proxy 1`, unchanged); Caddy is the only way in on the dev host (ADR 0008) and does not
   pass on client-supplied forwarding headers as trusted.

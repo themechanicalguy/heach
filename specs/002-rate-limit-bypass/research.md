@@ -70,6 +70,25 @@ on `main` at 0190912.
 - **Why**: proves recovery (SO-08.9) in an integration test in about a second without fake timers
   inside Nest. Default behaviour unchanged.
 
+### D-6 Allowance per route (owner to confirm; added 2026-10-22)
+
+- **Decision**: keep `@nestjs/throttler`'s per-route keys (class, handler, throttler name and
+  tracker), as Step 2 does today. "One allowance" in SO-08.6 means one per user per route.
+- **Why**: unchanged Step 2 behaviour; a busy route (RUM sends batches) cannot block sign-in or
+  notes for the same user. Caddy's 300 a minute per address bounds the total across `/api/*`.
+- **Alternative**: one allowance per tracker across all routes (override `generateKey`). Stricter
+  against a client spreading load over routes, but changes SO-08.1's meaning for every route and
+  makes RUM traffic count against API calls; rejected for this fix.
+
+### D-7 Lookup wait (added 2026-10-22)
+
+- **Decision**: no extra timeout in the tracker. The shared Redis client already bounds a stalled
+  command (`connectTimeout` 1 second, `maxRetriesPerRequest` 1); a rejection falls to the address
+  (D-3). The request is counted only after the lookup finishes, so a stall delays it but never
+  lets it through uncounted.
+- **Alternative**: a separate shorter timeout (for example 250 ms) in the tracker. Adds a second
+  timeout policy for one call site; not needed while `AuthGuard` waits on the same client anyway.
+
 ## Not changed
 
 - Guard order, `trust proxy 1`, Caddy configuration, limit value, health-probe exemption, error
