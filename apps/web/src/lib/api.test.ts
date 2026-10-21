@@ -143,6 +143,25 @@ describe('refresh failures and ended sessions', () => {
     expect(tab.hasAccessToken()).toBe(false);
   });
 
+  it('SE-07.11 a call from an ended session is not retried with a later session token', async () => {
+    const tab = await signedInTabWithExpiredToken();
+    let releaseCall: () => void = () => undefined;
+    server.fetchStub.mockImplementationOnce(async (url: string, init?: RequestInit) => {
+      await new Promise<void>((resolve) => {
+        releaseCall = resolve;
+      });
+      return server.handle(url, init);
+    });
+    const call = tab.api('/old-session');
+    tab.startSession('access-of-the-next-sign-in');
+    releaseCall();
+    await expect(call).rejects.toMatchObject({ status: 401 });
+    const oldSessionCalls = server.fetchStub.mock.calls.filter(([url]) =>
+      url.endsWith('/old-session'),
+    );
+    expect(oldSessionCalls).toHaveLength(1);
+  });
+
   it('SE-07.10 sign-out waits for the in-flight refresh and revokes the session it produced', async () => {
     const tab = await signedInTabWithExpiredToken();
     const call = tab.api('/a');

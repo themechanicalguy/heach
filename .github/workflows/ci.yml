@@ -213,7 +213,8 @@ jobs:
           test "$(curl -sk -o /dev/null -w '%{http_code}' https://127.0.0.1/or)" = 200
           sleep 61
       # The Step 2 exit flow through Caddy, web, API, PostgreSQL and KMS double: an Odia note is
-      # encrypted, owner-only and audited (EN-13.1, SE-02.3, I18N-04.1, LM-01.1).
+      # encrypted, owner-only and audited (EN-13.1, SE-02.3, I18N-04.1, LM-01.1); session refresh
+      # across calls and tabs (SE-07.5, SE-07.7, SE-07.12).
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -224,7 +225,7 @@ jobs:
           pnpm install --frozen-lockfile --filter @heach/web...
           pnpm --filter @heach/web... --filter '!@heach/web' build
           pnpm --filter @heach/web exec playwright install --with-deps chromium
-          pnpm --filter @heach/web exec playwright test e2e/notes-flow.spec.ts e2e/home.spec.ts
+          pnpm --filter @heach/web exec playwright test e2e/notes-flow.spec.ts e2e/session-refresh.spec.ts e2e/home.spec.ts
         env:
           CI: true
           E2E_API: 1

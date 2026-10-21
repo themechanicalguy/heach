@@ -126,18 +126,22 @@ export async function refreshSession(): Promise<RefreshOutcome> {
 
 /** Retries a 401 once: with a token another call already got, or after one shared refresh. */
 async function retryAfter401(path: string, init: RequestInit, sentWith?: string) {
+  const started = epoch;
   if (accessToken !== undefined && accessToken !== sentWith) return send(path, init);
   const result = await refreshOnce();
   if (result.outcome === 'failed') throw result.error;
-  if (result.outcome === 'rejected') throw new ApiError(401);
+  // Never retry a call from an ended session with a later session's token (SE-07.11).
+  if (result.outcome === 'rejected' || epoch !== started) throw new ApiError(401);
   return send(path, init);
 }
 
 /** Calls the API; on 401 it refreshes at most once and retries once. */
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const sentWith = accessToken;
+  const started = epoch;
   let response = await send(path, init);
   if (response.status === 401 && path !== REFRESH_PATH) {
+    if (epoch !== started) throw new ApiError(401);
     response = await retryAfter401(path, init, sentWith);
   }
   if (!response.ok) throw new ApiError(response.status);

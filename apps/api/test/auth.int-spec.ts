@@ -76,6 +76,32 @@ describe('Sessions (SE-07)', () => {
     expect(await statuses(me(deviceOne.token), me(deviceTwo.token))).toEqual([401, 200]);
   });
 
+  it('SE-07.13 a concurrent second use of a refresh token revokes every session', async () => {
+    const racer = await login(app, USERS.provider);
+    const otherDevice = await login(app, USERS.provider);
+    const [first, second] = await Promise.all([refresh(racer.cookie), refresh(racer.cookie)]);
+    // At most one use succeeds; the other is the replay.
+    expect([first.status, second.status]).toContain(401);
+    expect([first.status, second.status]).not.toEqual([200, 200]);
+    const loser = first.status === 401 ? first : second;
+    expect((loser.body as { accessToken?: string }).accessToken).toBeUndefined();
+    expect(String(loser.headers['set-cookie'])).toMatch(/heach_refresh=;/);
+    // Sessions that existed before the reuse was detected all stop working. The winner's new
+    // session may outlive it (spec 001 edge case; backlog item 3), so it is not asserted here.
+    expect(
+      await statuses(me(racer.token), me(otherDevice.token), refresh(otherDevice.cookie)),
+    ).toEqual([401, 401, 401]);
+  });
+
+  it('SE-07.10 logout after a refresh ends the rotated session', async () => {
+    const device = await login(app, USERS.patientB);
+    const rotated = fromResponse(await refresh(device.cookie).expect(200));
+    const response = await logout(rotated, false);
+    expect(response.status).toBe(204);
+    expect(String(response.headers['set-cookie'])).toMatch(/heach_refresh=;/);
+    expect(await statuses(refresh(rotated.cookie), me(rotated.token))).toEqual([401, 401]);
+  });
+
   it('rejects unknown users and malformed sign-in requests', async () => {
     const signIn = (userId: string) =>
       request(app.getHttpServer()).post('/v1/auth/test-login').send({ userId });
