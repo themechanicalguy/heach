@@ -1,8 +1,8 @@
 # Implementation Plan: Session-refresh reliability
 
-**Status**: Draft
+**Status**: Approved
 
-**Spec**: [spec.md](spec.md) | **Date**: 2026-10-21 | **Approval**:
+**Spec**: [spec.md](spec.md) | **Date**: 2026-10-21 | **Approval**: Owner (Saurav Rath), 2026-10-21, merged in #54; Approved status recorded in this follow-up docs PR on the owner's instruction
 
 **Input**: Feature specification from `specs/001-session-refresh-reliability/spec.md`
 
