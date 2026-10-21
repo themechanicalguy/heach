@@ -9,7 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { api, refreshSession, setAccessToken } from './api';
+import { api, onSessionEnded, refreshSession, signOutOfThisDevice, startSession } from './api';
 import type { AccessToken } from '@heach/types';
 
 type Status = 'checking' | 'signed-in' | 'signed-out';
@@ -25,25 +25,34 @@ const SessionContext = createContext<Session | undefined>(undefined);
 /** Restores the session from the refresh cookie on load; tokens never touch storage. */
 export function SessionProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [status, setStatus] = useState<Status>('checking');
+  // A session that ends anywhere (rejected refresh, sign-out in another tab) shows here (SE-07.8).
+  useEffect(
+    () =>
+      onSessionEnded(() => {
+        setStatus('signed-out');
+      }),
+    [],
+  );
+  // StrictMode's double start shares one refresh (SE-07.6); a network failure keeps the cookie.
   useEffect(() => {
-    void refreshSession().then((ok) => {
-      setStatus(ok ? 'signed-in' : 'signed-out');
+    let mounted = true;
+    void refreshSession().then((outcome) => {
+      if (mounted) setStatus(outcome === 'ok' ? 'signed-in' : 'signed-out');
     });
+    return () => {
+      mounted = false;
+    };
   }, []);
   const signInAsTestUser = useCallback(async (userId: string) => {
     const { accessToken } = await api<AccessToken>('/auth/test-login', {
       method: 'POST',
       body: JSON.stringify({ userId }),
     });
-    setAccessToken(accessToken);
+    startSession(accessToken);
     setStatus('signed-in');
   }, []);
   const signOut = useCallback(async () => {
-    await api<undefined>('/auth/logout', {
-      method: 'POST',
-      body: JSON.stringify({ allDevices: false }),
-    });
-    setAccessToken(undefined);
+    await signOutOfThisDevice();
     setStatus('signed-out');
   }, []);
   const value = useMemo(
