@@ -52,7 +52,7 @@ None: no flag, strings, migration or dependency.
 ### Tests
 
 - [x] T007 [P] [US2] `SE-07.7 refreshes run inside the cross-tab lock, one at a time` (lock double) in apps/web/src/lib/api.test.ts
-- [ ] T008 [P] [US2] `SE-07.5 SE-07.7 parallel expired calls in two tabs keep the session` in apps/web/e2e/session-refresh.spec.ts: two pages in one context, the first calls to `/api/v1/sample/notes` answered 401 by `page.route` to simulate expiry, refreshes go to the real API; assert both pages load notes and a later refresh still succeeds (no revocation). Skipped unless `E2E_API`
+- [x] T008 [P] [US2] `SE-07.5 SE-07.7 parallel expired calls in two tabs keep the session` in apps/web/e2e/session-refresh.spec.ts: two pages in one context, the first calls to `/api/v1/sample/notes` answered 401 by `page.route` to simulate expiry, refreshes go to the real API; assert both pages load notes and a later refresh still succeeds (no revocation). Skipped unless `E2E_API`
 
 ### Implementation
 
@@ -70,9 +70,9 @@ None: no flag, strings, migration or dependency.
 - [x] T011 [P] [US3] `SE-07.8 a rejected refresh ends the session here and in other tabs` and `SE-07.8 the refresh endpoint is never refreshed` in apps/web/src/lib/api.test.ts; `SE-07.8 the provider shows signed out when a call's refresh is rejected` in apps/web/src/lib/session.test.tsx
 - [x] T012 [P] [US3] `SE-07.9 a network or server failure keeps the session` (thrown fetch and 503) in apps/web/src/lib/api.test.ts
 - [x] T013 [P] [US3] `SE-07.10 sign-out waits for the in-flight refresh` in apps/web/src/lib/session.test.tsx
-- [ ] T014 [P] [US3] `SE-07.10 logout after a refresh ends the rotated session` in apps/api/test/auth.int-spec.ts
+- [x] T014 [P] [US3] `SE-07.10 logout after a refresh ends the rotated session` in apps/api/test/auth.int-spec.ts
 - [x] T015 [P] [US3] `SE-07.11 results from an ended session are ignored` in apps/web/src/lib/api.test.ts and apps/web/src/lib/session.test.tsx
-- [ ] T016 [P] [US3] `SE-07.12 signing out in one tab signs out the other` in apps/web/e2e/session-refresh.spec.ts
+- [x] T016 [P] [US3] `SE-07.12 signing out in one tab signs out the other` in apps/web/e2e/session-refresh.spec.ts
 
 ### Implementation
 
@@ -83,17 +83,17 @@ None: no flag, strings, migration or dependency.
 
 ## Phase 6: User Story 4 - Stolen refresh tokens are still caught (P1)
 
-- [ ] T019 [P] [US4] `SE-07.13 a concurrent second use of a refresh token revokes every session` in apps/api/test/auth.int-spec.ts: two simultaneous refreshes with one cookie plus a second device: at most one 200, the other 401 with no `accessToken` and a cleared cookie; the second device's session and access token and the original token are rejected afterwards. Do not assert on the winner's new session (race, backlog item 3)
+- [x] T019 [P] [US4] `SE-07.13 a concurrent second use of a refresh token revokes every session` in apps/api/test/auth.int-spec.ts: two simultaneous refreshes with one cookie plus a second device: at most one 200, the other 401 with no `accessToken` and a cleared cookie; the second device's session and access token and the original token are rejected afterwards. Do not assert on the winner's new session (race, backlog item 3)
 - [x] T020 [US4] Confirm no change to apps/api/src/auth/ (diff empty) and `pnpm --filter @heach/types check` passes
 
 ---
 
 ## Phase 7: Verification and status
 
-- [ ] T021 Run `pnpm check`, `pnpm test:scripts`, `node scripts/check-specs.mjs`; API integration and full-stack E2E locally or in CI
-- [ ] T022 SC-001: run the T008 test with `--repeat-each 50 --project desktop`; record the result
-- [ ] T023 Update docs/implementation-status.md: SE-07.5 to SE-07.13 rows with test evidence; spec index Status Done only when all pass
-- [ ] T024 Run /speckit-converge and resolve or record what it appends
+- [x] T021 Run `pnpm check`, `pnpm test:scripts`, `node scripts/check-specs.mjs`; API integration and full-stack E2E locally or in CI
+- [x] T022 SC-001: run the T008 test with `--repeat-each 50 --project desktop`; record the result
+- [x] T023 Update docs/implementation-status.md: SE-07.5 to SE-07.13 rows with test evidence; spec index Status Done only when all pass
+- [x] T024 Run /speckit-converge and resolve or record what it appends
 
 ---
 
@@ -113,3 +113,20 @@ F-notes). One finding: a call started in an older session could retry with a new
 token after a sign-out or a new sign-in.
 
 - [x] T025 Make `api()` fail with 401 instead of retrying when the session epoch changed since the call started, with a `SE-07.11` unit test, per SE-07.11 (partial)
+
+## Evidence (2026-10-21, local; GitHub Actions did not start: account billing)
+
+Isolated local stack (`COMPOSE_PROJECT_NAME=heach-spec001`, fresh database, both migrations applied
+from empty), API and web in dev mode (React StrictMode on):
+
+- Web unit tests: 26 of 26 (`api.test.ts` 12, `session.test.tsx` 4, existing 10). Mutations:
+  removing the shared refresh fails SE-07.5 and SE-07.6; removing the epoch check fails SE-07.11.
+- API integration: 71 of 71, including SE-07.10 and SE-07.13; SE-07.13 repeated 10 times, 10 passed.
+- E2E against the full stack: `session-refresh.spec.ts` and `notes-flow.spec.ts`, 12 of 12 on
+  mobile, tablet and desktop. With the pre-fix client restored, both session tests fail.
+- SC-001: `SE-07.5 SE-07.7` test with `--repeat-each 50`: 50 of 50 with the API rate limit at
+  10000 per minute, as CI's integration tests set it. API log: 250 refreshes 200, 50 refreshes 401,
+  all 401s being the expected cookie-less first load, so no replay. At the default 120 per minute
+  the same loop is throttled (429) after about 39 runs; a 429 is a refresh failure (SE-07.9).
+- `pnpm check` 37 of 37 tasks; `@heach/types check` up to date (no contract change);
+  `check-specs` pass; `test:scripts` 37 of 37.
