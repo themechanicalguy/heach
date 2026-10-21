@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 21 October 2026: spec 001 [session-refresh reliability](../specs/001-session-refresh-reliability/spec.md) approved by the owner (#54) and implemented in the web client (#56, CI green) (SE-07.5 to SE-07.13, review C-1); see the SE-07 row. ADR 0011 accepted and constitution ratified (PR #53). Step 2 unchanged since 18 October: remaining SNS subscription confirmation, lawyer and Odia reviews ([log](step-2-progress.md))
+- **Last updated:** 21 October 2026: spec 002 [rate-limit bypass](../specs/002-rate-limit-bypass/spec.md) drafted for owner approval (SO-08.4 to SO-08.11, review S-1); SO-08 moved to Partial with the confirmed bypass stated. Earlier the same day: spec 001 [session-refresh reliability](../specs/001-session-refresh-reliability/spec.md) approved by the owner (#54) and implemented in the web client (#56, CI green) (SE-07.5 to SE-07.13, review C-1); see the SE-07 row. ADR 0011 accepted and constitution ratified (PR #53). Step 2 unchanged since 18 October: remaining SNS subscription confirmation, lawyer and Odia reviews ([log](step-2-progress.md))
 - **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
@@ -60,7 +60,7 @@ Every module not listed under "Partial" below is ⬜ Not started.
 | EN Encryption | 13 | 4 | 8 | 1 | 2 |
 | SE Access control and audit | 9 | 1 | 4 | 4 | 2, 3, 6 |
 | PR Privacy and consent | 7 | 0 | 2 | 5 | 3 |
-| SO Secure development and operations | 10 | 3 | 4 | 3 | 2, 6, 10 |
+| SO Secure development and operations | 10 | 2 | 5 | 3 | 2, 6, 10 |
 | PF Performance | 7 | 4 | 2 | 1 | 2 |
 | A11Y Accessibility | 7 | 0 | 0 | 7 | not mapped (see gaps) |
 | I18N Multi-language | 7 | 5 | 1 | 1 | 2 |
@@ -120,6 +120,7 @@ written today, not just its Step 2 part.
 | SO-03 | Secret scan, `pnpm audit` (high blocks), ECR scan on push; Semgrep CE and Trivy in CI on every PR, each scanner proven by a fixture | Dynamic scan and penetration test (SO-04, before pilot) |
 | SO-06 | Access only through SSM Session Manager, no SSH | Bastion or zero-trust proxy for production, quarterly review |
 | SO-07 | Synthetic-data rule in docs and CLAUDE.md | Enforcement once real data exists |
+| SO-08 | API rate limit per IP or user (SO-08.1), Caddy edge limit 300 a minute per IP (SO-08.2), authorisation-failure alert (SO-08.3), input validation | The API limit can be bypassed by sending a different fake bearer token on each request (review S-1; confirmed 21 October; capped on the dev host by Caddy's per-IP limit): [spec 002](../specs/002-rate-limit-bypass/spec.md) (Draft, awaiting owner approval) fixes it. Counters are per API process (review P-1). WAF at the pilot (D3) |
 | I18N-01 | Locales `or`, `en`, `hi` defined; Odia default | Locale-prefixed routing, adding a language without code change |
 | I18N-02 | ESLint fails on hard-coded JSX strings and text props; ICU catalogues for or, en, hi with plurals; locale routes `/or`, `/en`, `/hi`; bundled Odia and Devanagari fonts | Native Odia review of the text (I18N-07) |
 | TS-01 | Vitest in every package and app | 80% coverage threshold on changed code |
