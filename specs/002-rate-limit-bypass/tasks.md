@@ -82,7 +82,17 @@ starts before that. Implementation branch: `fix/002-rate-limit-bypass`.
 - [x] T018 Existing `SO-08.1` test in apps/api/test/security.int-spec.ts still passes unchanged
 - [x] T019 `pnpm check`, `pnpm --filter @heach/api test:e2e`, `node scripts/check-specs.mjs`, `pnpm test:scripts`, gitleaks; types unchanged (`pnpm --filter @heach/types check`)
 - [x] T020 Update docs/implementation-status.md (SO-08 row: what exists, evidence, remaining gaps: shared counters, SE-08 OTP limits), docs/backlog.md (item 1 Done; add the shared-counter item) and docs/specs/README.md row
-- [ ] T021 (PR #64 opened; `/speckit-converge` is a user-only command and was not run, left to the owner) `/speckit-converge`; record evidence below; open the code PR with `Spec:` and `Criteria: SO-08.4 to SO-08.11` lines
+- [x] T021 (PR #64 opened; `/speckit-converge` followed by hand: Phase 7 below) `/speckit-converge`; record evidence below; open the code PR with `Spec:` and `Criteria: SO-08.4 to SO-08.11` lines
+
+## Phase 7: Convergence
+
+Added by `/speckit-converge` (followed by hand from its SKILL.md, 22 October 2026). Every criterion
+SO-08.4 to SO-08.11, success criterion SC-001 to SC-003 and plan decision D-1 to D-7 is met in the
+code; three edge cases of the spec had no direct test.
+
+- [x] T022 Add a test that the health probes stay exempt when the request carries fake tokens, in apps/api/test/rate-limit.int-spec.ts per spec edge case "Routes that skip the limit today" (partial)
+- [x] T023 Add a test that a valid token on a public route (`auth/refresh`) is counted by user, not by address, per spec edge case "A valid token on a public route" (partial)
+- [x] T024 Add a test that a wrong-role caller is counted before it is refused with 403, so it reaches 429, per spec edge case "A valid token whose role does not match the route" (partial)
 
 ---
 
@@ -102,13 +112,13 @@ compose project (PostgreSQL 18 and Redis 8 with TLS, as `pnpm services:up`).
 
 ### Regression proof (T007): the same tests, run against the guard on `main`
 
-| Run                                                                 | Before the fix (`UserThrottlerGuard` from `main`)                                                                        | After the fix                                                                                                     |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Unit `user-throttler.guard.spec.ts`                                 | 5 of 12 fail: SO-08.4 (live-session lookup), SO-08.6, SO-08.8, SO-08.11 (store rejects, store throws)                    | 12 of 12 pass                                                                                                     |
-| Integration `rate-limit.int-spec.ts`                                | 9 of 14 fail: SO-08.4 random, expired and revoked on both routes (6), SO-08.8, SO-08.6, SO-08.10 (varying first entries) | 14 of 14 pass; the API integration suite is 85 of 85 (13 files), with SO-08.1 in `security.int-spec.ts` unchanged |
-| SC-001, 10 × N = 50 requests with new random tokens, limit 5        | 0 of 50 refused (at least 45 required)                                                                                   | 45 of 50 refused (the first 5 served)                                                                             |
-| SC-002, limiter counters after fake-token requests from one address | 10 requests: 10; 1,010 requests: 1,010 (one per token)                                                                   | unchanged between 10 and 1,010 requests                                                                           |
-| Deploy bundle through Caddy, `scripts/rate-limit-check.sh`          | API image built from `main`'s guard: `requests=150 api_429=0`, exit 1                                                    | fixed image: `requests=150 api_429=30 early_429=0`, exit 0 (run twice)                                            |
+| Run                                                                 | Before the fix (`UserThrottlerGuard` from `main`)                                                                        | After the fix                                                                                                                                                                              |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit `user-throttler.guard.spec.ts`                                 | 5 of 12 fail: SO-08.4 (live-session lookup), SO-08.6, SO-08.8, SO-08.11 (store rejects, store throws)                    | 12 of 12 pass                                                                                                                                                                              |
+| Integration `rate-limit.int-spec.ts`                                | 9 of 14 fail: SO-08.4 random, expired and revoked on both routes (6), SO-08.8, SO-08.6, SO-08.10 (varying first entries) | 17 of 17 pass (14 plus the 3 convergence tests; 9 of the first 14 fail before the fix); the API integration suite is 88 of 88 (13 files), with SO-08.1 in `security.int-spec.ts` unchanged |
+| SC-001, 10 × N = 50 requests with new random tokens, limit 5        | 0 of 50 refused (at least 45 required)                                                                                   | 45 of 50 refused (the first 5 served)                                                                                                                                                      |
+| SC-002, limiter counters after fake-token requests from one address | 10 requests: 10; 1,010 requests: 1,010 (one per token)                                                                   | unchanged between 10 and 1,010 requests                                                                                                                                                    |
+| Deploy bundle through Caddy, `scripts/rate-limit-check.sh`          | API image built from `main`'s guard: `requests=150 api_429=0`, exit 1                                                    | fixed image: `requests=150 api_429=30 early_429=0`, exit 0 (run twice)                                                                                                                     |
 
 Tests that pass both before and after by design, because they pin behaviour that must not change:
 SO-08.5 (malformed headers were already counted by address), SO-08.7 (users and anonymous traffic
@@ -117,7 +127,7 @@ stay separate), SO-08.10 last-entry rule, SO-08.9 (429 body, `Retry-After`, logs
 ### Checks run (T018, T019)
 
 - `pnpm check`: lint, typecheck, unit tests, build, `lint:scripts`, `test:scripts` (42 script tests, 5 new for `rate-limit-check.sh`): pass
-- `pnpm --filter @heach/api test:e2e`: 85 of 85 pass
+- `pnpm --filter @heach/api test:e2e`: 88 of 88 pass
 - `node scripts/check-changed-coverage.mjs HEAD^1` with the API coverage run: 100% (11 of 11 changed lines), gate 80%
 - `node scripts/check-specs.mjs`, `pnpm format:check`: pass; `pnpm --filter @heach/types check`: generated types up to date (no OpenAPI change)
 - `pnpm secrets:scan` (gitleaks, whole history) and the commit hook scan: no leaks
@@ -133,4 +143,4 @@ stay separate), SO-08.10 last-entry rule, SO-08.9 (429 body, `Retry-After`, logs
 - `test/capture-output.ts` patches `process.stdout.write`, which the logger (pino on a file
   descriptor) bypasses; the log assertion in `sample-notes.int-spec.ts` therefore cannot see
   request logs. Not changed here; reported as follow-up.
-- `/speckit-converge` is user-only and was not run; T021 stays open for the owner.
+- `/speckit-converge` was followed by hand from its SKILL.md: three edge-case tests were missing (T022 to T024, Phase 7) and are added; a second pass finds nothing further.

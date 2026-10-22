@@ -10,7 +10,7 @@ Review IDs (S-1, C-2, …) refer to the 18 October 2026 codebase review
 | # | Item | Links | Why this position |
 | --- | --- | --- | --- |
 | 0 | Session-refresh reliability (done, #56) | SE-07; review C-1, T-1; [spec](../specs/001-session-refresh-reliability/spec.md) | High: users signed out of every device |
-| 1 | Rate-limit bypass with fake bearer tokens (done, #64) | SO-08, SE-08; review S-1, T-3; [spec](../specs/002-rate-limit-bypass/spec.md) | High: unlimited calls to public endpoints; must be fixed before OTP sign-in (Step 3) |
+| 1 | Rate-limit bypass with fake bearer tokens (implemented in #64, awaiting owner review) | SO-08, SE-08; review S-1, T-3; [spec](../specs/002-rate-limit-bypass/spec.md) | High: unlimited calls to public endpoints; must be fixed before OTP sign-in (Step 3) |
 | 2 | Transactional domain writes and their audit entries (`withTransaction` helper; spec drafted) | SE-05; review S-2; [spec](../specs/003-transactional-audit-writes/spec.md) | Audit can miss a write; Step 3 repositories should reuse the helper |
 | 3 | Transactional session rotation (revoke old + create new session in one transaction; keep the cookie on non-401 refresh errors) | SE-07; review S-2 note | A failure between the two statements signs the user out, and under a concurrent replay the winner's new session can outlive the revocation (found in the [session-refresh analysis](../specs/001-session-refresh-reliability/analysis.md)); same helper as item 2 |
 | 4 | Bounded re-encryption worker (keyset cursor, `< current` version, row counts) | EN-05; review C-2, T-3 | Can loop forever during a key rotation |

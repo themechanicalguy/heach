@@ -306,3 +306,44 @@ describe('Rate limit response and recovery (SO-08.9)', () => {
     await app.close();
   });
 });
+
+describe('Rate limit edge cases (SO-08.4, SO-08.6)', () => {
+  const current = useFreshApp();
+
+  it('SO-08.4 the health probes stay exempt when requests carry fake tokens', async () => {
+    const app = current();
+    const address = randomAddress();
+    for (const route of ['/healthz', '/readyz']) {
+      const codes = await statuses(app, route, 3 * LIMIT, () => ({
+        address,
+        headers: bearerOf(randomToken()),
+      }));
+      expect(codes.every((code) => code !== 429)).toBe(true);
+    }
+  });
+
+  it('SO-08.6 a valid token on a public route is counted by user, not by address', async () => {
+    const app = current();
+    const [a, b] = [await signIn(app, USERS.patientA), await signIn(app, USERS.patientB)];
+    const address = randomAddress();
+    const first = await statuses(app, PUBLIC_ROUTE, LIMIT + 2, () => ({
+      address,
+      headers: bearer(a),
+    }));
+    expect(first.at(-1)).toBe(429);
+    // Another user at the same address, on the same public route, has an allowance of their own.
+    expect((await hit(app, PUBLIC_ROUTE, { address, headers: bearer(b) })).status).not.toBe(429);
+  });
+
+  it('SO-08.6 a caller of the wrong role is counted before it is refused with 403', async () => {
+    const app = current();
+    const provider = await signIn(app, USERS.provider);
+    const address = randomAddress();
+    const codes = await statuses(app, PROTECTED_ROUTE, LIMIT + 2, () => ({
+      address,
+      headers: bearer(provider),
+    }));
+    expect(codes.slice(0, LIMIT)).toEqual(Array(LIMIT).fill(403));
+    expect(codes.slice(LIMIT)).toEqual([429, 429]);
+  });
+});
