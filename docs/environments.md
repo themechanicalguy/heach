@@ -58,11 +58,26 @@ aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target 
 
 ## Branch protection on main
 
-GitHub refuses branch protection on a private repository on the Free plan (HTTP 403, checked
-17 October 2026; [ADR 0004](adr/0004-github-free-no-branch-protection.md)). Until the account
-moves to GitHub Pro or the repository becomes public, `main` is protected by process: pull
-requests only, merged when every CI job passes, and the local pre-push hook. Once available, run
-(after `gh auth refresh -s admin:repo_hook` if asked):
+**Proposed, not applied (owner decision).** On 17 October 2026 GitHub refused branch protection on
+the private Free repository (HTTP 403, [ADR 0004](adr/0004-github-free-no-branch-protection.md)).
+The repository is now public, and on 22 October the API answered `Branch not protected`
+(HTTP 404), so protection is available at no cost. Until the owner applies it, `main` is
+protected by process: pull requests only, merged when every CI job passes, and the local
+pre-push hook.
+
+Proposed settings for a sole maintainer:
+
+| Setting | Value | Why |
+| --- | --- | --- |
+| Required status checks | All nine PR checks, `strict` (branch up to date) | Constitution VII: merge only when every CI job passes. A job skipped by its label (`no-status-change`) counts as passed |
+| Include administrators (`enforce_admins`) | `true` | Otherwise the only account can merge past a red check; to bypass in an emergency, the owner turns protection off and back on, which is visible |
+| Pull request before merging | Required, 0 approvals | Stops direct pushes to `main`; one approval cannot be given by a sole maintainer on their own PR. Raise to 1 when a second reviewer joins |
+| Conversation resolution | Required | Review comments are answered before merge |
+| Linear history | Required | Matches the squash merges used so far |
+| Force pushes, deletions | Blocked | |
+| Signed commits | Required | Squash merges made on GitHub are signed by GitHub (the last 20 on `main` are verified); local commits on branches need no change |
+
+Run (after `gh auth refresh -s admin:repo_hook` if asked):
 
 ```sh
 gh api -X PUT repos/themechanicalguy/heach/branches/main/protection \
@@ -71,18 +86,20 @@ gh api -X PUT repos/themechanicalguy/heach/branches/main/protection \
   "required_status_checks": {
     "strict": true,
     "contexts": ["Checks", "E2E smoke", "API image", "Deploy bundle", "Infra (fmt, validate)",
-                 "Secret scan", "Implementation status updated"]
+                 "Secret scan", "Static analysis and scanner fixtures",
+                 "Implementation status updated", "Spec linked"]
   },
-  "enforce_admins": false,
-  "required_pull_request_reviews": { "required_approving_review_count": 1, "dismiss_stale_reviews": true },
+  "enforce_admins": true,
+  "required_pull_request_reviews": { "required_approving_review_count": 0, "dismiss_stale_reviews": true },
+  "required_conversation_resolution": true,
+  "required_linear_history": true,
   "restrictions": null,
   "allow_force_pushes": false,
   "allow_deletions": false
 }
 JSON
 gh api -X POST repos/themechanicalguy/heach/branches/main/protection/required_signatures
+gh api repos/themechanicalguy/heach/branches/main/protection --jq '.required_status_checks.contexts'
 ```
 
-`enforce_admins` is false so a sole maintainer can still merge; set it to true when a second
-reviewer joins. Signed commits require every contributor to sign (`git config commit.gpgsign true`
-with an SSH or GPG key registered on GitHub).
+Applying it should go with an ADR that supersedes ADR 0004 (the repository is no longer private).

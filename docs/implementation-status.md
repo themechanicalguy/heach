@@ -1,6 +1,6 @@
 # Implementation status
 
-- **Last updated:** 22 October 2026: admin and edge-proxy Caddy rebuilt with Go 1.26.10, clearing HIGH CVE-2026-111943 (crypto/x509) that failed the container scan on `main` (SO-03.1); SO-03 status unchanged. 22 October 2026: spec 003 [transactional audit writes](../specs/003-transactional-audit-writes/spec.md) drafted for owner approval (SE-05.5 to SE-05.10, review S-2); SE-05 row added to the Partial table with its gaps. 21 October 2026: spec 002 [rate-limit bypass](../specs/002-rate-limit-bypass/spec.md) drafted for owner approval (SO-08.4 to SO-08.11, review S-1); SO-08 moved to Partial with the confirmed bypass stated. Earlier the same day: spec 001 [session-refresh reliability](../specs/001-session-refresh-reliability/spec.md) approved by the owner (#54) and implemented in the web client (#56, CI green) (SE-07.5 to SE-07.13, review C-1); see the SE-07 row. ADR 0011 accepted and constitution ratified (PR #53). Step 2 unchanged since 18 October: remaining SNS subscription confirmation, lawyer and Odia reviews ([log](step-2-progress.md))
+- **Last updated:** 22 October 2026: admin and edge-proxy Caddy rebuilt with Go 1.26.10, clearing HIGH CVE-2026-111943 (crypto/x509) that failed the container scan on `main` (SO-03.1); SO-03 status unchanged. 22 October 2026: reconciled stale claims: EN-06 and TS-03 counted Partial as their rows say, SO-03 Partial, TS-01 Done (its CI coverage gate exists), EN-06 and TS-03 rows updated, branch protection now available (public repository) but not enabled. 22 October 2026: spec 003 [transactional audit writes](../specs/003-transactional-audit-writes/spec.md) drafted for owner approval (SE-05.5 to SE-05.10, review S-2); SE-05 row added to the Partial table with its gaps. 21 October 2026: spec 002 [rate-limit bypass](../specs/002-rate-limit-bypass/spec.md) drafted for owner approval (SO-08.4 to SO-08.11, review S-1); SO-08 moved to Partial with the confirmed bypass stated. Earlier the same day: spec 001 [session-refresh reliability](../specs/001-session-refresh-reliability/spec.md) approved by the owner (#54) and implemented in the web client (#56, CI green) (SE-07.5 to SE-07.13, review C-1); see the SE-07 row. ADR 0011 accepted and constitution ratified (PR #53). Step 2 unchanged since 18 October: remaining SNS subscription confirmation, lawyer and Odia reviews ([log](step-2-progress.md))
 - **Current step:** Step 2 of the [implementation guideline](mvp-v1-implementation-guideline.md): engineering done, exit pending owner actions
 
 This page separates what is built from what is only specified. The
@@ -20,7 +20,7 @@ checks for it (rule in [`CLAUDE.md`](../CLAUDE.md#working-rules)).
 
 | # | Item | Status | Notes |
 | --- | --- | --- | --- |
-| 1 | Repository with branch protection on `main` | 🟡 Partial | GitHub Free cannot protect branches; replaced by PR-only process and a pre-push hook ([ADR 0004](adr/0004-github-free-no-branch-protection.md)). Signed commits not required |
+| 1 | Repository with branch protection on `main` | 🟡 Partial | Not enabled. The repository is now public (checked 22 October 2026), so GitHub Free allows protection: the API answered `Branch not protected` (HTTP 404, no longer 403). The premise of [ADR 0004](adr/0004-github-free-no-branch-protection.md) (stay private) no longer holds and the switch to public is not recorded in an ADR; settings proposed for the owner in [environments](environments.md#branch-protection-on-main). Until then: PR-only process and the pre-push hook. Commits on `main` are signed by GitHub's squash merge (last 20 verified) |
 | 2 | Monorepo, pnpm + Turborepo, Node LTS, TypeScript strict | ✅ Done | [ADR 0001](adr/0001-monorepo-and-stack.md) |
 | 3 | App shells `web`, `admin`, `api` | ✅ Done | API has `/healthz`, `/readyz`, OpenAPI |
 | 4 | Shared packages `ui`, `i18n`, `config`, `types`, `crypto`, `logger` | ✅ Done | Scaffolds; `crypto` is an interface only (Step 2) |
@@ -39,7 +39,7 @@ Walked through on 17 October 2026, with the changes in [ADR 0009](adr/0009-aws-c
 | --- | --- | --- |
 | New developer runs all three apps locally within 30 minutes | ✅ Done | `pnpm dev:up` ([local development](local-development.md)); CI's E2E smoke job starts all three from a clean checkout. Not yet timed on a fresh machine |
 | Merged PR reaches staging without manual steps | 🔁 Replaced by dev only, see ADR 0009 | Deploy dev runs after CI on `main`: first deploy of `52272c8990c8` answered on `https://15.252.65.98/api/readyz` (PostgreSQL and Redis ok). Scan gate, smoke test and rollback added in B3 (PR #17). Merge of PR #30 deployed `5f5c956ff9a2` with scan, deploy and smoke test passing ([run](https://github.com/themechanicalguy/heach/actions/runs/39063937336)) |
-| `main` protected; pipeline blocks a failing build | 🟡 Partial | CI fails on a failing build (7 jobs). GitHub branch protection returns HTTP 403 on the private Free repository ([ADR 0004](adr/0004-github-free-no-branch-protection.md)); commands ready in [environments](environments.md#branch-protection-on-main) |
+| `main` protected; pipeline blocks a failing build | 🟡 Partial | CI fails on a failing build (9 checks on every PR). Branch protection is available since the repository became public (22 October: HTTP 404 `Branch not protected`) but not enabled; owner decision pending ([environments](environments.md#branch-protection-on-main)) |
 | Third-party applications submitted and tracked | 🟡 Partial | Tracked: issues #19 to #25 (label `partner-onboarding`). Submitting them is the account holder's task |
 | Credit-expiry alerts active and tested, including simulated levels (playbook) | 🟡 Partial | github-oidc applied (18 October plan: no changes); GitHub variables set; real run reports ok, $120 of $120; simulated Watch, Plan, Act and Emergency each updated issue #29. All alert paths (levels, plan not ACTIVE, burn rate, failed check) verified locally with stubbed `gh`/`aws`; burn rate now alerts on its own. SNS subscription confirmed; labelled test alert sent 18 October ([run](https://github.com/themechanicalguy/heach/actions/runs/39065434862)). Pending: email receipt (owner), second address, three scheduled daily runs (18–20 October). `dev-sleep`/`dev-wake` tested 18 October: host stopped and `/api/healthz` stopped answering; after wake the smoke test passed |
 | ADR lists every requirement relaxed for the pilot (playbook) | ✅ Done | [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md) |
@@ -57,14 +57,14 @@ Every module not listed under "Partial" below is ⬜ Not started.
 | Module | IDs | Done | Partial | Not started | Planned in step |
 | --- | --- | --- | --- | --- | --- |
 | DC Data classification | DC-01 (Step 2 spec) | 1 | 0 | 0 | 2 |
-| EN Encryption | 13 | 4 | 8 | 1 | 2 |
+| EN Encryption | 13 | 3 | 9 | 1 | 2 |
 | SE Access control and audit | 9 | 1 | 4 | 4 | 2, 3, 6 |
 | PR Privacy and consent | 7 | 0 | 2 | 5 | 3 |
 | SO Secure development and operations | 10 | 2 | 5 | 3 | 2, 6, 10 |
 | PF Performance | 7 | 4 | 2 | 1 | 2 |
 | A11Y Accessibility | 7 | 0 | 0 | 7 | not mapped (see gaps) |
 | I18N Multi-language | 7 | 5 | 1 | 1 | 2 |
-| TS Testing | 9 | 4 | 3 | 2 | 2 |
+| TS Testing | 9 | 3 | 4 | 2 | 2 |
 | LM Logging and monitoring | 9 | 1 | 6 | 2 | 2 |
 | UX User experience | 8 | 5 | 0 | 3 | 2 |
 | AC, PO, KY, AD-01 to 03, 11, 12 | 6 + 7 + 9 + 5 | 0 | 0 | all | 3 |
@@ -77,15 +77,14 @@ Every module not listed under "Partial" below is ⬜ Not started.
 
 No functional requirement (journeys J1 to J9) is implemented yet.
 
-Counts after Step 2 (18 October 2026), strict: Done only where the requirement is met as
+Counts after Step 2 (18 October 2026, reconciled with the Partial table on 22 October), strict: Done only where the requirement is met as
 written today, not just its Step 2 part.
-- **EN:** Done 03, 06, 09, 13. Partial 01, 02, 04, 05, 07, 10, 11, 12 (live checks wait for the
-  apply). Not started 08.
+- **EN:** Done 03, 09, 13. Partial 01, 02, 04, 05, 06, 07, 10, 11, 12. Not started 08.
 - **SE:** Done 02. Partial 04, 05, 07, 09.
-- **SO:** Done 01, 03, 05. Partial 06, 07, 08, 10.
+- **SO:** Done 01, 05. Partial 03, 06, 07, 08, 10.
 - **PF:** Done 02, 03, 05, 06. Partial 01, 07 (shell only, no queued actions).
 - **I18N:** Done 01, 02, 03, 04, 06. Partial 07 (native review). Not started 05.
-- **TS:** Done 01, 02, 03, 07. Partial 05, 06, 09.
+- **TS:** Done 01, 02, 07. Partial 03, 05, 06, 09.
 - **LM:** Done 02. Partial 01, 03, 04, 05, 07, 09.
 - **UX:** Done 01 to 05. Not started 06 to 08.
 
@@ -109,7 +108,7 @@ written today, not just its Step 2 part.
 | EN-01 | TLS on 443 through Caddy's internal CA, HSTS header, port 80 redirects to HTTPS. PostgreSQL and Redis accept TLS only (private CA, `deploy/dev/make-certs.sh`); plaintext refused locally, in CI and on the dev host bundle | Publicly trusted certificate (internal CA on the dev host; EN-01.3 recorded: TLS 1.2 and 1.3 only) |
 | EN-02 | Encrypted EBS disk and snapshots, state bucket, uploads bucket (SSE-KMS), ECR images | Encrypted log store; queues and search do not exist yet |
 | EN-04 | Customer managed KMS keys in Mumbai; host role limited to `GenerateDataKey` and `Decrypt`. `@heach/crypto` envelope encryption, API KMS adapter, `app.data_key` table | Infra change not yet applied (AWS sign-in pending) |
-| EN-06 | One key per data domain (health, identity, payments, documents) per environment, yearly rotation | Only dev exists; the app does not use the keys yet |
+| EN-06 | One KMS key per data domain (health, identity, payments, documents) in dev, rotated yearly (`enable_key_rotation`, 365 days); the API wraps each domain's data keys with that domain's key (`KmsKeyProvider`, alias prefix; EN-06.1 unit test, EN-04.2 verified live) | Only the dev environment exists, so there are no separate staging or production keys yet |
 | EN-07 | Private, versioned uploads bucket, SSE-KMS (documents key), public access blocked, TLS only | Per-object keys, virus scanning, signed URLs (Step 2 onward) |
 | EN-10 | Nightly EBS snapshots kept 7 days, encrypted. Migrations run forward from empty in CI; separate migrator, API and audit-owner roles. Backup KMS key, private backups bucket and nightly dump timer live on dev; off-account encrypted copy on the owner's Mac; local and dev-host restore records (EN-10.3, EN-10.4) | Second-Region or managed backups revisited at the pilot (D1); SO-10 drill in Step 10 |
 | EN-12 | gitleaks in hooks and CI; generated passwords in SSM Parameter Store; CI deploys over OIDC without keys; the API reads its secrets by name from Parameter Store at start-up (only the three it needs); rotation runbook | Rotation run once in dev (EN-12.2, recorded); Secrets Manager revisited at the pilot (D2) |
@@ -124,8 +123,7 @@ written today, not just its Step 2 part.
 | SO-08 | API rate limit per IP or user (SO-08.1), Caddy edge limit 300 a minute per IP (SO-08.2), authorisation-failure alert (SO-08.3), input validation | The API limit can be bypassed by sending a different fake bearer token on each request (review S-1; confirmed 21 October; capped on the dev host by Caddy's per-IP limit): [spec 002](../specs/002-rate-limit-bypass/spec.md) (Draft, awaiting owner approval) fixes it. Counters are per API process (review P-1). WAF at the pilot (D3) |
 | I18N-01 | Locales `or`, `en`, `hi` defined; Odia default | Locale-prefixed routing, adding a language without code change |
 | I18N-02 | ESLint fails on hard-coded JSX strings and text props; ICU catalogues for or, en, hi with plurals; locale routes `/or`, `/en`, `/hi`; bundled Odia and Devanagari fonts | Native Odia review of the text (I18N-07) |
-| TS-01 | Vitest in every package and app | 80% coverage threshold on changed code |
-| TS-03 | API integration tests against real PostgreSQL and Redis in CI (`/healthz`, `/readyz`) | Every endpoint (none beyond health yet) |
+| TS-03 | API integration tests against real PostgreSQL and Redis in CI: 46 tests in 12 files covering health, readiness, auth (test login, refresh, logout), sample notes (create, list, read) and the authorisation matrix | `POST /v1/rum` has no API integration test |
 | TS-05 | E2E smoke for web and admin on every PR (Chromium) | Nightly full suite; mobile and tablet projects |
 | LM-02 | `@heach/logger` masks personal and Restricted keys and mobile numbers in values (whole trace, span and UUID hex IDs kept intact); ESLint fails on `console.*`; correlation and trace IDs on every API line; OpenTelemetry traces to Jaeger locally; Grafana dashboard and GlitchTip in the local `observability` profile | Nothing central on the dev host (ADR 0010) |
 | UX-01 | App shell with header, language switch, offline banner and bottom navigation on `/or`, `/en`, `/hi`. `@heach/ui`: tokens with three breakpoints, Button, TextField, OtpField, Card, Sheet, Table, Toast, BottomNav, loading/empty/error/offline states; Storybook built in CI; axe on every component and story | Tailwind not yet used (plain CSS on tokens); colour contrast checked only in the browser |
