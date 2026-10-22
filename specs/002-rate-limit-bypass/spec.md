@@ -1,12 +1,12 @@
 # Feature Specification: Rate-limit bypass with fake bearer tokens
 
-**Status**: Draft
+**Status**: Approved
 
 **Step**: [Step 2 spec](../../docs/specs/step-02-secure-foundation.md) of the [guideline](../../docs/mvp-v1-implementation-guideline.md) (security middleware, SO-08.1 and SO-08.2)
 
 **Requirements in scope**: SO-08 (rate limits as part of DDoS protection); SE-08 (device and IP throttling, the IP part only); SO-01 (threat model, in plan.md); LM-02 (no personal data in logs); TS-01, TS-03 (test evidence)
 
-**Approval**:
+**Approval**: Owner (Saurav Rath), 2026-10-22, explicit approval of this spec and its plan, with decisions D-1 to D-7 as written; takes effect when the owner merges this docs-only pull request
 
 **Created**: 2026-10-21
 

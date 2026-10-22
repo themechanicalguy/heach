@@ -1,8 +1,8 @@
 # Implementation Plan: Rate-limit bypass with fake bearer tokens
 
-**Status**: Draft
+**Status**: Approved
 
-**Spec**: [spec.md](spec.md) | **Date**: 2026-10-21 | **Approval**:
+**Spec**: [spec.md](spec.md) | **Date**: 2026-10-21 | **Approval**: Owner (Saurav Rath), 2026-10-22, explicit approval of this plan and its spec, with decisions D-1 to D-7 as written; takes effect when the owner merges this docs-only pull request
 
 **Input**: Feature specification from `specs/002-rate-limit-bypass/spec.md`
 
