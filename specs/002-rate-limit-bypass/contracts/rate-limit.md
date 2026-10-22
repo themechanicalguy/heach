@@ -5,9 +5,13 @@ change.
 
 ## Counting rule
 
+Counters are kept per route (controller handler) and per limit, as in Step 2; the rule below
+chooses the tracker within each route (decision D-6).
+
 1. If the `Authorization` header is `Bearer <token>` with `<token>` matching `[\w-]{20,}`, and
    `AccessTokenStore.resolve(<token>)` returns a principal, count against `user:<principal.userId>`.
-2. Otherwise, including when the lookup throws, count against `ip:<req.ip>`.
+2. Otherwise, including when the lookup throws or rejects after the Redis client's own timeout,
+   count against `ip:<req.ip>`. A request is never served before it has been counted.
 
 `req.ip` is the last entry of `X-Forwarded-For` (Express `trust proxy` = 1). The API is reachable
 only through Caddy, which sets that entry to the real peer address.
