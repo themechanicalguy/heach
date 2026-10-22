@@ -19,7 +19,7 @@
     "@heach/types": "workspace:*",
     "@heach/ui": "workspace:*",
     "@sentry/browser": "11.4.0",
-    "next": "16.3.8",
+    "next": "16.4.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "web-vitals": "6.2.2"
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@heach/config": "workspace:*",
     "@lhci/cli": "0.15.1",
-    "@next/eslint-plugin-next": "16.3.8",
+    "@next/eslint-plugin-next": "16.4.1",
     "@playwright/test": "1.63.0",
     "@testing-library/react": "16.3.3",
     "@types/node": "24.19.1",
