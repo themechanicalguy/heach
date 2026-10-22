@@ -1,12 +1,12 @@
 # Feature Specification: Bounded, audited re-encryption after a key rotation
 
-**Status**: Draft
+**Status**: Approved
 
 **Step**: [Step 2 spec](../../docs/specs/step-02-secure-foundation.md) of the [guideline](../../docs/mvp-v1-implementation-guideline.md) (key rotation, EN-05.1 to EN-05.3)
 
 **Requirements in scope**: EN-05 (key rotation, old data readable, re-encryption); SE-05 (audit of every read and write of Restricted data); SO-01 (threat model, in plan.md); LM-02 (no personal data in logs); TS-01, TS-03 (test evidence)
 
-**Approval**:
+**Approval**: Owner (Saurav Rath), 2026-10-22, explicit approval of this spec and its plan as drafted ("Approve 003, 004, 005 as drafted"), with decisions D-1 to D-5 as written, including the per-row audit entry with the `system` actor (D-4); takes effect when this docs-only pull request merges
 
 **Created**: 2026-10-22
 

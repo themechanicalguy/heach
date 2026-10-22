@@ -25,9 +25,9 @@ Step 1 was built before ADR 0007; its record is in [implementation status](../im
 | --- | --- | --- | --- |
 | [Session-refresh reliability](../../specs/001-session-refresh-reliability/spec.md) | 2 | SE-07 | Done (#56) |
 | [Rate-limit bypass](../../specs/002-rate-limit-bypass/spec.md) | 2 | SO-08, SE-08 | Approved; implemented in #64, Done on owner review of the evidence |
-| [Transactional audit writes](../../specs/003-transactional-audit-writes/spec.md) | 2 | SE-05 | Draft (awaiting owner approval) |
-| [Transactional session rotation](../../specs/004-transactional-session-rotation/spec.md) | 2 | SE-07 | Draft (awaiting owner approval; code after 003) |
-| [Bounded re-encryption](../../specs/005-bounded-reencryption/spec.md) | 2 | EN-05, SE-05 | Draft (awaiting owner approval; code after 003) |
+| [Transactional audit writes](../../specs/003-transactional-audit-writes/spec.md) | 2 | SE-05 | Approved (owner, 22 October); implementation next |
+| [Transactional session rotation](../../specs/004-transactional-session-rotation/spec.md) | 2 | SE-07 | Approved (owner, 22 October); code after 003 |
+| [Bounded re-encryption](../../specs/005-bounded-reencryption/spec.md) | 2 | EN-05, SE-05 | Approved (owner, 22 October); code after 003 |
 
 <!-- Add a row per feature directory, for example:
 | [OTP login](../../specs/003-otp-login/spec.md) | 3 | AC-01, AC-02 | Draft |
