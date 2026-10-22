@@ -202,7 +202,9 @@ jobs:
           curl -sSkI https://127.0.0.1/or | grep -qi "^content-security-policy: .*'nonce-"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/)" = 301
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5432 || true)" = 000
-      # Last of the curl checks: it uses up this runner's API allowance for the next minute.
+      # The last two curl checks use up this runner's API allowance; the sleep after them covers both.
+      - name: Fake tokens and forged forwarding headers still reach the API's 429 (SO-08.10)
+        run: bash scripts/rate-limit-check.sh https://127.0.0.1
       - name: Caddy rate limits the API per client IP (SO-08.2)
         run: |
           # /api/healthz skips the API's own throttler, so a 429 here can only come from Caddy.

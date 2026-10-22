@@ -11,7 +11,9 @@ import { AuthzFailureMonitor } from './authz-failure.monitor.js';
   imports: [
     ThrottlerModule.forRootAsync({
       inject: [EnvVars],
-      useFactory: (env: EnvVars) => [{ ttl: 60_000, limit: env.RATE_LIMIT_PER_MINUTE }],
+      useFactory: (env: EnvVars) => [
+        { ttl: env.RATE_LIMIT_WINDOW_SECONDS * 1000, limit: env.RATE_LIMIT_PER_MINUTE },
+      ],
     }),
   ],
   providers: [
