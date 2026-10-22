@@ -17,7 +17,7 @@ RUN pnpm --filter "@heach/admin..." build
 # Cross-compiled on the build machine: fast even when the target is arm64 (dev host).
 FROM --platform=$BUILDPLATFORM caddy:2.11.6-builder-alpine AS caddy
 ARG TARGETARCH
-ENV GOTOOLCHAIN=go1.26.9 GOOS=linux GOARCH=$TARGETARCH CGO_ENABLED=0
+ENV GOTOOLCHAIN=go1.26.10 GOOS=linux GOARCH=$TARGETARCH CGO_ENABLED=0
 RUN xcaddy build v2.11.6 --replace golang.org/x/net=golang.org/x/net@v0.60.0 \
     --with github.com/mholt/caddy-ratelimit@5625512f24f6f59d6f64fb3aafe5eecff0b286db \
     --output /usr/bin/caddy
