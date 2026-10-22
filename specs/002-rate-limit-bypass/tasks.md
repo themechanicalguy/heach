@@ -52,8 +52,8 @@ starts before that. Implementation branch: `fix/002-rate-limit-bypass`.
 
 ### Tests
 
-- [ ] T009 [P] [US2] `SO-08.6 one user's tokens share one allowance` (two `login` sessions of one synthetic user) in rate-limit.int-spec.ts
-- [ ] T010 [P] [US2] `SO-08.7 users and anonymous traffic at one address do not limit each other` in rate-limit.int-spec.ts
+- [ ] T009 [P] [US2] `SO-08.6 one user's tokens share one allowance` (two `login` sessions of one synthetic user, both on one route) in rate-limit.int-spec.ts
+- [ ] T010 [P] [US2] `SO-08.7 users and anonymous traffic at one address do not limit each other` (one route) in rate-limit.int-spec.ts
 
 ### Implementation
 
@@ -68,7 +68,7 @@ starts before that. Implementation branch: `fix/002-rate-limit-bypass`.
 - [ ] T012 [P] [US3] `SO-08.9 a 429 has Retry-After and a generic body, logs nothing sensitive, and recovers after the window` with `RATE_LIMIT_WINDOW_SECONDS=1`: assert header range, body has no token, address or user ID, captured request log lines contain none of them, and a request after the window succeeds, in rate-limit.int-spec.ts
 - [ ] T013 [P] [US3] `SO-08.10 a client-supplied X-Forwarded-For does not choose the address` (varying first entries, fixed last entry reaches 429) in rate-limit.int-spec.ts
 - [ ] T014 [P] [US3] `SO-08.11 a session-store failure counts by address` (store double throws) in user-throttler.guard.spec.ts
-- [ ] T015 [US3] scripts/rate-limit-check.sh `<base-url>`: 150 requests to `/api/v1/auth/refresh`, each with a random bearer token and random `X-Forwarded-For`, exit non-zero unless at least one 429 and the first 120 are not 429; no secrets, tokens generated at run time (SO-08.10)
+- [ ] T015 [US3] scripts/rate-limit-check.sh `<base-url>`: 150 requests to `/api/v1/auth/refresh`, each with a random bearer token and random `X-Forwarded-For`, exit non-zero unless at least one response is a 429 with the API's JSON error body (`ThrottlerException`, not Caddy's empty 429) and none of the first 100 is a 429; no secrets, tokens generated at run time (SO-08.10)
 - [ ] T016 [US3] Run scripts/rate-limit-check.sh in the deploy-bundle job of .github/workflows/ci.yml just before "Caddy rate limits the API per client IP" (its 61-second wait then covers both)
 
 ### Implementation
