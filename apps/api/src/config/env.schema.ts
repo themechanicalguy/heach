@@ -100,6 +100,12 @@ export class EnvVars {
   @Min(1)
   RATE_LIMIT_PER_MINUTE = 120;
 
+  /** Length of the rate-limit window; tests shorten it to prove recovery (SO-08.9). */
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  RATE_LIMIT_WINDOW_SECONDS = 60;
+
   /** SNS topic for alerts (D5); unset means alerts are logged only. */
   @IsOptional()
   @Matches(/^arn:aws:sns:ap-south-1:\d{12}:[\w-]+$/)
