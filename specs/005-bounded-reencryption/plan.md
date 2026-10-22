@@ -1,8 +1,8 @@
 # Implementation Plan: Bounded, audited re-encryption after a key rotation
 
-**Status**: Draft
+**Status**: Approved
 
-**Spec**: [spec.md](spec.md) | **Date**: 2026-10-22 | **Approval**:
+**Spec**: [spec.md](spec.md) | **Date**: 2026-10-22 | **Approval**: Owner (Saurav Rath), 2026-10-22, explicit approval of this plan and its spec as drafted, with decisions D-1 to D-5 as written; takes effect when this docs-only pull request merges
 
 **Input**: Feature specification from `specs/005-bounded-reencryption/spec.md`
 

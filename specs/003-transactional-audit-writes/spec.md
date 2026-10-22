@@ -1,12 +1,12 @@
 # Feature Specification: Transactional domain writes and their audit entries
 
-**Status**: Draft
+**Status**: Approved
 
 **Step**: [Step 2 spec](../../docs/specs/step-02-secure-foundation.md) of the [guideline](../../docs/mvp-v1-implementation-guideline.md) (audit log, SE-05.1 to SE-05.4)
 
 **Requirements in scope**: SE-05 (audit of every read and write of Restricted data); SO-01 (threat model, in plan.md); LM-02 (no personal data in logs); TS-01, TS-03 (test evidence)
 
-**Approval**:
+**Approval**: Owner (Saurav Rath), 2026-10-22, explicit approval of this spec and its plan as drafted ("Approve 003, 004, 005 as drafted"), with decisions D-1 to D-6 as written; takes effect when this docs-only pull request merges
 
 **Created**: 2026-10-22
 
