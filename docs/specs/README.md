@@ -24,7 +24,7 @@ Step 1 was built before ADR 0007; its record is in [implementation status](../im
 | Feature | Step | Requirement IDs | Status |
 | --- | --- | --- | --- |
 | [Session-refresh reliability](../../specs/001-session-refresh-reliability/spec.md) | 2 | SE-07 | Done (#56) |
-| [Rate-limit bypass](../../specs/002-rate-limit-bypass/spec.md) | 2 | SO-08, SE-08 | Draft (awaiting owner approval) |
+| [Rate-limit bypass](../../specs/002-rate-limit-bypass/spec.md) | 2 | SO-08, SE-08 | Approved (on merge of the approval PR; implementation not started) |
 | [Transactional audit writes](../../specs/003-transactional-audit-writes/spec.md) | 2 | SE-05 | Draft (awaiting owner approval) |
 
 <!-- Add a row per feature directory, for example:
