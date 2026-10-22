@@ -19,7 +19,7 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 8 | feat/step2-web-shell | Shell, PWA, sample-note UI, RUM, error tracking, E2E projects, visual baselines, budgets, Lighthouse | Merged #41 |
 | 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep and Trivy in CI with runtime fixtures per scanner, npm removed from runtime images, patched Caddy, changed-line coverage gate, adapter ports and doubles with lint boundary | Merged #42 |
 | 10 | feat/step2-backups | Backup KMS key and bucket, nightly dump timer, off-account pull script, restore check, infra security check, state bucket to SSE-KMS, spec threat-model check | Merged #43; infra apply pending AWS sign-in |
-| 11 | feat/step2-approved-additions | Caddy rate limit (SO-08.2), local Prometheus, Grafana and GlitchTip profile with the LM-05.1 dashboard, source-map upload script and LM-03.1 test, CSP fix for error reports | Open |
+| 11 | feat/step2-approved-additions | Caddy rate limit (SO-08.2), local Prometheus, Grafana and GlitchTip profile with the LM-05.1 dashboard, source-map upload script and LM-03.1 test, CSP fix for error reports | Merged #45 |
 
 ## Evidence by criterion
 
@@ -109,7 +109,8 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 
 ## Owner actions
 
-- Confirm the SNS email subscription on `heach-credit-reminders` (AWS sent a confirmation email; it shows PendingConfirmation). Until then SO-08.3, LM-07.1 and credit alerts are published but not delivered.
+- Settle the SNS email subscription on `heach-credit-reminders`: the records disagree (confirmed at 01:38 IST, PendingConfirmation at 16:18 IST, both 18 October; not re-checked since). Check it with `aws sns list-subscriptions-by-topic` and confirm a labelled test email arrives. Until then SO-08.3, LM-07.1 and credit alerts are published but delivery is unproven.
+- Decide how Restricted fields in the off-account copy can be decrypted without the AWS account (they are wrapped by the dev KMS keys), and whether a recurring restore check is scheduled now or at the pilot ([assessment](step-2-assessment-2026-10-22.md#backups-and-recovery)).
 - Copy the Keychain item `heach-backup-passphrase` into your password manager; the off-account copies cannot be decrypted without it.
 - Optional, a permission narrowing: remove the now-unused `ssm:GetParametersByPath` from the host policy in `infra/modules/app-host/main.tf` and apply.
 - Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md) to a lawyer you choose.
