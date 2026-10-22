@@ -1,5 +1,6 @@
 import type { DataDomain, DataKeyRecord, DataKeyStore } from '@heach/crypto';
 import type pg from 'pg';
+import { withTransaction } from '../data-stores/transaction.js';
 
 interface DataKeyRow {
   domain: DataDomain;
@@ -33,9 +34,7 @@ export class PgDataKeyStore implements DataKeyStore {
 
   /** Retires the current version and inserts the new one in one transaction. */
   async add(record: DataKeyRecord): Promise<void> {
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
+    await withTransaction(this.pool, async (client) => {
       await client.query(
         'UPDATE app.data_key SET retired_at = $2 WHERE domain = $1 AND retired_at IS NULL',
         [record.domain, record.createdAt],
@@ -44,13 +43,7 @@ export class PgDataKeyStore implements DataKeyStore {
         'INSERT INTO app.data_key (domain, version, wrapped_key, created_at) VALUES ($1, $2, $3, $4)',
         [record.domain, record.version, record.wrappedKey, record.createdAt],
       );
-      await client.query('COMMIT');
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
+    });
   }
 }
 
