@@ -92,6 +92,9 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | EN-10.4 | ✅ | Local record and dev-host record in the [runbook](runbooks/backup-restore.md). On 2026-10-18 `…1019Z.dump` was restored into a new database `heach_restore_1792318811` on the host: 1 synthetic note, stored as AES-256-GCM ciphertext. A separate API container decrypted it through KMS for its owner. The database was then dropped; the active `heach` database was never written |
 | SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
+| SE-05.5 to SE-05.10 (spec 003) | ✅ CI, deployed; Done on owner review | Merged #67. `transaction.spec.ts`, `notes.repository.spec.ts`, `test/audit-transaction.int-spec.ts`; fresh local run 24 October on `491f5a0`: all passing ([evidence](../specs/003-transactional-audit-writes/tasks.md#evidence)) |
+| SE-07.14 to SE-07.20 (spec 004) | ✅ CI, deployed; Done on owner review | Merged #69. `session.service.spec.ts`, `auth.controller.spec.ts`, `test/session-rotation.int-spec.ts`; session E2E (`session-refresh.spec.ts`) on three viewports in the CI deploy-bundle job on `491f5a0` (30 passed); fresh local integration run 24 October: all passing ([evidence](../specs/004-transactional-session-rotation/tasks.md#evidence)) |
+| EN-05.4 to EN-05.9 (spec 005) | ✅ CI, deployed; Done on owner review | Merged #70. `reencrypt.spec.ts`, `test/reencrypt.int-spec.ts`; fresh local run 24 October: all passing ([evidence](../specs/005-bounded-reencryption/tasks.md#evidence)). Not yet run on the dev host |
 
 ## Deploy and rollback record
 
@@ -107,9 +110,11 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 - 18 October 2026, rotation: see the [secret-rotation runbook](runbooks/secret-rotation.md) record; fixed in #51.
 - 18 October 2026: Deploy dev [run 39117175524](https://github.com/themechanicalguy/heach/actions/runs/39117175524) for `16d9b03` is green: image build, scan gate, deploy and smoke test passed, no rollback. After #51, the next deploy also recreates the API.
 
+- 22 and 23 October 2026: Deploy dev green for spec 003 `1d74b17` ([run 39838278055](https://github.com/themechanicalguy/heach/actions/runs/39838278055)), spec 004 `468c7f1` ([run 39910289211](https://github.com/themechanicalguy/heach/actions/runs/39910289211)) and spec 005 `491f5a0` ([run 39915546133](https://github.com/themechanicalguy/heach/actions/runs/39915546133)): deploy and smoke test of `/healthz` and `/api/readyz` passed, no rollback. The smoke test checks health only, not the corrective behaviour.
+
 ## Owner actions
 
-- Settle the SNS email subscription on `heach-credit-reminders`: the records disagree (confirmed at 01:38 IST, PendingConfirmation at 16:18 IST, both 18 October; not re-checked since). Check it with `aws sns list-subscriptions-by-topic` and confirm a labelled test email arrives. Until then SO-08.3, LM-07.1 and credit alerts are published but delivery is unproven.
+- Settle the SNS email subscription on `heach-credit-reminders`. On 22 October the owner reported, in a Claude Code session, re-creating and confirming it and sending a synthetic test; nothing in the repository records the subscription state or the email's receipt, and it could not be re-checked on 24 October (AWS session expired). Check it with `aws sns list-subscriptions-by-topic` and confirm a labelled test email arrives. Until then SO-08.3, LM-07.1 and credit alerts are published but delivery is unproven.
 - Decide how Restricted fields in the off-account copy can be decrypted without the AWS account (they are wrapped by the dev KMS keys), and whether a recurring restore check is scheduled now or at the pilot ([assessment](step-2-assessment-2026-10-22.md#backups-and-recovery)).
 - Copy the Keychain item `heach-backup-passphrase` into your password manager; the off-account copies cannot be decrypted without it.
 - Optional, a permission narrowing: remove the now-unused `ssm:GetParametersByPath` from the host policy in `infra/modules/app-host/main.tf` and apply.
