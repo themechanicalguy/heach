@@ -13,6 +13,8 @@ import { bootApp } from './boot-app.js';
 import { connectAs } from './db.js';
 
 const IV_BYTES = 12;
+// Creates 120 notes and re-encrypts the whole shared table; slower than the 5 s default in CI.
+const SLOW_TEST_TIMEOUT_MS = 30_000;
 const byText = (a: string, b: string) => a.localeCompare(b);
 
 let app: INestApplication<App>;
@@ -135,29 +137,33 @@ function changeDuringRun(ids: string[]): void {
 }
 
 describe('Bounded, audited re-encryption (EN-05.4 to EN-05.9)', () => {
-  it('EN-05.4 EN-05.6 EN-05.7 EN-05.8 one pass with true counts and an entry per change (SC-001, SC-002)', async () => {
-    const ids = await createNotes(120);
-    const [changed, broken] = [ids.slice(0, 5), ids.slice(5, 8)];
-    for (const id of broken) await corrupt(id);
-    cleanup.push(...broken);
-    const target = await encryptor.rotate('health');
-    const stale = await staleCount(target);
-    changeDuringRun(changed);
+  it(
+    'EN-05.4 EN-05.6 EN-05.7 EN-05.8 one pass with true counts and an entry per change (SC-001, SC-002)',
+    async () => {
+      const ids = await createNotes(120);
+      const [changed, broken] = [ids.slice(0, 5), ids.slice(5, 8)];
+      for (const id of broken) await corrupt(id);
+      cleanup.push(...broken);
+      const target = await encryptor.rotate('health');
+      const stale = await staleCount(target);
+      changeDuringRun(changed);
 
-    const { runId, counts } = await runJob();
+      const { runId, counts } = await runJob();
 
-    expect(counts).toEqual({ reencrypted: stale - 8, skipped: 5, failed: 3 });
-    const recorded = await entries(runId);
-    const done = recorded.filter((e) => e.action === 'sample_note.reencrypt');
-    expect(done).toHaveLength(counts.reencrypted);
-    expect(done.every((e) => e.actor_role === 'system' && e.actor_id === 'job:reencrypt')).toBe(
-      true,
-    );
-    const failed = recorded.filter((e) => e.action === 'sample_note.reencrypt.failed');
-    expect(failed.map((e) => e.entity_id).toSorted(byText)).toEqual(broken.toSorted(byText));
-    for (const id of broken) expect((await bodyOf(id)).keyVersion).not.toBe(String(target));
-    expect(await staleCount(target)).toBe(8);
-  });
+      expect(counts).toEqual({ reencrypted: stale - 8, skipped: 5, failed: 3 });
+      const recorded = await entries(runId);
+      const done = recorded.filter((e) => e.action === 'sample_note.reencrypt');
+      expect(done).toHaveLength(counts.reencrypted);
+      expect(done.every((e) => e.actor_role === 'system' && e.actor_id === 'job:reencrypt')).toBe(
+        true,
+      );
+      const failed = recorded.filter((e) => e.action === 'sample_note.reencrypt.failed');
+      expect(failed.map((e) => e.entity_id).toSorted(byText)).toEqual(broken.toSorted(byText));
+      for (const id of broken) expect((await bodyOf(id)).keyVersion).not.toBe(String(target));
+      expect(await staleCount(target)).toBe(8);
+    },
+    SLOW_TEST_TIMEOUT_MS,
+  );
 
   it('EN-05.5 only rows below the target version are re-encrypted', async () => {
     const old = await createNote();
