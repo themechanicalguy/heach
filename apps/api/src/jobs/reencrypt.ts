@@ -93,7 +93,11 @@ async function reencryptRow(
   }
 }
 
-async function main(): Promise<void> {
+/**
+ * The job command (specs/005-bounded-reencryption/contracts/reencrypt-job.md): rotates first with
+ * `--rotate`, logs counts only, and returns the exit code, 1 when any row failed (EN-05.6).
+ */
+export async function main(argv: readonly string[] = process.argv): Promise<number> {
   await loadSecrets(process.env);
   const app = await NestFactory.createApplicationContext(
     AppModule.forEnv(validateEnv(process.env).APP_ENV),
@@ -101,25 +105,28 @@ async function main(): Promise<void> {
   );
   const encryptor = app.get<EnvelopeEncryptor>(FIELD_ENCRYPTOR);
   const runId = `reencrypt-${randomUUID()}`;
-  await runWithContext({ correlationId: runId, system: 'job:reencrypt' }, async () => {
-    if (process.argv.includes('--rotate')) {
-      await encryptor.rotate('health');
-    }
-    const targetVersion = await encryptor.currentKeyVersion('health');
-    logger.info({ runId, domain: 'health', targetVersion }, 'Re-encryption started');
-    const counts = await reencryptHealth(app.get(PG_POOL), encryptor, app.get(AuditService));
-    logger.info({ runId, domain: 'health', targetVersion, ...counts }, 'Re-encryption finished');
-    process.exitCode = counts.failed > 0 ? 1 : 0;
-  });
-  await app.close();
+  try {
+    return await runWithContext({ correlationId: runId, system: 'job:reencrypt' }, async () => {
+      if (argv.includes('--rotate')) {
+        await encryptor.rotate('health');
+      }
+      const targetVersion = await encryptor.currentKeyVersion('health');
+      logger.info({ runId, domain: 'health', targetVersion }, 'Re-encryption started');
+      const counts = await reencryptHealth(app.get(PG_POOL), encryptor, app.get(AuditService));
+      logger.info({ runId, domain: 'health', targetVersion, ...counts }, 'Re-encryption finished');
+      return counts.failed > 0 ? 1 : 0;
+    });
+  } finally {
+    await app.close();
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
-  await main().catch((error: unknown) => {
+  process.exitCode = await main().catch((error: unknown) => {
     logger.error(
       { error: error instanceof Error ? error.name : 'unknown' },
       'Re-encryption failed',
     );
-    process.exitCode = 1;
+    return 1;
   });
 }

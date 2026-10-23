@@ -7,7 +7,7 @@ import { AuditService } from '../src/audit/audit.service.js';
 import { runWithContext } from '../src/common/request-context.js';
 import { FIELD_ENCRYPTOR } from '../src/crypto/crypto.tokens.js';
 import { PG_POOL } from '../src/data-stores/data-stores.tokens.js';
-import { reencryptHealth } from '../src/jobs/reencrypt.js';
+import { main, reencryptHealth } from '../src/jobs/reencrypt.js';
 import { bearer, login, type Login, USERS } from './auth-helpers.js';
 import { bootApp } from './boot-app.js';
 import { connectAs } from './db.js';
@@ -216,4 +216,17 @@ describe('Bounded, audited re-encryption (EN-05.4 to EN-05.9)', () => {
     expect(second.counts).toEqual({ reencrypted: 0, skipped: 0, failed: 0 });
     expect(await entries(second.runId)).toEqual([]);
   });
+
+  it(
+    'EN-05.6 the command exits 0 after a clean run and 1 when a row fails',
+    async () => {
+      await createNotes(1);
+      expect(await main(['node', 'reencrypt.js', '--rotate'])).toBe(0);
+      const broken = await createNote();
+      cleanup.push(broken);
+      await corrupt(broken);
+      expect(await main(['node', 'reencrypt.js', '--rotate'])).toBe(1);
+    },
+    SLOW_TEST_TIMEOUT_MS,
+  );
 });
