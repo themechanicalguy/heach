@@ -1,4 +1,13 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ApiCookieAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { readCookie } from '../common/cookies.js';
@@ -41,7 +50,10 @@ export class AuthController {
     try {
       return respond(response, await this.sessions.refresh(readCookie(request, REFRESH_COOKIE)));
     } catch (error) {
-      response.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH });
+      // Only 401 means the session is over; on any other failure the cookie stays (SE-07.16).
+      if (error instanceof UnauthorizedException) {
+        response.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH });
+      }
       throw error;
     }
   }

@@ -87,7 +87,7 @@ describe('Sessions (SE-07)', () => {
     expect((loser.body as { accessToken?: string }).accessToken).toBeUndefined();
     expect(String(loser.headers['set-cookie'])).toMatch(/heach_refresh=;/);
     // Sessions that existed before the reuse was detected all stop working. The winner's new
-    // session may outlive it (spec 001 edge case; backlog item 3), so it is not asserted here.
+    // session is revoked too since spec 004; SE-07.18 in session-rotation.int-spec.ts proves it.
     expect(
       await statuses(me(racer.token), me(otherDevice.token), refresh(otherDevice.cookie)),
     ).toEqual([401, 401, 401]);
