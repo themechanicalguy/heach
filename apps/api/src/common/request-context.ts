@@ -13,6 +13,8 @@ export interface Principal {
 export interface RequestContext {
   correlationId: string;
   principal?: Principal;
+  /** A system job acting with no user, for example `job:reencrypt`; set only by the job itself. */
+  system?: string;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();

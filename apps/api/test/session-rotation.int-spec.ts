@@ -9,6 +9,8 @@ import { bootApp } from './boot-app.js';
 import { connectAs } from './db.js';
 
 const REPEATS = 50;
+// 50 repetitions run past the 5 s default on slower CI runners (SE-07.20 timed out on #70).
+const REPEAT_TIMEOUT_MS = 30_000;
 
 let app: INestApplication<App>;
 let admin: pg.Client;
@@ -101,29 +103,37 @@ describe('Session rotation under faults (SE-07.14 to SE-07.17)', () => {
     expect(refreshCookie(unauthorised)).toMatch(/^heach_refresh=;/);
   });
 
-  it('SE-07.17 the same cookie refreshes after a transient fault (50 users, SC-002)', async () => {
-    const store = app.get(AccessTokenStore);
-    for (let attempt = 0; attempt < REPEATS; attempt += 1) {
-      const device = await login(app, USERS.patientB);
-      vi.spyOn(store, 'issue').mockRejectedValueOnce(new Error('redis down'));
-      expect((await refresh(device.cookie)).status).toBe(500);
-      const recovered = await refresh(device.cookie);
-      expect(recovered.status).toBe(200);
-      await me(fromResponse(recovered).token).expect(200);
-    }
-  });
+  it(
+    'SE-07.17 the same cookie refreshes after a transient fault (50 users, SC-002)',
+    async () => {
+      const store = app.get(AccessTokenStore);
+      for (let attempt = 0; attempt < REPEATS; attempt += 1) {
+        const device = await login(app, USERS.patientB);
+        vi.spyOn(store, 'issue').mockRejectedValueOnce(new Error('redis down'));
+        expect((await refresh(device.cookie)).status).toBe(500);
+        const recovered = await refresh(device.cookie);
+        expect(recovered.status).toBe(200);
+        await me(fromResponse(recovered).token).expect(200);
+      }
+    },
+    REPEAT_TIMEOUT_MS,
+  );
 });
 
 describe('Replay and sign-out under concurrency (SE-07.18 to SE-07.20)', () => {
-  it('SE-07.18 a concurrent replay revokes the winner too (50 races, SC-001)', async () => {
-    for (let attempt = 0; attempt < REPEATS; attempt += 1) {
-      const racer = await login(app, USERS.provider);
-      const other = await login(app, USERS.provider);
-      const [first, second] = await Promise.all([refresh(racer.cookie), refresh(racer.cookie)]);
-      expect([first.status, second.status]).not.toEqual([200, 200]);
-      await expectNothingWorks([racer, other, ...winners(first, second)]);
-    }
-  });
+  it(
+    'SE-07.18 a concurrent replay revokes the winner too (50 races, SC-001)',
+    async () => {
+      for (let attempt = 0; attempt < REPEATS; attempt += 1) {
+        const racer = await login(app, USERS.provider);
+        const other = await login(app, USERS.provider);
+        const [first, second] = await Promise.all([refresh(racer.cookie), refresh(racer.cookie)]);
+        expect([first.status, second.status]).not.toEqual([200, 200]);
+        await expectNothingWorks([racer, other, ...winners(first, second)]);
+      }
+    },
+    REPEAT_TIMEOUT_MS,
+  );
 
   it('SE-07.19 a sequential replay revokes every session', async () => {
     const device = await login(app, USERS.provider);
@@ -135,13 +145,17 @@ describe('Replay and sign-out under concurrency (SE-07.18 to SE-07.20)', () => {
     await expectNothingWorks([device, other, rotated]);
   });
 
-  it('SE-07.20 sign-out of all devices during another device refresh leaves no session (50 times)', async () => {
-    for (let attempt = 0; attempt < REPEATS; attempt += 1) {
-      const leaving = await login(app, USERS.patientB);
-      const other = await login(app, USERS.patientB);
-      const [signOut, refreshed] = await Promise.all([logoutAll(leaving), refresh(other.cookie)]);
-      expect(signOut.status).toBe(204);
-      await expectNothingWorks([leaving, other, ...winners(refreshed)]);
-    }
-  });
+  it(
+    'SE-07.20 sign-out of all devices during another device refresh leaves no session (50 times)',
+    async () => {
+      for (let attempt = 0; attempt < REPEATS; attempt += 1) {
+        const leaving = await login(app, USERS.patientB);
+        const other = await login(app, USERS.patientB);
+        const [signOut, refreshed] = await Promise.all([logoutAll(leaving), refresh(other.cookie)]);
+        expect(signOut.status).toBe(204);
+        await expectNothingWorks([leaving, other, ...winners(refreshed)]);
+      }
+    },
+    REPEAT_TIMEOUT_MS,
+  );
 });
