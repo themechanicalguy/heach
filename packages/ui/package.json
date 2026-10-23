@@ -28,8 +28,8 @@
   ],
   "devDependencies": {
     "@heach/config": "workspace:* typescript@*",
-    "@storybook/react": "10.6.1",
-    "@storybook/react-vite": "10.6.1",
+    "@storybook/react": "10.6.2",
+    "@storybook/react-vite": "10.6.2",
     "@testing-library/react": "16.3.3",
     "@types/node": "24.19.1",
     "@types/react": "19.3.0",
@@ -39,9 +39,9 @@
     "jsdom": "30.1.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "storybook": "10.6.1",
+    "storybook": "10.6.2",
     "typescript": "6.0.3",
-    "vite": "8.3.2",
+    "vite": "8.3.4",
     "vitest": "5.0.3"
   },
   "peerDependencies": {
