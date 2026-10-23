@@ -13,7 +13,8 @@ export interface AuditEvent {
 
 /**
  * Appends to the hash-chained audit log through audit.append, the only write the API role has
- * (SE-05.4). Actor, role and correlation ID come from the request context.
+ * (SE-05.4). Actor, role and correlation ID come from the request context; a system job with no
+ * user is recorded as role `system` with the job's name as actor (spec 005 D-4).
  */
 @Injectable()
 export class AuditService {
@@ -21,9 +22,11 @@ export class AuditService {
 
   async record(event: AuditEvent, client: Pick<pg.Pool, 'query'> = this.pool): Promise<void> {
     const context = currentContext();
+    const principal = context?.principal;
+    const system = principal ? undefined : context?.system;
     await client.query('SELECT audit.append($1, $2, $3, $4, $5, $6)', [
-      context?.principal?.userId ?? null,
-      context?.principal?.role ?? 'anonymous',
+      principal?.userId ?? system ?? null,
+      principal?.role ?? (system ? 'system' : 'anonymous'),
       event.action,
       event.entity,
       event.entityId,

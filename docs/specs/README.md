@@ -27,7 +27,7 @@ Step 1 was built before ADR 0007; its record is in [implementation status](../im
 | [Rate-limit bypass](../../specs/002-rate-limit-bypass/spec.md) | 2 | SO-08, SE-08 | Approved; implemented in #64, Done on owner review of the evidence |
 | [Transactional audit writes](../../specs/003-transactional-audit-writes/spec.md) | 2 | SE-05 | Approved; implemented (`fix/003-transactional-audit-writes`), Done on owner review of the evidence |
 | [Transactional session rotation](../../specs/004-transactional-session-rotation/spec.md) | 2 | SE-07 | Approved; implemented (`fix/004-transactional-session-rotation`), Done on owner review of the evidence |
-| [Bounded re-encryption](../../specs/005-bounded-reencryption/spec.md) | 2 | EN-05, SE-05 | Approved (owner, 22 October); code after 003 |
+| [Bounded re-encryption](../../specs/005-bounded-reencryption/spec.md) | 2 | EN-05, SE-05 | Approved; implemented (`fix/005-bounded-reencryption`), Done on owner review of the evidence |
 
 <!-- Add a row per feature directory, for example:
 | [OTP login](../../specs/003-otp-login/spec.md) | 3 | AC-01, AC-02 | Draft |

@@ -3,6 +3,7 @@ import type { INestApplication } from '@nestjs/common';
 import type pg from 'pg';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
+import { AuditService } from '../src/audit/audit.service.js';
 import { BLIND_INDEXER, FIELD_ENCRYPTOR } from '../src/crypto/crypto.tokens.js';
 import { PG_POOL } from '../src/data-stores/data-stores.tokens.js';
 import { reencryptHealth } from '../src/jobs/reencrypt.js';
@@ -35,7 +36,8 @@ describe('Key rotation and re-encryption (EN-05.3)', () => {
     const encryptor = app.get<EnvelopeEncryptor>(FIELD_ENCRYPTOR);
     const version = String(await encryptor.rotate('health'));
 
-    expect(await reencryptHealth(app.get(PG_POOL), encryptor)).toBeGreaterThan(0);
+    const counts = await reencryptHealth(app.get(PG_POOL), encryptor, app.get(AuditService));
+    expect(counts.reencrypted).toBeGreaterThan(0);
 
     const { rows } = await admin.query<{ stale: string }>(
       "SELECT count(*) AS stale FROM app.patient_note WHERE body ->> 'keyVersion' <> $1",
