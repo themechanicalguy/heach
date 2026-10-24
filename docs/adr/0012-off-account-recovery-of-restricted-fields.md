@@ -1,6 +1,6 @@
 # 0012. Decide how backups are recovered without the AWS account
 
-- **Status:** Proposed (owner decision needed; nothing here is built)
+- **Status:** Accepted (owner, 2026-10-25: R1, R2 and R3 as recommended)
 - **Date:** 2026-10-24
 - **Requirements:** EN-04, EN-06, EN-10, SO-10; Step 2 spec decision D1; [ADR 0010](0010-step-2-backups-secrets-waf.md)
 
@@ -28,7 +28,7 @@ before the first real record (pilot gate, ADR 0009).
 
 ## Decision
 
-Proposed; the owner chooses. Recommended:
+Accepted by the owner on 25 October 2026 ("Accept R1+R2+R3"), as recommended:
 
 1. **Restricted fields (R1):** accept the gap for dev while all data is synthetic, and before the
    pilot add an offline escrow wrap (option B below) through its own feature spec. Record the
@@ -76,6 +76,12 @@ unset HEACH_BACKUP_PASS
 A table of contents means the passphrase in the password manager is the right one.
 
 ## Consequences
+
+Open after acceptance (owner actions, each recorded with its date in the
+[backup runbook](../runbooks/backup-restore.md)): the weekly calendar reminder (R2) and the
+password-manager test decryption (R3). EN-10 stays Partial until R3 is recorded; R1 option B is a
+pilot-gate item in the [backlog](../backlog.md), not Step 2 work.
+
 
 - Until R1 is decided, the status page keeps EN-10 Partial with "Restricted fields not recoverable
   without the AWS account" as a stated gap, and the pilot cannot start.

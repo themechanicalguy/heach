@@ -1,8 +1,8 @@
 # Implementation Plan: Recurring restore verification of the nightly backup
 
-**Status**: Draft
+**Status**: Approved
 
-**Spec**: [spec.md](spec.md) | **Date**: 2026-10-24 | **Approval**: Not approved; needs the owner's explicit approval with decisions D-1 to D-5 ([research.md](research.md))
+**Spec**: [spec.md](spec.md) | **Date**: 2026-10-24 | **Approval**: Owner (Saurav Rath), 2026-10-25, explicit approval of this spec and its plan as drafted ("Approve as drafted"), with decisions D-1 to D-5 as written, including the weekly Sunday schedule (D-1), the one summary audit entry (D-3) and the alert published with the API role's credentials (D-5, amended for spec 007); takes effect when this docs-only pull request merges
 
 **Input**: Feature specification from `specs/006-recurring-restore-check/spec.md`
 

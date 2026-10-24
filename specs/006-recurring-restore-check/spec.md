@@ -1,12 +1,12 @@
 # Feature Specification: Recurring restore verification of the nightly backup
 
-**Status**: Draft
+**Status**: Approved
 
 **Step**: [Step 2 spec](../../docs/specs/step-02-secure-foundation.md) of the [guideline](../../docs/mvp-v1-implementation-guideline.md) (backups, EN-10.3 and EN-10.4)
 
 **Requirements in scope**: EN-10 (backups encrypted, restore-tested); SE-05 (audit of Restricted-data access); SO-01 (threat model, in plan.md); LM-02 (no personal data in logs); LM-07 (alerts); TS-01, TS-03 (test evidence)
 
-**Approval**: Not approved. Needs the owner's explicit approval of this spec and its plan, with decisions D-1 to D-5 in [research.md](research.md); takes effect when the approval pull request merges
+**Approval**: Owner (Saurav Rath), 2026-10-25, explicit approval of this spec and its plan as drafted ("Approve as drafted"), with decisions D-1 to D-5 as written, including the weekly Sunday schedule (D-1), the one summary audit entry (D-3) and the alert published with the API role's credentials (D-5, amended for spec 007); takes effect when this docs-only pull request merges
 
 **Created**: 2026-10-24
 
@@ -163,4 +163,4 @@ None. Host job only; English log lines and alert text, no user-facing strings.
 
 ## Open questions
 
-None. Decisions D-1 to D-5 in [research.md](research.md) are for the owner to confirm at approval.
+None.

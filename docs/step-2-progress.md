@@ -51,13 +51,13 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-05.2 | ✅ | `sample-notes.int-spec.ts` (generic 400, no echo) |
 | SO-08.1 | ✅ | `test/security.int-spec.ts` (@nestjs/throttler, per token or IP) |
 | SO-08.2 | ✅ | SQL injection sample → 400 (`security.int-spec.ts`). Caddy: `caddy-ratelimit` zone of 300 requests a minute per client IP on `/api/*`; the CI deploy-bundle job floods `/api/healthz` (which the API throttler skips) and requires 429s from Caddy while pages still answer 200. Local record 18 October: 20-event test zone gave 20 × 200 then 429 with `Retry-After: 60` |
-| SO-08.3 | ✅ published, SNS delivered; 🧑 inbox receipt | `test/security.int-spec.ts`. Live on 2026-10-18 at 10:17:21 UTC: published only (subscription then PendingConfirmation). **24 October 2026:** subscription checked in AWS: one email subscription, `SubscriptionsConfirmed` 1, pending 0. At 16:06:22 UTC synthetic user `00000000-0000-4000-8000-000000000003` made 11 role-denied requests (403) over HTTPS through the public entry; the deployed API (`8b0387f`), now on the API role, published one alert ("HEACH: repeated authorisation failures", body names that synthetic user). CloudWatch for 16:06 UTC: `NumberOfMessagesPublished` 1, `NumberOfNotificationsDelivered` 1, `NumberOfNotificationsFailed` 0. Delivered means SNS handed it to the mail system; arrival in the inbox is not yet confirmed by the owner |
+| SO-08.3 | ✅ published, SNS delivered, received | `test/security.int-spec.ts`. Live on 2026-10-18 at 10:17:21 UTC: published only (subscription then PendingConfirmation). **24 October 2026:** subscription checked in AWS: one email subscription, `SubscriptionsConfirmed` 1, pending 0. At 16:06:22 UTC synthetic user `00000000-0000-4000-8000-000000000003` made 11 role-denied requests (403) over HTTPS through the public entry; the deployed API (`8b0387f`), now on the API role, published one alert ("HEACH: repeated authorisation failures", body names that synthetic user). CloudWatch for 16:06 UTC: `NumberOfMessagesPublished` 1, `NumberOfNotificationsDelivered` 1, `NumberOfNotificationsFailed` 0. Delivered means SNS handed it to the mail system. **Received:** the owner confirmed on 25 October 2026 (in a Claude Code session) that this alert arrived in the intended inbox |
 | LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
 | LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
 | LM-04.1 | ✅ | Local record, plus dev host on 2026-10-18: Pixel 7 and Desktop Chrome visited `/or`, `/en/notes` and `/hi/sign-in` on https://15.252.65.98. The API logged CLS, FCP, INP, LCP and TTFB for each of `/[locale]`, `/[locale]/notes` and `/[locale]/sign-in` × mobile and desktop. Lines carry only vital, value, route template, device class and a random request correlation ID |
 | LM-05.1 | ✅ (local dashboard, ADR 0010) | Traces in OpenTelemetry and Jaeger. Grafana dashboard `HEACH API (LM-05.1)` (provisioned, `deploy/observability/grafana`) over Prometheus: request rate, 5xx share, p50/p95/p99. Record 18 October, local API: 37.6 requests/s, p50 2.5 ms, p95 4.8 ms, p99 5.0 ms; synthetic outage (PostgreSQL stopped, `/readyz` 503) showed 18 % 5xx share. `scripts/observability-dashboard.test.mjs` keeps the three panels. Local only (ADR 0010) |
-| LM-07.1 | ✅ publish | `error-rate.monitor.spec.ts`. Live on 2026-10-18 at 10:17:51 UTC: the API's own `ErrorRateMonitor` and `SnsAlertPublisher` ran in a one-off API container on the host (host role, real topic) with the subject `[SYNTHETIC TEST LM-07.1]`. A 10 percent rate sent 1 alert; a second evaluation sent none. The request path into the monitor is covered by the spec, not live. One more message was published at 10:11 UTC, during the rotation outage, probably a genuine alert; nothing was delivered, so its content is unconfirmed. Delivery waits on the subscription. **24 October 2026, 16:05:22 UTC:** the same method in a one-off API container on the API role (`8b0387f`), subject `[SYNTHETIC TEST LM-07.1] HEACH: API error rate above 5 percent`, body prefixed "Synthetic test, no action needed": a 10 percent rate over 100 requests sent one alert, a second evaluation none. CloudWatch for 16:05 UTC: published 1, delivered 1, failed 0. 🧑 Inbox receipt not yet confirmed by the owner |
+| LM-07.1 | ✅ published, SNS delivered, received | `error-rate.monitor.spec.ts`. Live on 2026-10-18 at 10:17:51 UTC: the API's own `ErrorRateMonitor` and `SnsAlertPublisher` ran in a one-off API container on the host (host role, real topic) with the subject `[SYNTHETIC TEST LM-07.1]`. A 10 percent rate sent 1 alert; a second evaluation sent none. The request path into the monitor is covered by the spec, not live. One more message was published at 10:11 UTC, during the rotation outage, probably a genuine alert; nothing was delivered, so its content is unconfirmed. Delivery waits on the subscription. **24 October 2026, 16:05:22 UTC:** the same method in a one-off API container on the API role (`8b0387f`), subject `[SYNTHETIC TEST LM-07.1] HEACH: API error rate above 5 percent`, body prefixed "Synthetic test, no action needed": a 10 percent rate over 100 requests sent one alert, a second evaluation none. CloudWatch for 16:05 UTC: published 1, delivered 1, failed 0. **Received:** the owner confirmed on 25 October 2026 that this alert arrived in the intended inbox |
 | I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
 | I18N-02.1 | ✅ | `apps/web/src/lint-rules.test.ts` (JSX text and `alt` fail at error level) |
 | I18N-02.2 | ✅ | `packages/i18n/src/icu.test.ts`, `translator.test.ts` |
@@ -134,21 +134,14 @@ specs' evidence. Step 2 is **not complete**.
 
 Status on 24 October 2026. Nobody outside the project has been contacted.
 
-- **Confirm alert email receipt.** Two labelled synthetic alerts were published and SNS reports both
-  delivered (16:05 and 16:06 UTC on 24 October): `[SYNTHETIC TEST LM-07.1] HEACH: API error rate
-  above 5 percent` and `HEACH: repeated authorisation failures` (body names synthetic user
-  `00000000-0000-4000-8000-000000000003`). Say whether both arrived (check spam), so SO-08.3,
-  LM-07.1 and the credit alerts can be recorded as received. The subscription itself is confirmed in
-  AWS.
+- ~~Confirm alert email receipt~~: done 25 October 2026, both synthetic alerts (LM-07.1, SO-08.3)
+  arrived. The credit alerts' receipt was not asked and stays unrecorded.
 - **Review the evidence for specs 001 to 005 and 007** (gate G4, Done): each spec's tasks and this
   log. Code, CI, deployment and, for 007, live checks are recorded; acceptance is yours.
-- **Decide ADR 0012** ([proposed](adr/0012-off-account-recovery-of-restricted-fields.md)): how
-  Restricted fields are recovered without the AWS account (recommended: accept for dev, escrow
-  wrap by spec before the pilot), the weekly pull (recommended: manual plus a calendar reminder),
-  and the passphrase (copy `heach-backup-passphrase` into your password manager and run the test in
-  the ADR).
-- **Approve or change draft spec 006** (recurring restore check, D-1 to D-5), as amended for the
-  spec 007 roles.
+- ~~Decide ADR 0012~~: accepted 25 October 2026 (R1, R2, R3 as recommended). Still yours:
+  add the weekly calendar reminder (R2), copy `heach-backup-passphrase` into your password manager
+  and run the test decryption in the ADR from that copy (R3); tell me the date and the result.
+- ~~Approve spec 006~~: approved 25 October 2026 as drafted.
 - Optional: a re-encryption with `--rotate` on dev (creates `health` key version 2;
   [runbook](runbooks/key-rotation.md)); and documentation gap 13 (admin on `localhost:8443`).
 - Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md)
