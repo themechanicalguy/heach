@@ -2,7 +2,7 @@
 
 **Status**: Approved
 
-**Spec**: [spec.md](spec.md) | **Date**: 2026-10-24 | **Approval**: Owner (Saurav Rath), 2026-10-25, explicit approval of this spec and its plan as drafted ("Approve as drafted"), with decisions D-1 to D-5 as written, including the weekly Sunday schedule (D-1), the one summary audit entry (D-3) and the alert published with the API role's credentials (D-5, amended for spec 007); takes effect when this docs-only pull request merges
+**Spec**: [spec.md](spec.md) | **Date**: 2026-10-24 | **Approval**: Owner (Saurav Rath), 2026-10-25, explicit approval of this spec and its plan as drafted ("Approve as drafted"), with decisions D-1 to D-5 as written, including the weekly Sunday schedule (D-1), the one summary audit entry (D-3) and the alert published with the API role's credentials (D-5, amended for spec 007); takes effect when this docs-only pull request merges. Amended 2026-10-25 with the owner's explicit approval ("Approve amendment"): the audit entry carries outcome, dump name and run ID, and counts go in the job's log line (no detail column exists); the live connection is the API role used only for `audit.append`; read grants in the throwaway copy only; stage `job` for a job that fails before reporting a stage
 
 **Input**: Feature specification from `specs/006-recurring-restore-check/spec.md`
 
@@ -83,8 +83,11 @@ docs/runbooks/backup-restore.md             # schedule, failure handling, record
 ## Data model and migrations
 
 None. The throwaway database is restored from the dump, so it has the live schema. The job's
-connection to it uses the API role after `GRANT CONNECT` (as `scripts/restore-check.sh` does); the
-live database is reached only through `audit.append`.
+connection to it uses the API role after `GRANT CONNECT` (as `scripts/restore-check.sh` does). In
+the throwaway database only, the host script also grants the API role `SELECT` on the `app` and
+`audit` tables and `EXECUTE` on `audit.verify_chain()`, so the job can count rows and verify the
+chain; the live database's grants are unchanged. The live database is reached only through
+`audit.append` (amended 2026-10-25).
 
 ## Encryption and keys
 
@@ -96,15 +99,19 @@ GET (SSE-KMS), as the runbook restore does.
 
 No HTTP contract. Command contract:
 
-- `node dist/jobs/restore-check.js` with `RESTORE_DATABASE_URL` set: exit 0 on pass; exit 1 with
-  stage `audit-chain` or `decrypt` on failure.
+- `node dist/jobs/restore-check.js` with `RESTORE_DATABASE_NAME` (a `heach_restorecheck_<digits>`
+  name; the job derives the URL from `DATABASE_URL` and refuses any other name),
+  `RESTORE_RUN_ID` and `RESTORE_DUMP_NAME` set: exit 0 on pass; exit 1 with stage `audit-chain`
+  or `decrypt` on failure (amended 2026-10-25: a name rather than a URL, so the host script needs
+  no database URL).
 - Output: one JSON log line `{ runId, stage, outcome, tables: {name: count}, decrypted, failed }`.
 - `deploy/dev/restore-check.sh`: stages `freshness`, `restore`, then the job's stages; exit 0 or 1;
-  on 1, one SNS publish.
+  on 1, one SNS publish. A job that fails before it reports a stage (for example it cannot start)
+  is reported as stage `job` (amended 2026-10-25).
 
 ## Audit, logging and monitoring
 
-- Audit: one `backup.restore_check` entry per run in the live log (D-3).
+- Audit: one entry per job run in the live log (D-3): `backup.restore_check` or `backup.restore_check.failed`, entity `backup`, the dump name as entity ID, the run ID as correlation ID (amended 2026-10-25; counts are in the log line).
 - Logging: the JSON line above; the host script logs stage transitions to the journal.
 - Monitoring: SNS alert on failure (D-5); the operator copies a monthly record to the runbook.
 

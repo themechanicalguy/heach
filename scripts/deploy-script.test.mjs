@@ -75,3 +75,19 @@ test('SE-07.23: only the loopback entry adds the key, and it is published on loo
     ['127.0.0.1:9443:9443'],
   );
 });
+
+test('EN-10.5: every deploy installs and enables the weekly restore check timer', () => {
+  const timers = deploy.slice(
+    deploy.indexOf('install -m 644'),
+    deploy.indexOf('systemctl daemon-reload'),
+  );
+  assert.match(timers, /heach-restore-check\.service heach-restore-check\.timer/);
+  const enable = deploy.slice(deploy.indexOf('systemctl enable --now'));
+  assert.match(enable.slice(0, enable.indexOf('>/dev/null')), /heach-restore-check\.timer/);
+  const timer = readFileSync(
+    new URL('../deploy/dev/heach-restore-check.timer', import.meta.url),
+    'utf8',
+  );
+  assert.match(timer, /OnCalendar=Sun \*-\*-\* 00:00:00 UTC/);
+  assert.match(timer, /Persistent=true/);
+});

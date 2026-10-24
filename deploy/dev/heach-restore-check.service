@@ -1,0 +1,7 @@
+[Unit]
+Description=HEACH weekly restore check of the newest backup (EN-10.5)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/heach/restore-check.sh

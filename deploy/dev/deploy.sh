@@ -73,12 +73,14 @@ docker compose up -d --remove-orphans
 # passwords (EN-12.2 rotation); a same-tag deploy would otherwise keep the old API running.
 docker compose up -d --no-deps --force-recreate api
 
-# Nightly backup timer (EN-10.3); Persistent=true catches up after the host sleeps. API role
-# credentials every 15 minutes (finding 7).
+# Nightly backup timer (EN-10.3) and weekly restore check (EN-10.5); Persistent=true catches up
+# after the host sleeps. API role credentials every 15 minutes (finding 7).
 install -m 644 heach-backup.service heach-backup.timer heach-api-credentials.service \
-  heach-api-credentials.timer /etc/systemd/system/
+  heach-api-credentials.timer heach-restore-check.service heach-restore-check.timer \
+  /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now heach-backup.timer heach-api-credentials.timer >/dev/null
+systemctl enable --now heach-backup.timer heach-api-credentials.timer \
+  heach-restore-check.timer >/dev/null
 
 for _ in $(seq 1 60); do
   if docker compose exec -T api wget -qO- http://127.0.0.1:3001/readyz >/dev/null 2>&1; then

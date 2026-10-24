@@ -1,0 +1,410 @@
+import { type ChildProcess, spawn } from 'node:child_process';
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import type { INestApplication } from '@nestjs/common';
+import pg from 'pg';
+import request from 'supertest';
+import type { App } from 'supertest/types.js';
+import { pgClientConfig } from '../src/db/connection.js';
+import { bearer, login, USERS } from './auth-helpers.js';
+import { bootApp } from './boot-app.js';
+import { connectAs } from './db.js';
+
+// Drives deploy/dev/restore-check.sh end to end against the local PostgreSQL (spec 006): real
+// pg_dump and pg_restore, the built job, a local folder in place of S3 and a fake alert command.
+const ROOT = new URL('../../../', import.meta.url).pathname;
+const SCRIPT = join(ROOT, 'deploy/dev/restore-check.sh');
+const BASH = '/bin/bash';
+const JOB = join(ROOT, 'apps/api/dist/jobs/restore-check.js');
+const RUN_TIMEOUT_MS = 120_000; // SC-004: a run on a small data set finishes in under 2 minutes
+const TEST_TIMEOUT_MS = 180_000;
+const IV_BYTES = 12;
+const RUN_ID = /restorecheck-[0-9a-f-]{36}/;
+const SYNTHETIC = 'synthetic restore-check note';
+
+interface Run {
+  code: number | null;
+  output: string;
+  alerts: string[];
+  runId: string;
+  ms: number;
+}
+
+let app: INestApplication<App>;
+let admin: pg.Client;
+let work: string;
+let alertLog: string;
+let goodDump: Buffer;
+const noteIds: string[] = [];
+
+/** Waits for a child process; resolves its exit code, stdout and stdout plus stderr. */
+function collect(child: ChildProcess, input?: Buffer) {
+  return new Promise<{ code: number | null; stdout: Buffer; output: string }>((resolve, reject) => {
+    const out: Buffer[] = [];
+    let output = '';
+    child.stdout?.on('data', (chunk: Buffer) => {
+      out.push(chunk);
+      output += chunk.toString();
+    });
+    child.stderr?.on('data', (chunk: Buffer) => {
+      output += chunk.toString();
+    });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      resolve({ code, stdout: Buffer.concat(out), output });
+    });
+    child.stdin?.end(input);
+  });
+}
+
+/** Runs a command in the local postgres container, with optional stdin; resolves stdout. */
+async function inPostgres(script: string, input?: Buffer): Promise<Buffer> {
+  const child = spawn(
+    BASH,
+    ['-c', 'exec docker compose exec -T postgres sh -c "$1"', 'sh', script],
+    {
+      cwd: ROOT,
+    },
+  );
+  const { code, stdout, output } = await collect(child, input);
+  if (code !== 0) throw new Error(`postgres exec: ${output}`);
+  return stdout;
+}
+
+const AS_ADMIN = 'PGPASSWORD="$POSTGRES_PASSWORD"';
+const dumpOf = (db: string) => inPostgres(`${AS_ADMIN} pg_dump -U "$POSTGRES_USER" -d ${db} -Fc`);
+
+async function liveDatabase(): Promise<string> {
+  const { rows } = await admin.query<{ db: string }>('SELECT current_database() AS db');
+  return rows[0]?.db ?? '';
+}
+
+async function adminOn(db: string): Promise<pg.Client> {
+  const url = new URL(process.env.DATABASE_ADMIN_URL ?? '');
+  url.pathname = `/${db}`;
+  const client = new pg.Client(
+    pgClientConfig(
+      url.toString(),
+      process.env.DATABASE_ADMIN_PASSWORD,
+      process.env.DATA_TLS_CA_FILE ?? '',
+    ),
+  );
+  await client.connect();
+  return client;
+}
+
+/** The good dump, restored into a scratch database, changed by `tamper`, dumped again. */
+async function tamperedDump(tamper: (client: pg.Client) => Promise<void>): Promise<Buffer> {
+  const db = `heach_rcsource_${String(Date.now())}`;
+  await admin.query(`CREATE DATABASE ${db}`);
+  try {
+    await inPostgres(
+      `${AS_ADMIN} pg_restore -U "$POSTGRES_USER" -d ${db} --exit-on-error`,
+      goodDump,
+    );
+    const client = await adminOn(db);
+    try {
+      await tamper(client);
+    } finally {
+      await client.end();
+    }
+    return await dumpOf(db);
+  } finally {
+    await admin.query(`DROP DATABASE IF EXISTS ${db} WITH (FORCE)`);
+  }
+}
+
+const stamp = (date: Date) =>
+  date
+    .toISOString()
+    .replace(/:\d\d\.\d+Z$/, 'Z')
+    .replace(':', '');
+
+/** A folder laid out like the bucket, holding the given dumps by object name. */
+async function dumps(files: Record<string, Buffer>): Promise<string> {
+  const dir = await mkdtemp(join(work, 'dumps-'));
+  await mkdir(join(dir, 'pg'));
+  for (const [name, content] of Object.entries(files)) {
+    await writeFile(join(dir, name), content);
+  }
+  return dir;
+}
+
+const fresh = () => `pg/${stamp(new Date())}.dump`;
+
+async function runCheck(
+  dumpDir: string,
+  job = `node ${JOB}`,
+  onStart?: (pid: number) => void,
+): Promise<Run> {
+  const started = Date.now();
+  const child = spawn(BASH, [SCRIPT], {
+    cwd: ROOT,
+    detached: true, // its own process group, so a test can kill the run and its job together
+    env: {
+      ...process.env,
+      RESTORE_CHECK_DIR: ROOT,
+      RESTORE_CHECK_DUMPS: dumpDir,
+      RESTORE_CHECK_JOB: job,
+      RESTORE_CHECK_ALERT: join(work, 'alert.sh'),
+    },
+  });
+  if (child.pid) onStart?.(child.pid);
+  const { code, output } = await collect(child);
+  const log = existsSync(alertLog) ? await readFile(alertLog, 'utf8') : '';
+  await rm(alertLog, { force: true });
+  return {
+    code,
+    output,
+    alerts: log.split('\n---\n').filter(Boolean),
+    runId: RUN_ID.exec(output)?.[0] ?? '',
+    ms: Date.now() - started,
+  };
+}
+
+async function throwaways(): Promise<string[]> {
+  const { rows } = await admin.query<{ datname: string }>(
+    "SELECT datname FROM pg_database WHERE datname LIKE 'heach\\_restorecheck\\_%' ORDER BY 1",
+  );
+  return rows.map((row) => row.datname);
+}
+
+async function waitForThrowaway(): Promise<string> {
+  for (let i = 0; i < 300; i += 1) {
+    const [db] = await throwaways();
+    if (db) return db;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error('no restore-check database appeared');
+}
+
+/** A checksum of every live application table, plus the audit log's size. */
+async function liveState(): Promise<{ tables: Record<string, string>; audit: number }> {
+  const { rows } = await admin.query<{ name: string }>(
+    `SELECT format('%I.%I', table_schema, table_name) AS name FROM information_schema.tables
+      WHERE table_schema = 'app' AND table_type = 'BASE TABLE' ORDER BY 1`,
+  );
+  const tables: Record<string, string> = {};
+  for (const { name } of rows) {
+    const result = await admin.query<{ sum: string }>(
+      `SELECT md5(coalesce(string_agg(t::text, '|' ORDER BY t::text), '')) AS sum FROM ${name} t`,
+    );
+    tables[name] = result.rows[0]?.sum ?? '';
+  }
+  const audit = await admin.query<{ n: string }>('SELECT count(*) AS n FROM audit.entry');
+  return { tables, audit: Number(audit.rows[0]?.n) };
+}
+
+function expectPrivacySafe(run: Run): void {
+  const text = `${run.output}\n${run.alerts.join('\n')}`;
+  expect(text).not.toContain(SYNTHETIC);
+  expect(text).not.toContain(USERS.patientA);
+  for (const id of noteIds) expect(text).not.toContain(id);
+}
+
+beforeAll(async () => {
+  if (!existsSync(JOB)) throw new Error('Build the API first: pnpm --filter @heach/api build');
+  app = await bootApp();
+  admin = await connectAs('admin');
+  work = await mkdtemp(join(tmpdir(), 'heach-restore-check-'));
+  alertLog = join(work, 'alerts.log');
+  await writeFile(
+    join(work, 'alert.sh'),
+    `#!/bin/bash\nprintf '%s\\n%s\\n---\\n' "$1" "$2" >> '${alertLog}'\n`,
+  );
+  await chmod(join(work, 'alert.sh'), 0o755);
+  const patient = await login(app, USERS.patientA);
+  for (let i = 0; i < 3; i += 1) {
+    const response = await request(app.getHttpServer())
+      .post('/v1/sample/notes')
+      .set(bearer(patient))
+      .send({ body: `${SYNTHETIC} ${String(i)}` })
+      .expect(201);
+    noteIds.push((response.body as { id: string }).id);
+  }
+  goodDump = await dumpOf(await liveDatabase());
+}, TEST_TIMEOUT_MS);
+
+afterAll(async () => {
+  for (const db of await throwaways()) await admin.query(`DROP DATABASE ${db} WITH (FORCE)`);
+  await admin.query('DELETE FROM app.patient_note WHERE id = ANY($1::uuid[])', [noteIds]);
+  await admin.end();
+  await app.close();
+  await rm(work, { recursive: true, force: true });
+});
+
+describe('Recurring restore check: passing run (EN-10.5, EN-10.8, EN-10.9, EN-10.10)', () => {
+  let run: Run;
+  let before: Awaited<ReturnType<typeof liveState>>;
+  let after: Awaited<ReturnType<typeof liveState>>;
+  const name = fresh();
+
+  beforeAll(async () => {
+    before = await liveState();
+    run = await runCheck(await dumps({ [name]: goodDump }));
+    after = await liveState();
+  }, TEST_TIMEOUT_MS);
+
+  it('EN-10.5 restores the newest dump and records its name, table counts and decrypted count', () => {
+    expect(run.code, run.output).toBe(0);
+    expect(run.output).toContain(name);
+    const line = run.output.split('\n').find((l) => l.includes('"outcome":"pass"')) ?? '{}';
+    const record = JSON.parse(line) as { tables: Record<string, number>; decrypted: number };
+    expect(record.tables['app.patient_note']).toBeGreaterThanOrEqual(noteIds.length);
+    expect(record.tables['audit.entry']).toBeGreaterThan(0);
+    // Up to 1,000 newest values are decrypted (EN-10.7); shared local databases may hold more.
+    expect(record.decrypted).toBe(Math.min(record.tables['app.patient_note'] ?? 0, 1_000));
+    expect(run.alerts).toEqual([]);
+  });
+
+  it('EN-10.5 finishes within two minutes (SC-004)', () => {
+    expect(run.ms).toBeLessThan(RUN_TIMEOUT_MS);
+  });
+
+  it('EN-10.8 leaves no restore-check database', async () => {
+    expect(await throwaways()).toEqual([]);
+  });
+
+  it('EN-10.9 leaves every live table unchanged and adds exactly one audit entry', () => {
+    expect(after.tables).toEqual(before.tables);
+    expect(after.audit).toBe(before.audit + 1);
+  });
+
+  it('EN-10.10 writes one system entry with the run ID and dump name, and no personal data', async () => {
+    const { rows } = await admin.query(
+      'SELECT actor_id, actor_role, action, entity, entity_id FROM audit.entry WHERE correlation_id = $1',
+      [run.runId],
+    );
+    expect(rows).toEqual([
+      {
+        actor_id: 'job:restore-check',
+        actor_role: 'system',
+        action: 'backup.restore_check',
+        entity: 'backup',
+        entity_id: name,
+      },
+    ]);
+    expectPrivacySafe(run);
+  });
+});
+
+describe('Recurring restore check: failures (EN-10.6, EN-10.7, EN-10.8, EN-10.10)', () => {
+  async function expectFailure(run: Run, stage: string): Promise<void> {
+    expect(run.code, run.output).toBe(1);
+    expect(run.alerts).toHaveLength(1);
+    const [subject, ...body] = (run.alerts[0] ?? '').split('\n');
+    expect(subject).toBe(`[HEACH] Restore check failed: ${stage}`);
+    expect(body.join('\n')).toContain(run.runId);
+    expect(await throwaways()).toEqual([]);
+    expectPrivacySafe(run);
+  }
+
+  it('EN-10.6 fails at freshness when there is no dump', async () => {
+    await expectFailure(await runCheck(await dumps({})), 'freshness');
+  });
+
+  it(
+    'EN-10.6 fails at freshness when the newest dump is older than 26 hours',
+    async () => {
+      const old = `pg/${stamp(new Date(Date.now() - 27 * 3600_000))}.dump`;
+      await expectFailure(await runCheck(await dumps({ [old]: goodDump })), 'freshness');
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    'EN-10.6 fails at restore when the dump is truncated',
+    async () => {
+      const half = goodDump.subarray(0, Math.floor(goodDump.length / 2));
+      await expectFailure(await runCheck(await dumps({ [fresh()]: half })), 'restore');
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    'EN-10.7 fails at audit-chain when an audit entry was altered',
+    async () => {
+      const broken = await tamperedDump(async (client) => {
+        await client.query(
+          "UPDATE audit.entry SET action = 'forged' WHERE seq = (SELECT min(seq) FROM audit.entry)",
+        );
+      });
+      const run = await runCheck(await dumps({ [fresh()]: broken }));
+      await expectFailure(run, 'audit-chain');
+      const { rows } = await admin.query(
+        'SELECT action FROM audit.entry WHERE correlation_id = $1',
+        [run.runId],
+      );
+      expect(rows).toEqual([{ action: 'backup.restore_check.failed' }]);
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    'EN-10.7 fails at decrypt when a Restricted value does not authenticate',
+    async () => {
+      const corrupted = await tamperedDump(async (client) => {
+        const { rows } = await client.query<{ ciphertext: string }>(
+          "SELECT body ->> 'ciphertext' AS ciphertext FROM app.patient_note WHERE id = $1",
+          [noteIds[0]],
+        );
+        const raw = Buffer.from(rows[0]?.ciphertext ?? '', 'base64');
+        raw.writeUInt8((raw.readUInt8(IV_BYTES) + 1) % 256, IV_BYTES);
+        await client.query(
+          "UPDATE app.patient_note SET body = jsonb_set(body, '{ciphertext}', to_jsonb($2::text)) WHERE id = $1",
+          [noteIds[0], raw.toString('base64')],
+        );
+      });
+      await expectFailure(await runCheck(await dumps({ [fresh()]: corrupted })), 'decrypt');
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    'EN-10.6 reports stage job when the job cannot start',
+    async () => {
+      await expectFailure(await runCheck(await dumps({ [fresh()]: goodDump }), 'exit 3'), 'job');
+    },
+    TEST_TIMEOUT_MS,
+  );
+});
+
+describe('Recurring restore check: interrupted runs (EN-10.8)', () => {
+  async function interrupted(signal: NodeJS.Signals): Promise<{ run: Run; db: string }> {
+    let pid = 0;
+    const pending = runCheck(await dumps({ [fresh()]: goodDump }), 'sleep 60', (p) => (pid = p));
+    const db = await waitForThrowaway();
+    process.kill(-pid, signal);
+    return { run: await pending, db };
+  }
+
+  it(
+    'EN-10.8 a stopped run (SIGTERM, as systemd stops it) drops its database',
+    async () => {
+      await interrupted('SIGTERM');
+      expect(await throwaways()).toEqual([]);
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    'EN-10.8 the next run drops a killed run’s database once it is a day old (SC-003)',
+    async () => {
+      for (let i = 0; i < 3; i += 1) {
+        const { db } = await interrupted('SIGKILL');
+        expect(await throwaways()).toEqual([db]);
+        const dayOld = `heach_restorecheck_${String(Math.floor(Date.now() / 1000) - 86_400 - 60 - i)}`;
+        await admin.query(`ALTER DATABASE ${db} RENAME TO ${dayOld}`);
+      }
+      const recent = `heach_restorecheck_${String(Math.floor(Date.now() / 1000) - 60)}`;
+      await admin.query(`CREATE DATABASE ${recent}`);
+      const run = await runCheck(await dumps({ [fresh()]: goodDump }));
+      expect(run.code, run.output).toBe(0);
+      expect(await throwaways()).toEqual([recent]); // younger than a day: kept (D-4)
+      await admin.query(`DROP DATABASE ${recent}`);
+    },
+    TEST_TIMEOUT_MS * 2,
+  );
+});
