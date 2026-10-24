@@ -28,6 +28,7 @@ Step 1 was built before ADR 0007; its record is in [implementation status](../im
 | [Transactional audit writes](../../specs/003-transactional-audit-writes/spec.md) | 2 | SE-05 | Approved; merged in #67, CI green, deployed to dev 23 October (`491f5a0`, smoke test passed); Done on owner review of the evidence |
 | [Transactional session rotation](../../specs/004-transactional-session-rotation/spec.md) | 2 | SE-07 | Approved; merged in #69, CI green, deployed to dev 23 October (`491f5a0`, smoke test passed); Done on owner review of the evidence |
 | [Bounded re-encryption](../../specs/005-bounded-reencryption/spec.md) | 2 | EN-05, SE-05 | Approved; merged in #70, CI green, deployed to dev 23 October (`491f5a0`, smoke test passed); Done on owner review of the evidence |
+| [Recurring restore check](../../specs/006-recurring-restore-check/spec.md) | 2 | EN-10, SE-05 | Draft; awaiting owner approval (decisions D-1 to D-5) |
 
 <!-- Add a row per feature directory, for example:
 | [OTP login](../../specs/003-otp-login/spec.md) | 3 | AC-01, AC-02 | Draft |
