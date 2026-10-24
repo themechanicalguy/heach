@@ -408,7 +408,8 @@ describe('Recurring restore check: interrupted runs (EN-10.8)', () => {
       for (let i = 0; i < 3; i += 1) {
         const { db } = await interrupted('SIGKILL');
         expect(await throwaways()).toEqual([db]);
-        const dayOld = `heach_restorecheck_${String(Math.floor(Date.now() / 1000) - 86_400 - 60 - i)}`;
+        // Hours apart, so killed runs that started in the same second still get distinct names.
+        const dayOld = `heach_restorecheck_${String(Math.floor(Date.now() / 1000) - 86_400 - 3_600 * (i + 1))}`;
         await ddl(`ALTER DATABASE ${db} RENAME TO ${dayOld}`);
       }
       const recent = `heach_restorecheck_${String(Math.floor(Date.now() / 1000) - 60)}`;
