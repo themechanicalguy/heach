@@ -15,9 +15,18 @@ code on `main` at 491f5a0.
   checks the notes decrypt. It is local only (needs `.env`, the test sign-in and `dist/main.js`).
 - The dev-host proof on 18 October was manual: restore, a one-off API container, read, drop.
 - No timer, workflow or calendar entry repeats either check.
-- Host role (`infra/modules/app-host/main.tf`): `s3:GetObject`/`PutObject` on `pg/*`,
-  `s3:ListBucket` with prefix `pg/*`, `sns:Publish` on the alert topic, KMS
-  `GenerateDataKey`/`Decrypt` on the `alias/heach-dev-*` keys.
+- Roles since [spec 007](../007-security-review-fixes/spec.md) (EN-12.4; applied and verified live
+  24 October 2026). Host role `heach-dev-host`: `s3:GetObject`/`PutObject` on `pg/*`,
+  `s3:ListBucket` with prefix `pg/*`, KMS `GenerateDataKey`/`Decrypt` on the backup key only,
+  parameters under `/heach/dev/`, and `sts:AssumeRole` on the API role. It has **no** data-domain
+  KMS keys and **no** `sns:Publish`. API role `heach-dev-api`: its four parameters, KMS
+  `GenerateDataKey`/`Decrypt` on the four data-domain keys, the uploads bucket and `sns:Publish`
+  on the alert topic. Containers run by `docker compose run … api` get API-role credentials from
+  `/opt/heach/aws` (refreshed every 15 minutes by `heach-api-credentials.timer`); the metadata hop
+  limit 1 keeps the host role out of every container.
+- Proven on 24 October 2026 on the dev host, by hand: a one-off API container on the API role
+  decrypted a note restored from `pg/2026-10-24T1609Z.dump` (runbook restore record). So D-2 works
+  unchanged under the new roles; D-5 did not (see its amendment).
 - `audit.verify_chain()` exists (`apps/api/sql/bootstrap.sql`) and returns the first broken link.
 
 ## Decisions
@@ -68,8 +77,16 @@ code on `main` at 491f5a0.
   subject `[HEACH] Restore check failed: <stage>`; the body holds the stage, dump name and run ID.
   Passing runs publish nothing; the record is the journal plus a runbook row added by the operator
   monthly.
-- **Why**: the host already may publish to this topic; no new resource or cost. Delivery depends on
-  the email subscription, which is an open owner action.
+- **Amended 24 October 2026 (spec 007 role split)**: the host role can no longer publish. The host
+  script publishes with the API role's short-lived credentials, the role that already publishes the
+  API's alerts: `aws sns publish` run with `AWS_CONFIG_FILE` pointing at a host-side copy of the
+  `credential_process` profile that reads `/opt/heach/aws/credentials.json`. No infrastructure
+  change. Rejected: giving `sns:Publish` back to the host role (reverses the spec 007 narrowing and
+  needs an apply); publishing from inside the job only (misses the `freshness` and `restore`
+  stages, which fail before any container runs).
+- **Why**: no new resource or cost. Publication is not delivery: the email subscription was
+  confirmed in AWS on 24 October 2026 (one confirmed, none pending) and SNS reported both synthetic
+  alerts of that day as delivered; receipt in the inbox is confirmed only by the owner.
 - **Alternatives**: an S3 success marker (needs a new `PutObject` prefix, an infra change) or a
   heartbeat from GitHub Actions (cannot see the host); deferred.
 

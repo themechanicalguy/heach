@@ -30,7 +30,7 @@ Tests are written first and recorded failing (no job exists) before the job is w
 - [ ] T007 [US1] EN-10.9 test: live table checksums equal before and after; only one audit entry added
 - [ ] T008 [US1] Record T003 to T007 failing in Evidence
 - [ ] T009 [US1] apps/api/src/jobs/restore-check.ts: `main(argv)` returns the exit code; verify chain, decrypt and count, one JSON line; `job:restore-check` script in apps/api/package.json
-- [ ] T010 [US1] deploy/dev/restore-check.sh: newest `pg/*.dump` by name, 26-hour freshness, stale-database cleanup, restore with `--exit-on-error`, one-off API container, trap drop, SNS publish on failure
+- [ ] T010 [US1] deploy/dev/restore-check.sh: newest `pg/*.dump` by name, 26-hour freshness, stale-database cleanup, restore with `--exit-on-error`, one-off API container, trap drop, SNS publish on failure with the API role's credentials (research D-5, amended)
 - [ ] T011 [US1] deploy/dev/heach-restore-check.service and .timer (Sundays 00:00 UTC, `Persistent=true`); deploy/dev/deploy.sh installs and enables; assertion in scripts/deploy-script.test.mjs
 
 ---
