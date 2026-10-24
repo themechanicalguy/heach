@@ -166,3 +166,12 @@ affects at the latest (for example item 6 in the Step 2 spec).
 12. ✅ _Resolved 18 October: module approved and added to D4._ **SO-08.2 asks for a Caddy rate limit, but stock Caddy has none.** It needs the third-party
    `caddy-ratelimit` module and a custom Caddy build, which is not in the Step 2 dependency list
    (D4). The API rate limit (SO-08.1) is on. Owner decision: add the module to D4, or reword SO-08.2.
+13. **The admin entry may not answer through port forwarding as documented.** Found 24 October
+   while adding the test sign-in entry (spec 007): `https://localhost:8443` sends the name
+   `localhost`, but the admin site in `deploy/dev/Caddyfile` is addressed only by the host's IP,
+   so Caddy has no matching site (an empty response, or a TLS error when no `localhost`
+   certificate exists). Reproduced against a local Caddy, not on the dev host. The new 9443 entry
+   lists `localhost` too; the admin site was left unchanged (outside the security review's scope).
+   Owner decision: add `https://localhost:8443` to the admin site, or document another way in.
+14. **Coverage reports are committed** (`packages/crypto/coverage-unit/`, 16 files): any local
+   coverage run rewrites them. They should be untracked and ignored.
