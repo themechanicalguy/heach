@@ -56,6 +56,15 @@ aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target 
 # then open https://localhost:8443
 ```
 
+Test sign-in as a synthetic user works only through the loopback entry on port 9443; the public
+address answers it with 404 (SE-07.23, [spec 007](../specs/007-security-review-fixes/spec.md)):
+
+```sh
+aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target <instance-id> \
+  --document-name AWS-StartPortForwardingSession --parameters portNumber=9443,localPortNumber=9443
+# then open https://localhost:9443 (web and API; Caddy adds the test sign-in key)
+```
+
 ## Branch protection on main
 
 **Proposed, not applied (owner decision).** On 17 October 2026 GitHub refused branch protection on

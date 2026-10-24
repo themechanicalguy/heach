@@ -57,3 +57,15 @@ resource "aws_ssm_parameter" "blind_index_key" {
   type  = "SecureString"
   value = random_id.blind_index_key.hex
 }
+
+# Security review 2026-10-24, finding 2: the key the test sign-in requires on this host. Only the
+# API (by name) and the loopback-only Caddy entry hold it; the public entry never sends it.
+resource "random_id" "test_login_key" {
+  byte_length = 32
+}
+
+resource "aws_ssm_parameter" "test_login_key" {
+  name  = "${local.parameter_path}/TEST_LOGIN_KEY"
+  type  = "SecureString"
+  value = random_id.test_login_key.hex
+}

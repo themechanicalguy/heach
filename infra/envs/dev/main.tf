@@ -70,7 +70,10 @@ module "host" {
   security_group_id   = module.network.host_security_group_id
   ecr_repository_arns = module.registry.repository_arns
   parameter_path      = local.parameter_path
-  kms_key_arns        = values(module.keys.key_arns)
+  kms_key_arns        = [for domain, arn in module.keys.key_arns : arn if domain != "backup"]
+  backup_kms_key_arn  = module.keys.key_arns["backup"]
+  # Exactly what apps/api/src/secrets/load-secrets.ts apiSecrets('dev') asks for.
+  api_parameter_names = ["DB_APP_PASSWORD", "REDIS_PASSWORD", "BLIND_INDEX_KEY", "TEST_LOGIN_KEY"]
   uploads_bucket_arn  = module.uploads.arn
   backups_bucket_arn  = module.backups.arn
   # Created by infra/github-oidc (D5: the existing heach-credit-reminders topic).

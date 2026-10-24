@@ -13,6 +13,8 @@ import { bearer, fromResponse, USERS, type Login } from './auth-helpers.js';
 import { bootApp } from './boot-app.js';
 
 const LIMIT = 5;
+// Above three users' allowances together, so the address limit is reached first (SO-08.12).
+const ADDRESS_LIMIT = 12;
 const PUBLIC_ROUTE = '/v1/auth/refresh';
 const PROTECTED_ROUTE = '/v1/sample/notes';
 
@@ -88,9 +90,9 @@ const storageOf = (app: INestApplication<App>) =>
   app.get<ThrottlerStorageService>(getStorageToken());
 
 /** Requests after the Nth are refused, the first N are not (a limit of N per window). */
-function expectLimitedAfterLimit(codes: number[]): void {
-  expect(codes.slice(LIMIT).every((code) => code === 429)).toBe(true);
-  expect(codes.slice(0, LIMIT).every((code) => code !== 429)).toBe(true);
+function expectLimitedAfterLimit(codes: number[], limit = ADDRESS_LIMIT): void {
+  expect(codes.slice(limit).every((code) => code === 429)).toBe(true);
+  expect(codes.slice(0, limit).every((code) => code !== 429)).toBe(true);
 }
 
 /**
@@ -102,6 +104,7 @@ function useFreshApp(): () => INestApplication<App> {
   beforeEach(async () => {
     app = await bootApp('test', {
       RATE_LIMIT_PER_MINUTE: String(LIMIT),
+      RATE_LIMIT_PER_ADDRESS_PER_MINUTE: String(ADDRESS_LIMIT),
       RATE_LIMIT_WINDOW_SECONDS: '60',
     });
   });
@@ -118,18 +121,18 @@ describe('Rate limit counts unknown tokens by address (SO-08.4, SO-08.5, SO-08.8
     it('SO-08.4 SC-001 random bearer tokens are counted by address', async () => {
       const app = current();
       const address = randomAddress();
-      const codes = await statuses(app, route, 10 * LIMIT, () => ({
+      const codes = await statuses(app, route, 5 * ADDRESS_LIMIT, () => ({
         address,
         headers: bearerOf(randomToken()),
       }));
-      expect(count429(codes)).toBeGreaterThanOrEqual(9 * LIMIT);
+      expect(count429(codes)).toBe(4 * ADDRESS_LIMIT);
       expectLimitedAfterLimit(codes);
     });
 
     it('SO-08.4 expired bearer tokens are counted by address', async () => {
       const app = current();
       const sessions = await Promise.all(
-        Array.from({ length: 2 * LIMIT }, () => signIn(app, USERS.patientA)),
+        Array.from({ length: ADDRESS_LIMIT + 3 }, () => signIn(app, USERS.patientA)),
       );
       await app.get<Redis>(REDIS_CLIENT).del(...sessions.map((s) => `at:${hashToken(s.token)}`));
       const address = randomAddress();
@@ -143,7 +146,7 @@ describe('Rate limit counts unknown tokens by address (SO-08.4, SO-08.5, SO-08.8
     it('SO-08.4 revoked bearer tokens are counted by address', async () => {
       const app = current();
       const sessions = await Promise.all(
-        Array.from({ length: 2 * LIMIT }, () => signIn(app, USERS.patientA)),
+        Array.from({ length: ADDRESS_LIMIT + 3 }, () => signIn(app, USERS.patientA)),
       );
       await request(app.getHttpServer())
         .post('/v1/auth/logout')
@@ -173,7 +176,7 @@ describe('Rate limit counts unknown tokens by address (SO-08.4, SO-08.5, SO-08.8
     ];
     for (const route of [PUBLIC_ROUTE, PROTECTED_ROUTE]) {
       const address = randomAddress();
-      const codes = await statuses(app, route, 2 * LIMIT, (i) => ({
+      const codes = await statuses(app, route, ADDRESS_LIMIT + 3, (i) => ({
         address,
         headers: { Authorization: at(headers, i % headers.length) },
       }));
@@ -207,7 +210,7 @@ describe('Rate limit counts a live session by user (SO-08.6, SO-08.7)', () => {
     expect(codes.slice(LIMIT).every((code) => code === 429)).toBe(true);
   });
 
-  describe('SO-08.7 users and anonymous traffic at one address do not limit each other', () => {
+  describe('SO-08.7 users and anonymous traffic under the address limit do not limit each other', () => {
     it('SO-08.7 a limited user does not limit another user or anonymous callers', async () => {
       const app = current();
       const [a, b] = [await signIn(app, USERS.patientA), await signIn(app, USERS.patientB)];
@@ -221,18 +224,64 @@ describe('Rate limit counts a live session by user (SO-08.6, SO-08.7)', () => {
       expect((await hit(app, PROTECTED_ROUTE, { address })).status).toBe(401);
     });
 
-    it('SO-08.7 limited anonymous traffic does not limit signed-in users (SC-003)', async () => {
+    it('SO-08.7 anonymous traffic under the address limit uses no user allowance (SC-003)', async () => {
       const app = current();
-      const [a, b] = [await signIn(app, USERS.patientA), await signIn(app, USERS.patientB)];
+      const a = await signIn(app, USERS.patientA);
       const address = randomAddress();
-      const anonymous = await statuses(app, PROTECTED_ROUTE, LIMIT + 2, () => ({ address }));
-      expect(anonymous.at(-1)).toBe(429);
-      for (const user of [a, b]) {
-        expect((await hit(app, PROTECTED_ROUTE, { address, headers: bearer(user) })).status).toBe(
-          200,
-        );
-      }
+      await statuses(app, PROTECTED_ROUTE, LIMIT, () => ({ address }));
+      const signedIn = await statuses(app, PROTECTED_ROUTE, LIMIT, () => ({
+        address,
+        headers: bearer(a),
+      }));
+      expect(signedIn).toEqual(Array(LIMIT).fill(200));
     });
+  });
+});
+
+describe('Rate limit counts every request by address as well (SO-08.12)', () => {
+  const current = useFreshApp();
+
+  it('SO-08.12 valid tokens of several users do not lift the address limit', async () => {
+    const app = current();
+    const users = [USERS.patientA, USERS.patientB, USERS.provider];
+    const sessions = await Promise.all(users.map((user) => signIn(app, user)));
+    const address = randomAddress();
+    const codes = await statuses(app, PROTECTED_ROUTE, users.length * LIMIT, (i) => ({
+      address,
+      headers: bearer(at(sessions, i % sessions.length)),
+    }));
+    expectLimitedAfterLimit(codes);
+  });
+
+  it('SO-08.12 an address over its limit is refused even with a valid token', async () => {
+    const app = current();
+    const a = await signIn(app, USERS.patientA);
+    const address = randomAddress();
+    await statuses(app, PROTECTED_ROUTE, ADDRESS_LIMIT, () => ({
+      address,
+      headers: bearerOf(randomToken()),
+    }));
+    expect((await hit(app, PROTECTED_ROUTE, { address, headers: bearer(a) })).status).toBe(429);
+    // The same user from another address still has their allowance.
+    const elsewhere = await hit(app, PROTECTED_ROUTE, {
+      address: randomAddress(),
+      headers: bearer(a),
+    });
+    expect(elsewhere.status).toBe(200);
+  });
+
+  it('SO-08.12 changing invalid tokens on the sign-in route share the address limit', async () => {
+    const app = current();
+    const address = randomAddress();
+    const codes: number[] = [];
+    for (let i = 0; i < ADDRESS_LIMIT + 3; i += 1) {
+      const response = await request(app.getHttpServer())
+        .post('/v1/auth/test-login')
+        .set({ 'X-Forwarded-For': address, ...bearerOf(randomToken()) })
+        .send({ userId: USERS.patientA });
+      codes.push(response.status);
+    }
+    expectLimitedAfterLimit(codes);
   });
 });
 
@@ -243,17 +292,17 @@ describe('Rate limit uses the proxy-appended address (SO-08.10)', () => {
     it('SO-08.10 varying first entries behind the proxy-appended last entry reach 429', async () => {
       const app = current();
       const proxyAddress = randomAddress();
-      const codes = await statuses(app, PUBLIC_ROUTE, LIMIT + 3, () => ({
+      const codes = await statuses(app, PUBLIC_ROUTE, ADDRESS_LIMIT + 3, () => ({
         address: `${randomAddress()}, ${proxyAddress}`,
         headers: bearerOf(randomToken()),
       }));
-      expect(codes.slice(LIMIT).every((code) => code === 429)).toBe(true);
+      expect(codes.slice(ADDRESS_LIMIT).every((code) => code === 429)).toBe(true);
     });
 
     it('SO-08.10 the last entry is the address that is counted', async () => {
       const app = current();
       const [first, second] = [randomAddress(), randomAddress()];
-      const spoofed = await statuses(app, PUBLIC_ROUTE, LIMIT + 2, () => ({
+      const spoofed = await statuses(app, PUBLIC_ROUTE, ADDRESS_LIMIT + 2, () => ({
         address: `${second}, ${first}`,
       }));
       expect(spoofed.at(-1)).toBe(429);
@@ -314,7 +363,7 @@ describe('Rate limit edge cases (SO-08.4, SO-08.6)', () => {
     const app = current();
     const address = randomAddress();
     for (const route of ['/healthz', '/readyz']) {
-      const codes = await statuses(app, route, 3 * LIMIT, () => ({
+      const codes = await statuses(app, route, 2 * ADDRESS_LIMIT, () => ({
         address,
         headers: bearerOf(randomToken()),
       }));
@@ -322,7 +371,17 @@ describe('Rate limit edge cases (SO-08.4, SO-08.6)', () => {
     }
   });
 
-  it('SO-08.6 a valid token on a public route is counted by user, not by address', async () => {
+  it('SO-08.4 the health probes stay exempt for a signed-in caller', async () => {
+    const app = current();
+    const a = await signIn(app, USERS.patientA);
+    const codes = await statuses(app, '/healthz', 2 * LIMIT, () => ({
+      address: randomAddress(),
+      headers: bearer(a),
+    }));
+    expect(codes.every((code) => code !== 429)).toBe(true);
+  });
+
+  it('SO-08.6 a valid token on a public route is also counted by its user', async () => {
     const app = current();
     const [a, b] = [await signIn(app, USERS.patientA), await signIn(app, USERS.patientB)];
     const address = randomAddress();

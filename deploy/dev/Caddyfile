@@ -27,16 +27,24 @@ https://{$PUBLIC_HOST}:443 {
 	tls internal
 	import security_headers
 	handle_path /api/* {
-		# Per client IP, before the API's own per-user limits (SO-08.2). Pages and static
-		# assets are not limited here.
-		rate_limit {
-			zone api_per_ip {
-				key {remote_host}
-				events 300
-				window 1m
+		# In the order written: rate limit, refuse test sign-in, then proxy.
+		route {
+			# Per client IP, before the API's own limits (SO-08.2). Pages and static assets are
+			# not limited here.
+			rate_limit {
+				zone api_per_ip {
+					key {remote_host}
+					events 300
+					window 1m
+				}
 			}
+			# Test sign-in is never served to the internet (SE-07.23): only the loopback entry
+			# on 9443 below. The API also refuses it without the key that entry adds.
+			@test_login path_regexp test_login (?i)/auth/+test-login
+			respond @test_login 404
+			request_header -X-Test-Login-Key
+			reverse_proxy api:3001
 		}
-		reverse_proxy api:3001
 	}
 	handle {
 		reverse_proxy web:3000
@@ -50,4 +58,22 @@ https://{$PUBLIC_HOST}:8443 {
 	import security_headers
 	header Cache-Control "no-store"
 	reverse_proxy admin:8080
+}
+
+# Web and API with test sign-in, for trusted developers: published on the host's loopback only,
+# reached through Session Manager port forwarding like admin (SE-07.23). This entry adds the key
+# the API requires for test sign-in; synthetic users only. `localhost` too: through port
+# forwarding the browser asks for that name.
+https://{$PUBLIC_HOST}:9443, https://localhost:9443 {
+	tls internal
+	import security_headers
+	handle_path /api/* {
+		reverse_proxy api:3001 {
+			# Read per request: an unset key sends an empty one, which the API refuses.
+			header_up X-Test-Login-Key {env.TEST_LOGIN_KEY}
+		}
+	}
+	handle {
+		reverse_proxy web:3000
+	}
 }

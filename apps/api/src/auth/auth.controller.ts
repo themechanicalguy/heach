@@ -7,8 +7,15 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiCookieAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCookieAuth,
+  ApiHeader,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { readCookie } from '../common/cookies.js';
 import { ROLES } from '../common/request-context.js';
@@ -17,6 +24,8 @@ import { AccessTokenDto, LogoutDto, TestLoginDto } from './auth.dto.js';
 import { bearerToken, principalOf } from './auth.guard.js';
 import { Public, Roles } from './roles.decorator.js';
 import { type IssuedTokens, SessionService } from './session.service.js';
+import { TEST_LOGIN_KEY_HEADER } from './test-identity.adapter.js';
+import { TestLoginGate } from './test-login.gate.js';
 
 export const REFRESH_COOKIE = 'heach_refresh';
 const COOKIE_PATH = '/api/v1/auth';
@@ -26,10 +35,16 @@ const COOKIE_PATH = '/api/v1/auth';
 export class AuthController {
   constructor(private readonly sessions: SessionService) {}
 
-  /** Test identity adapter only; the module is not loaded outside dev and test (SE-07.4). */
+  /**
+   * Test identity adapter only; the module is not loaded outside dev and test (SE-07.4). On the
+   * dev host it answers only requests carrying the key of the loopback-only entry (SE-07.23); any
+   * other request gets the same 404 as a route that does not exist.
+   */
   @Post('test-login')
   @HttpCode(HttpStatus.OK)
   @Public('Sign-in endpoint')
+  @UseGuards(TestLoginGate)
+  @ApiHeader({ name: TEST_LOGIN_KEY_HEADER, required: false, description: 'Required in dev' })
   @ApiOkResponse({ type: AccessTokenDto })
   async testLogin(
     @Body() body: TestLoginDto,

@@ -10,7 +10,8 @@ import { ReadinessService } from './readiness.service.js';
 @ApiTags('health')
 @Controller()
 @Public('Liveness and readiness probes')
-@SkipThrottle()
+// Both limits, so a probe sent with a signed-in token is not counted either.
+@SkipThrottle({ default: true, user: true })
 export class HealthController {
   constructor(
     private readonly env: EnvVars,

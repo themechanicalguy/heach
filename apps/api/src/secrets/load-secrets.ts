@@ -7,16 +7,25 @@ const SECRET_PARAMETERS = {
   DB_MIGRATOR_PASSWORD: 'DATABASE_MIGRATOR_PASSWORD',
   REDIS_PASSWORD: 'REDIS_PASSWORD',
   BLIND_INDEX_KEY: 'BLIND_INDEX_KEY',
+  TEST_LOGIN_KEY: 'TEST_LOGIN_KEY',
 } as const;
 
 export type SecretName = keyof typeof SECRET_PARAMETERS;
 
-/** What the API process itself needs; the admin and migrator passwords stay out of it. */
+/**
+ * What the API process itself needs; the admin and migrator passwords stay out of it. The API's
+ * IAM role may read exactly these parameters (infra/envs/dev/main.tf `api_parameter_names`).
+ */
 export const API_SECRETS: readonly SecretName[] = [
   'DB_APP_PASSWORD',
   'REDIS_PASSWORD',
   'BLIND_INDEX_KEY',
 ];
+
+/** The API's secrets in one environment: the dev host adds its test sign-in key (SE-07.23). */
+export function apiSecrets(appEnv: string | undefined): readonly SecretName[] {
+  return appEnv === 'dev' ? [...API_SECRETS, 'TEST_LOGIN_KEY'] : API_SECRETS;
+}
 
 type ParameterReader = Pick<SSMClient, 'send'>;
 

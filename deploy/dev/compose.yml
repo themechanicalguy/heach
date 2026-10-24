@@ -14,8 +14,11 @@ services:
       - 80:80 # redirect to HTTPS
       - 443:443 # web, and the API under /api
       - 127.0.0.1:8443:8443 # admin: loopback only, reached through Session Manager
+      - 127.0.0.1:9443:9443 # web and API with test sign-in: loopback only (SE-07.23)
     environment:
       PUBLIC_HOST: ${PUBLIC_HOST:?}
+      # Added by the loopback entry to test sign-in requests; never sent by the public entry.
+      TEST_LOGIN_KEY: ${TEST_LOGIN_KEY:-}
       XDG_DATA_HOME: /data
       XDG_CONFIG_HOME: /config
     volumes:
@@ -37,8 +40,9 @@ services:
     image: ${REGISTRY}/heach/admin:${IMAGE_TAG}
     restart: unless-stopped
 
-  # Secrets are read from Parameter Store at start-up (EN-12.1); none are set here. Keys come
-  # from KMS through the instance role (EN-04). One-off tasks: `run --rm api node dist/db/…`.
+  # Secrets are read from Parameter Store at start-up (EN-12.1); none are set here. AWS access is
+  # the API role's, from ./aws (api-credentials.sh), never the instance role's: KMS data keys
+  # (EN-04) and exactly its own parameters. One-off tasks: `run --rm api node dist/db/…`.
   api:
     image: ${REGISTRY}/heach/api:${IMAGE_TAG}
     environment:
@@ -55,6 +59,7 @@ services:
       DATA_TLS_CA_FILE: /certs/ca.crt
       FEATURE_FLAGS: sample-patient-note
       ALERT_TOPIC_ARN: ${ALERT_TOPIC_ARN:-}
+      AWS_CONFIG_FILE: /aws/config
       DATABASE_URL: postgresql://heach_app@postgres:5432/heach
       DATABASE_MIGRATOR_URL: postgresql://heach_migrator@postgres:5432/heach
       DATABASE_ADMIN_URL: postgresql://heach@postgres:5432/heach
@@ -65,8 +70,10 @@ services:
       DATABASE_ADMIN_PASSWORD: ${DB_ADMIN_PASSWORD:-}
       REDIS_PASSWORD: ${CI_REDIS_PASSWORD:-}
       BLIND_INDEX_KEY: ${BLIND_INDEX_KEY:-}
+      TEST_LOGIN_KEY: ${CI_TEST_LOGIN_KEY:-}
     volumes:
       - ./certs/ca.crt:/certs/ca.crt:ro
+      - ./aws:/aws:ro
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }

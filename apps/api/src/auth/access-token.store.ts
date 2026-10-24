@@ -8,19 +8,22 @@ export const ACCESS_TOKEN_TTL_SECONDS = 15 * 60; // SE-07.1: at most 15 minutes
 
 /**
  * Opaque access tokens in Redis, keyed by their hash, so they can be revoked at once (SE-07.3).
- * Each user's token hashes are also kept in a set for revoke-all.
+ * Each token hash is also kept in its user's set (revoke-all) and its device's session-family set
+ * (sign-out of one device, SE-07.21), so a token issued before a refresh is revoked with it.
  */
 @Injectable()
 export class AccessTokenStore {
   constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
-  async issue(principal: Principal): Promise<string> {
+  async issue(principal: Principal, familyId: string): Promise<string> {
     const { token, hash } = newToken();
     await this.redis
       .multi()
       .set(`at:${hash}`, JSON.stringify(principal), 'EX', ACCESS_TOKEN_TTL_SECONDS)
-      .sadd(`user-at:${principal.userId}`, hash)
-      .expire(`user-at:${principal.userId}`, ACCESS_TOKEN_TTL_SECONDS)
+      .sadd(userKey(principal.userId), hash)
+      .expire(userKey(principal.userId), ACCESS_TOKEN_TTL_SECONDS)
+      .sadd(familyKey(familyId), hash)
+      .expire(familyKey(familyId), ACCESS_TOKEN_TTL_SECONDS)
       .exec();
     return token;
   }
@@ -35,7 +38,19 @@ export class AccessTokenStore {
   }
 
   async revokeAllForUser(userId: string): Promise<void> {
-    const hashes = await this.redis.smembers(`user-at:${userId}`);
-    await this.redis.del(...hashes.map((hash) => `at:${hash}`), `user-at:${userId}`);
+    await this.revokeSet(userKey(userId));
+  }
+
+  /** Every access token issued to one device's session family, before or after refreshes. */
+  async revokeFamily(familyId: string): Promise<void> {
+    await this.revokeSet(familyKey(familyId));
+  }
+
+  private async revokeSet(key: string): Promise<void> {
+    const hashes = await this.redis.smembers(key);
+    await this.redis.del(...hashes.map((hash) => `at:${hash}`), key);
   }
 }
+
+const userKey = (userId: string) => `user-at:${userId}`;
+const familyKey = (familyId: string) => `family-at:${familyId}`;

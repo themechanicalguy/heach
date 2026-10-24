@@ -29,7 +29,7 @@ export class RumController {
   @Post()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Public('Anonymous browser metrics: no identity, rate limited')
-  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  @Throttle({ default: { limit: 60, ttl: 60_000 }, user: { limit: 60, ttl: 60_000 } })
   @ApiNoContentResponse()
   record(@Body() vital: WebVitalDto): void {
     appLogger.info(

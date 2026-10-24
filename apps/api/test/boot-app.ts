@@ -12,6 +12,7 @@ export async function bootApp(
   process.env.APP_ENV = 'test';
   process.env.FEATURE_FLAGS = 'sample-patient-note';
   process.env.RATE_LIMIT_PER_MINUTE = '10000';
+  process.env.RATE_LIMIT_PER_ADDRESS_PER_MINUTE = '10000';
   Object.assign(process.env, overrides);
   const app = await createApp({ logger: ['error'] });
   await app.init();

@@ -1,13 +1,14 @@
 #!/bin/bash
-# Deploy-bundle check for the API rate limit (SO-08.10): 150 requests through the proxy, each
-# with a new random bearer token and a random X-Forwarded-For, must still reach the API's own 429.
+# Deploy-bundle check for the API rate limit (SO-08.10, SO-08.12): 250 requests through the proxy,
+# each with a new random bearer token and a random X-Forwarded-For, must still reach the API's own
+# 429 (per-address limit 200 per route), before Caddy's edge limit (300 per address) would.
 # Usage: rate-limit-check.sh <base-url>   (for example https://127.0.0.1; -k: self-signed)
 # Uses up the caller's allowance for /api/v1/auth/refresh for one window. Tokens are generated
 # at run time and never printed.
 set -euo pipefail
 base="${1:?usage: rate-limit-check.sh <base-url>}"
-total=150
-early=100
+total=250
+early=150
 body="$(mktemp)"
 trap 'rm -f "$body"' EXIT
 api_429=0
