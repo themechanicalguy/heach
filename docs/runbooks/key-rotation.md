@@ -51,6 +51,7 @@ Proof: `apps/api/test/crypto.int-spec.ts` (EN-05.3), `apps/api/test/reencrypt.in
 | Date | Where | Result | By |
 | --- | --- | --- | --- |
 | 2026-10-23 | Local isolated stack | `--rotate` to version 40: 1,207 re-encrypted, 0 skipped, 0 failed, exit 0, 1.5 s; 1,207 audit entries for the run, actor `system` / `job:reencrypt`; re-run 0, no entries; `audit.verify_chain()` intact | Claude Code |
+| 2026-10-24 | Dev host, `8b0387f`, one-off API container on the API role, **without** `--rotate` | Started, read its secrets, connected and ended: target version 1, 0 re-encrypted, 0 skipped, 0 failed, exit 0 (every value already on version 1). Proves the deployed job runs on the host; it does not prove re-encryption there, which needs `--rotate` (a new `health` data-key version, owner's call) | Claude Code |
 
 Today only `app.patient_note.body` holds `health` values. When a step adds Restricted columns,
 extend `reencryptHealth` (or add a job per domain) in the same pull request.

@@ -6,7 +6,17 @@ For a healthcare and data-protection lawyer practising in India. The Step 2 exit
 
 Status: **not yet reviewed.** Nobody has been contacted; the owner chooses and engages the lawyer.
 Everything below was written by the engineering team from general knowledge; none of it is legal
-advice and none of it has been checked against current law.
+advice and none of it has been checked against current law. Checked 24 October 2026: no feedback
+received (issue #23 has no comments); question 15 added for the backup decision in ADR 0012.
+
+### Cover note the owner can send
+
+> Hello, I am building HEACH, a health-care booking platform for patients in Odisha (online
+> consultations, home nursing and physiotherapy, clinic appointments and lab tests). Before we
+> handle any real patient data, I would like your first review of our consent wording and of the
+> Aadhaar-based identity verification route. The attached pack describes the product, lists 15
+> questions and has four draft consent texts to mark up. Could you tell me which questions you can
+> answer briefly, which need a longer opinion, and your fee and timeline? Thank you.
 
 ## The product in brief
 
@@ -88,6 +98,14 @@ with "Agree" and "Not now", and each agreement is stored and can be withdrawn in
     should we present them so they are not mistaken for clinical staff?
 14. As a marketplace that takes payment and a commission, what is our liability for a provider's
     care, and what must our terms say?
+
+### E. Backups
+
+15. To recover health records if our cloud account is lost, we may keep an offline "escrow" key,
+    held by the founder in a password manager and on paper, that can decrypt every health record
+    ([ADR 0012](../adr/0012-off-account-recovery-of-restricted-fields.md), option B). What custody,
+    access-logging or disclosure duties would that create under the DPDP Act, and is it preferable
+    to accepting that a lost account loses the records?
 
 ## What we need back
 

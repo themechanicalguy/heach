@@ -20,6 +20,7 @@ observability containers local only (ADR 0010); off-account backup copy to the o
 | 9 | feat/step2-quality-gates | GCM tag-length fix (found by Semgrep), Semgrep and Trivy in CI with runtime fixtures per scanner, npm removed from runtime images, patched Caddy, changed-line coverage gate, adapter ports and doubles with lint boundary | Merged #42 |
 | 10 | feat/step2-backups | Backup KMS key and bucket, nightly dump timer, off-account pull script, restore check, infra security check, state bucket to SSE-KMS, spec threat-model check | Merged #43; infra apply pending AWS sign-in |
 | 11 | feat/step2-approved-additions | Caddy rate limit (SO-08.2), local Prometheus, Grafana and GlitchTip profile with the LM-05.1 dashboard, source-map upload script and LM-03.1 test, CSP fix for error reports | Merged #45 |
+| 12 | fix/security-review-2026-10-24 | Spec 007: address plus user rate limits, loopback-only test sign-in with a key, device sign-out revokes the family, API IAM role and hop limit 1, full dependency audit | Merged #74; infra applied and deployed 24 October; live-verified 24 October |
 
 ## Evidence by criterion
 
@@ -50,13 +51,13 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-05.2 | ✅ | `sample-notes.int-spec.ts` (generic 400, no echo) |
 | SO-08.1 | ✅ | `test/security.int-spec.ts` (@nestjs/throttler, per token or IP) |
 | SO-08.2 | ✅ | SQL injection sample → 400 (`security.int-spec.ts`). Caddy: `caddy-ratelimit` zone of 300 requests a minute per client IP on `/api/*`; the CI deploy-bundle job floods `/api/healthz` (which the API throttler skips) and requires 429s from Caddy while pages still answer 200. Local record 18 October: 20-event test zone gave 20 × 200 then 429 with `Retry-After: 60` |
-| SO-08.3 | ✅ publish | `test/security.int-spec.ts`. Live on 2026-10-18 at 10:17:21 UTC: synthetic user `…0003` made 10 denied requests over HTTPS and SNS `NumberOfMessagesPublished` on `heach-credit-reminders` rose in that minute. Email delivery waits on the owner confirming the subscription (it shows PendingConfirmation) |
+| SO-08.3 | ✅ published, SNS delivered; 🧑 inbox receipt | `test/security.int-spec.ts`. Live on 2026-10-18 at 10:17:21 UTC: published only (subscription then PendingConfirmation). **24 October 2026:** subscription checked in AWS: one email subscription, `SubscriptionsConfirmed` 1, pending 0. At 16:06:22 UTC synthetic user `00000000-0000-4000-8000-000000000003` made 11 role-denied requests (403) over HTTPS through the public entry; the deployed API (`8b0387f`), now on the API role, published one alert ("HEACH: repeated authorisation failures", body names that synthetic user). CloudWatch for 16:06 UTC: `NumberOfMessagesPublished` 1, `NumberOfNotificationsDelivered` 1, `NumberOfNotificationsFailed` 0. Delivered means SNS handed it to the mail system; arrival in the inbox is not yet confirmed by the owner |
 | LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
 | LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
 | LM-04.1 | ✅ | Local record, plus dev host on 2026-10-18: Pixel 7 and Desktop Chrome visited `/or`, `/en/notes` and `/hi/sign-in` on https://15.252.65.98. The API logged CLS, FCP, INP, LCP and TTFB for each of `/[locale]`, `/[locale]/notes` and `/[locale]/sign-in` × mobile and desktop. Lines carry only vital, value, route template, device class and a random request correlation ID |
 | LM-05.1 | ✅ (local dashboard, ADR 0010) | Traces in OpenTelemetry and Jaeger. Grafana dashboard `HEACH API (LM-05.1)` (provisioned, `deploy/observability/grafana`) over Prometheus: request rate, 5xx share, p50/p95/p99. Record 18 October, local API: 37.6 requests/s, p50 2.5 ms, p95 4.8 ms, p99 5.0 ms; synthetic outage (PostgreSQL stopped, `/readyz` 503) showed 18 % 5xx share. `scripts/observability-dashboard.test.mjs` keeps the three panels. Local only (ADR 0010) |
-| LM-07.1 | ✅ publish | `error-rate.monitor.spec.ts`. Live on 2026-10-18 at 10:17:51 UTC: the API's own `ErrorRateMonitor` and `SnsAlertPublisher` ran in a one-off API container on the host (host role, real topic) with the subject `[SYNTHETIC TEST LM-07.1]`. A 10 percent rate sent 1 alert; a second evaluation sent none. The request path into the monitor is covered by the spec, not live. One more message was published at 10:11 UTC, during the rotation outage, probably a genuine alert; nothing was delivered, so its content is unconfirmed. Delivery waits on the subscription |
+| LM-07.1 | ✅ publish | `error-rate.monitor.spec.ts`. Live on 2026-10-18 at 10:17:51 UTC: the API's own `ErrorRateMonitor` and `SnsAlertPublisher` ran in a one-off API container on the host (host role, real topic) with the subject `[SYNTHETIC TEST LM-07.1]`. A 10 percent rate sent 1 alert; a second evaluation sent none. The request path into the monitor is covered by the spec, not live. One more message was published at 10:11 UTC, during the rotation outage, probably a genuine alert; nothing was delivered, so its content is unconfirmed. Delivery waits on the subscription. **24 October 2026, 16:05:22 UTC:** the same method in a one-off API container on the API role (`8b0387f`), subject `[SYNTHETIC TEST LM-07.1] HEACH: API error rate above 5 percent`, body prefixed "Synthetic test, no action needed": a 10 percent rate over 100 requests sent one alert, a second evaluation none. CloudWatch for 16:05 UTC: published 1, delivered 1, failed 0. 🧑 Inbox receipt not yet confirmed by the owner |
 | I18N-01.1 | ✅ | `apps/web/e2e/home.spec.ts` (/or, /en, /hi; redirect); `packages/i18n/README.md` (new locale = file + two entries) |
 | I18N-02.1 | ✅ | `apps/web/src/lint-rules.test.ts` (JSX text and `alt` fail at error level) |
 | I18N-02.2 | ✅ | `packages/i18n/src/icu.test.ts`, `translator.test.ts` |
@@ -88,13 +89,28 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | EN-02.1 | ✅ code | `scripts/check-infra-security.mjs` in CI with fixtures; it found the state bucket on SSE-S3, now SSE-KMS in code (bootstrap apply is an owner action) |
 | EN-05.2 | ✅ | Same check: every `aws_kms_key` has yearly rotation |
 | EN-04.2 | ✅ | `scripts/check-infra-security.mjs` in CI. Live on 2026-10-18: the `heach-dev-host` policy allows only `kms:GenerateDataKey` and `kms:Decrypt` on the five `alias/heach-dev-*` keys. `iam simulate-principal-policy` gives implicit deny for Encrypt, ReEncryptFrom, CreateGrant, ScheduleKeyDeletion, PutKeyPolicy and for any other key. The keys are AWS_KMS origin, customer-managed, single-Region, with rotation on |
-| EN-10.3 | ✅ | Live on 2026-10-18. `pg/2026-10-18T1018Z.dump` and `…1019Z.dump` are in private bucket `heach-dev-backups-667291759252` (ap-south-1, all four public-access blocks on), SSE-KMS with the backup key `alias/heach-dev-backup`. The host timer fires at 21:00 UTC (02:30 IST). The off-account copy is in `~/HEACH-backups` on the owner's Mac: AES-256 with a Keychain passphrase, mode 600, SHA-256 verified. Decrypted without AWS, it is byte-identical to the S3 object |
-| EN-10.4 | ✅ | Local record and dev-host record in the [runbook](runbooks/backup-restore.md). On 2026-10-18 `…1019Z.dump` was restored into a new database `heach_restore_1792318811` on the host: 1 synthetic note, stored as AES-256-GCM ciphertext. A separate API container decrypted it through KMS for its owner. The database was then dropped; the active `heach` database was never written |
+| EN-10.3 | ✅ | Live on 2026-10-18. `pg/2026-10-18T1018Z.dump` and `…1019Z.dump` are in private bucket `heach-dev-backups-667291759252` (ap-south-1, all four public-access blocks on), SSE-KMS with the backup key `alias/heach-dev-backup`. The host timer fires at 21:00 UTC (02:30 IST). The off-account copy is in `~/HEACH-backups` on the owner's Mac: AES-256 with a Keychain passphrase, mode 600, SHA-256 verified. Decrypted without AWS, it is byte-identical to the S3 object. **24 October 2026:** nightly dumps present for every night 18 to 23 October; a dump run at 16:09 UTC under the host role as narrowed by spec 007 wrote `pg/2026-10-24T1609Z.dump` (SSE-KMS, backup key); `scripts/backup-pull.sh` copied it off-account, `shasum -c` OK, decrypted copy identical to the S3 object (SHA-256 prefix `9813ed2e5d478b57`). Gaps: Restricted fields need the dev KMS keys and the weekly pull is manual ([ADR 0012](adr/0012-off-account-recovery-of-restricted-fields.md), proposed) |
+| EN-10.4 | ✅ | Local record and dev-host record in the [runbook](runbooks/backup-restore.md). On 2026-10-18 `…1019Z.dump` was restored into a new database `heach_restore_1792318811` on the host: 1 synthetic note, stored as AES-256-GCM ciphertext. A separate API container decrypted it through KMS for its owner. The database was then dropped; the active `heach` database was never written. **Re-proven 24 October 2026 after spec 007** ([record](runbooks/backup-restore.md#restore-records)): `pg/2026-10-24T1609Z.dump` restored into `heach_restore_1792858593`, audit chain intact, 2 of 2 bodies ciphertext, a one-off API container on the API role decrypted the synthetic owner's note; live counts unchanged, throwaway database dropped. Still one-off: the recurring check is draft spec 006 |
 | SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
 | SE-05.5 to SE-05.10 (spec 003) | ✅ CI, deployed; Done on owner review | Merged #67. `transaction.spec.ts`, `notes.repository.spec.ts`, `test/audit-transaction.int-spec.ts`; fresh local run 24 October on `491f5a0`: all passing ([evidence](../specs/003-transactional-audit-writes/tasks.md#evidence)) |
 | SE-07.14 to SE-07.20 (spec 004) | ✅ CI, deployed; Done on owner review | Merged #69. `session.service.spec.ts`, `auth.controller.spec.ts`, `test/session-rotation.int-spec.ts`; session E2E (`session-refresh.spec.ts`) on three viewports in the CI deploy-bundle job on `491f5a0` (30 passed); fresh local integration run 24 October: all passing ([evidence](../specs/004-transactional-session-rotation/tasks.md#evidence)) |
-| EN-05.4 to EN-05.9 (spec 005) | ✅ CI, deployed; Done on owner review | Merged #70. `reencrypt.spec.ts`, `test/reencrypt.int-spec.ts`; fresh local run 24 October: all passing ([evidence](../specs/005-bounded-reencryption/tasks.md#evidence)). Not yet run on the dev host |
+| EN-05.4 to EN-05.9 (spec 005) | ✅ CI, deployed; Done on owner review | Merged #70. `reencrypt.spec.ts`, `test/reencrypt.int-spec.ts`; fresh local run 24 October: all passing ([evidence](../specs/005-bounded-reencryption/tasks.md#evidence)). Run once on the dev host 24 October without `--rotate`: exit 0, nothing to re-encrypt (all values on version 1); a rotation on dev is the owner's call ([record](runbooks/key-rotation.md#record)) |
+| SO-08.12, SE-07.21 to SE-07.23, EN-12.4, SO-03.2 (spec 007) | ✅ CI, deployed, live-verified; Done on owner review | Merged #74 (`8b0387f`), CI green including the deploy-bundle checks (public test sign-in 404, loopback 200). Owner applied the infra 24 October (4 added, 2 changed in place, $0); Deploy dev attempt 2 green. Live on 24 October: `tofu plan` no changes; API role reads exactly its four parameters, admin and migrator passwords denied, IMDS unreachable from containers (hop limit 1); public test sign-in 404 from the internet and on the host, loopback entry 200 ([live verification](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24)) |
+
+## Exit criteria (guideline Step 2), checked 24 October 2026
+
+| Exit criterion | Evidence | State |
+| --- | --- | --- |
+| A sample note travels end to end: Odia on a phone, field-encrypted, owner only, audited | EN-13.1 (end to end), EN-03.1, SE-02.3, I18N-04.1 above; deploy-bundle E2E on three viewports | Met (code, CI) |
+| A test proves the note is ciphertext in the database and absent from logs | `sample-notes.int-spec.ts`, deploy-bundle SQL and log checks | Met (code, CI) |
+| A PR with a hard-coded string, missing translation, accessibility violation, oversized bundle or leaked secret is blocked | I18N-02.1, I18N-07.1, TS-02.1 and UX-01.2, PF-02.1, EN-12.3 fixtures | Met (CI) |
+| Traces show one correlation ID from browser to database | LM-01.1 | Met (code, CI; local Jaeger, ADR 0010) |
+| The lawyer's first review of consent wording and the Aadhaar route is in hand | [Review pack](reviews/lawyer-review-step-2.md) ready; not sent | **Not met: owner (D6)** |
+
+The Step 2 spec also requires the native Odia review (I18N-07, not met: owner) and leaves operational
+acceptance open: alert inbox receipt, ADR 0012, spec 006, and the owner's review of the corrective
+specs' evidence. Step 2 is **not complete**.
 
 ## Deploy and rollback record
 
@@ -110,13 +126,31 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 - 18 October 2026, rotation: see the [secret-rotation runbook](runbooks/secret-rotation.md) record; fixed in #51.
 - 18 October 2026: Deploy dev [run 39117175524](https://github.com/themechanicalguy/heach/actions/runs/39117175524) for `16d9b03` is green: image build, scan gate, deploy and smoke test passed, no rollback. After #51, the next deploy also recreates the API.
 
+- 24 October 2026, [Deploy dev run 40095340473](https://github.com/themechanicalguy/heach/actions/runs/40095340473) for `8b0387f` (#74, spec 007), attempt 1 at 12:53 UTC: stopped at the preflight, "Parameter /heach/dev/TEST_LOGIN_KEY is missing: apply infra/envs/dev first. Nothing changed."; no rollback, the previous version kept serving (the designed rollout). The owner applied `infra/envs/dev` at 15:25 UTC (API role and policy, test sign-in key and parameter; host policy and metadata hop limit changed in place). Attempt 2 at 15:26 UTC: green, deploy and smoke test passed. Live checks afterwards are in the [security review](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24).
 - 22 and 23 October 2026: Deploy dev green for spec 003 `1d74b17` ([run 39838278055](https://github.com/themechanicalguy/heach/actions/runs/39838278055)), spec 004 `468c7f1` ([run 39910289211](https://github.com/themechanicalguy/heach/actions/runs/39910289211)) and spec 005 `491f5a0` ([run 39915546133](https://github.com/themechanicalguy/heach/actions/runs/39915546133)): deploy and smoke test of `/healthz` and `/api/readyz` passed, no rollback. The smoke test checks health only, not the corrective behaviour.
 
 ## Owner actions
 
-- Settle the SNS email subscription on `heach-credit-reminders`. On 22 October the owner reported, in a Claude Code session, re-creating and confirming it and sending a synthetic test; nothing in the repository records the subscription state or the email's receipt, and it could not be re-checked on 24 October (AWS session expired). Check it with `aws sns list-subscriptions-by-topic` and confirm a labelled test email arrives. Until then SO-08.3, LM-07.1 and credit alerts are published but delivery is unproven.
-- Decide how Restricted fields in the off-account copy can be decrypted without the AWS account (they are wrapped by the dev KMS keys), and whether a recurring restore check is scheduled now or at the pilot ([assessment](step-2-assessment-2026-10-22.md#backups-and-recovery)).
-- Copy the Keychain item `heach-backup-passphrase` into your password manager; the off-account copies cannot be decrypted without it.
-- Optional, a permission narrowing: remove the now-unused `ssm:GetParametersByPath` from the host policy in `infra/modules/app-host/main.tf` and apply.
-- Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md) to a lawyer you choose.
-- Native Odia speaker review of new keys (I18N-07): [review sheet](reviews/odia-review-step-2.md) with all 34 keys.
+Status on 24 October 2026. Nobody outside the project has been contacted.
+
+- **Confirm alert email receipt.** Two labelled synthetic alerts were published and SNS reports both
+  delivered (16:05 and 16:06 UTC on 24 October): `[SYNTHETIC TEST LM-07.1] HEACH: API error rate
+  above 5 percent` and `HEACH: repeated authorisation failures` (body names synthetic user
+  `00000000-0000-4000-8000-000000000003`). Say whether both arrived (check spam), so SO-08.3,
+  LM-07.1 and the credit alerts can be recorded as received. The subscription itself is confirmed in
+  AWS.
+- **Review the evidence for specs 001 to 005 and 007** (gate G4, Done): each spec's tasks and this
+  log. Code, CI, deployment and, for 007, live checks are recorded; acceptance is yours.
+- **Decide ADR 0012** ([proposed](adr/0012-off-account-recovery-of-restricted-fields.md)): how
+  Restricted fields are recovered without the AWS account (recommended: accept for dev, escrow
+  wrap by spec before the pilot), the weekly pull (recommended: manual plus a calendar reminder),
+  and the passphrase (copy `heach-backup-passphrase` into your password manager and run the test in
+  the ADR).
+- **Approve or change draft spec 006** (recurring restore check, D-1 to D-5), as amended for the
+  spec 007 roles.
+- Optional: a re-encryption with `--rotate` on dev (creates `health` key version 2;
+  [runbook](runbooks/key-rotation.md)); and documentation gap 13 (admin on `localhost:8443`).
+- Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md)
+  (cover note included) to a lawyer you choose.
+- Native Odia speaker review of new keys (I18N-07): [review sheet](reviews/odia-review-step-2.md)
+  with all 34 keys and a cover note.
