@@ -7,6 +7,15 @@ Sanskritised wording. `{name}`-style placeholders and ICU plural syntax (`{count
 must stay exactly as written; only the words around them change.
 
 Status: **not yet reviewed.** Nobody has been contacted; the owner chooses and engages the reviewer.
+Checked 24 October 2026: the 34 rows below match `or.json` on `main` exactly (no key added, removed
+or changed since the sheet was written); no feedback has been received.
+
+### Cover note the owner can send
+
+> Hello, I am building HEACH, a care-booking app for patients in Odisha. Could you check about 34
+> short Odia phrases from the app's first screens? For each, please mark it OK or suggest more
+> natural everyday Odia, and answer five short questions at the end. Words inside curly braces,
+> like `{date}`, must stay as they are. The sheet is attached. Thank you.
 
 ## How to review
 

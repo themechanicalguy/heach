@@ -233,12 +233,8 @@ already partly or wholly fixed on `main`; each is stated below.
 
 ### Not run, remaining risks and manual steps
 
-- **Infrastructure is not applied.** No AWS session was available, so no `tofu plan` was run. The
-  owner runs the plan (expected: add the API role, its policy, the test sign-in key and parameter;
-  change in place the host policy and the instance's metadata options; no replacement, no cost),
-  applies it, then re-runs Deploy dev at once (spec 007 plan, Rollout). Until the apply, Deploy dev
-  stops at its preflight and the running version stays up. Live IAM (policy simulation for the API
-  role) and the deployed public 404 must be checked after the deploy.
+- ~~Infrastructure is not applied.~~ Applied by the owner on 24 October 2026 (4 added, 2 changed,
+  no replacement, no cost) and Deploy dev re-run green; see the live verification below.
 - **Not run locally:** the deploy-bundle E2E through the loopback entry (runs in CI), the Trivy
   image scan, and the full Playwright suites. Web code is unchanged.
 - Rate-limit counters stay in memory: correct for the one API process that runs; shared (Redis)
@@ -255,3 +251,44 @@ already partly or wholly fixed on `main`; each is stated below.
 These fixes close the seven findings as written. They do not make the system ready for real
 patient data: the Step 2 exit criteria, the remaining Partial items and a penetration test still
 stand.
+
+## Live verification after the apply (2026-10-24)
+
+Run by Claude Code on 24 October 2026 between 15:55 and 16:15 UTC, against the dev host
+`i-0d548af276bc4fa08` (15.252.65.98) and the AWS account, after the owner's apply and
+[Deploy dev run 40095340473](https://github.com/themechanicalguy/heach/actions/runs/40095340473)
+(attempt 2, `8b0387f`). Host commands went through SSM Run Command; nothing printed a secret
+value. The only writes were synthetic: test sign-ins of the seeded users and the alert and backup
+checks recorded in the [Step 2 log](../step-2-progress.md).
+
+| Check | Result |
+| --- | --- |
+| `tofu plan` on `infra/envs/dev` | `No changes. Your infrastructure matches the configuration.` |
+| Deployed version | `/opt/heach/DEPLOYED_TAG` and all three app containers: `8b0387f0cedb`; API and web healthy |
+| `/healthz`, `/api/readyz` from the internet | 200; `{"status":"ok","checks":{"postgres":"ok","redis":"ok"}}` |
+| API role policy (`heach-dev-api`, `api-runtime`) | `ssm:GetParameters` on exactly DB_APP_PASSWORD, REDIS_PASSWORD, BLIND_INDEX_KEY, TEST_LOGIN_KEY; the four data-domain keys (GenerateDataKey, Decrypt); uploads bucket; `sns:Publish` on the alert topic. Trust: only `heach-dev-host` |
+| IAM simulation, API role | Allowed: `GetParameters` on its four names; Decrypt on the health key. Implicit deny: `GetParameters`/`GetParameter` on POSTGRES_PASSWORD and DB_MIGRATOR_PASSWORD, `GetParameter` on its own names, `GetParametersByPath` on `/heach/dev`, backups bucket GetObject, backup-key Decrypt, `sts:AssumeRole` on the host role, Encrypt on the health key |
+| Host role (`pull-images-read-config`) | ECR pull; `ssm:GetParameter(s)` under `/heach/dev/*` (bootstrap, migrations); `sts:AssumeRole` on the API role; backup key; backups `pg/*`. No data-domain keys, uploads or SNS. `ssm:GetParametersByPath` is gone (the earlier optional owner action is done) |
+| `/heach/dev/TEST_LOGIN_KEY` | Exists, SecureString, created 2026-10-24 15:25 UTC |
+| Instance metadata | `HttpTokens` required, `HttpPutResponseHopLimit` 1 |
+| From inside the API container | Identity is `assumed-role/heach-dev-api`; POSTGRES_PASSWORD and DB_MIGRATOR_PASSWORD: `AccessDeniedException`; own four parameters: 4 returned, 0 invalid; IMDSv2 token request: timeout (hop limit); IMDSv1: 401. No secret variable and no `AWS_ACCESS_KEY_ID` in its environment |
+| From the host | IMDSv2 token 200 (host role still works for the host itself) |
+| API credentials | `heach-api-credentials.timer` active; `/opt/heach/aws/credentials.json` mode 640, refreshed 15:58 UTC |
+| Test sign-in, public entry, from the internet | 404 for `/api/v1/auth/test-login` and `/api/v1/auth//TEST-LOGIN`, with no key and with a random key |
+| Test sign-in, public entry, on the host with the public host name | 404 with no key and with a random key (0 bytes, no cookie) |
+| Test sign-in, loopback entry 9443 (`localhost` and the public host name) | 200 with an access token and the `heach_refresh` cookie (synthetic user `…0001`) |
+| API direct on 3001, no key | 404 |
+| Ports 9443 and 8443 | Listening on 127.0.0.1 only; unreachable from the internet |
+
+Two observations, neither a defect of the fixes:
+
+- On the host, `https://127.0.0.1` and `https://127.0.0.1:9443` answer **200 with an empty body**
+  for any request, because no Caddy site has the address `127.0.0.1` on the dev host
+  (`PUBLIC_HOST` is the public IP; CI sets it to `127.0.0.1`, so CI's names match). That is Caddy's
+  default for an unknown host name, not a sign-in: no token, no cookie. Checks on the host must use
+  `localhost` or the public host name.
+- `https://localhost:8443` (admin through port forwarding) also answers an empty 200, while the
+  public host name on 8443 serves the admin page: documentation gap 13 on the
+  [status page](../implementation-status.md#documentation-gaps-found-in-review), now reproduced on
+  the dev host.
+

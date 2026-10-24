@@ -8,7 +8,7 @@
 - [x] T006 Finding 6: verified already fixed by spec 003 (`audit-transaction.int-spec.ts`, `notes.repository.spec.ts`)
 - [x] T007 Finding 7: API IAM role with exact parameter ARNs, narrower host role, IMDS hop limit 1, `api-credentials.sh` and timer, privileged passwords only to one-off containers; static checks (EN-12.4)
 - [x] T008 Docs: specs index, implementation status, cloud setup and environments (loopback entry), spec 002 and 004 notes, security review remediation section
-- [ ] T009 Owner: approve this spec; apply the infra plan; re-run Deploy dev; confirm live (IAM simulation for the API role, public test sign-in 404)
+- [x] T009 Owner: approve this spec; apply the infra plan; re-run Deploy dev; confirm live (IAM simulation for the API role, public test sign-in 404). Approved, applied and redeployed by the owner on 24 October 2026; live checks run the same day ([live verification](../../docs/reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24))
 
 ## Evidence
 
