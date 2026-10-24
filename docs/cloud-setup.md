@@ -129,6 +129,7 @@ What one deploy does (`.github/workflows/deploy-dev.yml`):
 | Web | `https://<host_ip>` |
 | API | `https://<host_ip>/api/healthz`, `/api/readyz` |
 | Admin | `aws ssm start-session --target <instance_id> --document-name AWS-StartPortForwardingSession --parameters portNumber=8443,localPortNumber=8443`, then `https://localhost:8443` |
+| Web with test sign-in (SE-07.23) | `aws ssm start-session --target <instance_id> --document-name AWS-StartPortForwardingSession --parameters portNumber=9443,localPortNumber=9443`, then `https://localhost:9443`. The public address refuses test sign-in; this loopback-only entry adds the key from `/heach/dev/TEST_LOGIN_KEY` |
 | Shell on the host | `aws ssm start-session --target <instance_id>` |
 
 `/docs` (OpenAPI) is off in this environment because it runs with `NODE_ENV=production`.

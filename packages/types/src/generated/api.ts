@@ -242,7 +242,10 @@ export interface operations {
   AuthController_testLogin: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description Required in dev */
+        'x-test-login-key'?: string;
+      };
       path?: never;
       cookie?: never;
     };

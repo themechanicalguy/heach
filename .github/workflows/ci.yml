@@ -63,8 +63,10 @@ jobs:
         run: pnpm --filter @heach/ui build-storybook
       - name: Generated API types are up to date
         run: pnpm --filter @heach/types check
-      - name: Dependency audit (high and critical block the merge)
-        run: pnpm audit --prod --audit-level high
+      # Production and development dependencies alike: a vulnerable dev server or build tool runs
+      # on developer machines and CI with access to the source (security review 2026-10-24).
+      - name: Dependency audit, all dependencies (high and critical block the merge, SO-03.2)
+        run: pnpm audit --audit-level high
 
   smoke:
     name: E2E smoke
@@ -168,6 +170,7 @@ jobs:
         run: |
           # No Parameter Store or KMS in CI: secrets via .env and the local key double, APP_ENV test.
           redis_password=$(openssl rand -hex 16)
+          test_login_key=$(openssl rand -hex 32)
           {
             echo "REGISTRY=local"
             echo "IMAGE_TAG=ci"
@@ -182,6 +185,9 @@ jobs:
             echo "DB_MIGRATOR_PASSWORD=$(openssl rand -hex 16)"
             echo "REDIS_PASSWORD=$redis_password"
             echo "CI_REDIS_PASSWORD=$redis_password"
+            # Test sign-in behind the loopback entry's key, as on the dev host (SE-07.23).
+            echo "TEST_LOGIN_KEY=$test_login_key"
+            echo "CI_TEST_LOGIN_KEY=$test_login_key"
           } > .env
           grep '^POSTGRES_PASSWORD=' .env | sed 's/^POSTGRES_PASSWORD=/DB_ADMIN_PASSWORD=/' >> .env
           bash make-certs.sh certs
@@ -202,6 +208,21 @@ jobs:
           curl -sSkI https://127.0.0.1/or | grep -qi "^content-security-policy: .*'nonce-"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/)" = 301
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:5432 || true)" = 000
+      - name: Test sign-in only through the loopback entry (SE-07.23)
+        run: |
+          login() { curl -sk -o /dev/null -w '%{http_code}' -X POST "$1/api/v1/auth/test-login" \
+            -H 'content-type: application/json' -H "X-Test-Login-Key: ${2:-}" \
+            -d '{"userId":"00000000-0000-4000-8000-000000000001"}'; }
+          # The public entry refuses it, even with a guessed key header.
+          test "$(login https://127.0.0.1)" = 404
+          test "$(login https://127.0.0.1 "$(openssl rand -hex 32)")" = 404
+          # The API itself refuses it without the key, behind any proxy.
+          test "$(docker compose -f deploy/dev/compose.yml exec -T api wget -qS -O /dev/null \
+            --post-data '{"userId":"00000000-0000-4000-8000-000000000001"}' \
+            --header 'content-type: application/json' http://127.0.0.1:3001/v1/auth/test-login 2>&1 \
+            | grep -o 'HTTP/1.1 [0-9]*' | tail -1)" = 'HTTP/1.1 404'
+          # The loopback entry adds the key.
+          test "$(login https://127.0.0.1:9443)" = 200
       # The last two curl checks use up this runner's API allowance; the sleep after them covers both.
       - name: Fake tokens and forged forwarding headers still reach the API's 429 (SO-08.10)
         run: bash scripts/rate-limit-check.sh https://127.0.0.1
@@ -231,7 +252,8 @@ jobs:
         env:
           CI: true
           E2E_API: 1
-          E2E_BASE_URL: https://127.0.0.1
+          # The loopback entry: the only one that serves test sign-in (SE-07.23).
+          E2E_BASE_URL: https://127.0.0.1:9443
       - name: The note is ciphertext in PostgreSQL and its reads are audited
         working-directory: deploy/dev
         run: |
@@ -269,7 +291,7 @@ jobs:
         run: node scripts/check-tags.mjs
       - name: Specs are structurally complete (threat models, sections, criterion IDs, index; SO-01.1, ADR 0011)
         run: node scripts/check-specs.mjs
-      - name: KMS on buckets and disks, yearly key rotation, host KMS actions (EN-02.1, EN-05.2, EN-04.2)
+      - name: KMS on buckets and disks, key rotation, host KMS actions, API role boundary (EN-02.1, EN-05.2, EN-04.2, EN-12.4)
         run: node scripts/check-infra-security.mjs
       # No AWS credentials: backends are skipped; providers come from the committed lock files.
       - name: Validate every stack

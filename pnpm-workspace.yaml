@@ -11,3 +11,17 @@ allowBuilds:
   '@scarf/scarf': false
   # Post-install script only prints a version notice; the library works without it.
   protobufjs: false
+# Security fixes for transitive dependencies whose parents pin a vulnerable range (security
+# review 2026-10-24, finding 3). Remove each line once the parent ships the fixed version.
+overrides:
+  # @nestjs/platform-express 12.x pins multer 2.4.0 (GHSA-q7qp-rjg7-q26m).
+  '@nestjs/platform-express>multer': 2.5.0
+  # @lhci/cli 0.15.1 (latest) pins Lighthouse 12, whose puppeteer-core pulls extract-zip, which has
+  # no fixed release (GHSA-jmr9-qjv8-65gv, GHSA-7pqw-9j4j-h8q3). Lighthouse 13 drops it.
+  '@lhci/cli>lighthouse': 13.5.0
+  '@lhci/utils>lighthouse': 13.5.0
+  # Lighthouse CI tooling: tmp (GHSA-ph9p-34f9-6g65, GHSA-52f5-9888-hmc6), uuid
+  # (GHSA-w5hq-g745-h8pq), basic-ftp (GHSA-c475-qrg2-pj4r).
+  'tmp@<0.2.6': 0.2.7
+  'uuid@<11.1.1': 11.1.1
+  'basic-ftp@<6.2.1': 6.2.3

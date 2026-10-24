@@ -5,10 +5,12 @@ import { AuthController } from './auth.controller.js';
 import { SessionRepository } from './session.repository.js';
 import { SessionService } from './session.service.js';
 import { assertTestLoginAllowed } from './test-identity.adapter.js';
+import { TestLoginGate } from './test-login.gate.js';
 
 /**
  * Sessions and tokens. The test identity adapter (test-login) refuses to start outside dev and
- * test (SE-07.4); Step 3 replaces it with OTP login.
+ * test (SE-07.4) and, on the dev host, answers only the loopback-only entry (SE-07.23); Step 3
+ * replaces it with OTP login.
  */
 @Module({})
 export class AuthModule {
@@ -18,7 +20,7 @@ export class AuthModule {
       module: AuthModule,
       global: true,
       controllers: [AuthController],
-      providers: [AccessTokenStore, SessionRepository, SessionService],
+      providers: [AccessTokenStore, SessionRepository, SessionService, TestLoginGate],
       exports: [AccessTokenStore, SessionService],
     };
   }

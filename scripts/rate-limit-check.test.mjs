@@ -42,18 +42,18 @@ async function check(answer) {
 
 const apiError = '{"statusCode":429,"error":"ThrottlerException"}';
 
-describe('scripts/rate-limit-check.sh (SO-08.10)', () => {
+describe('scripts/rate-limit-check.sh (SO-08.10, SO-08.12)', () => {
   it('passes when the API refuses after its limit', async () => {
-    const result = await check((n) => (n <= 120 ? [401, '{}'] : [429, apiError]));
+    const result = await check((n) => (n <= 200 ? [401, '{}'] : [429, apiError]));
     assert.equal(result.code, 0, result.err);
-    assert.match(result.out, /api_429=30 early_429=0/);
+    assert.match(result.out, /api_429=50 early_429=0/);
   });
 
   it('sends a new token and a new forwarding header on every request', async () => {
     const result = await check(() => [401, '{}']);
-    assert.equal(result.seen.length, 150);
-    assert.equal(new Set(result.seen.map((s) => s.auth)).size, 150);
-    assert.ok(new Set(result.seen.map((s) => s.xff)).size > 100);
+    assert.equal(result.seen.length, 250);
+    assert.equal(new Set(result.seen.map((s) => s.auth)).size, 250);
+    assert.ok(new Set(result.seen.map((s) => s.xff)).size > 200);
     assert.ok(result.seen.every((s) => s.url === '/api/v1/auth/refresh'));
   });
 
@@ -64,14 +64,14 @@ describe('scripts/rate-limit-check.sh (SO-08.10)', () => {
   });
 
   it('fails when only the proxy refuses (empty 429 body)', async () => {
-    const result = await check((n) => (n <= 120 ? [401, '{}'] : [429, '']));
+    const result = await check((n) => (n <= 200 ? [401, '{}'] : [429, '']));
     assert.notEqual(result.code, 0);
     assert.match(result.err, /no 429 from the API/);
   });
 
   it('fails when requests are refused too early', async () => {
-    const result = await check((n) => (n <= 50 ? [401, '{}'] : [429, apiError]));
+    const result = await check((n) => (n <= 100 ? [401, '{}'] : [429, apiError]));
     assert.notEqual(result.code, 0);
-    assert.match(result.err, /within the first 100/);
+    assert.match(result.err, /within the first 150/);
   });
 });

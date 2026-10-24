@@ -6,7 +6,7 @@ import { SessionService } from './session.service.js';
 const USER = '00000000-0000-4000-8000-000000000001';
 
 /** Repository and token-store doubles that record call order; the transaction can fail at COMMIT. */
-function setup(session: Partial<SessionRow> | undefined, commitFails = false) {
+function setup(session: Partial<SessionRow> | undefined, commitFails = false, familyLive = true) {
   const log: string[] = [];
   const step = (name: string) => () => {
     log.push(name);
@@ -41,6 +41,16 @@ function setup(session: Partial<SessionRow> | undefined, commitFails = false) {
     revokeIfActive: vi.fn(step('revoke')),
     revokeAllForUser: vi.fn(step('revokeAll')),
     create: vi.fn(step('insert')),
+    lockUser: vi.fn(step('lockUser')),
+    familyOf: vi.fn(() => {
+      log.push('familyOf');
+      return Promise.resolve('family-1');
+    }),
+    revokeFamily: vi.fn(step('revokeFamily')),
+    familyIsLive: vi.fn(() => {
+      log.push('familyIsLive');
+      return Promise.resolve(familyLive);
+    }),
   };
   const tokens = {
     issue: vi.fn(() => {
@@ -49,6 +59,7 @@ function setup(session: Partial<SessionRow> | undefined, commitFails = false) {
     }),
     revoke: vi.fn(step('revokeToken')),
     revokeAllForUser: vi.fn(step('revokeAllTokens')),
+    revokeFamily: vi.fn(step('revokeFamilyTokens')),
   };
   const service = new SessionService(
     repo as unknown as SessionRepository,
@@ -59,11 +70,13 @@ function setup(session: Partial<SessionRow> | undefined, commitFails = false) {
 
 describe('SessionService.refresh', () => {
   it('SE-07.14 rotates in one transaction: lock, revoke, insert, issue, then commit', async () => {
-    const { service, log } = setup({});
+    const { service, log, tokens } = setup({});
     await expect(service.refresh('cookie-token')).resolves.toMatchObject({
       accessToken: 'new-access-token',
     });
     expect(log).toEqual(['BEGIN', 'lock', 'revoke', 'insert', 'issue', 'COMMIT']);
+    // The new access token joins the device's family, so a device sign-out reaches it (SE-07.21).
+    expect(tokens.issue).toHaveBeenCalledWith(expect.anything(), 'family-1');
   });
 
   it('SE-07.14 a failed insert rolls back before any token is issued', async () => {
@@ -83,7 +96,23 @@ describe('SessionService.refresh', () => {
   it('SE-07.19 a used token commits the revocation of every session, then every access token', async () => {
     const { service, log } = setup({ revoked_at: new Date() });
     await expect(service.refresh('cookie-token')).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(log).toEqual(['BEGIN', 'lock', 'revokeAll', 'COMMIT', 'revokeAllTokens']);
+    expect(log).toEqual([
+      'BEGIN',
+      'lock',
+      'familyIsLive',
+      'revokeAll',
+      'COMMIT',
+      'revokeAllTokens',
+    ]);
+  });
+
+  it('SE-07.22 a used token of a signed-out family is refused without revoking other devices', async () => {
+    const { service, repo, tokens, log } = setup({ revoked_at: new Date() }, false, false);
+    await expect(service.refresh('cookie-token')).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(log).toEqual(['BEGIN', 'lock', 'familyIsLive', 'COMMIT']);
+    expect(repo.revokeAllForUser).not.toHaveBeenCalled();
+    expect(tokens.revokeAllForUser).not.toHaveBeenCalled();
+    expect(tokens.issue).not.toHaveBeenCalled();
   });
 
   it('SE-07.16 an unknown or expired token is 401 and changes nothing', async () => {
@@ -93,5 +122,34 @@ describe('SessionService.refresh', () => {
       expect(repo.revokeIfActive).not.toHaveBeenCalled();
       expect(tokens.revoke).not.toHaveBeenCalled();
     }
+  });
+});
+
+describe('SessionService.signOut', () => {
+  const principal = { userId: USER, role: 'patient' as const, sessionId: 'session-3' };
+
+  it('SE-07.21 one device: revokes its whole family under the user lock, then its tokens', async () => {
+    const { service, repo, tokens, log } = setup({});
+    await service.signOut(principal, 'presented-token', false);
+    expect(log).toEqual([
+      'revokeToken',
+      'BEGIN',
+      'lockUser',
+      'familyOf',
+      'revokeFamily',
+      'COMMIT',
+      'revokeFamilyTokens',
+    ]);
+    expect(repo.familyOf).toHaveBeenCalledWith(expect.anything(), 'session-3');
+    expect(tokens.revokeFamily).toHaveBeenCalledWith('family-1');
+    expect(repo.revokeAllForUser).not.toHaveBeenCalled();
+    expect(tokens.revokeAllForUser).not.toHaveBeenCalled();
+  });
+
+  it('SE-07.3 every device: revokes every session, then every access token', async () => {
+    const { service, tokens, log } = setup({});
+    await service.signOut(principal, 'presented-token', true);
+    expect(log).toEqual(['BEGIN', 'lockUser', 'revokeAll', 'COMMIT', 'revokeAllTokens']);
+    expect(tokens.revokeFamily).not.toHaveBeenCalled();
   });
 });

@@ -15,7 +15,10 @@ export interface IssuedTokens {
   refreshExpiresAt: Date;
 }
 
-type Rotation = { kind: 'rotated'; tokens: IssuedTokens } | { kind: 'replay'; userId: string };
+type Rotation =
+  | { kind: 'rotated'; tokens: IssuedTokens }
+  | { kind: 'replay'; userId: string }
+  | { kind: 'ended' };
 
 /** Sign-in, refresh-token rotation with replay detection, and logout (SE-07). */
 @Injectable()
@@ -36,7 +39,8 @@ export class SessionService {
   /**
    * Rotates the refresh token in one transaction under the user's lock: all or nothing
    * (SE-07.14, SE-07.15). A token used twice revokes every session and access token of its user,
-   * including any a concurrent first use just issued (SE-07.2, SE-07.18).
+   * including any a concurrent first use just issued (SE-07.2, SE-07.18). A token from a family
+   * already signed out is only refused: nothing is left there to steal (SE-07.22).
    */
   async refresh(refreshToken: string | undefined): Promise<IssuedTokens> {
     if (!refreshToken) {
@@ -54,6 +58,10 @@ export class SessionService {
         await this.accessTokens.revokeAllForUser(outcome.userId);
         throw new UnauthorizedException();
       }
+      if (outcome.kind === 'ended') {
+        appLogger.warn({ event: 'refresh_after_sign_out' }, 'Refresh token of a signed-out device');
+        throw new UnauthorizedException();
+      }
       return outcome.tokens;
     } catch (error) {
       // A failed commit must not leave the access token it issued usable (SE-07.15).
@@ -64,14 +72,29 @@ export class SessionService {
     }
   }
 
-  /** Ends this device's session, or every session of the user (SE-07.3). */
+  /** Ends this device's session family, or every session of the user (SE-07.3, SE-07.21). */
   async signOut(principal: Principal, accessToken: string, allDevices: boolean): Promise<void> {
     if (allDevices) {
       await this.signOutEverywhere(principal.userId);
       return;
     }
-    await this.sessions.revokeIfActive(principal.sessionId);
     await this.accessTokens.revoke(accessToken);
+    await this.signOutDevice(principal);
+  }
+
+  /**
+   * Revokes every session and access token of this device's family, including those issued before
+   * or by a refresh. The user's lock orders it with rotation: a refresh that committed first is
+   * revoked here; one that runs after finds the family ended (SE-07.21, SE-07.22).
+   */
+  private async signOutDevice(principal: Principal): Promise<void> {
+    const familyId = await this.sessions.transaction(async (client) => {
+      await this.sessions.lockUser(client, principal.userId);
+      const family = await this.sessions.familyOf(client, principal.sessionId);
+      if (family) await this.sessions.revokeFamily(client, family);
+      return family;
+    });
+    if (familyId) await this.accessTokens.revokeFamily(familyId);
   }
 
   /** Takes the user's lock first, so a concurrent rotation cannot outlive it (SE-07.20). */
@@ -89,6 +112,9 @@ export class SessionService {
       throw new UnauthorizedException();
     }
     if (session.revoked_at) {
+      if (!(await this.sessions.familyIsLive(client, session.family_id))) {
+        return { kind: 'ended' };
+      }
       await this.sessions.revokeAllForUser(session.user_id, client);
       return { kind: 'replay', userId: session.user_id };
     }
@@ -115,7 +141,7 @@ export class SessionService {
       },
       client,
     );
-    const accessToken = await this.accessTokens.issue(principal);
+    const accessToken = await this.accessTokens.issue(principal, familyId);
     return { accessToken, refreshToken: refresh.token, refreshExpiresAt };
   }
 }
