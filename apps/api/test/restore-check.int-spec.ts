@@ -2,12 +2,14 @@ import { type ChildProcess, spawn } from 'node:child_process';
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import type { INestApplication } from '@nestjs/common';
 import pg from 'pg';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { pgClientConfig } from '../src/db/connection.js';
+import { main } from '../src/jobs/restore-check.js';
 import { bearer, login, USERS } from './auth-helpers.js';
 import { bootApp } from './boot-app.js';
 import { connectAs } from './db.js';
@@ -407,4 +409,63 @@ describe('Recurring restore check: interrupted runs (EN-10.8)', () => {
     },
     TEST_TIMEOUT_MS * 2,
   );
+});
+
+describe('Recurring restore check: the job command in process (EN-10.5, EN-10.7, EN-10.9)', () => {
+  /** What the host script does before the job: restore into a throwaway copy and grant reads. */
+  async function restoredCopy(content: Buffer): Promise<string> {
+    const db = `heach_restorecheck_${String(Math.floor(Date.now() / 1000))}`;
+    await admin.query(`CREATE DATABASE ${db}`);
+    await inPostgres(
+      `${AS_ADMIN} pg_restore -U "$POSTGRES_USER" -d ${db} --exit-on-error`,
+      content,
+    );
+    await admin.query(`GRANT CONNECT ON DATABASE ${db} TO heach_app`);
+    const copy = await adminOn(db);
+    await copy.query(`GRANT SELECT ON ALL TABLES IN SCHEMA app, audit TO heach_app;
+      GRANT EXECUTE ON FUNCTION audit.verify_chain() TO heach_app`);
+    await copy.end();
+    return db;
+  }
+
+  async function runMain(content: Buffer): Promise<number> {
+    const db = await restoredCopy(content);
+    try {
+      return await main({
+        ...process.env,
+        RESTORE_DATABASE_NAME: db,
+        RESTORE_RUN_ID: `restorecheck-${randomUUID()}`,
+        RESTORE_DUMP_NAME: fresh(),
+      });
+    } finally {
+      await admin.query(`DROP DATABASE ${db} WITH (FORCE)`);
+    }
+  }
+
+  it(
+    'EN-10.5 returns 0 for a good copy',
+    async () => {
+      expect(await runMain(goodDump)).toBe(0);
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    'EN-10.7 returns 1 for a copy with a broken audit link',
+    async () => {
+      const broken = await tamperedDump(async (client) => {
+        await client.query(
+          "UPDATE audit.entry SET action = 'forged' WHERE seq = (SELECT max(seq) FROM audit.entry)",
+        );
+      });
+      expect(await runMain(broken)).toBe(1);
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it('EN-10.9 refuses to run against any database but a throwaway copy', async () => {
+    await expect(
+      main({ ...process.env, RESTORE_DATABASE_NAME: await liveDatabase() }),
+    ).rejects.toThrow(/not a restore-check database/);
+  });
 });
