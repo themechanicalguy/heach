@@ -77,6 +77,32 @@ export class SessionRepository {
     return result.rowCount === 1;
   }
 
+  /** The session family (one device's chain of refreshes) a session belongs to. */
+  async familyOf(client: TransactionClient, sessionId: string): Promise<string | undefined> {
+    const { rows } = await client.query<{ family_id: string }>(
+      'SELECT family_id FROM app.session WHERE id = $1',
+      [sessionId],
+    );
+    return rows[0]?.family_id;
+  }
+
+  async revokeFamily(client: TransactionClient, familyId: string): Promise<void> {
+    await client.query(
+      'UPDATE app.session SET revoked_at = now() WHERE family_id = $1 AND revoked_at IS NULL',
+      [familyId],
+    );
+  }
+
+  /** True while the family still has a session that can refresh. */
+  async familyIsLive(client: TransactionClient, familyId: string): Promise<boolean> {
+    const { rows } = await client.query<{ live: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM app.session
+                       WHERE family_id = $1 AND revoked_at IS NULL AND expires_at > now()) AS live`,
+      [familyId],
+    );
+    return rows[0]?.live === true;
+  }
+
   async revokeAllForUser(userId: string, client: Queryable = this.pool): Promise<void> {
     await client.query(
       'UPDATE app.session SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL',

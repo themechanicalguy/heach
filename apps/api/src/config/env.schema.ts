@@ -89,16 +89,31 @@ export class EnvVars {
   @Matches(/^[0-9a-f]{64}$/)
   BLIND_INDEX_KEY!: string;
 
+  /**
+   * Key the test sign-in requires; on the dev host only the loopback-only proxy entry sends it
+   * (SE-07.23). Without it, test sign-in is refused in dev and open in local and test.
+   */
+  @ValidateIf((env: EnvVars) => !!env.TEST_LOGIN_KEY) // empty, as Compose passes it, means unset
+  @IsString()
+  @MinLength(32)
+  TEST_LOGIN_KEY?: string;
+
   /** Comma-separated server feature flags switched on in this environment (FF-01.1). */
   @IsOptional()
   @IsString()
   FEATURE_FLAGS?: string;
 
-  /** Requests per minute per user, or per IP when signed out (SO-08.1). */
+  /** Requests per window per signed-in user, on top of the address limit (SO-08.1). */
   @Type(() => Number)
   @IsInt()
   @Min(1)
   RATE_LIMIT_PER_MINUTE = 120;
+
+  /** Requests per window per client address, whatever the credentials (SO-08.12). */
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  RATE_LIMIT_PER_ADDRESS_PER_MINUTE = 200;
 
   /** Length of the rate-limit window; tests shorten it to prove recovery (SO-08.9). */
   @Type(() => Number)

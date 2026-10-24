@@ -159,3 +159,85 @@ describe('Replay and sign-out under concurrency (SE-07.18 to SE-07.20)', () => {
     REPEAT_TIMEOUT_MS,
   );
 });
+
+const logoutDevice = (session: Login) =>
+  request(app.getHttpServer())
+    .post('/v1/auth/logout')
+    .set(bearer(session))
+    .send({ allDevices: false });
+
+/** Another device of the same user still works: its access token and its refresh cookie. */
+async function expectStillSignedIn(session: Login): Promise<void> {
+  expect((await me(session.token)).status, 'other device access token').toBe(200);
+  expect((await refresh(session.cookie)).status, 'other device refresh').toBe(200);
+}
+
+describe('Device sign-out revokes its whole session family (SE-07.21, SE-07.22)', () => {
+  it('SE-07.21 login, refresh twice, logout: every earlier token of the device stops', async () => {
+    const first = await login(app, USERS.patientA);
+    const other = await login(app, USERS.patientA);
+    const second = fromResponse(await refresh(first.cookie).expect(200));
+    const third = fromResponse(await refresh(second.cookie).expect(200));
+    // The pre-refresh access tokens are still valid until the device signs out.
+    expect((await me(first.token)).status).toBe(200);
+    expect((await logoutDevice(third)).status).toBe(204);
+    await expectNothingWorks([first, second, third]);
+    await expectStillSignedIn(other);
+  });
+
+  it('SE-07.21 logout with a pre-refresh access token also ends the newer tokens', async () => {
+    const first = await login(app, USERS.patientA);
+    const other = await login(app, USERS.patientA);
+    const rotated = fromResponse(await refresh(first.cookie).expect(200));
+    expect((await logoutDevice(first)).status).toBe(204);
+    await expectNothingWorks([first, rotated]);
+    await expectStillSignedIn(other);
+  });
+
+  it('SE-07.3 logout of all devices ends every family of the user', async () => {
+    const first = await login(app, USERS.patientA);
+    const other = await login(app, USERS.patientA);
+    const rotated = fromResponse(await refresh(first.cookie).expect(200));
+    expect((await logoutAll(rotated)).status).toBe(204);
+    await expectNothingWorks([first, rotated, other]);
+  });
+
+  it('SE-07.22 reusing a signed-out device token is refused and leaves other devices', async () => {
+    const device = await login(app, USERS.patientA);
+    const other = await login(app, USERS.patientA);
+    const rotated = fromResponse(await refresh(device.cookie).expect(200));
+    expect((await logoutDevice(rotated)).status).toBe(204);
+    const reuse = await refresh(device.cookie);
+    expect(reuse.status).toBe(401);
+    expect(refreshCookie(reuse)).toMatch(/^heach_refresh=;/);
+    await expectStillSignedIn(other);
+  });
+
+  it('SE-07.19 a replay while the family is live still revokes every device', async () => {
+    const device = await login(app, USERS.patientA);
+    const other = await login(app, USERS.patientA);
+    const rotated = fromResponse(await refresh(device.cookie).expect(200));
+    expect((await refresh(device.cookie)).status).toBe(401);
+    await expectNothingWorks([device, rotated, other]);
+  });
+
+  it(
+    'SE-07.22 refresh racing a device logout ends the device and spares the others (50 races)',
+    async () => {
+      const other = await login(app, USERS.patientA);
+      for (let attempt = 0; attempt < REPEATS; attempt += 1) {
+        const device = await login(app, USERS.patientA);
+        const [signOut, refreshed] = await Promise.all([
+          logoutDevice(device),
+          refresh(device.cookie),
+        ]);
+        expect(signOut.status).toBe(204);
+        expect([200, 401]).toContain(refreshed.status);
+        await expectNothingWorks([device, ...winners(refreshed)]);
+        expect((await me(other.token)).status, 'other device after race').toBe(200);
+      }
+      expect((await refresh(other.cookie)).status).toBe(200);
+    },
+    REPEAT_TIMEOUT_MS,
+  );
+});

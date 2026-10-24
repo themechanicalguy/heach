@@ -4,16 +4,21 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { EnvVars } from '../config/env.schema.js';
 import { ALERT_PUBLISHER, LogAlertPublisher, SnsAlertPublisher } from './alert-publisher.js';
 import { AuthzFailureMonitor } from './authz-failure.monitor.js';
+import { ADDRESS_THROTTLER, USER_THROTTLER } from './user-throttler.guard.js';
 
-/** Rate limits (SO-08.1) and security alerts (SO-08.3). */
+/** Rate limits per address and per user (SO-08.1, SO-08.12) and security alerts (SO-08.3). */
 @Global()
 @Module({
   imports: [
     ThrottlerModule.forRootAsync({
       inject: [EnvVars],
-      useFactory: (env: EnvVars) => [
-        { ttl: env.RATE_LIMIT_WINDOW_SECONDS * 1000, limit: env.RATE_LIMIT_PER_MINUTE },
-      ],
+      useFactory: (env: EnvVars) => {
+        const ttl = env.RATE_LIMIT_WINDOW_SECONDS * 1000;
+        return [
+          { name: ADDRESS_THROTTLER, ttl, limit: env.RATE_LIMIT_PER_ADDRESS_PER_MINUTE },
+          { name: USER_THROTTLER, ttl, limit: env.RATE_LIMIT_PER_MINUTE },
+        ];
+      },
     }),
   ],
   providers: [

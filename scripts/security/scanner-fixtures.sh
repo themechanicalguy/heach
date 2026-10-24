@@ -25,11 +25,12 @@ cp security/semgrep/heach.yml "$dir/sast/"
 expect_fail semgrep docker run --rm -v "$dir/sast:/src" -w /src "$SEMGREP" \
   semgrep scan --metrics=off --config heach.yml --severity ERROR --error --quiet bad.tsx
 
-# Dependency scan: a version with a published high advisory.
+# Dependency scan: a version with a published high advisory, as a dev dependency, since the CI
+# audit covers development tooling too (SO-03.2).
 mkdir -p "$dir/deps"
-echo '{"name":"fixture","version":"0.0.0","private":true,"dependencies":{"lodash":"4.17.15"}}' > "$dir/deps/package.json"
+echo '{"name":"fixture","version":"0.0.0","private":true,"devDependencies":{"lodash":"4.17.15"}}' > "$dir/deps/package.json"
 (cd "$dir/deps" && pnpm install --lockfile-only --ignore-workspace >/dev/null 2>&1)
-expect_fail pnpm-audit pnpm --dir "$dir/deps" audit --prod --audit-level high --ignore-workspace
+expect_fail pnpm-audit pnpm --dir "$dir/deps" audit --audit-level high --ignore-workspace
 
 # Container scan: an end-of-life base image with known high CVEs.
 expect_fail trivy docker run --rm "$TRIVY" image --quiet --severity HIGH,CRITICAL --ignore-unfixed \

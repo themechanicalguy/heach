@@ -52,7 +52,17 @@
     "/v1/auth/test-login": {
       "post": {
         "operationId": "AuthController_testLogin",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-test-login-key",
+            "in": "header",
+            "description": "Required in dev",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
