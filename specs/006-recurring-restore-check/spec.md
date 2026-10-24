@@ -84,7 +84,7 @@ if a synthetic note body, user ID or note ID appears; and counts the audit entry
 - Disk too small for a restore: the restore fails, the check alerts at stage `restore`, and the
   throwaway database is dropped.
 - SNS publish fails: the run still exits non-zero and the journal holds the failure; publication
-  is not delivery (the email subscription is an owner action, unconfirmed).
+  is not delivery (the email subscription is confirmed in AWS; inbox receipt is confirmed only by the owner).
 - KMS unavailable: fails at stage `decrypt`; nothing is retried within the run.
 
 ## Requirements _(mandatory)_
@@ -104,9 +104,10 @@ These extend Step 2's EN-10.1 to EN-10.4, which stay in force.
 
 ### Permissions
 
-No HTTP endpoint and no user role. The check runs as a systemd timer on the dev host with the host's
-existing role (S3 read of `pg/*`, KMS decrypt, SNS publish to the alert topic; no change), and
-locally or in CI against local services.
+No HTTP endpoint and no user role. The check runs as a systemd timer on the dev host with the roles
+as they are since spec 007: the host role reads `pg/*` from S3; the one-off API container
+decrypts with the API role; the failure alert is published with the API role's credentials
+(research D-5). No IAM change. It also runs locally or in CI against local services.
 
 | Action                | Patient | Provider | Admin | Other                                          | Criterion           |
 | --------------------- | ------- | -------- | ----- | ---------------------------------------------- | ------------------- |
@@ -151,9 +152,11 @@ None. Host job only; English log lines and alert text, no user-facing strings.
 
 - **Specs 003 and 005 are on `main`**: `withTransaction`, the system audit actor (spec 005) and the
   field decryptor are reused unchanged.
-- **The host role already allows** S3 Get and List on `pg/*` of the backups bucket, KMS decrypt on
-  the data and backup keys, and SNS publish on the alert topic (`infra/modules/app-host/main.tf`);
-  no infrastructure change.
+- **The existing roles suffice** (`infra/modules/app-host/main.tf`, as applied for spec 007 and
+  checked live on 24 October 2026): the host role has S3 Get and List on `pg/*` and the backup key;
+  the API role has the data-domain keys and SNS publish on the alert topic. No infrastructure
+  change. (Amended 24 October 2026: the first draft assumed the host role still held data keys and
+  SNS publish, which spec 007 removed.)
 - **One Restricted column** (`app.patient_note.body`) holds data today; each step that adds one
   extends the decrypt stage in the same pull request (as the re-encryption runbook rule).
 - **Cost**: within free usage (a few S3 GETs and KMS decrypts a week, minutes of the existing host).

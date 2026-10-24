@@ -30,7 +30,9 @@ PostgreSQL image).
 
 **Storage**: None added. A throwaway database exists for the length of a run.
 
-**Third parties**: KMS and S3 through the host role (unchanged); SNS publish (unchanged).
+**Third parties**: S3 (`pg/*`, decrypted by S3 with the backup key) through the host role; data-key
+KMS calls inside the one-off API container through the API role; SNS publish with the API role's
+credentials (research D-5, amended for spec 007). No IAM change.
 
 **Constraints**: runs on the t4g.small dev host next to the live stack; the data set is under 1 MB
 today. The decrypt stage caps at 1,000 rows so time stays bounded as data grows.
@@ -39,17 +41,17 @@ today. The decrypt stage caps at 1,000 rows so time stays bounded as data grows.
 
 _GATE: Must pass before research. Re-check after design._
 
-| Principle                               | How this plan meets it                                                                                         | Violation and justification |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| I Spec before code                      | Docs only; no code until this spec and plan are Approved on `main`                                             | None                        |
-| II Traceable criteria                   | EN-10.5 to EN-10.10, each with a named test                                                                    | None                        |
-| III Data protection                     | Restricted values read only to prove decryption and discarded; access audited; throwaway copies always dropped | None                        |
-| IV Synthetic data, logs, secrets        | Synthetic dumps in tests; output, record and alert hold counts, stage, dump name and run ID only               | None                        |
-| V Languages, accessibility, performance | No user-facing strings; bounded rows and time                                                                  | None                        |
-| VI Architecture, reuse, dependencies    | Reuses the field encryptor, `AuditService` system actor (spec 005), host role, alert topic; no new dependency  | None                        |
-| VII Evidence-based completion           | EN-10 stays Partial until four weekly host records exist (SC-001) and the off-account key decision is made     | None                        |
-| VIII Changes and exceptions             | EN-10.1 to EN-10.4 unchanged                                                                                   | None                        |
-| IX Humans approve                       | Owner approves the spec; enabling the timer on the host happens through the normal deploy after merge          | None                        |
+| Principle                               | How this plan meets it                                                                                                             | Violation and justification |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| I Spec before code                      | Docs only; no code until this spec and plan are Approved on `main`                                                                 | None                        |
+| II Traceable criteria                   | EN-10.5 to EN-10.10, each with a named test                                                                                        | None                        |
+| III Data protection                     | Restricted values read only to prove decryption and discarded; access audited; throwaway copies always dropped                     | None                        |
+| IV Synthetic data, logs, secrets        | Synthetic dumps in tests; output, record and alert hold counts, stage, dump name and run ID only                                   | None                        |
+| V Languages, accessibility, performance | No user-facing strings; bounded rows and time                                                                                      | None                        |
+| VI Architecture, reuse, dependencies    | Reuses the field encryptor, `AuditService` system actor (spec 005), host and API roles as they are, alert topic; no new dependency | None                        |
+| VII Evidence-based completion           | EN-10 stays Partial until four weekly host records exist (SC-001) and the off-account key decision is made                         | None                        |
+| VIII Changes and exceptions             | EN-10.1 to EN-10.4 unchanged                                                                                                       | None                        |
+| IX Humans approve                       | Owner approves the spec; enabling the timer on the host happens through the normal deploy after merge                              | None                        |
 
 ## Project Structure
 
