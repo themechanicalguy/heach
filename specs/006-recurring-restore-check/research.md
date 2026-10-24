@@ -31,7 +31,7 @@ code on `main` at 491f5a0.
 
 ## Decisions
 
-### D-1 Weekly on the dev host (owner to confirm)
+### D-1 Weekly on the dev host (confirmed by the owner 2026-10-25)
 
 - **Decision**: a `heach-restore-check.timer` on Sundays at 00:00 UTC (05:30 IST), three hours after
   the Saturday dump, `Persistent=true`.
@@ -53,7 +53,7 @@ code on `main` at 491f5a0.
   rejected for the host. (b) only `pg_restore --list`: proves the archive, not that values decrypt;
   rejected.
 
-### D-3 One summary audit entry in the live database (owner to confirm)
+### D-3 One summary audit entry in the live database (confirmed by the owner 2026-10-25)
 
 - **Decision**: one `backup.restore_check` entry per run in the live `heach` audit log, as the
   system job, with outcome, stage and counts; written after the decrypt stage, best effort when it
