@@ -49,14 +49,24 @@ export class SessionRepository {
     );
   }
 
-  /** The session for this token hash, with it and its user's row locked until commit. */
+  /**
+   * The session for this token hash, with its user's row and then it locked until commit. The user
+   * comes first, as in sign-out: locking both rows in one statement can take the session first and
+   * deadlock with a sign-out that holds the user and updates the session (SE-07.22).
+   */
   async lockByHash(client: TransactionClient, hash: string): Promise<SessionRow | undefined> {
-    await client.query(LOCK_TIMEOUT);
+    const { rows: owners } = await client.query<{ user_id: string }>(
+      'SELECT user_id FROM app.session WHERE refresh_token_hash = $1',
+      [hash],
+    );
+    const owner = owners[0];
+    if (!owner) return undefined;
+    await this.lockUser(client, owner.user_id);
     const { rows } = await client.query<SessionRow>(
       `SELECT s.id, s.user_id, s.family_id, u.role, s.expires_at, s.revoked_at
          FROM app.session s JOIN app.user_test u ON u.id = s.user_id
         WHERE s.refresh_token_hash = $1
-          FOR UPDATE`,
+          FOR UPDATE OF s`,
       [hash],
     );
     return rows[0];
