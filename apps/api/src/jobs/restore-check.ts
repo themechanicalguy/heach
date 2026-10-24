@@ -38,22 +38,17 @@ export function restoreDatabaseUrl(databaseUrl: string, name: string): string {
   return url.toString();
 }
 
-const quoted = (identifier: string) => `"${identifier.replaceAll('"', '""')}"`;
-
+/** Exact row counts of every `app` and `audit` table, quoted and counted inside PostgreSQL. */
 async function countTables(restored: Pool): Promise<Record<string, number>> {
-  const { rows } = await restored.query<{ name: string }>(
-    `SELECT table_schema || '.' || table_name AS name FROM information_schema.tables
+  const { rows } = await restored.query<{ name: string; n: string }>(
+    `SELECT table_schema || '.' || table_name AS name,
+            (xpath('/row/n/text()', query_to_xml(
+              format('SELECT count(*) AS n FROM %I.%I', table_schema, table_name),
+              false, true, '')))[1]::text AS n
+       FROM information_schema.tables
       WHERE table_schema IN ('app', 'audit') AND table_type = 'BASE TABLE' ORDER BY 1`,
   );
-  const tables: Record<string, number> = {};
-  for (const { name } of rows) {
-    const [schema = '', table = ''] = name.split('.');
-    const count = await restored.query<{ n: string }>(
-      `SELECT count(*) AS n FROM ${quoted(schema)}.${quoted(table)}`,
-    );
-    tables[name] = Number(count.rows[0]?.n);
-  }
-  return tables;
+  return Object.fromEntries(rows.map(({ name, n }) => [name, Number(n)]));
 }
 
 /** Decrypts up to 1,000 note bodies, newest first, keeping counts only (EN-10.7). */

@@ -26,9 +26,13 @@ function fakeRestored(broken: string | null, bodies: EncryptedField[]) {
     queries.push(sql);
     if (sql.includes('verify_chain')) return Promise.resolve({ rows: [{ broken }] });
     if (sql.includes('information_schema.tables')) {
-      return Promise.resolve({ rows: [{ name: 'app.patient_note' }, { name: 'audit.entry' }] });
+      return Promise.resolve({
+        rows: [
+          { name: 'app.patient_note', n: '3' },
+          { name: 'audit.entry', n: '3' },
+        ],
+      });
     }
-    if (sql.startsWith('SELECT count(*)')) return Promise.resolve({ rows: [{ n: '3' }] });
     if (sql.includes('FROM app.patient_note')) {
       return Promise.resolve({ rows: bodies.map((body) => ({ body })) });
     }
@@ -80,10 +84,10 @@ describe('restore check job (spec 006)', () => {
     );
   });
 
-  it('EN-10.7 quotes table names it reads from the catalogue', async () => {
+  it('EN-10.7 counts rows inside PostgreSQL with quoted identifiers', async () => {
     const { pool, queries } = fakeRestored(null, []);
     await checkRestoredDatabase(pool, fakeEncryptor().encryptor);
-    expect(queries).toContain('SELECT count(*) AS n FROM "app"."patient_note"');
+    expect(queries[0]).toMatch(/format\('SELECT count\(\*\) AS n FROM %I\.%I'/);
   });
 
   it('EN-10.9 connects only to a throwaway database name', () => {
