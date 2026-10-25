@@ -106,6 +106,8 @@ with "Agree" and "Not now", and each agreement is stored and can be withdrawn in
     ([ADR 0012](../adr/0012-off-account-recovery-of-restricted-fields.md), option B). What custody,
     access-logging or disclosure duties would that create under the DPDP Act, and is it preferable
     to accepting that a lost account loses the records?
+    (Current position, ADR 0012 accepted 25 October 2026: while all data is synthetic we accept the
+    gap; option B would be built before the first real record, so your answer shapes that design.)
 
 ## What we need back
 
