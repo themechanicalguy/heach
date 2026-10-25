@@ -47,7 +47,7 @@ Tests are written first and recorded failing (no job exists) before the job is w
 - [x] T014 docs/runbooks/backup-restore.md: schedule, failure handling, record table for weekly runs
 - [x] T015 `pnpm check`; `pnpm --filter @heach/api test:e2e`; `pnpm test:scripts`; changed-line coverage; record counts in Evidence
 - [x] T016 Update docs/implementation-status.md (EN-10 row), docs/backlog.md item 5, docs/specs/README.md row
-- [ ] T017 After deploy: run the service once on the dev host (operator) and add its record to the runbook
+- [x] T017 After deploy: run the service once on the dev host (operator) and add its record to the runbook
 
 ## Dependencies & Execution Order
 
@@ -75,9 +75,12 @@ failed (no job build, no script); `scripts/restore-check.test.mjs` 4 of 4 and th
 | `pnpm check`                                                                                            | 37 of 37 tasks passed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 SC-002 is met by the integration test (one alert per failure stage, 100%). SC-004: the passing run
-took under 2 minutes locally (asserted). **SC-001 (four consecutive weekly host records) and T017
-are open**: they need the merge, Deploy dev, and four scheduled Sunday runs on the dev host,
-recorded in the [runbook](../../docs/runbooks/backup-restore.md#weekly-restore-check-records-sc-001).
+took under 2 minutes locally (asserted). **Deployed** in #80 (`a2cbf6f`, Deploy dev run 40157998902, green). **T017 done 25 October 2026**:
+the service run by hand on the dev host passed in 6 seconds (SC-004) and a synthetic failure proved
+the host alert path (published, delivered, received by the owner); records in the
+[runbook](../../docs/runbooks/backup-restore.md#weekly-restore-check-records-sc-001). The timer's
+first scheduled run is Sunday 1 November 2026, 00:00 UTC. **SC-001 is open**: four consecutive
+scheduled runs (1, 8, 15 and 22 November) must be recorded there.
 
 **Amendment (owner-approved 25 October 2026).** See the Approval lines of spec.md and plan.md:
 counts in the log line rather than the audit entry (no detail column), API role used only for

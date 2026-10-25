@@ -35,6 +35,8 @@ password manager, not the Keychain (R3). Restricted fields in the copy still nee
 | --- | --- | --- | --- |
 | 2026-10-18 | Pull `pg/2026-10-18T1019Z.dump` | `shasum -c` OK; decrypted copy identical to S3 | Claude Code |
 | 2026-10-24 | Pull `pg/2026-10-24T1609Z.dump` | `shasum -c` OK; identical (SHA-256 prefix `9813ed2e5d478b57`) | Claude Code |
+| 2026-10-25 | R2: weekly calendar reminder for the pull | Added | Owner |
+| 2026-10-25 | R3: test decryption of `2026-10-24T1609Z.dump.enc` with the passphrase pasted from the password manager | `shasum -c` OK; output starts `PGDMP`: the password-manager copy is correct | Owner |
 
 ## Weekly restore check (EN-10.5 to EN-10.10, spec 006)
 
@@ -68,6 +70,8 @@ One row per scheduled run, copied from the journal (counts only).
 
 | Run (UTC) | Trigger | Dump | Result | Counts | Run ID | By |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-10-25 03:44:57 to 03:45:03 | By hand (T017), `systemctl start`, deployed `a2cbf6f843db` | `pg/2026-10-24T2100Z.dump` | Passed: freshness, restore, audit chain, decrypt; copy dropped (none left); live database gained only its `backup.restore_check` entry (audit 34 to 35, chain intact, notes 2 before and after) | tables `app.data_key` 1, `app.patient_note` 2, `app.session` 33, `app.user_test` 4, `audit.entry` 34; decrypted 2, failed 0 | `restorecheck-54de7a36-566a-4340-905c-38fbb80a9315` | Claude Code |
+| 2026-10-25 03:48 | By hand, synthetic failure (empty dump folder) to prove the host alert path | none | Failed at freshness as intended; one alert `[HEACH] Restore check failed: freshness` published with the API role's credentials; SNS delivered 1, failed 0 (03:48 UTC); **received** in the owner's inbox (owner confirmed 25 October) | none | `restorecheck-5c18fff6-967c-4b99-b8e8-e6908cc82e0f` | Claude Code |
 
 ## Restore (EN-10.4)
 

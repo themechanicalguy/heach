@@ -69,17 +69,21 @@ the Keychain):
 cd ~/HEACH-backups
 shasum -a 256 -c <name>.dump.enc.sha256
 read -rs HEACH_BACKUP_PASS; export HEACH_BACKUP_PASS     # paste from the password manager
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:HEACH_BACKUP_PASS -in <name>.dump.enc | pg_restore --list | head -3
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:HEACH_BACKUP_PASS -in <name>.dump.enc | head -c 5; echo
 unset HEACH_BACKUP_PASS
 ```
 
-A table of contents means the passphrase in the password manager is the right one.
+`PGDMP` (the custom-format dump header) means the passphrase in the password manager is the right
+one; a wrong passphrase prints `bad decrypt`. Corrected 25 October 2026: the first version piped
+into `pg_restore --list`, which is not installed on the owner's computer, so the owner's first
+attempt failed for that reason.
 
 ## Consequences
 
-Open after acceptance (owner actions, each recorded with its date in the
-[backup runbook](../runbooks/backup-restore.md)): the weekly calendar reminder (R2) and the
-password-manager test decryption (R3). EN-10 stays Partial until R3 is recorded; R1 option B is a
+Done after acceptance (owner actions, recorded in the [backup runbook](../runbooks/backup-restore.md)):
+the weekly calendar reminder (R2, confirmed by the owner 25 October 2026) and the
+password-manager test decryption (R3, passed 25 October 2026: `pg/2026-10-24T1609Z.dump` copy,
+checksum OK, `PGDMP` with the passphrase pasted from the password manager). R1 option B is a
 pilot-gate item in the [backlog](../backlog.md), not Step 2 work.
 
 
