@@ -24,4 +24,4 @@ pnpm --filter @heach/types check      # what CI runs: fails if the committed fil
 ```
 
 Generation is a manual step, not part of `build`, so the API and this package never wait on
-each other. Step 2 adds a typed fetch client on top of these types.
+each other.
