@@ -89,7 +89,6 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | TS-06.1 | ✅ | `apps/api/src/adapters/*.port.ts` and `fakes.ts`; lint boundary proven in `lint-rules.spec.ts` |
 | EN-02.1 | ✅ code | `scripts/check-infra-security.mjs` in CI with fixtures; it found the state bucket on SSE-S3, now SSE-KMS in code (bootstrap apply is an owner action) |
 | EN-05.2 | ✅ | Same check: every `aws_kms_key` has yearly rotation |
-| EN-04.2 | ✅ | `scripts/check-infra-security.mjs` in CI. Live on 2026-10-18: the `heach-dev-host` policy allows only `kms:GenerateDataKey` and `kms:Decrypt` on the five `alias/heach-dev-*` keys. `iam simulate-principal-policy` gives implicit deny for Encrypt, ReEncryptFrom, CreateGrant, ScheduleKeyDeletion, PutKeyPolicy and for any other key. The keys are AWS_KMS origin, customer-managed, single-Region, with rotation on |
 | EN-10.3 | ✅ | Live on 2026-10-18. `pg/2026-10-18T1018Z.dump` and `…1019Z.dump` are in private bucket `heach-dev-backups-667291759252` (ap-south-1, all four public-access blocks on), SSE-KMS with the backup key `alias/heach-dev-backup`. The host timer fires at 21:00 UTC (02:30 IST). The off-account copy is in `~/HEACH-backups` on the owner's Mac: AES-256 with a Keychain passphrase, mode 600, SHA-256 verified. Decrypted without AWS, it is byte-identical to the S3 object. **24 October 2026:** nightly dumps present for every night 18 to 23 October; a dump run at 16:09 UTC under the host role as narrowed by spec 007 wrote `pg/2026-10-24T1609Z.dump` (SSE-KMS, backup key); `scripts/backup-pull.sh` copied it off-account, `shasum -c` OK, decrypted copy identical to the S3 object (SHA-256 prefix `9813ed2e5d478b57`). Gaps: Restricted fields need the dev KMS keys and the weekly pull is manual ([ADR 0012](adr/0012-off-account-recovery-of-restricted-fields.md), proposed) |
 | EN-10.4 | ✅ | Local record and dev-host record in the [runbook](runbooks/backup-restore.md). On 2026-10-18 `…1019Z.dump` was restored into a new database `heach_restore_1792318811` on the host: 1 synthetic note, stored as AES-256-GCM ciphertext. A separate API container decrypted it through KMS for its owner. The database was then dropped; the active `heach` database was never written. **Re-proven 24 October 2026 after spec 007** ([record](runbooks/backup-restore.md#restore-records)): `pg/2026-10-24T1609Z.dump` restored into `heach_restore_1792858593`, audit chain intact, 2 of 2 bodies ciphertext, a one-off API container on the API role decrypted the synthetic owner's note; live counts unchanged, throwaway database dropped. Recurring check: spec 006 (below) |
 | SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
@@ -100,23 +99,12 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | EN-05.4 to EN-05.9 (spec 005) | ✅ Done: owner accepted (G4) 25 October 2026 | Merged #70. `reencrypt.spec.ts`, `test/reencrypt.int-spec.ts`; fresh local run 24 October: all passing ([evidence](../specs/005-bounded-reencryption/tasks.md#evidence)). Run once on the dev host 24 October without `--rotate`: exit 0, nothing to re-encrypt (all values on version 1); a rotation on dev is the owner's call ([record](runbooks/key-rotation.md#record)) |
 | SO-08.12, SE-07.21 to SE-07.23, EN-12.4, SO-03.2 (spec 007) | ✅ Done: owner accepted (G4) 25 October 2026; live re-verified on `a2cbf6f` 25 October | Merged #74 (`8b0387f`), CI green including the deploy-bundle checks (public test sign-in 404, loopback 200). Owner applied the infra 24 October (4 added, 2 changed in place, $0); Deploy dev attempt 2 green. Live on 24 October: `tofu plan` no changes; API role reads exactly its four parameters, admin and migrator passwords denied, IMDS unreachable from containers (hop limit 1); public test sign-in 404 from the internet and on the host, loopback entry 200 ([live verification](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24)) |
 
-## Exit criteria (guideline Step 2), checked 25 October 2026
+## Exit criteria and what closes Step 2
 
-| Exit criterion | Evidence | State |
-| --- | --- | --- |
-| A sample note travels end to end: Odia on a phone, field-encrypted, owner only, audited | EN-13.1 (end to end), EN-03.1, SE-02.3, I18N-04.1 above; deploy-bundle E2E on three viewports | Met (code, CI) |
-| A test proves the note is ciphertext in the database and absent from logs | `sample-notes.int-spec.ts`, deploy-bundle SQL and log checks | Met (code, CI) |
-| A PR with a hard-coded string, missing translation, accessibility violation, oversized bundle or leaked secret is blocked | I18N-02.1, I18N-07.1, TS-02.1 and UX-01.2, PF-02.1, EN-12.3 fixtures | Met (CI) |
-| Traces show one correlation ID from browser to database | LM-01.1 | Met (code, CI; local Jaeger, ADR 0010) |
-| The lawyer's first review of consent wording and the Aadhaar route is in hand | [Review pack](reviews/lawyer-review-step-2.md) ready; not sent | **Not met: owner (D6)** |
-
-The Step 2 spec also requires the native Odia review (I18N-07, not met: owner) and spec 006's four
-weekly runs (SC-001, 1 to 22 November 2026). Alert inbox receipt, ADR 0012 and G4 for specs 001 to
-005 and 007 were closed by the owner on 25 October 2026. The [audit](step-1-2-audit.md) of
-25 October 2026 added two items: LM-02.1 is Partial (nested masking) and the guideline's step-end
-demo on a real phone is not recorded; the first exit row above is proven in device emulation only.
-Step 2 is **not complete**; the [acceptance matrix](step-2-acceptance-matrix.md#closing-step-2)
-lists what closes it.
+The verdict on each guideline exit criterion and the list of open items are in the
+[acceptance matrix](step-2-acceptance-matrix.md#guideline-exit-criteria). Dates, owners and
+closure conditions for every open item are in the
+[follow-up register](follow-up-register.md#closes-step-2).
 
 ## Deploy and rollback record
 
@@ -136,26 +124,3 @@ lists what closes it.
 - 24 October 2026: CI on `main` red for `36e82ac` (#72) and `525e9cf` (#75, merged with both checks failing): the dependency audit and Trivy caught newly published highs in body-parser and multer. Deploy dev was skipped both times; #74 (`8b0387f`, 12:37 UTC) fixed them. Recorded by the audit of 25 October.
 - 17 and 18 October 2026, rollback: the "Roll back to the previous tag" step ran 11 times and failed every time (expired ECR tags, preflight stops, the rotation outage). It has not run since, and has never succeeded ([FU-12](follow-up-register.md#step-1-items-still-open)).
 - 22 and 23 October 2026: Deploy dev green for spec 003 `1d74b17` ([run 39838278055](https://github.com/themechanicalguy/heach/actions/runs/39838278055)), spec 004 `468c7f1` ([run 39910289211](https://github.com/themechanicalguy/heach/actions/runs/39910289211)) and spec 005 `491f5a0` ([run 39915546133](https://github.com/themechanicalguy/heach/actions/runs/39915546133)): deploy and smoke test of `/healthz` and `/api/readyz` passed, no rollback. The smoke test checks health only, not the corrective behaviour.
-
-## Owner actions
-
-Status on 25 October 2026. Nobody outside the project has been contacted by Claude Code. From the
-audit of 25 October 2026 on, open actions are tracked with owners, dates and closure conditions in
-the [follow-up register](follow-up-register.md); the list below is kept as the history of this log.
-
-- ~~Confirm alert email receipt~~: done 25 October 2026, both synthetic alerts (LM-07.1, SO-08.3)
-  arrived. The credit alerts' receipt was not asked and stays unrecorded.
-- ~~Review the evidence for specs 001 to 005 and 007~~ (gate G4): accepted 25 October 2026.
-- ~~Drop `ssm:GetParametersByPath` from the host policy~~ (18 October follow-up): gone from
-  `infra/`; `tofu plan` showed no changes on 24 October.
-- **Spec 006 SC-001**: after each of Sundays 1, 8, 15 and 22 November 2026, record the run
-  ([how](runbooks/backup-restore.md#scheduled-runs-where-the-evidence-is-and-how-to-read-it)); keep
-  the host awake from Saturday 21:00 to Sunday 01:00 UTC; then the G4 review of spec 006.
-- ~~Decide ADR 0012~~: accepted 25 October 2026; R2 reminder added and R3 passed the same day.
-- ~~Approve spec 006~~: approved 25 October 2026 as drafted.
-- Optional: a re-encryption with `--rotate` on dev (creates `health` key version 2;
-  [runbook](runbooks/key-rotation.md)); and documentation gap 13 (admin on `localhost:8443`).
-- Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md)
-  (cover note included) to a lawyer you choose.
-- Native Odia speaker review of new keys (I18N-07): [review sheet](reviews/odia-review-step-2.md)
-  with all 34 keys, a cover note, the feedback needed back and how it is applied.

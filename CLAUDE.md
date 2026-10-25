@@ -22,7 +22,6 @@ Read these before planning any work. Do not copy their content here; link to req
 - `docs/spec-workflow.md` — how to run `/speckit-*` from idea to merged code, gates, resuming a feature
 - `docs/implementation-status.md` — what is built, partial or not started, per step and requirement ID
 - `docs/local-development.md` — running everything locally, git hooks. Current: **Step 2 exit pending the lawyer and Odia reviews, four weekly restore-check runs (to 22 November 2026), LM-02.1 nested masking and a real-phone demo; Step 3 next** ([register](docs/follow-up-register.md#closes-step-2)).
-- `docs/step-1-review.md` — Step 1 audit of 17 October (historical): what passed, open actions, risks Step 2 must fix first
 - `docs/step-1-2-audit.md` — Step 1 and Step 2 audit of 25 October 2026: status of every item, Step 3 verdict
 - `docs/follow-up-register.md` — the one list of checks and actions still due, with owners, dates and closure conditions
 

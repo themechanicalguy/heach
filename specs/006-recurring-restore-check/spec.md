@@ -10,7 +10,7 @@
 
 **Created**: 2026-10-24
 
-**Input**: Goal brief: "Complete operational engineering tasks, including recurring restore verification, only within approved scope" (backlog item 5; [Step 2 assessment](../../docs/step-2-assessment-2026-10-22.md#backups-and-recovery): "Recurring restore verification: none scheduled")
+**Input**: Goal brief: "Complete operational engineering tasks, including recurring restore verification, only within approved scope" (backlog item 5; [Step 2 assessment](https://github.com/themechanicalguy/heach/blob/338943c/docs/step-2-assessment-2026-10-22.md#backups-and-recovery): "Recurring restore verification: none scheduled")
 
 ## Scope
 

@@ -18,7 +18,7 @@ second list.
   the success criteria of feature specs 001 to 007; ADRs 0004 and 0008 to 0012; the
   [acceptance matrix](step-2-acceptance-matrix.md), [Step 2 log](step-2-progress.md),
   [implementation status](implementation-status.md), [specs index](specs/README.md),
-  [Step 1 review](step-1-review.md), backlog and reviews.
+  [Step 1 review](https://github.com/themechanicalguy/heach/blob/338943c/docs/step-1-review.md) (removed after this audit; permanent link), backlog and reviews.
 - **Rules followed:** read-only against GitHub, AWS and the dev host; synthetic data only; no
   infrastructure change, deploy, restore run on the host, external contact or human approval.
 
