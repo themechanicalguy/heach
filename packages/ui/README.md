@@ -9,8 +9,9 @@ import '@heach/ui/ui.css';
 <Button onClick={save}>{t('form.save')}</Button>;
 ```
 
-Components: `Button`, `TextField`, `OtpField`, `Card`, `Sheet`, `Table`, `Toast`, `BottomNav` and the
-states `EmptyState`, `ErrorState`, `OfflineBanner`, `Skeleton`. Design tokens are in `src/tokens.ts`;
-`ui.css` mirrors them as CSS variables. Each component has a story and an axe test (UX-01, TS-02).
-Touch targets are at least 48 px (A11Y-03). Labels always come from messages, never hard-coded.
+Now: `Button`, a native `<button>` that defaults to `type="button"`, with a 48 px minimum target
+(A11Y-03) and a visible focus ring. Labels always come from messages, never hard-coded.
+
+Step 2 replaces `ui.css` with design tokens and Tailwind, adds the base components (input, OTP
+field, card, sheet, table, toast), Storybook and axe checks (UX-01 to UX-05, A11Y-07).
 Extend these components rather than writing new ones in an app.

@@ -1,10 +1,11 @@
 # Security review — 2026-10-24
 
-> **Remediation status (24 October 2026):** all seven findings are fixed in code on branch
-> `fix/security-review-2026-10-24` ([spec 007](../../specs/007-security-review-fixes/spec.md),
-> Draft), verified locally, **not yet merged, applied or deployed**. Finding 7's IAM separation takes
-> effect only after the owner applies the infrastructure plan and re-runs Deploy dev. See
-> [Remediation](#remediation-2026-10-24) at the end. The original review follows unchanged.
+> **Remediation status (updated 25 October 2026):** all seven findings are fixed by
+> [spec 007](../../specs/007-security-review-fixes/spec.md), merged in #74, infrastructure applied
+> by the owner and deployed on 24 October 2026, verified live the same day (see
+> [Live verification](#live-verification-after-the-apply-2026-10-24)), and accepted by the owner
+> (gate G4) on 25 October 2026. See [Remediation](#remediation-2026-10-24) at the end. The
+> original review follows unchanged.
 
 **Verdict: the codebase is not fully secure and is not ready to handle real patient data.**
 

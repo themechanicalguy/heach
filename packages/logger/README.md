@@ -13,10 +13,7 @@ logger.info({ port: 3001 }, 'API listening');
   The service goes in `service`, not `name`, because `name` is always redacted.
 - Keys that commonly hold personal data (`name`, `mobile`, `address`, `aadhaar`, `otp`, tokens,
   and more; see `DEFAULT_REDACT_PATHS`) are replaced with `[REDACTED]`, at the top level and one
-  level deep, and mobile numbers in top-level string values are masked. Deeper values are not
-  masked yet (LM-02.1, [FU-27](../../docs/follow-up-register.md#closes-step-2)). Pass `redact` to
-  add paths.
+  level deep. Pass `redact` to add paths.
 - Redaction is a safety net. **Never log personal or health data on purpose** (LM-02, PR-07).
 
-Pass `context`, a function returning fields such as the correlation and trace IDs, to add them
-to every line (LM-01).
+Step 2 adds correlation IDs, OpenTelemetry trace context and the Nest logger adapter (LM-01 to LM-05).

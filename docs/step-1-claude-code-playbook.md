@@ -81,14 +81,7 @@ Decision recorded on 17 October 2026: use the Free plan until it ends, then set 
 
 **What this means for the timing of your upgrade.** Waiting for the plan to end is possible because of the 90-day window, but I recommend upgrading no later than the 15-day notice (the "Act" level below). That keeps the instance running without a gap and gives you time to recover if the upgrade hits a problem. Upgrading keeps unused credits valid for up to 12 months from your sign-up date, so the later you upgrade, the fewer calendar months you have left to spend them.
 
-**Alert levels.** Part B4 builds a daily check on top of AWS's emails. A level is reached when either trigger is met, whichever comes first.
-
-| Level | Trigger | What you do |
-| --- | --- | --- |
-| Watch | 50 percent of credits left, or 60 days left | Review spend with `scripts/credit-status`; put the upgrade date in your calendar |
-| Plan | 25 percent left, or 30 days left | Confirm your payment card is valid; take an encrypted backup outside the account; make sure the B6 budgets are written and planned in Terraform |
-| Act | 10 percent left, or 15 days left | Upgrade now (part B6). This is the latest safe moment |
-| Emergency | 5 percent left, or 7 days left | Upgrade today; stop idle dev resources |
+**Alert levels.** Part B4 builds a daily check on top of AWS's emails. The four levels (Watch, Plan, Act, Emergency), their triggers and what to do at each are in the [credit expiry plan](credit-expiry-plan.md#alert-levels).
 
 Two more alerts run alongside: a **burn-rate warning** when, at the current daily spend, credits would run out before the plan's end date, and a **plan state warning** if the plan status ever shows as expired.
 

@@ -180,7 +180,8 @@ The manual checks above were run on 18 October 2026, mostly against the dev host
 - LM-07.1 alert: a labelled synthetic test alert, published to SNS.
 - LM-03.1, LM-04.1 and LM-05.1: local records (ADR 0010), plus a dev-host LM-04.1 record.
 
-Email delivery of SNS alerts waits on the owner confirming the topic subscription.
+Email delivery of SNS alerts: the subscription was confirmed in AWS on 24 October 2026 and the owner
+confirmed receipt of both synthetic alerts on 25 October 2026 (log rows SO-08.3 and LM-07.1).
 
 ## Data
 
