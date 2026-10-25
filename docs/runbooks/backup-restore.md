@@ -1,4 +1,4 @@
-# Runbook: database backups and restore (EN-10.3, EN-10.4)
+# Runbook: database backups and restore (EN-10.3 to EN-10.10)
 
 Decision D1 and [ADR 0010](../adr/0010-step-2-backups-secrets-waf.md): one Region, its own key,
 plus a weekly encrypted copy outside the AWS account.
@@ -25,6 +25,50 @@ scripts/backup-pull.sh            # first run creates the Keychain passphrase: s
 
 Without the passphrase the copy cannot be decrypted; losing it loses the copy.
 
+[ADR 0012](../adr/0012-off-account-recovery-of-restricted-fields.md) (accepted 25 October 2026):
+the pull stays manual, prompted by a weekly calendar reminder (R2); the passphrase is also kept in
+the owner's password manager and proven by the test decryption in the ADR, typed from the
+password manager, not the Keychain (R3). Restricted fields in the copy still need the dev KMS keys
+(R1, accepted for dev; escrow wrap before the pilot). Record each pull and the R3 test:
+
+| Date | Action | Result | By |
+| --- | --- | --- | --- |
+| 2026-10-18 | Pull `pg/2026-10-18T1019Z.dump` | `shasum -c` OK; decrypted copy identical to S3 | Claude Code |
+| 2026-10-24 | Pull `pg/2026-10-24T1609Z.dump` | `shasum -c` OK; identical (SHA-256 prefix `9813ed2e5d478b57`) | Claude Code |
+
+## Weekly restore check (EN-10.5 to EN-10.10, spec 006)
+
+`heach-restore-check.timer` runs `/opt/heach/restore-check.sh` every Sunday at 00:00 UTC (05:30
+India time), three hours after Saturday's dump; `Persistent=true` catches up after `dev-sleep`.
+`deploy.sh` installs and enables it. Each run:
+
+1. **freshness**: the newest `pg/*.dump` by name must be under 26 hours old.
+2. **restore**: drops any `heach_restorecheck_*` database older than a day (a killed run's), then
+   restores the dump with `--exit-on-error` into a new `heach_restorecheck_<epoch>` database and
+   grants the API role read access in that copy only.
+3. **audit-chain** and **decrypt**: `node dist/jobs/restore-check.js` in a one-off API container
+   (API role) counts every table, runs `audit.verify_chain()` and decrypts up to 1,000 note bodies
+   with the data keys stored in the restored copy; the plaintext is discarded. It writes one
+   `backup.restore_check` (or `.failed`) entry to the live audit log as `job:restore-check`, with
+   the dump name and the run ID only, and logs one JSON line with the counts.
+4. The throwaway database is always dropped (also on `systemctl stop`). Any failure publishes one
+   alert, `[HEACH] Restore check failed: <stage>`, with the dump name and run ID, using the API
+   role's credentials. Stage `job` means the job could not start.
+
+Run it by hand: `sudo systemctl start heach-restore-check.service`; read the result:
+`journalctl -u heach-restore-check.service -n 30`; next run: `systemctl list-timers heach-restore-check.timer`.
+On an alert: read the journal for the run ID, fix the stage that failed (missing dump: check
+`heach-backup.service`; restore: the dump or disk; audit-chain: treat as possible tampering, keep
+the dump; decrypt: KMS access of the API role or a damaged value), then run it by hand.
+Disable: `sudo systemctl disable --now heach-restore-check.timer`.
+
+### Weekly restore check records (SC-001)
+
+One row per scheduled run, copied from the journal (counts only).
+
+| Run (UTC) | Trigger | Dump | Result | Counts | Run ID | By |
+| --- | --- | --- | --- | --- | --- | --- |
+
 ## Restore (EN-10.4)
 
 1. Get a dump: from S3 (`aws s3 cp s3://…/pg/<name>.dump .`) or from the off-account copy
@@ -44,4 +88,4 @@ Without the passphrase the copy cannot be decrypted; losing it loses the copy.
 | 2026-10-18 | Local `pg_dump -Fc` (77 KB, synthetic) | New empty database on local PostgreSQL 18 | Restore check passed: 104 notes restored, 95 belong to synthetic patient A and all decrypt through the API (bodies not printed) | Claude Code |
 | 2026-10-18 | Dev host dump `pg/2026-10-18T1019Z.dump` (S3, SSE-KMS); off-account copy verified byte-identical after decryption without AWS | New database `heach_restore_1792318811` on the dev host's PostgreSQL; the active `heach` database untouched (note count 1 before and after) | Passed: 1 synthetic note restored as AES-256-GCM ciphertext and decrypted through KMS by a separate API container for its owner; restore database and container removed | Claude Code |
 | 2026-10-24 | Dev host dump `pg/2026-10-24T1609Z.dump` (S3, SSE-KMS with the backup key), made by `heach-backup.service` under the host role as narrowed by spec 007 | New database `heach_restore_1792858593` on the dev host's PostgreSQL | Passed: `pg_restore --exit-on-error` ok; 2 notes and 34 audit entries restored; `audit.verify_chain()` reports no broken link; 2 of 2 bodies are ciphertext; a one-off API container on the API role decrypted the synthetic owner's note (1 of 1). Live `heach`: notes 2 and audit entries 34 before and after. Restore database and container removed (0 left) | Claude Code |
-| 2026-10-24 | Off-account copy of `pg/2026-10-24T1609Z.dump` pulled by `scripts/backup-pull.sh` to `~/HEACH-backups` | Owner's computer, no AWS involved in decryption | Passed: `shasum -c` OK; decrypted with the Keychain passphrase, byte-identical to the S3 object (SHA-256 prefix `9813ed2e5d478b57` on both). Restricted fields inside still need the dev KMS keys ([ADR 0012](../adr/0012-off-account-recovery-of-restricted-fields.md), proposed) | Claude Code |
+| 2026-10-24 | Off-account copy of `pg/2026-10-24T1609Z.dump` pulled by `scripts/backup-pull.sh` to `~/HEACH-backups` | Owner's computer, no AWS involved in decryption | Passed: `shasum -c` OK; decrypted with the Keychain passphrase, byte-identical to the S3 object (SHA-256 prefix `9813ed2e5d478b57` on both). Restricted fields inside still need the dev KMS keys ([ADR 0012](../adr/0012-off-account-recovery-of-restricted-fields.md), accepted 25 October: R1 for dev) | Claude Code |

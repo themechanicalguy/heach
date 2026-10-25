@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the HEACH restore check every week
+
+[Timer]
+# Sunday 00:00 UTC is 05:30 in India, three hours after Saturday's 21:00 UTC dump (spec 006 D-1).
+OnCalendar=Sun *-*-* 00:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
