@@ -15,9 +15,6 @@ what is not. Regenerate the criteria table when the log changes.
 | 1 | Lawyer's first review of consent wording and the Aadhaar route (guideline exit criterion, D6) | External review | The owner sends [the pack](reviews/lawyer-review-step-2.md) to a lawyer of their choice and shares the feedback; the owner is arranging it (25 October 2026) |
 | 2 | Native Odia review of the Step 2 keys (I18N-07, step spec "Screens and languages") | External review | The owner arranges a native speaker with medical vocabulary ([sheet](reviews/odia-review-step-2.md)); feedback then goes into the catalogues and is retested |
 | 3 | Spec 006 SC-001: four consecutive weekly restore-check records on the dev host | Observation period | Scheduled runs on Sundays 1, 8, 15 and 22 November 2026 (00:00 UTC); a newly enabled timer has no missed run to catch up, so 1 November is the first |
-| 4 | ADR 0012 R3: passphrase recovered from the password-manager copy | Owner action | The owner copies `heach-backup-passphrase` into their password manager and runs the test decryption in the ADR from that copy; Claude Code cannot read the password manager |
-| 5 | ADR 0012 R2: weekly reminder for the off-account pull | Owner action | The owner adds the recurring calendar reminder and confirms it |
-| 6 | Gate G4 (Done) for corrective specs 001 to 007 | Owner acceptance | The owner reviews each spec's evidence ([below](#corrective-feature-specs)) and accepts or names gaps |
 
 ## Guideline exit criteria
 
@@ -112,17 +109,17 @@ what is not. Regenerate the criteria table when the log changes.
 
 ## Corrective feature specs
 
-Each spec's tasks file holds its evidence. Gate G4 (Done) is the owner's review of that evidence.
+Each spec's tasks file holds its evidence. Gate G4 (Done) is the owner's review of that evidence: the owner accepted specs 001 to 005 and 007 on 25 October 2026; spec 006 waits for its four weekly runs.
 
 | Spec | Criteria | Code | Tests (CI) | Deployed to dev | Live or manual evidence | G4 owner acceptance |
 | --- | --- | --- | --- | --- | --- | --- |
-| [001 Session-refresh reliability](../specs/001-session-refresh-reliability/tasks.md) | SE-07.5 to SE-07.13 | #56 | Unit, integration and session E2E on three viewports; SC-001 50 of 50 | Yes (every deploy since 21 October) | Not host-specific (client behaviour) | Pending |
-| [002 Rate-limit bypass](../specs/002-rate-limit-bypass/tasks.md) | SO-08.4 to SO-08.11 | #64 | `rate-limit.int-spec.ts` and unit tests | Yes, `7c8c1c9`, smoke passed (22 October) | No separate host check; behaviour proven by CI integration tests (extended by spec 007's address limit) | Pending |
-| [003 Transactional audit writes](../specs/003-transactional-audit-writes/tasks.md) | SE-05.5 to SE-05.10 | #67 | `audit-transaction.int-spec.ts`, `transaction.spec.ts`; converge pass 25 October: no findings | Yes, `1d74b17` (22 October) | Not host-specific | Pending |
-| [004 Transactional session rotation](../specs/004-transactional-session-rotation/tasks.md) | SE-07.14 to SE-07.20 | #69 | `session-rotation.int-spec.ts`, unit tests, session E2E | Yes, `468c7f1` (23 October) | Not host-specific | Pending |
-| [005 Bounded re-encryption](../specs/005-bounded-reencryption/tasks.md) | EN-05.4 to EN-05.9 | #70 | `reencrypt.int-spec.ts`, `reencrypt.spec.ts` | Yes, `491f5a0` (23 October) | Run on the dev host 24 October without `--rotate`: exit 0 ([record](runbooks/key-rotation.md#record)) | Pending |
+| [001 Session-refresh reliability](../specs/001-session-refresh-reliability/tasks.md) | SE-07.5 to SE-07.13 | #56 | Unit, integration and session E2E on three viewports; SC-001 50 of 50 | Yes (every deploy since 21 October) | Not host-specific (client behaviour) | Accepted 25 October 2026 |
+| [002 Rate-limit bypass](../specs/002-rate-limit-bypass/tasks.md) | SO-08.4 to SO-08.11 | #64 | `rate-limit.int-spec.ts` and unit tests | Yes, `7c8c1c9`, smoke passed (22 October) | No separate host check; behaviour proven by CI integration tests (extended by spec 007's address limit) | Accepted 25 October 2026 |
+| [003 Transactional audit writes](../specs/003-transactional-audit-writes/tasks.md) | SE-05.5 to SE-05.10 | #67 | `audit-transaction.int-spec.ts`, `transaction.spec.ts`; converge pass 25 October: no findings | Yes, `1d74b17` (22 October) | Not host-specific | Accepted 25 October 2026 |
+| [004 Transactional session rotation](../specs/004-transactional-session-rotation/tasks.md) | SE-07.14 to SE-07.20 | #69 | `session-rotation.int-spec.ts`, unit tests, session E2E | Yes, `468c7f1` (23 October) | Not host-specific | Accepted 25 October 2026 |
+| [005 Bounded re-encryption](../specs/005-bounded-reencryption/tasks.md) | EN-05.4 to EN-05.9 | #70 | `reencrypt.int-spec.ts`, `reencrypt.spec.ts` | Yes, `491f5a0` (23 October) | Run on the dev host 24 October without `--rotate`: exit 0 ([record](runbooks/key-rotation.md#record)) | Accepted 25 October 2026 |
 | [006 Recurring restore check](../specs/006-recurring-restore-check/tasks.md) | EN-10.5 to EN-10.10 | #80 | `restore-check.int-spec.ts` (16), unit (9), scripts (11) | See the deploy record below | First run by hand (T017) below; SC-001 four weekly runs pending | Not yet (SC-001 open) |
-| [007 Security review fixes](../specs/007-security-review-fixes/tasks.md) | SO-08.12, SE-07.21 to SE-07.23, EN-12.4, SO-03.2 | #74 | Integration and unit tests; deploy-bundle test sign-in checks | Yes, `8b0387f` after the owner's infra apply (24 October) | Live 24 October: API role reads exactly its 4 parameters, admin and migrator passwords denied, hop limit 1, public test sign-in 404, loopback 200 ([record](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24)); re-checked after the spec 006 deploy below | Pending |
+| [007 Security review fixes](../specs/007-security-review-fixes/tasks.md) | SO-08.12, SE-07.21 to SE-07.23, EN-12.4, SO-03.2 | #74 | Integration and unit tests; deploy-bundle test sign-in checks | Yes, `8b0387f` after the owner's infra apply (24 October) | Live 24 October: API role reads exactly its 4 parameters, admin and migrator passwords denied, hop limit 1, public test sign-in 404, loopback 200 ([record](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24)); re-checked after the spec 006 deploy below | Accepted 25 October 2026 |
 
 ## Decisions and ADRs
 
@@ -136,7 +133,7 @@ Each spec's tasks file holds its evidence. Gate G4 (Done) is the owner's review 
 | D6 | Lawyer review is a Step 2 exit criterion, owner action | **Open** (open item 1) |
 | [ADR 0010](adr/0010-step-2-backups-secrets-waf.md) | Backups, secrets, WAF deferral; observability local only | Accepted and applied (LM-03.1, LM-05.1 local records) |
 | [ADR 0011](adr/0011-spec-kit-feature-specs.md) | Spec Kit feature specs | Accepted; specs 001 to 007 follow it |
-| [ADR 0012](adr/0012-off-account-recovery-of-restricted-fields.md) | Off-account recovery: R1 accept for dev, R2 manual pull with reminder, R3 password-manager passphrase test | Accepted 25 October 2026; R2 and R3 open (owner); R1 option B is a pilot-gate item (backlog 6a) |
+| [ADR 0012](adr/0012-off-account-recovery-of-restricted-fields.md) | Off-account recovery: R1 accept for dev, R2 manual pull with reminder, R3 password-manager passphrase test | Accepted 25 October 2026; R2 reminder added and R3 passed (owner, 25 October 2026); R1 option B is a pilot-gate item (backlog 6a) |
 
 ## Human acceptance records
 
@@ -147,9 +144,12 @@ Each spec's tasks file holds its evidence. Gate G4 (Done) is the owner's review 
 | Spec 006 amendment (audit entry fields, live connection, throwaway grants, stage `job`) | Owner | 25 October 2026 | Spec 006 Approval line |
 | Synthetic alerts LM-07.1 and SO-08.3 received in the intended inbox | Owner | 25 October 2026 | [Log](step-2-progress.md) rows SO-08.3 and LM-07.1 |
 | ADR 0012 accepted | Owner | 25 October 2026 | ADR status |
+| ADR 0012 R2 weekly reminder added; R3 passphrase recovered from the password manager (`PGDMP`) | Owner | 25 October 2026 | [Runbook](runbooks/backup-restore.md#weekly-off-account-copy-owner) |
+| Spec 006 synthetic failure alert received in the intended inbox | Owner | 25 October 2026 | [Runbook](runbooks/backup-restore.md#weekly-restore-check-records-sc-001) |
 | Lawyer review | Lawyer chosen by the owner | Not yet | Open item 1 |
 | Native Odia review | Native speaker chosen by the owner | Not yet | Open item 2 |
-| G4 acceptance of specs 001 to 007 | Owner | Not yet | Open item 6 |
+| G4 acceptance of specs 001 to 005 and 007 | Owner | 25 October 2026 | This page; [specs index](specs/README.md) |
+| G4 acceptance of spec 006 | Owner | After SC-001 | Open item 3 |
 
 ## Requirement counts and later steps
 
@@ -163,7 +163,7 @@ step, not to missing Step 2 work. Every in-scope Partial requirement, classified
 | EN-02 | Encrypted log store, queues, search | Steps 4, 5 and pilot |
 | EN-04, EN-06 | Staging and production keys | Environments after dev (ADR 0009) |
 | EN-05 | A data-key rotation schedule; a dev rotation is optional (owner's call) | Pilot operations |
-| EN-10 | Four weekly restore-check records; passphrase test; escrow wrap | **Step 2** (open items 3 to 5); escrow at the pilot gate |
+| EN-10 | Four weekly restore-check records; escrow wrap | **Step 2** (open item 3); escrow at the pilot gate |
 | EN-11 | Offline booking summaries, the vault | Steps 5 and 8 |
 | EN-12 | Secrets Manager reconsidered | Pilot (D2) |
 | SE-05, LM-09 | Audit retention (PR-05); admin actions | Step 3 onwards |
@@ -184,4 +184,16 @@ step, not to missing Step 2 work. Every in-scope Partial requirement, classified
 
 ## Deploy and live verification of the final version
 
-Recorded below after the spec 006 deploy.
+25 October 2026, `main` at `a2cbf6f` (#80), after #81 (`3468179`):
+
+| Check | Result |
+| --- | --- |
+| CI on `main` | Green for `3468179` and `a2cbf6f` (all jobs) |
+| Deploy dev | [Run 40157998902](https://github.com/themechanicalguy/heach/actions/runs/40157998902) green; host `DEPLOYED_TAG` `a2cbf6f843db`; `scripts/smoke-test.sh` passed |
+| Restore check timer | Enabled; next run Sunday 1 November 2026, 00:00 UTC; backup timer unchanged (21:00 UTC nightly) |
+| Restore check by hand (T017) | Passed in 6 seconds; copy dropped; live audit entry `backup.restore_check` by `job:restore-check` with the dump name only |
+| Restore check failure alert from the host | Published with the API role's credentials; SNS delivered 1, failed 0; received by the owner |
+| Public test sign-in (SE-07.23) | 404 from the internet and through the public site on the host, also with a guessed `x-test-login-key`; the loopback entry `127.0.0.1:9443` issues a token |
+| API role (EN-12.4) | `iam simulate-principal-policy`: `ssm:GetParameters` allowed on exactly `DB_APP_PASSWORD`, `REDIS_PASSWORD`, `BLIND_INDEX_KEY`, `TEST_LOGIN_KEY`; implicit deny on `POSTGRES_PASSWORD` and `DB_MIGRATOR_PASSWORD`; `sns:Publish` allowed |
+| Host role | `sns:Publish` implicit deny (spec 007); reads its deploy parameters |
+| Credential isolation | Instance metadata requires tokens with hop limit 1; from the API container the metadata endpoint times out |
