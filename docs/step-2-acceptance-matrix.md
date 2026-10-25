@@ -6,7 +6,7 @@ decisions, ADRs 0010 to 0012 and the [guideline exit criteria](mvp-v1-implementa
 Detailed evidence lives in the [Step 2 log](step-2-progress.md); this page states what is met and
 what is not. Regenerate the criteria table when the log changes.
 
-- **Checked:** 25 October 2026, on `main` (see the deploy record below)
+- **Checked:** 25 October 2026, on `main` `952f350`, re-verified on the host at 07:31 UTC (see the deploy record below)
 - **Verdict:** **Step 2 is not complete.** Every acceptance criterion of the step spec has passing
   tests or dated evidence, but these remain:
 
@@ -15,6 +15,34 @@ what is not. Regenerate the criteria table when the log changes.
 | 1 | Lawyer's first review of consent wording and the Aadhaar route (guideline exit criterion, D6) | External review | The owner sends [the pack](reviews/lawyer-review-step-2.md) to a lawyer of their choice and shares the feedback; the owner is arranging it (25 October 2026) |
 | 2 | Native Odia review of the Step 2 keys (I18N-07, step spec "Screens and languages") | External review | The owner arranges a native speaker with medical vocabulary ([sheet](reviews/odia-review-step-2.md)); feedback then goes into the catalogues and is retested |
 | 3 | Spec 006 SC-001: four consecutive weekly restore-check records on the dev host | Observation period | Scheduled runs on Sundays 1, 8, 15 and 22 November 2026 (00:00 UTC); a newly enabled timer has no missed run to catch up, so 1 November is the first |
+
+## Status by kind
+
+| Kind | Items | State on 25 October 2026 |
+| --- | --- | --- |
+| Engineering implemented and verified | All 74 step spec criteria; the four engineering exit criteria; specs 001 to 007 built, merged, deployed and tested; spec 006 timer deployed, enabled and run by hand; failure alert path proven | Done. No actionable engineering work is open for Step 2 |
+| Human reviews pending | Lawyer review (open item 1); native Odia review (open item 2) | Owner arranges both. Packs are ready, and nobody has been contacted by Claude Code |
+| Scheduled observation pending | Spec 006 SC-001, four scheduled runs (open item 3), then G4 for spec 006 | Runs on 1, 8, 15 and 22 November 2026, independent of any session. Each is recorded after it happens. The manual runs of 25 October do not count |
+
+## Closing Step 2
+
+Step 2 closes when all three open items are closed, in any order:
+
+1. **Lawyer review.** The owner shares the lawyer's feedback. Wording changes go through a spec or
+   requirements PR first, then code. Record the date and outcome in the
+   [review pack](reviews/lawyer-review-step-2.md), here (exit criterion row and open item 1) and in
+   D6.
+2. **Odia review.** Apply the feedback as the [sheet](reviews/odia-review-step-2.md#applying-it-developer)
+   describes. Close open item 2 and mark I18N-07 Done on the status page if no gap remains.
+3. **SC-001.** After each Sunday run, add its row to the
+   [records table](runbooks/backup-restore.md#weekly-restore-check-records-sc-001)
+   ([how](runbooks/backup-restore.md#scheduled-runs-where-the-evidence-is-and-how-to-read-it)).
+   After the fourth consecutive row (22 November if none is missed), record the owner's G4
+   acceptance of spec 006 in its tasks file, the specs index and here, and EN-10's status.
+
+Then set the verdict above to complete. Mark guideline Step 2 Done in
+[implementation status](implementation-status.md) and the log, and move the current step to Step 3
+(the "Current:" marker in `CLAUDE.md`).
 
 ## Guideline exit criteria
 
@@ -197,3 +225,16 @@ step, not to missing Step 2 work. Every in-scope Partial requirement, classified
 | API role (EN-12.4) | `iam simulate-principal-policy`: `ssm:GetParameters` allowed on exactly `DB_APP_PASSWORD`, `REDIS_PASSWORD`, `BLIND_INDEX_KEY`, `TEST_LOGIN_KEY`; implicit deny on `POSTGRES_PASSWORD` and `DB_MIGRATOR_PASSWORD`; `sns:Publish` allowed |
 | Host role | `sns:Publish` implicit deny (spec 007); reads its deploy parameters |
 | Credential isolation | Instance metadata requires tokens with hop limit 1; from the API container the metadata endpoint times out |
+
+Re-checked 25 October 2026, 07:31 UTC, after #82 deployed `952f350`. All checks were read-only;
+no restore run was started.
+
+| Check | Result |
+| --- | --- |
+| CI and Deploy dev on `main` | Green for `952f350` ([Deploy dev run 40161949029](https://github.com/themechanicalguy/heach/actions/runs/40161949029)); host `DEPLOYED_TAG` `952f35067ca1`; `scripts/smoke-test.sh` passed |
+| Restore check timer | `enabled`, `active`, `Persistent=yes`, `OnCalendar=Sun *-*-* 00:00:00 UTC`; host timezone UTC; `systemd-analyze calendar` gives 1, 8, 15 and 22 November 2026, 00:00 UTC; `LastTriggerUSec` empty (it has never fired) |
+| Deployed files | `restore-check.sh`, the timer and the service on the host have the same SHA-256 as `deploy/dev/` on `main` |
+| Cleanup | No `heach_restorecheck_*` database exists |
+| Audit | One `backup.restore_check` entry (role `system`, 03:45:03 UTC, T017); `audit.verify_chain()` reports no broken link; 35 entries |
+| Evidence retention | Host journal 63.6 MB, reaching back to 17 October 2026, under the default size cap |
+| Backup timer | Last run Saturday 24 October 21:00 UTC; next 25 October 21:00 UTC |

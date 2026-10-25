@@ -94,13 +94,13 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | EN-10.4 | ✅ | Local record and dev-host record in the [runbook](runbooks/backup-restore.md). On 2026-10-18 `…1019Z.dump` was restored into a new database `heach_restore_1792318811` on the host: 1 synthetic note, stored as AES-256-GCM ciphertext. A separate API container decrypted it through KMS for its owner. The database was then dropped; the active `heach` database was never written. **Re-proven 24 October 2026 after spec 007** ([record](runbooks/backup-restore.md#restore-records)): `pg/2026-10-24T1609Z.dump` restored into `heach_restore_1792858593`, audit chain intact, 2 of 2 bodies ciphertext, a one-off API container on the API role decrypted the synthetic owner's note; live counts unchanged, throwaway database dropped. Recurring check: spec 006 (below) |
 | SO-01.1 | ✅ | `docs/specs/0000-template.md` has the section; `scripts/check-specs.mjs` in CI fails a step spec without threats (fixtures in `check-specs.test.mjs`) |
 | FF-01.1 | ✅ | `feature-flags.spec.ts`, flag-off test in `sample-notes.int-spec.ts` |
-| EN-10.5 to EN-10.10 (spec 006) | ✅ CI, deployed, first host run passed; 🟡 SC-001 four weekly runs pending | Approved 25 October (amended the same day with the owner's approval). Merged #80, deployed `a2cbf6f` 25 October; host run by hand passed and a synthetic failure alert was published, delivered and received (owner, 25 October) ([records](runbooks/backup-restore.md#weekly-restore-check-records-sc-001)). Tests: `restore-check.spec.ts` (9), `test/restore-check.int-spec.ts` (16, real dump and restore through the host script), `scripts/restore-check.test.mjs` and the deploy timer test ([evidence](../specs/006-recurring-restore-check/tasks.md#evidence)). Open: merge, Deploy dev, a first run by hand on the host and four consecutive scheduled Sunday runs recorded in the [runbook](runbooks/backup-restore.md#weekly-restore-check-records-sc-001) |
+| EN-10.5 to EN-10.10 (spec 006) | ✅ CI, deployed, first host run passed; 🟡 SC-001 four weekly runs pending | Approved 25 October (amended the same day with the owner's approval). Merged #80, deployed `a2cbf6f` 25 October; host run by hand passed and a synthetic failure alert was published, delivered and received (owner, 25 October) ([records](runbooks/backup-restore.md#weekly-restore-check-records-sc-001)). Tests: `restore-check.spec.ts` (9), `test/restore-check.int-spec.ts` (16, real dump and restore through the host script), `scripts/restore-check.test.mjs` and the deploy timer test ([evidence](../specs/006-recurring-restore-check/tasks.md#evidence)). Re-checked on the host 25 October 2026 07:31 UTC, on `952f350`: the timer is enabled and active with `Persistent=yes`, next run Sunday 1 November 00:00 UTC; the host's restore files match `main` byte for byte; no `heach_restorecheck_*` database is left; the live audit log holds exactly one `backup.restore_check` entry and its chain is intact. Open: four consecutive scheduled Sunday runs, 1, 8, 15 and 22 November 2026, each recorded in the [runbook](runbooks/backup-restore.md#weekly-restore-check-records-sc-001), then the owner's G4 review |
 | SE-05.5 to SE-05.10 (spec 003) | ✅ Done: owner accepted (G4) 25 October 2026 | Merged #67. `transaction.spec.ts`, `notes.repository.spec.ts`, `test/audit-transaction.int-spec.ts`; fresh local run 24 October on `491f5a0`: all passing ([evidence](../specs/003-transactional-audit-writes/tasks.md#evidence)) |
 | SE-07.14 to SE-07.20 (spec 004) | ✅ Done: owner accepted (G4) 25 October 2026 | Merged #69. `session.service.spec.ts`, `auth.controller.spec.ts`, `test/session-rotation.int-spec.ts`; session E2E (`session-refresh.spec.ts`) on three viewports in the CI deploy-bundle job on `491f5a0` (30 passed); fresh local integration run 24 October: all passing ([evidence](../specs/004-transactional-session-rotation/tasks.md#evidence)) |
 | EN-05.4 to EN-05.9 (spec 005) | ✅ Done: owner accepted (G4) 25 October 2026 | Merged #70. `reencrypt.spec.ts`, `test/reencrypt.int-spec.ts`; fresh local run 24 October: all passing ([evidence](../specs/005-bounded-reencryption/tasks.md#evidence)). Run once on the dev host 24 October without `--rotate`: exit 0, nothing to re-encrypt (all values on version 1); a rotation on dev is the owner's call ([record](runbooks/key-rotation.md#record)) |
 | SO-08.12, SE-07.21 to SE-07.23, EN-12.4, SO-03.2 (spec 007) | ✅ Done: owner accepted (G4) 25 October 2026; live re-verified on `a2cbf6f` 25 October | Merged #74 (`8b0387f`), CI green including the deploy-bundle checks (public test sign-in 404, loopback 200). Owner applied the infra 24 October (4 added, 2 changed in place, $0); Deploy dev attempt 2 green. Live on 24 October: `tofu plan` no changes; API role reads exactly its four parameters, admin and migrator passwords denied, IMDS unreachable from containers (hop limit 1); public test sign-in 404 from the internet and on the host, loopback entry 200 ([live verification](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24)) |
 
-## Exit criteria (guideline Step 2), checked 24 October 2026
+## Exit criteria (guideline Step 2), checked 25 October 2026
 
 | Exit criterion | Evidence | State |
 | --- | --- | --- |
@@ -110,9 +110,10 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | Traces show one correlation ID from browser to database | LM-01.1 | Met (code, CI; local Jaeger, ADR 0010) |
 | The lawyer's first review of consent wording and the Aadhaar route is in hand | [Review pack](reviews/lawyer-review-step-2.md) ready; not sent | **Not met: owner (D6)** |
 
-The Step 2 spec also requires the native Odia review (I18N-07, not met: owner) and leaves operational
-acceptance open: alert inbox receipt, ADR 0012, spec 006, and the owner's review of the corrective
-specs' evidence. Step 2 is **not complete**.
+The Step 2 spec also requires the native Odia review (I18N-07, not met: owner) and spec 006's four
+weekly runs (SC-001, 1 to 22 November 2026). Alert inbox receipt, ADR 0012 and G4 for specs 001 to
+005 and 007 were closed by the owner on 25 October 2026. Step 2 is **not complete**; the
+[acceptance matrix](step-2-acceptance-matrix.md#closing-step-2) lists what closes it.
 
 ## Deploy and rollback record
 
@@ -133,12 +134,16 @@ specs' evidence. Step 2 is **not complete**.
 
 ## Owner actions
 
-Status on 24 October 2026. Nobody outside the project has been contacted.
+Status on 25 October 2026. Nobody outside the project has been contacted by Claude Code.
 
 - ~~Confirm alert email receipt~~: done 25 October 2026, both synthetic alerts (LM-07.1, SO-08.3)
   arrived. The credit alerts' receipt was not asked and stays unrecorded.
-- **Review the evidence for specs 001 to 005 and 007** (gate G4, Done): each spec's tasks and this
-  log. Code, CI, deployment and, for 007, live checks are recorded; acceptance is yours.
+- ~~Review the evidence for specs 001 to 005 and 007~~ (gate G4): accepted 25 October 2026.
+- ~~Drop `ssm:GetParametersByPath` from the host policy~~ (18 October follow-up): gone from
+  `infra/`; `tofu plan` showed no changes on 24 October.
+- **Spec 006 SC-001**: after each of Sundays 1, 8, 15 and 22 November 2026, record the run
+  ([how](runbooks/backup-restore.md#scheduled-runs-where-the-evidence-is-and-how-to-read-it)); keep
+  the host awake from Saturday 21:00 to Sunday 01:00 UTC; then the G4 review of spec 006.
 - ~~Decide ADR 0012~~: accepted 25 October 2026; R2 reminder added and R3 passed the same day.
 - ~~Approve spec 006~~: approved 25 October 2026 as drafted.
 - Optional: a re-encryption with `--rotate` on dev (creates `health` key version 2;
@@ -146,4 +151,4 @@ Status on 24 October 2026. Nobody outside the project has been contacted.
 - Lawyer review (D6), Step 2 exit criterion: send [the review pack](reviews/lawyer-review-step-2.md)
   (cover note included) to a lawyer you choose.
 - Native Odia speaker review of new keys (I18N-07): [review sheet](reviews/odia-review-step-2.md)
-  with all 34 keys and a cover note.
+  with all 34 keys, a cover note, the feedback needed back and how it is applied.

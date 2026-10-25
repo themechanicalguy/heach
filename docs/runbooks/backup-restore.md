@@ -64,6 +64,57 @@ On an alert: read the journal for the run ID, fix the stage that failed (missing
 the dump; decrypt: KMS access of the API role or a damaged value), then run it by hand.
 Disable: `sudo systemctl disable --now heach-restore-check.timer`.
 
+### Scheduled runs: where the evidence is and how to read it
+
+The timer runs on the host under systemd. Nothing depends on a laptop, a terminal or a Claude
+session being open. The host must be running at the time: `scripts/dev-sleep` is the only thing
+that stops it, and only when someone runs it.
+
+Each run leaves three traces:
+
+| Evidence | Where | Kept |
+| --- | --- | --- |
+| Stage lines (`restore-check run=<id> stage=<stage> …`) and one JSON line with the counts | Host journal, `journalctl -u heach-restore-check.service` | Root volume; 63.6 MB used on 25 October 2026, reaching back to 17 October, under the default size cap |
+| One `backup.restore_check` (pass) or `backup.restore_check.failed` entry, role `system` | Live audit log `audit.entry` (append-only, hash-chained) | Permanent |
+| On failure only: email `[HEACH] Restore check failed: <stage>` with the dump name and run ID | SNS topic `heach-credit-reminders` to the owner's inbox (path proven 25 October 2026) | The inbox |
+
+**Silence is not a pass.** No email arrives when the run never starts: host stopped, timer
+disabled, systemd broken. After each scheduled Sunday, open a shell on the host
+(`aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target <instance-id>`)
+and run, read only:
+
+```sh
+systemctl show heach-restore-check.timer -p LastTriggerUSec -p NextElapseUSecRealtime
+journalctl -u heach-restore-check.service --since -2days --no-pager -o short-iso \
+  | grep -E 'Start|Finished|restore-check run=|tables|Deactivated|Failed'
+```
+
+**Scheduled or by hand?** A scheduled run starts within a minute of Sunday 00:00 UTC (05:30 India
+time), and the timer's `LastTriggerUSec` equals that start. A run started with `systemctl start` at
+any other time is a manual run: record it with Trigger "By hand", and it never counts towards
+SC-001. Before 1 November `LastTriggerUSec` is empty, because the timer has not fired yet.
+
+**After a failure email.** Read the journal for the run ID, fix the stage (see "On an alert"
+above), run it by hand to confirm the fix, and record both rows. The failed scheduled run still
+counts as a weekly record, because SC-001 accepts "a pass, or an alert for each failure". A week
+with no scheduled run, for any reason, breaks the sequence. A by-hand run does not fill that week:
+the four consecutive weeks start again from the next Sunday.
+
+**Keep the host awake over the window.** Do not run `scripts/dev-sleep` between Saturday 21:00 UTC
+(the dump) and Sunday 01:00 UTC. If the host was asleep, `Persistent=true` runs both timers on
+wake, and the restore check can start before the new dump exists and fail at `freshness`. Such a
+run alerts, so it counts, but it proves less than a normal run.
+
+**SC-001 dates.** From `systemd-analyze calendar` on the host, 25 October 2026 (host timezone UTC).
+A run gets its row in the records table below only after it has happened:
+
+| # | Scheduled (UTC) | India time | Recorded by |
+| --- | --- | --- | --- |
+| 1 | Sunday 1 November 2026, 00:00 | 05:30 | The owner, or a session the owner starts, from the commands above |
+| 2 | Sunday 8 November 2026, 00:00 | 05:30 | Same |
+| 3 | Sunday 15 November 2026, 00:00 | 05:30 | Same |
+| 4 | Sunday 22 November 2026, 00:00 | 05:30 | Same; then the owner's G4 review of spec 006 |
+
 ### Weekly restore check records (SC-001)
 
 One row per scheduled run, copied from the journal (counts only).

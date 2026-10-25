@@ -7,8 +7,9 @@ Sanskritised wording. `{name}`-style placeholders and ICU plural syntax (`{count
 must stay exactly as written; only the words around them change.
 
 Status: **not yet reviewed.** Nobody has been contacted; the owner chooses and engages the reviewer.
-Checked 24 October 2026: the 34 rows below match `or.json` on `main` exactly (no key added, removed
-or changed since the sheet was written); no feedback has been received.
+Checked again 25 October 2026 on `main` `952f350`: the 34 rows below match `or.json` exactly, and
+`or.json` has no key that is not listed. No feedback has been received. If a key changes before the
+review, update its row first so the reviewer sees what ships.
 
 ### Cover note the owner can send
 
@@ -70,9 +71,36 @@ For each row, put ✅ in "OK?" if the Odia is natural and correct, or write a be
 
 ## After the review
 
-A developer applies the corrections to `or.json` in a PR that links this file, keeps the
-placeholders, runs `pnpm --filter @heach/i18n test` (missing-key and ICU checks) and updates the
-visual baselines. Record the reviewer's name (with their permission) and date here.
+### Feedback needed back
+
+The review is complete when the owner has all of these from the reviewer and pastes them into a
+Claude session or a PR:
+
+1. Every one of the 34 rows marked ✅ or given a correction. Blank rows count as not reviewed.
+2. Written answers to the five questions. Question 4 sets the rule for every later screen, so it
+   needs a clear choice: Odia script, transliterated English, or both.
+3. The reviewer's name and the date, and whether the name may be recorded here. Without
+   permission, record "native speaker chosen by the owner".
+
+Partial feedback is applied like full feedback, but the review stays open until all 34 rows are
+covered.
+
+### Applying it (developer)
+
+1. On a branch `fix/i18n-odia-review`, change only the values in
+   `packages/i18n/src/messages/or.json`. Keep keys, `{placeholders}` and the ICU plural skeleton
+   exactly as they are. Copy each correction into this sheet's "Odia now" column as well, so the
+   sheet keeps matching the catalogue.
+2. `pnpm --filter @heach/i18n test`: the missing-key, ICU and catalogue checks (I18N-02.2,
+   I18N-07.1).
+3. Update the visual baselines (UX-03.1, TS-07.1) with the Linux Playwright container, as in
+   [local development](../local-development.md). Look at the new Odia screenshots before you
+   commit them.
+4. `pnpm check`, then a PR that links this file. Record the answer to question 4 as a rule in
+   `packages/i18n/README.md`.
+5. In the same PR, fill the table below. Mark I18N-07 Done in
+   [implementation status](../implementation-status.md) only if no gap remains. Close open item 2
+   in the [acceptance matrix](../step-2-acceptance-matrix.md) with the date.
 
 | Reviewer | Date | Result |
 | --- | --- | --- |
