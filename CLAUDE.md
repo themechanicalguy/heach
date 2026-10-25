@@ -21,7 +21,7 @@ Read these before planning any work. Do not copy their content here; link to req
 - `specs/NNN-*/` — feature specs from Spec Kit: `spec.md` behaviour, `plan.md` design, `tasks.md` work
 - `docs/spec-workflow.md` — how to run `/speckit-*` from idea to merged code, gates, resuming a feature
 - `docs/implementation-status.md` — what is built, partial or not started, per step and requirement ID
-- `docs/local-development.md` — running everything locally, git hooks. Current: **Step 2 exit pending owner actions; Step 3 next**.
+- `docs/local-development.md` — running everything locally, git hooks. Current: **Step 2 exit pending the lawyer and Odia reviews and four weekly restore-check runs (to 22 November 2026); Step 3 next**.
 - `docs/step-1-review.md` — Step 1 audit: what passed, open actions, risks Step 2 must fix first
 
 ## Stack
