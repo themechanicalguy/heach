@@ -39,8 +39,10 @@ pnpm --filter <pkg> <script>            # one workspace's script
 apps/web        Next.js PWA for patients and providers
 apps/admin      React (Vite) admin panel, desktop first
 apps/api        NestJS API
-packages/       config, ui, i18n, types, crypto, logger (shared)
-docs/           requirements, guideline, local development, ADRs
+packages/       config, ui, i18n, types, crypto, logger, flags (shared)
+docs/           requirements, guideline, step specs, status, runbooks, ADRs (index: docs/README.md)
+specs/          feature specs (Spec Kit)
+infra/          OpenTofu stacks
 ```
 
 ## Contributing

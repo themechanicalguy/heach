@@ -1,4 +1,4 @@
-// Credit alert levels from docs/step-1-claude-code-playbook.md: a level is reached when either
+// Credit alert levels from docs/credit-expiry-plan.md (Alert levels): a level is reached when either
 // trigger (percent of credits left or days left) is met, whichever comes first.
 
 export const LEVELS = [

@@ -1,7 +1,7 @@
 # Research: Recurring restore verification of the nightly backup
 
 Inputs: Step 2 spec EN-10.3 and EN-10.4; requirement EN-10 ("restore-tested quarterly");
-[Step 2 assessment](../../docs/step-2-assessment-2026-10-22.md#backups-and-recovery);
+[Step 2 assessment](https://github.com/themechanicalguy/heach/blob/338943c/docs/step-2-assessment-2026-10-22.md#backups-and-recovery);
 [backup runbook](../../docs/runbooks/backup-restore.md) and its two restore records; backlog item 5;
 code on `main` at 491f5a0.
 

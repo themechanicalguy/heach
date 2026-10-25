@@ -18,7 +18,7 @@ pnpm install
 pnpm dev:up
 ```
 
-`pnpm dev:up` does three things:
+`pnpm dev:up` does four things:
 
 1. **`.env`**: creates it from `.env.example` (git-ignored). If it already exists, existing
    values are never changed; keys it is missing are appended with their placeholder values.
@@ -87,8 +87,8 @@ be running). CI scans the whole history again, so a skipped hook does not skip t
 `pnpm secrets:scan` runs the full-history scan locally. Before opening a pull request, run
 `pnpm check`: the same lint, typecheck, unit tests and build that CI runs.
 
-ESLint warns about hard-coded user-facing text in JSX (`<p>Hello</p>`, `alt="…"`); use
-`t(key)` instead. It becomes an error in Step 2.
+ESLint fails on hard-coded user-facing text in JSX (`<p>Hello</p>`, `alt="…"`); use `t(key)`
+instead (I18N-02.1).
 
 If a hook blocks you, fix the cause. `--no-verify` skips hooks; never use it to commit a secret.
 If a secret was ever committed, treat it as leaked: rotate it, even after removing it.
@@ -122,7 +122,9 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 ## Logs, traces and metrics (Step 2, LM-01 to LM-05)
 
 - The API logs JSON lines through `@heach/logger`: every line carries `correlationId` and, when
-  tracing is on, `traceId`. Names, mobile numbers and Restricted fields are masked (LM-02).
+  tracing is on, `traceId`. Names, mobile numbers and Restricted fields are masked at the top
+  level and one level deep; deeper values are not yet (LM-02.1,
+  [FU-27](follow-up-register.md#closes-step-2)).
 - `pnpm dev:up` starts the OpenTelemetry Collector and Jaeger. Open http://localhost:16686 and
   search service `heach-api`, or tag `heach.correlation_id=<id>` from a response's
   `x-correlation-id` header, to see the request with its PostgreSQL and Redis spans.

@@ -1,8 +1,9 @@
 # Cloud setup (AWS, dev only)
 
 Step 1 runs one **dev** environment on AWS in Mumbai (`ap-south-1`) with **synthetic data only**.
-Staging, production, managed databases and the Hyderabad backup region come later
-([ADR 0005](adr/0005-aws-dev-environment.md)). Infrastructure is code in [`infra/`](../infra/),
+Staging, production and managed databases come later
+([ADR 0005](adr/0005-aws-dev-environment.md)); backups stay in this one Region
+([ADR 0010](adr/0010-step-2-backups-secrets-waf.md)). Infrastructure is code in [`infra/`](../infra/),
 written for [OpenTofu](https://opentofu.org).
 
 Nothing here is created until you run `tofu apply` yourself.
@@ -128,8 +129,7 @@ What one deploy does (`.github/workflows/deploy-dev.yml`):
 | --- | --- |
 | Web | `https://<host_ip>` |
 | API | `https://<host_ip>/api/healthz`, `/api/readyz` |
-| Admin | `aws ssm start-session --target <instance_id> --document-name AWS-StartPortForwardingSession --parameters portNumber=8443,localPortNumber=8443`, then `https://localhost:8443` |
-| Web with test sign-in (SE-07.23) | `aws ssm start-session --target <instance_id> --document-name AWS-StartPortForwardingSession --parameters portNumber=9443,localPortNumber=9443`, then `https://localhost:9443`. The public address refuses test sign-in; this loopback-only entry adds the key from `/heach/dev/TEST_LOGIN_KEY` |
+| Admin, and web with test sign-in (SE-07.23) | Session Manager port forwarding: [environments](environments.md#admin-panel) |
 | Shell on the host | `aws ssm start-session --target <instance_id>` |
 
 `/docs` (OpenAPI) is off in this environment because it runs with `NODE_ENV=production`.
@@ -137,5 +137,5 @@ What one deploy does (`.github/workflows/deploy-dev.yml`):
 ## What this does not do yet
 
 - No domain or publicly trusted certificate; no staging; no preview deployments per PR.
-- No managed PostgreSQL or Redis, no backups to Hyderabad, no KMS customer keys, no WAF.
-  All of these are required before real patient data and are planned for later steps.
+- No managed PostgreSQL or Redis and no WAF ([ADR 0008](adr/0008-lean-single-host-on-credits.md),
+  [ADR 0010](adr/0010-step-2-backups-secrets-waf.md)); both are decided again before real patient data.

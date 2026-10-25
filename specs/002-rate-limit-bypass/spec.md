@@ -8,7 +8,7 @@
 
 **Approval**: Owner (Saurav Rath), 2026-10-22, explicit approval of this spec and its plan, with decisions D-1 to D-7 as written; takes effect when the owner merges this docs-only pull request
 
-**Amended by**: [spec 007](../007-security-review-fixes/spec.md) (Draft, 2026-10-24): SO-08.12 counts every request by client address as well, so SO-08.6 and SO-08.7 no longer exempt a live session from the address limit
+**Amended by**: [spec 007](../007-security-review-fixes/spec.md) (Approved 2026-10-24; Done, owner accepted 2026-10-25): SO-08.12 counts every request by client address as well, so SO-08.6 and SO-08.7 no longer exempt a live session from the address limit
 
 **Created**: 2026-10-21
 

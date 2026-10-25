@@ -23,5 +23,6 @@ Assume it is compromised, even if the commit was never pushed or was removed aft
 
 ## Scope today
 
-Step 1 of the build: no production environment and no real patient data exist yet. The breach
+Development (guideline Steps 1 and 2) on one dev environment with synthetic data only: no
+production environment and no real patient data exist yet. The breach
 response plan (SO-09) is written before any real data is handled (guideline Step 6).

@@ -38,12 +38,8 @@ A bad change on `main` should also be reverted in git, or the next merge deploys
 
 ## Sleep and wake dev
 
-```sh
-scripts/dev-sleep   # stop the host; prints what still costs (about $10 a month)
-scripts/dev-wake    # start it; waits until the smoke test passes
-```
-
-Deploys fail while dev sleeps. More in the [credit expiry plan](credit-expiry-plan.md).
+`scripts/dev-sleep` and `scripts/dev-wake`; deploys fail while dev sleeps. What still costs while
+asleep: [credit expiry plan](credit-expiry-plan.md#sleep-and-wake-dev).
 
 ## Admin panel
 

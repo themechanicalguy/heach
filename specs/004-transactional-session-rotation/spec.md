@@ -8,7 +8,7 @@
 
 **Approval**: Owner (Saurav Rath), 2026-10-22, explicit approval of this spec and its plan as drafted ("Approve 003, 004, 005 as drafted"), with decisions D-1 to D-5 as written, including SE-07.20 (sign-out of all devices takes the per-user lock) and no grace window; takes effect when this docs-only pull request merges
 
-**Amended by**: [spec 007](../007-security-review-fixes/spec.md) (Draft, 2026-10-24): sign-out of one device revokes its whole session family (SE-07.21), and a token of a signed-out family is a plain 401 (SE-07.22)
+**Amended by**: [spec 007](../007-security-review-fixes/spec.md) (Approved 2026-10-24; Done, owner accepted 2026-10-25): sign-out of one device revokes its whole session family (SE-07.21), and a token of a signed-out family is a plain 401 (SE-07.22)
 
 **Created**: 2026-10-22
 

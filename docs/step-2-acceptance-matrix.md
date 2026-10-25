@@ -7,26 +7,34 @@ Detailed evidence lives in the [Step 2 log](step-2-progress.md); this page state
 what is not. Regenerate the criteria table when the log changes.
 
 - **Checked:** 25 October 2026, on `main` `952f350`, re-verified on the host at 07:31 UTC (see the deploy record below)
-- **Verdict:** **Step 2 is not complete.** Every acceptance criterion of the step spec has passing
-  tests or dated evidence, but these remain:
+- **Audited:** 25 October 2026, 08:47 to 09:20 UTC, on `main` `338943c`, independently, in the
+  [Step 1 and Step 2 audit](step-1-2-audit.md). It changed LM-02.1 from Met to Partial and added
+  open items 4 and 5. Due dates, procedures and closure conditions for every open item are in the
+  [follow-up register](follow-up-register.md#closes-step-2), not repeated here.
+- **Verdict:** **Step 2 is not complete.** 73 of the 74 acceptance criteria of the step spec have
+  passing tests or dated evidence; LM-02.1 is Partial. These remain:
 
 | # | Open item | Kind | Exact dependency |
 | --- | --- | --- | --- |
 | 1 | Lawyer's first review of consent wording and the Aadhaar route (guideline exit criterion, D6) | External review | The owner sends [the pack](reviews/lawyer-review-step-2.md) to a lawyer of their choice and shares the feedback; the owner is arranging it (25 October 2026) |
 | 2 | Native Odia review of the Step 2 keys (I18N-07, step spec "Screens and languages") | External review | The owner arranges a native speaker with medical vocabulary ([sheet](reviews/odia-review-step-2.md)); feedback then goes into the catalogues and is retested |
 | 3 | Spec 006 SC-001: four consecutive weekly restore-check records on the dev host | Observation period | Scheduled runs on Sundays 1, 8, 15 and 22 November 2026 (00:00 UTC); a newly enabled timer has no missed run to catch up, so 1 November is the first |
+| 4 | LM-02.1 for nested input: the shared logger writes a mobile number nested two levels down, or inside a nested string, in clear (found by the audit with synthetic values, 25 October 2026; review S-6) | Engineering | A spec (or amendment) approved by the owner, then a fix with a three-level test ([FU-27](follow-up-register.md#closes-step-2)). No current call site logs nested personal data |
+| 5 | Step-end demo on a real mid-range Android phone, in Odia, over a throttled network (guideline rule for every step; not tracked before the audit) | Owner demonstration | A dated record in the [log](step-2-progress.md), or a written waiver ([FU-08](follow-up-register.md#closes-step-2)) |
 
 ## Status by kind
 
 | Kind | Items | State on 25 October 2026 |
 | --- | --- | --- |
-| Engineering implemented and verified | All 74 step spec criteria; the four engineering exit criteria; specs 001 to 007 built, merged, deployed and tested; spec 006 timer deployed, enabled and run by hand; failure alert path proven | Done. No actionable engineering work is open for Step 2 |
-| Human reviews pending | Lawyer review (open item 1); native Odia review (open item 2) | Owner arranges both. Packs are ready, and nobody has been contacted by Claude Code |
+| Engineering implemented and verified | 73 of the 74 step spec criteria; the four engineering exit criteria; specs 001 to 007 built, merged, deployed and tested; spec 006 timer deployed, enabled and run by hand; failure alert path proven | Done |
+| Engineering open | LM-02.1 nested masking (open item 4) | Needs a spec, then a small fix (audit, 25 October 2026) |
+| Human reviews pending | Lawyer review (open item 1); native Odia review (open item 2); real-phone demo (open item 5) | Owner arranges all three. Packs are ready, and nobody has been contacted by Claude Code |
 | Scheduled observation pending | Spec 006 SC-001, four scheduled runs (open item 3), then G4 for spec 006 | Runs on 1, 8, 15 and 22 November 2026, independent of any session. Each is recorded after it happens. The manual runs of 25 October do not count |
 
 ## Closing Step 2
 
-Step 2 closes when all three open items are closed, in any order:
+Step 2 closes when all five open items are closed, in any order (rows FU-01 to FU-08 and FU-27 of
+the [follow-up register](follow-up-register.md#closes-step-2)):
 
 1. **Lawyer review.** The owner shares the lawyer's feedback. Wording changes go through a spec or
    requirements PR first, then code. Record the date and outcome in the
@@ -39,6 +47,9 @@ Step 2 closes when all three open items are closed, in any order:
    ([how](runbooks/backup-restore.md#scheduled-runs-where-the-evidence-is-and-how-to-read-it)).
    After the fourth consecutive row (22 November if none is missed), record the owner's G4
    acceptance of spec 006 in its tasks file, the specs index and here, and EN-10's status.
+4. **LM-02.1.** Approve the spec, merge the fix with green CI, set LM-02.1 to Met here and LM-02 to
+   Done on the status page.
+5. **Real-phone demo.** Record it in the log, or record the owner's written waiver.
 
 Then set the verdict above to complete. Mark guideline Step 2 Done in
 [implementation status](implementation-status.md) and the log, and move the current step to Step 3
@@ -48,7 +59,7 @@ Then set the verdict above to complete. Mark guideline Step 2 Done in
 
 | Exit criterion | Evidence | State |
 | --- | --- | --- |
-| A sample note travels end to end: entered in Odia on a phone, field-encrypted, readable only by its owner, with an audit entry | EN-13.1, EN-03.1, SE-02.3, I18N-04.1, SE-05.1 below; deploy-bundle E2E on mobile, tablet and desktop behind Caddy | Met |
+| A sample note travels end to end: entered in Odia on a phone, field-encrypted, readable only by its owner, with an audit entry | EN-13.1, EN-03.1, SE-02.3, I18N-04.1, SE-05.1 below; deploy-bundle E2E on mobile, tablet and desktop behind Caddy | Met (Chromium device emulation; the real-phone demo is open item 5) |
 | A test proves the note is ciphertext in the database and absent from logs | `test/sample-notes.int-spec.ts`; deploy-bundle SQL and log checks | Met |
 | A pull request with a hard-coded string, missing translation, accessibility violation, oversized bundle or leaked secret is blocked | I18N-02.1, I18N-07.1, UX-01.2 and TS-02.1, PF-02.1, EN-12.3 fixtures | Met |
 | Traces show one correlation ID from browser to database | LM-01.1 (`e2e/notes-flow.spec.ts`, `test/tracing.int-spec.ts`; local Jaeger, ADR 0010) | Met |
@@ -104,7 +115,7 @@ Then set the verdict above to complete. Mark guideline Step 2 Done in
 | Security middleware and scanning | SO-08.2 | Integration test | `security.int-spec.ts` | Automated (CI) | Met |
 | Security middleware and scanning | SO-08.3 | Integration test against the alert rule | `test/security.int-spec.ts`; live 24 October 2026: published 1, delivered 1; received, owner confirmed 25 October 2026 | Automated (CI) | Met |
 | Logging and monitoring | LM-01.1 | E2E test reading the trace | `apps/web/e2e/notes-flow.spec.ts`; `test/tracing.int-spec.ts` | Automated (CI) | Met |
-| Logging and monitoring | LM-02.1 | Unit test in `@heach/logger` | `packages/logger/src/index.test.ts` | Automated (CI) | Met |
+| Logging and monitoring | LM-02.1 | Unit test in `@heach/logger` | `packages/logger/src/index.test.ts` (top level and one level only); audit probe 25 October 2026: nested values written in clear | Automated (CI) | **Partial** (open item 4) |
 | Logging and monitoring | LM-02.2 | Lint fixture | `apps/api/src/lint-rules.spec.ts` | Automated (CI) | Met |
 | Logging and monitoring | LM-03.1 | Manual record | `e2e/error-tracking.spec.ts` against local GlitchTip; dated 18 October 2026 (ADR 0010: local only) | Manual, dated | Met |
 | Logging and monitoring | LM-04.1 | Manual record | dated 2026-10-18 | Manual, dated | Met |
@@ -206,6 +217,7 @@ step, not to missing Step 2 work. Every in-scope Partial requirement, classified
 | TS-06 | Real adapters and sandbox runs | Steps 3 and 5 |
 | TS-09 | Vault sharing and entitlement tests | Steps 8 and 9 |
 | LM-01 | Queue workers | Step 5 |
+| LM-02 | Masking of nested values (found by the audit, 25 October 2026) | **Step 2** (open item 4) |
 | LM-03, LM-05 | Error tracking and dashboards on a host | Pilot (ADR 0010) |
 | LM-04 | Network type | Later (not in LM-04.1) |
 | LM-07 | Payment, OTP, video and queue alerts | Steps 3, 5 and 6 |

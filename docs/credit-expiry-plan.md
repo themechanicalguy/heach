@@ -62,32 +62,11 @@ snapshots); compute (about $8.18) stops. Deploys fail while it sleeps.
 ## Encrypted backup outside the account
 
 Take one at the **Plan** level and before the upgrade. The copy must leave AWS: if the account
-closes, snapshots and buckets inside it go with it.
-
-```sh
-export AWS_PROFILE=saurav-heach-admin
-ID=$(aws ec2 describe-instances --region ap-south-1 --filters Name=tag:Environment,Values=dev \
-  Name=instance-state-name,Values=running --query 'Reservations[0].Instances[0].InstanceId' --output text)
-
-# 1. Database dump, encrypted on the host with a passphrase you keep in your password manager,
-#    then copied to your Mac through the uploads bucket (deleted from it afterwards).
-#    Run on the host (Session Manager: aws ssm start-session --target $ID):
-#      cd /opt/heach && docker compose exec -T postgres pg_dumpall -U heach \
-#        | gzip | openssl enc -aes-256-cbc -pbkdf2 -salt -out /tmp/db.sql.gz.enc
-#      aws s3 cp /tmp/db.sql.gz.enc s3://heach-dev-uploads-667291759252/backup/ && rm /tmp/db.sql.gz.enc
-aws s3 cp s3://heach-dev-uploads-667291759252/backup/db.sql.gz.enc ~/heach-backup/
-aws s3 rm s3://heach-dev-uploads-667291759252/backup/db.sql.gz.enc
-
-# 2. Uploads (decrypted by S3 on download), then encrypted locally.
-aws s3 sync s3://heach-dev-uploads-667291759252 ~/heach-backup/uploads --exclude 'backup/*'
-tar -czf - -C ~/heach-backup uploads | openssl enc -aes-256-cbc -pbkdf2 -salt -out ~/heach-backup/uploads.tar.gz.enc
-rm -rf ~/heach-backup/uploads
-```
-
-Keep `~/heach-backup` on an encrypted disk or encrypted cloud storage outside AWS. Dev holds
-synthetic data only (SO-07); this is practice for the pilot. Restore: decrypt with
-`openssl enc -d -aes-256-cbc -pbkdf2`, then `psql -U heach < db.sql` inside the postgres container
-and `aws s3 sync` the uploads back.
+closes, snapshots and buckets inside it go with it. Run `scripts/backup-pull.sh` as described in the
+[backup runbook](runbooks/backup-restore.md#weekly-off-account-copy-owner), and check the
+passphrase is in your password manager ([ADR 0012](adr/0012-off-account-recovery-of-restricted-fields.md)
+R3). Restricted fields in the copy still need the dev KMS keys (R1). No application code writes to the
+uploads bucket yet; add it to the pull when a step starts storing files there.
 
 ## If the window was missed
 

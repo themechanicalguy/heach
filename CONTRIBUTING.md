@@ -27,9 +27,10 @@ before starting any work.
    requirement ID the change builds, extends or removes. CI checks this; for a change that moves
    no item (refactor, dependency bump), add the `no-status-change` label instead.
 6. **Merge only when all CI jobs pass**: Checks, E2E smoke, API image, Deploy bundle, Infra,
-   Secret scan, Implementation status updated, Spec linked. The repository
-   is on GitHub Free, so nothing enforces this except us
-   ([ADR 0004](docs/adr/0004-github-free-no-branch-protection.md)).
+   Secret scan, Static analysis and scanner fixtures, Implementation status updated, Spec linked.
+   Branch protection is not applied, so nothing enforces this except us
+   ([ADR 0004](docs/adr/0004-github-free-no-branch-protection.md),
+   [proposed settings](docs/environments.md#branch-protection-on-main)).
 
 ## Rules that are never relaxed
 
@@ -41,7 +42,7 @@ before starting any work.
   Use `@heach/logger`, never `console.log`.
 - **No improvised cryptography.** `@heach/crypto` is the only place encryption will live
   ([README](packages/crypto/README.md)).
-- **No hard-coded user-facing text.** Use `t(key)`; ESLint warns now and fails from Step 2.
+- **No hard-coded user-facing text.** Use `t(key)`; ESLint fails on hard-coded text (I18N-02.1).
 - **Authorisation on the server** for every request and object.
 - **New dependencies need approval** when they are outside the stack in `CLAUDE.md`: state what
   it does, its licence, maintenance status and the in-stack alternative.
