@@ -5,6 +5,10 @@ Audit of the repository and the AWS setup against Step 1 of the
 [ADR 0009](adr/0009-aws-credits-and-restricted-pilot.md), on 17 October 2026 (playbook "Step 1
 exit check").
 
+Historical record, kept as written. The current state of every item is in the
+[Step 1 and Step 2 audit](step-1-2-audit.md) of 25 October 2026; what is still open is in the
+[follow-up register](follow-up-register.md).
+
 ## Build items
 
 | # | Item | Result | Evidence |

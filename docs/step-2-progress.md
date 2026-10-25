@@ -53,7 +53,7 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 | SO-08.2 | ✅ | SQL injection sample → 400 (`security.int-spec.ts`). Caddy: `caddy-ratelimit` zone of 300 requests a minute per client IP on `/api/*`; the CI deploy-bundle job floods `/api/healthz` (which the API throttler skips) and requires 429s from Caddy while pages still answer 200. Local record 18 October: 20-event test zone gave 20 × 200 then 429 with `Retry-After: 60` |
 | SO-08.3 | ✅ published, SNS delivered, received | `test/security.int-spec.ts`. Live on 2026-10-18 at 10:17:21 UTC: published only (subscription then PendingConfirmation). **24 October 2026:** subscription checked in AWS: one email subscription, `SubscriptionsConfirmed` 1, pending 0. At 16:06:22 UTC synthetic user `00000000-0000-4000-8000-000000000003` made 11 role-denied requests (403) over HTTPS through the public entry; the deployed API (`8b0387f`), now on the API role, published one alert ("HEACH: repeated authorisation failures", body names that synthetic user). CloudWatch for 16:06 UTC: `NumberOfMessagesPublished` 1, `NumberOfNotificationsDelivered` 1, `NumberOfNotificationsFailed` 0. Delivered means SNS handed it to the mail system. **Received:** the owner confirmed on 25 October 2026 (in a Claude Code session) that this alert arrived in the intended inbox |
 | LM-01.1 | ✅ | Browser: every app API call carries an `x-correlation-id` (`apps/web/e2e/notes-flow.spec.ts`); API to DB to logs: `test/tracing.int-spec.ts` |
-| LM-02.1 | ✅ | `packages/logger/src/index.test.ts` |
+| LM-02.1 | 🟡 | `packages/logger/src/index.test.ts` covers top-level values and keys one level down. **25 October 2026 (audit):** a synthetic probe against the built logger wrote a mobile number in clear at `req.query.phone` and inside a nested string (review S-6); no current call site logs nested personal data. Open until a spec and fix land ([FU-27](follow-up-register.md#closes-step-2)) |
 | LM-02.2 | ✅ | `apps/api/src/lint-rules.spec.ts` |
 | LM-04.1 | ✅ | Local record, plus dev host on 2026-10-18: Pixel 7 and Desktop Chrome visited `/or`, `/en/notes` and `/hi/sign-in` on https://15.252.65.98. The API logged CLS, FCP, INP, LCP and TTFB for each of `/[locale]`, `/[locale]/notes` and `/[locale]/sign-in` × mobile and desktop. Lines carry only vital, value, route template, device class and a random request correlation ID |
 | LM-05.1 | ✅ (local dashboard, ADR 0010) | Traces in OpenTelemetry and Jaeger. Grafana dashboard `HEACH API (LM-05.1)` (provisioned, `deploy/observability/grafana`) over Prometheus: request rate, 5xx share, p50/p95/p99. Record 18 October, local API: 37.6 requests/s, p50 2.5 ms, p95 4.8 ms, p99 5.0 ms; synthetic outage (PostgreSQL stopped, `/readyz` 503) showed 18 % 5xx share. `scripts/observability-dashboard.test.mjs` keeps the three panels. Local only (ADR 0010) |
@@ -112,8 +112,11 @@ Statuses: ⬜ not started, 🟡 in progress, ✅ proven, 🧑 owner action.
 
 The Step 2 spec also requires the native Odia review (I18N-07, not met: owner) and spec 006's four
 weekly runs (SC-001, 1 to 22 November 2026). Alert inbox receipt, ADR 0012 and G4 for specs 001 to
-005 and 007 were closed by the owner on 25 October 2026. Step 2 is **not complete**; the
-[acceptance matrix](step-2-acceptance-matrix.md#closing-step-2) lists what closes it.
+005 and 007 were closed by the owner on 25 October 2026. The [audit](step-1-2-audit.md) of
+25 October 2026 added two items: LM-02.1 is Partial (nested masking) and the guideline's step-end
+demo on a real phone is not recorded; the first exit row above is proven in device emulation only.
+Step 2 is **not complete**; the [acceptance matrix](step-2-acceptance-matrix.md#closing-step-2)
+lists what closes it.
 
 ## Deploy and rollback record
 
@@ -130,11 +133,15 @@ weekly runs (SC-001, 1 to 22 November 2026). Alert inbox receipt, ADR 0012 and G
 - 18 October 2026: Deploy dev [run 39117175524](https://github.com/themechanicalguy/heach/actions/runs/39117175524) for `16d9b03` is green: image build, scan gate, deploy and smoke test passed, no rollback. After #51, the next deploy also recreates the API.
 
 - 24 October 2026, [Deploy dev run 40095340473](https://github.com/themechanicalguy/heach/actions/runs/40095340473) for `8b0387f` (#74, spec 007), attempt 1 at 12:53 UTC: stopped at the preflight, "Parameter /heach/dev/TEST_LOGIN_KEY is missing: apply infra/envs/dev first. Nothing changed."; no rollback, the previous version kept serving (the designed rollout). The owner applied `infra/envs/dev` at 15:25 UTC (API role and policy, test sign-in key and parameter; host policy and metadata hop limit changed in place). Attempt 2 at 15:26 UTC: green, deploy and smoke test passed. Live checks afterwards are in the [security review](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24).
+- 24 October 2026: CI on `main` red for `36e82ac` (#72) and `525e9cf` (#75, merged with both checks failing): the dependency audit and Trivy caught newly published highs in body-parser and multer. Deploy dev was skipped both times; #74 (`8b0387f`, 12:37 UTC) fixed them. Recorded by the audit of 25 October.
+- 17 and 18 October 2026, rollback: the "Roll back to the previous tag" step ran 11 times and failed every time (expired ECR tags, preflight stops, the rotation outage). It has not run since, and has never succeeded ([FU-12](follow-up-register.md#step-1-items-still-open)).
 - 22 and 23 October 2026: Deploy dev green for spec 003 `1d74b17` ([run 39838278055](https://github.com/themechanicalguy/heach/actions/runs/39838278055)), spec 004 `468c7f1` ([run 39910289211](https://github.com/themechanicalguy/heach/actions/runs/39910289211)) and spec 005 `491f5a0` ([run 39915546133](https://github.com/themechanicalguy/heach/actions/runs/39915546133)): deploy and smoke test of `/healthz` and `/api/readyz` passed, no rollback. The smoke test checks health only, not the corrective behaviour.
 
 ## Owner actions
 
-Status on 25 October 2026. Nobody outside the project has been contacted by Claude Code.
+Status on 25 October 2026. Nobody outside the project has been contacted by Claude Code. From the
+audit of 25 October 2026 on, open actions are tracked with owners, dates and closure conditions in
+the [follow-up register](follow-up-register.md); the list below is kept as the history of this log.
 
 - ~~Confirm alert email receipt~~: done 25 October 2026, both synthetic alerts (LM-07.1, SO-08.3)
   arrived. The credit alerts' receipt was not asked and stays unrecorded.
