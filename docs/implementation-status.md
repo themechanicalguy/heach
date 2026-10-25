@@ -136,7 +136,7 @@ written today, not just its Step 2 part.
 | SO-06 | Access only through SSM Session Manager, no SSH | Bastion or zero-trust proxy for production, quarterly review |
 | SO-07 | Synthetic-data rule in docs and CLAUDE.md | Enforcement once real data exists |
 | SO-08 | API rate limit per route: every request is counted by client address whatever its credentials, and a live session by its user as well ([spec 007](../specs/007-security-review-fixes/spec.md) SO-08.12, Approved; amends spec 002, which counted a live session by user only), so neither fake nor valid tokens create allowances; `Retry-After` and the generic error body on 429; `RATE_LIMIT_WINDOW_SECONDS` (SO-08.1, SO-08.4 to SO-08.11, [spec 002](../specs/002-rate-limit-bypass/spec.md): unit `user-throttler.guard.spec.ts`, integration `rate-limit.int-spec.ts` on real PostgreSQL and Redis, deploy-bundle check `scripts/rate-limit-check.sh` through Caddy in CI). Caddy edge limit 300 a minute per IP (SO-08.2), authorisation-failure alert (SO-08.3), input validation | Counters are in memory, per API process and per route; a second API process needs shared counters first (review P-1, [backlog](backlog.md) item 8). Checked 22 October: one API container, one Node process, so not needed yet. Sign-up, OTP and device throttling (SE-08) arrive with Step 3. WAF at the pilot (D3) |
-| TS-05 | E2E smoke for web and admin on every PR (Chromium) | Nightly full suite; mobile and tablet projects |
+| TS-05 | E2E smoke for web and admin on every PR (Chromium), on mobile, tablet and desktop projects (TS-05.1) | Nightly and pre-release full suite: no full journey suite exists yet (TS-04, later steps) |
 
 ## Documentation gaps found in review
 

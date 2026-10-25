@@ -1,6 +1,6 @@
 # Step 2 progress and acceptance evidence
 
-Working log for [the Step 2 spec](specs/step-02-secure-foundation.md). It records evidence for each
+Working log for [the Step 2 spec](specs/step-02-secure-foundation.md). The criterion-by-criterion verdict is in the [acceptance matrix](step-2-acceptance-matrix.md). It records evidence for each
 criterion and what is left, so work can resume after an interruption. Owner approvals for this
 step (18 October 2026): merge green PRs; self-apply additive dev infra up to US$5 a month;
 observability containers local only (ADR 0010); off-account backup copy to the owner's computer.

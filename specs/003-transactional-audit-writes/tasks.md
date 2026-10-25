@@ -73,7 +73,7 @@ starts before that. Implementation branch: `fix/003-transactional-audit-writes`.
 - [x] T016 `SE-05.1` test in notes.repository.spec.ts still passes (fake pool gains `connect`; each public method still writes exactly one entry on success); `audit-chain.int-spec.ts`, `db-roles.int-spec.ts`, `sample-notes.int-spec.ts` unchanged and passing
 - [x] T017 `pnpm check`, `pnpm --filter @heach/api test:e2e`, coverage threshold on changed code, `node scripts/check-specs.mjs`, `pnpm test:scripts`, gitleaks; types unchanged (`pnpm --filter @heach/types generate` gives no diff)
 - [x] T018 Update docs/implementation-status.md (SE-05: what exists, evidence, remaining gaps: re-encryption job audit, P-2), docs/backlog.md (item 2 Done) and docs/specs/README.md row
-- [ ] T019 `/speckit-converge` (left to the owner: the skill is user-invocable only); evidence recorded below and the code PR opened; record evidence below; open the code PR with `Spec:` and `Criteria: SE-05.5 to SE-05.10` lines
+- [x] T019 (converge followed by hand from its SKILL.md on 25 October 2026, as for specs 001 and 002: every SE-05.5 to SE-05.10 criterion, SC-001 to SC-003, the edge cases and the plan's touch-points are implemented and tested; no findings, so no Convergence phase was appended) `/speckit-converge` (left to the owner: the skill is user-invocable only); evidence recorded below and the code PR opened; record evidence below; open the code PR with `Spec:` and `Criteria: SE-05.5 to SE-05.10` lines
 
 ---
 
