@@ -39,7 +39,7 @@ The 10 steps run in order and total roughly 38 to 43 weeks for a team of eight t
 
 Four rules apply to every step:
 
-- **The spec comes first.** A step's code starts only after its spec, with testable acceptance criteria and a threat model, is approved in [`docs/specs/`](specs/README.md) ([ADR 0007](adr/0007-spec-driven-development.md)).
+- **Threat model and testable acceptance first.** Each step's work states its acceptance checks and a threat model (SO-01) before it is built; design decisions with trade-offs go in an ADR.
 - **The definition of done is the gate.** No feature merges without encryption of sensitive fields, authorisation tests, translations in three languages, unit and E2E tests, accessibility and performance checks, and logging.
 - **Third-party onboarding starts early.** Payment gateway, SMS (DLT registration), Aadhaar and DigiLocker partner, and video provider approvals can take weeks, so applications go in during steps 1 and 2.
 - **Each step ends with a demo on a real mid-range Android phone**, in Odia, over a throttled network.

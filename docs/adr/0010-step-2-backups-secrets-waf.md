@@ -10,7 +10,7 @@ The project runs in one AWS Region (ap-south-1) on Free plan credits
 ([ADR 0008](0008-lean-single-host-on-credits.md), [ADR 0009](0009-aws-credits-and-restricted-pilot.md)).
 EN-10 originally asked for a copy of backups in a second Region, EN-12 for a secrets manager with
 rotation, and SO-08 for a WAF. Neither a second Region nor paid services fit those limits. The
-Step 2 spec (`docs/specs/step-02-secure-foundation.md`) records the owner's decisions D1 to D3.
+Step 2 spec (`docs/archive/step-specs/step-02-secure-foundation.md`) records the owner's decisions D1 to D3.
 
 ## Decision
 

@@ -8,8 +8,7 @@
   DC-01 from the Step 2 spec) and for journeys J1 to J9: the slice that builds it, the step, what it
   depends on, and how it is proved. Status today is copied from
   [implementation status](implementation-status.md) on 28 October 2026; that page stays the record.
-- **Not here:** criterion IDs. They are defined only in feature specs (constitution II); the proof
-  column says what kind of test the spec's criteria will need.
+- **Not here:** criterion IDs. The proof column says what kind of test each requirement needs.
 
 Slice keys (`3.1`, `5.4`) are the [web roadmap](web-roadmap.md)'s labels; a feature spec number is
 assigned when it is specified. "DoD" means the requirement applies to every slice through the
@@ -97,7 +96,7 @@ languages; Step 10 runs all three languages.
 
 | ID | Today | Slice (step) | Depends on | Proof |
 | --- | --- | --- | --- | --- |
-| SO-01 | ✅ | DoD: threat model in every plan | `check-specs` | CI structure check plus review |
+| SO-01 | ✅ | DoD: threat model in every plan | Threat model per module | Review |
 | SO-02 | ⬜ | DoD (ASVS L2 checklist per plan); 10.1 | None | M: checklist in plan; pen test |
 | SO-03 | 🟡 | Ongoing | CI | CI gates |
 | SO-04 | ⬜ | 6.9 (pilot pen test), 8.x (vault pen test), 10.1 | FU-24 | M: reports |

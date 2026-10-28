@@ -53,7 +53,7 @@ aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target 
 ```
 
 Test sign-in as a synthetic user works only through the loopback entry on port 9443; the public
-address answers it with 404 (SE-07.23, [spec 007](../specs/007-security-review-fixes/spec.md)):
+address answers it with 404 (SE-07.23, [spec 007](archive/specs/007-security-review-fixes/spec.md)):
 
 ```sh
 aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target <instance-id> \
@@ -92,7 +92,7 @@ gh api -X PUT repos/themechanicalguy/heach/branches/main/protection \
     "strict": true,
     "contexts": ["Checks", "E2E smoke", "API image", "Deploy bundle", "Infra (fmt, validate)",
                  "Secret scan", "Static analysis and scanner fixtures",
-                 "Implementation status updated", "Spec linked"]
+                 "Implementation status updated"]
   },
   "enforce_admins": true,
   "required_pull_request_reviews": { "required_approving_review_count": 0, "dismiss_stale_reviews": true },

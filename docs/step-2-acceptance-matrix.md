@@ -1,6 +1,6 @@
 # Step 2 acceptance matrix
 
-Criterion-by-criterion check of [Step 2](specs/step-02-secure-foundation.md) against code, tests,
+Criterion-by-criterion check of [Step 2](archive/step-specs/step-02-secure-foundation.md) against code, tests,
 deployment and dated manual evidence, together with the corrective feature specs, the step's
 decisions, ADRs 0010 to 0012 and the [guideline exit criteria](mvp-v1-implementation-guideline.md#step-2-secure-foundation-and-quality-gates).
 Detailed evidence lives in the [Step 2 log](step-2-progress.md); this page states what is met and
@@ -152,13 +152,13 @@ Each spec's tasks file holds its evidence. Gate G4 (Done) is the owner's review 
 
 | Spec | Criteria | Code | Tests (CI) | Deployed to dev | Live or manual evidence | G4 owner acceptance |
 | --- | --- | --- | --- | --- | --- | --- |
-| [001 Session-refresh reliability](../specs/001-session-refresh-reliability/tasks.md) | SE-07.5 to SE-07.13 | #56 | Unit, integration and session E2E on three viewports; SC-001 50 of 50 | Yes (every deploy since 21 October) | Not host-specific (client behaviour) | Accepted 25 October 2026 |
-| [002 Rate-limit bypass](../specs/002-rate-limit-bypass/tasks.md) | SO-08.4 to SO-08.11 | #64 | `rate-limit.int-spec.ts` and unit tests | Yes, `7c8c1c9`, smoke passed (22 October) | No separate host check; behaviour proven by CI integration tests (extended by spec 007's address limit) | Accepted 25 October 2026 |
-| [003 Transactional audit writes](../specs/003-transactional-audit-writes/tasks.md) | SE-05.5 to SE-05.10 | #67 | `audit-transaction.int-spec.ts`, `transaction.spec.ts`; converge pass 25 October: no findings | Yes, `1d74b17` (22 October) | Not host-specific | Accepted 25 October 2026 |
-| [004 Transactional session rotation](../specs/004-transactional-session-rotation/tasks.md) | SE-07.14 to SE-07.20 | #69 | `session-rotation.int-spec.ts`, unit tests, session E2E | Yes, `468c7f1` (23 October) | Not host-specific | Accepted 25 October 2026 |
-| [005 Bounded re-encryption](../specs/005-bounded-reencryption/tasks.md) | EN-05.4 to EN-05.9 | #70 | `reencrypt.int-spec.ts`, `reencrypt.spec.ts` | Yes, `491f5a0` (23 October) | Run on the dev host 24 October without `--rotate`: exit 0 ([record](runbooks/key-rotation.md#record)) | Accepted 25 October 2026 |
-| [006 Recurring restore check](../specs/006-recurring-restore-check/tasks.md) | EN-10.5 to EN-10.10 | #80 | `restore-check.int-spec.ts` (16), unit (9), scripts (11) | See the deploy record below | First run by hand (T017) below; SC-001 four weekly runs pending | Not yet (SC-001 open) |
-| [007 Security review fixes](../specs/007-security-review-fixes/tasks.md) | SO-08.12, SE-07.21 to SE-07.23, EN-12.4, SO-03.2 | #74 | Integration and unit tests; deploy-bundle test sign-in checks | Yes, `8b0387f` after the owner's infra apply (24 October) | Live 24 October: API role reads exactly its 4 parameters, admin and migrator passwords denied, hop limit 1, public test sign-in 404, loopback 200 ([record](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24)); re-checked after the spec 006 deploy below | Accepted 25 October 2026 |
+| [001 Session-refresh reliability](archive/specs/001-session-refresh-reliability/tasks.md) | SE-07.5 to SE-07.13 | #56 | Unit, integration and session E2E on three viewports; SC-001 50 of 50 | Yes (every deploy since 21 October) | Not host-specific (client behaviour) | Accepted 25 October 2026 |
+| [002 Rate-limit bypass](archive/specs/002-rate-limit-bypass/tasks.md) | SO-08.4 to SO-08.11 | #64 | `rate-limit.int-spec.ts` and unit tests | Yes, `7c8c1c9`, smoke passed (22 October) | No separate host check; behaviour proven by CI integration tests (extended by spec 007's address limit) | Accepted 25 October 2026 |
+| [003 Transactional audit writes](archive/specs/003-transactional-audit-writes/tasks.md) | SE-05.5 to SE-05.10 | #67 | `audit-transaction.int-spec.ts`, `transaction.spec.ts`; converge pass 25 October: no findings | Yes, `1d74b17` (22 October) | Not host-specific | Accepted 25 October 2026 |
+| [004 Transactional session rotation](archive/specs/004-transactional-session-rotation/tasks.md) | SE-07.14 to SE-07.20 | #69 | `session-rotation.int-spec.ts`, unit tests, session E2E | Yes, `468c7f1` (23 October) | Not host-specific | Accepted 25 October 2026 |
+| [005 Bounded re-encryption](archive/specs/005-bounded-reencryption/tasks.md) | EN-05.4 to EN-05.9 | #70 | `reencrypt.int-spec.ts`, `reencrypt.spec.ts` | Yes, `491f5a0` (23 October) | Run on the dev host 24 October without `--rotate`: exit 0 ([record](runbooks/key-rotation.md#record)) | Accepted 25 October 2026 |
+| [006 Recurring restore check](archive/specs/006-recurring-restore-check/tasks.md) | EN-10.5 to EN-10.10 | #80 | `restore-check.int-spec.ts` (16), unit (9), scripts (11) | See the deploy record below | First run by hand (T017) below; SC-001 four weekly runs pending | Not yet (SC-001 open) |
+| [007 Security review fixes](archive/specs/007-security-review-fixes/tasks.md) | SO-08.12, SE-07.21 to SE-07.23, EN-12.4, SO-03.2 | #74 | Integration and unit tests; deploy-bundle test sign-in checks | Yes, `8b0387f` after the owner's infra apply (24 October) | Live 24 October: API role reads exactly its 4 parameters, admin and migrator passwords denied, hop limit 1, public test sign-in 404, loopback 200 ([record](reviews/2026-10-24-security-review.md#live-verification-after-the-apply-2026-10-24)); re-checked after the spec 006 deploy below | Accepted 25 October 2026 |
 
 ## Decisions and ADRs
 
@@ -178,7 +178,7 @@ Each spec's tasks file holds its evidence. Gate G4 (Done) is the owner's review 
 
 | What | Who | When | Record |
 | --- | --- | --- | --- |
-| Step 2 spec approved | Owner | 18 October 2026 | [Spec](specs/step-02-secure-foundation.md) status |
+| Step 2 spec approved | Owner | 18 October 2026 | [Spec](archive/step-specs/step-02-secure-foundation.md) status |
 | Specs 001 to 007 approved before code | Owner | 21 to 25 October 2026 | Each spec's Approval line |
 | Spec 006 amendment (audit entry fields, live connection, throwaway grants, stage `job`) | Owner | 25 October 2026 | Spec 006 Approval line |
 | Synthetic alerts LM-07.1 and SO-08.3 received in the intended inbox | Owner | 25 October 2026 | [Log](step-2-progress.md) rows SO-08.3 and LM-07.1 |
@@ -187,7 +187,7 @@ Each spec's tasks file holds its evidence. Gate G4 (Done) is the owner's review 
 | Spec 006 synthetic failure alert received in the intended inbox | Owner | 25 October 2026 | [Runbook](runbooks/backup-restore.md#weekly-restore-check-records-sc-001) |
 | Lawyer review | Lawyer chosen by the owner | Not yet | Open item 1 |
 | Native Odia review | Native speaker chosen by the owner | Not yet | Open item 2 |
-| G4 acceptance of specs 001 to 005 and 007 | Owner | 25 October 2026 | This page; [specs index](specs/README.md) |
+| G4 acceptance of specs 001 to 005 and 007 | Owner | 25 October 2026 | This page; [specs index](archive/step-specs/README.md) |
 | G4 acceptance of spec 006 | Owner | After SC-001 | Open item 3 |
 
 ## Requirement counts and later steps

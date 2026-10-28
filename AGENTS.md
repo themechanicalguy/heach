@@ -4,17 +4,16 @@ For any coding agent working in this repository. HEACH handles health data of pa
 Odisha; security and data protection come before speed. This file is an entry point and holds no
 rules of its own. Read, in this order:
 
-1. [Constitution](.specify/memory/constitution.md): principles and gates, and what an agent may
-   and may not approve.
-2. [`CLAUDE.md`](CLAUDE.md): the full working rules, stack, layout, code style and commands. They
+1. [`CLAUDE.md`](CLAUDE.md): the full working rules, stack, layout, code style and commands. They
    apply to every agent, not only Claude Code.
-3. [Spec workflow](docs/spec-workflow.md): how a feature goes from `/speckit-specify` to merged
-   code, and how to select or resume a feature.
-4. [Specs index](docs/specs/README.md), then the spec you are working from.
+2. [Requirements](docs/mvp-v1-requirements.md) and the
+   [implementation guideline](docs/mvp-v1-implementation-guideline.md): what to build and in what
+   order.
+3. [Implementation status](docs/implementation-status.md) and the
+   [follow-up register](docs/follow-up-register.md): what exists and what is still due.
 
-Spec Kit commands are set up for Claude Code (`.claude/skills/`, typed as `/speckit-<command>`).
-Another agent can follow the same steps by reading the matching `SKILL.md` and the templates in
-`.specify/templates/overrides/`, but must not create a second Spec Kit integration without an ADR.
+Retired step and feature specs are in [`docs/archive/`](docs/archive/README.md) as a historical
+record only ([ADR 0013](docs/adr/0013-retire-spec-driven-development.md)).
 
-Before you finish any change: `pnpm check` passes, `docs/implementation-status.md` is updated
-when a requirement ID or step item moves, and the pull request names its spec and criterion IDs.
+Before you finish any change: `pnpm check` passes, and `docs/implementation-status.md` is updated
+when a requirement ID or step item moves.

@@ -1,7 +1,7 @@
 # Web roadmap: Steps 2 to 10 as bounded feature slices
 
 - **Status:** Draft for owner review (28 October 2026). Nothing here is approved. It proposes; the
-  owner decides. Agents never set it, or anything it proposes, to Approved (constitution IX).
+  owner decides. 
 - **Owns:** how each [guideline](mvp-v1-implementation-guideline.md) step breaks into bounded
   feature slices, in dependency order, for a web-only product. It is **not** a second delivery
   plan: the guideline stays the only plan, and where this page proposes a change to it, the change
@@ -11,7 +11,7 @@
   ID and journeys J1 to J9 to a slice, a step, its dependencies and its acceptance proof.
 - **Baseline:** `main` at `1ca6493` (28 October 2026): Step 2 built, its exit open
   ([follow-up register](follow-up-register.md#closes-step-2)); specs 001 to 007 Done or deployed,
-  [spec 008](../specs/008-nested-log-masking/spec.md) Draft; no functional requirement built.
+  [spec 008](archive/specs/008-nested-log-masking/spec.md) Draft; no functional requirement built.
 
 ## Contents
 
@@ -69,32 +69,25 @@ Step 2 is not complete. Step 3 code needs, in this order:
 
 | # | Blocker | Closes | Who | When | What it unblocks |
 | --- | --- | --- | --- | --- | --- |
-| 1 | **Spec 008 nested log masking** (reuse, do not redraft): [spec](../specs/008-nested-log-masking/spec.md), [plan](../specs/008-nested-log-masking/plan.md) are on `main`; its `tasks.md` is drafted on a local branch (`docs/008-nested-log-masking-tasks`, `eb12224`) that is not pushed yet. Owner runs `/speckit-analyze` (no critical or high finding, G2), approves spec and plan by a pull request comment, merges; then implementation PR | FU-27; LM-02 back to Done | Owner approves; Claude Code implements | Now | Any Step 3 code that logs a mobile number, name or identity data (3.1 onward) |
-| 2 | **Written gate exception** (constitution VIII): Step 3 code runs while Step 2's external items stay open, naming FU-01 to FU-08 and their end conditions | Audit condition 2 | Owner | Before the first Step 3 code PR | All Step 3 code; without it, Step 3 is specification only |
-| 3 | **Triage the 18 October review findings** (S-3, S-4, S-5, C-3, A-1, P-2, Low items): backlog row or written acceptance each | FU-13 | Owner decides; Claude Code drafts | Before the Step 3 charter is approved | Slice 3.0 (S-4 before the identity key is first used; A-1 before Step 3 forms reuse `Toast`) |
-| 4 | **Branch protection** decision | FU-10 | Owner | Before Step 3 merges start | Process only |
-| 5 | **Admin entry through port forwarding** decision | FU-18 | Owner | Before slice 3.9 | Admin login on dev |
-| 6 | **Partner applications submitted**: SMS and DLT (#20), identity partner (#21) now; payment (#19), video (#22), domain (#24) next | FU-09 | Owner | Overdue | Step 3 exit (identity sandbox, real OTP SMS); Steps 5 and 6 |
-| 7 | **Rollback drill** | FU-12 | Owner approves; Claude Code prepares | Early in Step 3 | Safe deploys of Step 3 |
-| 8 | Weekly restore checks 1, 8, 15 and 22 November, then G4 of spec 006 | FU-01 to FU-05 | Owner (scheduled) | 22 November earliest | Step 2 closure only |
-| 9 | Lawyer review of consent wording and the Aadhaar route | FU-06 | Owner | Not dated | Step 2 closure; slices 3.3 and 3.6 |
-| 10 | Native Odia review of the 34 Step 2 keys | FU-07 | Owner | Not dated | Step 2 closure; Odia usability test in Step 3 |
-| 11 | Real-phone demo in Odia over a throttled network | FU-08 | Owner | Before Step 2 is marked complete | Step 2 closure |
+| 1 | **Nested log masking** (LM-02.1 gap): implement the design in the [archived spec 008](archive/specs/008-nested-log-masking/spec.md) and its [plan](archive/specs/008-nested-log-masking/plan.md) | FU-27; LM-02 back to Done | Claude Code implements; owner reviews the PR | Now | Any Step 3 code that logs a mobile number, name or identity data (3.1 onward) |
+| 2 | **Triage the 18 October review findings** (S-3, S-4, S-5, C-3, A-1, P-2, Low items): backlog row or written acceptance each | FU-13 | Owner decides; Claude Code drafts | Before slice 3.0 | Slice 3.0 (S-4 before the identity key is first used; A-1 before Step 3 forms reuse `Toast`) |
+| 3 | **Branch protection** decision | FU-10 | Owner | Before Step 3 merges start | Process only |
+| 4 | **Admin entry through port forwarding** decision | FU-18 | Owner | Before slice 3.9 | Admin login on dev |
+| 5 | **Partner applications submitted**: SMS and DLT (#20), identity partner (#21) now; payment (#19), video (#22), domain (#24) next | FU-09 | Owner | Overdue | Step 3 exit (identity sandbox, real OTP SMS); Steps 5 and 6 |
+| 6 | **Rollback drill** | FU-12 | Owner approves; Claude Code prepares | Early in Step 3 | Safe deploys of Step 3 |
+| 7 | Weekly restore checks 1, 8, 15 and 22 November, then spec 006 marked Done | FU-01 to FU-05 | Owner (scheduled) | 22 November earliest | Step 2 closure only |
+| 8 | Lawyer review of consent wording and the Aadhaar route | FU-06 | Owner | Not dated | Step 2 closure; slices 3.3 and 3.6 |
+| 9 | Native Odia review of the 34 Step 2 keys | FU-07 | Owner | Not dated | Step 2 closure; Odia usability test in Step 3 |
+| 10 | Real-phone demo in Odia over a throttled network | FU-08 | Owner | Before Step 2 is marked complete | Step 2 closure |
 
-Also open and not blocking: #88 (FU-14 closure record), FU-11, FU-16, FU-17, FU-19 (the
-`spec-exempt` label, which also unblocks documentation gap 19).
+Also open and not blocking: #88 (FU-14 closure record), FU-11, FU-16, FU-17, and documentation gap 19.
 
-## How slices become specs
+## Slices
 
-- One slice is one feature spec in `specs/NNN-name/` through the [spec workflow](spec-workflow.md).
-  `/speckit-specify` assigns the number (the next is 009); the slice keys below (`3.1`, `5.4`) are
-  only this page's labels.
-- Each step gets a charter in `docs/specs/step-NN-*.md` before its first feature spec. The
-  [Step 3 charter](specs/step-03-accounts-onboarding.md) is drafted with this page.
-- Criterion IDs are defined only in the feature specs (constitution II). This page and the
-  traceability matrix name requirement IDs, never criterion IDs.
-- A slice is small enough when its spec has one primary journey or one module, its plan has one
-  migration set and one threat model, and its code fits in one or two pull requests.
+- The slice keys below (`3.1`, `5.4`) are this page's labels for bounded pieces of work.
+- This page and the traceability matrix name requirement IDs, never criterion IDs.
+- A slice is small enough when it has one primary journey or one module, one migration set and one
+  threat model, and its code fits in one or two pull requests.
 - Every slice inherits the [definition of done](mvp-v1-requirements.md#definition-of-done-for-every-feature);
   the per-step additions are under [Cross-cutting work per step](#cross-cutting-work-per-step).
 
@@ -139,7 +132,7 @@ exist yet:
 
 ## Step 3: Accounts, identity verification and provider onboarding
 
-Charter: [Step 3 spec](specs/step-03-accounts-onboarding.md) (Draft). Exit: every provider type can
+Charter: [Step 3 spec](archive/step-specs/step-03-accounts-onboarding.md) (Draft). Exit: every provider type can
 onboard on a phone and be approved in the admin website. Journeys: **J1**, **J5**.
 
 | Slice | Requirements | Depends on | Acceptance proof (summary) |
@@ -361,7 +354,7 @@ the step charter or feature spec named; until then that spec stays Draft.
 | Q-OUTSTATE | Doctors registered outside Odisha | 3.7, 3.10 | Lawyer |
 | Q-POLICE | Background or police verification for home-visit providers and attendants | 3.7, 3.10 | Owner and lawyer; make it a checklist item so it can be added without code |
 | Q-PATIENT-KYC | Identity verification mandatory for patients in any case (for example attendant bookings) | 3.6, 5.2 | Owner |
-| Q-HINDI | Hindi at launch | Every step's translation work | Keep three languages (requirements and constitution V) unless the owner changes both |
+| Q-HINDI | Hindi at launch | Every step's translation work | Keep three languages (requirements and CLAUDE.md) unless the owner changes both |
 | D-SCAN | Virus scanner | 3.4 | ClamAV as its own container (GPL-2.0, not linked into our code) versus a managed scan service (cost, availability on the plan); measure memory on the host |
 | D-ADMIN-MFA | Admin second factor | 3.9 | TOTP with `node:crypto` (no new dependency); WebAuthn later |
 | D-GRID | Admin data-grid library (the stack names one, none chosen) | 3.9 | Extend `packages/ui` `Table` with server-side sort and pagination first; a library only if that falls short |
@@ -369,7 +362,7 @@ the step charter or feature spec named; until then that spec stays Draft.
 | D-SEARCH | Search engine | 4.6 | PostgreSQL `pg_trgm` and a per-language synonym and transliteration table; no new service |
 | D-QUEUE | Job runner | 5.1 | PostgreSQL outbox and job table with `FOR UPDATE SKIP LOCKED` (commits with the booking, no new dependency) versus a Redis queue library (new dependency) |
 | D-PDF | PDF rendering that shapes Odia script correctly | 5.6 | Spike first: render one Odia prescription with each candidate; headless Chromium is reliable for shaping but heavy on the host |
-| D-PUSH | Web push library | 5.8 | `web-push` (MPL-2.0) rather than hand-written payload encryption (constitution III: no improvised cryptography) |
+| D-PUSH | Web push library | 5.8 | `web-push` (MPL-2.0) rather than hand-written payload encryption (no improvised cryptography: `@heach/crypto` and audited libraries only) |
 | Q-CASH | Cash or UPI at the time of home service | 5.3 | Online only for the first release |
 | Q-COMMISSION | Commission and cancellation policy per service | 5.5, 5.7 | Owner; configurable, so not a code blocker |
 | Q-LOAD | Expected launch load | 4.5 load test, TS-08 | Owner |
