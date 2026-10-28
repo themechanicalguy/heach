@@ -147,8 +147,9 @@ they build on its decisions (charter: "not approved against anything that is not
 
 ## Plan of record
 
-1. Docs PR (this branch): this page, spec 008 `tasks.md`, spec 009 complete set, specs index
-   and charter rows. Status: see the log below.
+1. Docs PR [#91](https://github.com/themechanicalguy/heach/pull/91) (this branch): this page,
+   spec 008 `tasks.md`, spec 009 complete set, specs index and charter rows. Opened 28 October
+   2026; waiting for the owner.
 2. Owner: E3, charter answers, approvals of 008 and 009.
 3. Code PR `feat/008-nested-log-masking` (spec 008 tasks), then slice 3.0 spec and code (needs
    FU-13 triage), then `feat/009-otp-sign-in`.
@@ -212,5 +213,7 @@ Kept current at the end of each session. Paste it into a new agent session to re
 > to `main`, never set a spec Approved, never write an owner approval comment, never tick a
 > human-only checklist, never merge, deploy or apply infrastructure. Application code starts
 > only when the progress page's approval table shows the spec and plan Approved and merged and
-> the gate exception E3 written. Continue from the first unfinished row of "Plan of record"; log
+> the gate exception E3 written. Docs PR #91 holds the drafts; check its comments first and fix
+> what the owner asks there, on the same branch. While it waits, draft the next slice spec
+> (3.2 roles and linked patients) as its own docs PR. Continue from the first unfinished row of "Plan of record"; log
 > every finished step in the Log table with its commit, and refresh this prompt before you stop.
