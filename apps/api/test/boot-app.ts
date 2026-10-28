@@ -10,9 +10,16 @@ export async function bootApp(
   process.env.NODE_ENV = nodeEnv;
   process.env.API_PORT ??= '3001';
   process.env.APP_ENV = 'test';
-  process.env.FEATURE_FLAGS = 'sample-patient-note';
+  process.env.FEATURE_FLAGS = 'sample-patient-note,accounts';
   process.env.RATE_LIMIT_PER_MINUTE = '10000';
   process.env.RATE_LIMIT_PER_ADDRESS_PER_MINUTE = '10000';
+  // SMS stay in memory; OTP caps stay out of the way unless a test lowers one (SE-08).
+  process.env.SMS_PROVIDER = 'fake';
+  process.env.OTP_SENDS_PER_NUMBER_PER_HOUR = '1000';
+  process.env.OTP_SENDS_PER_NUMBER_PER_DAY = '1000';
+  process.env.OTP_SENDS_PER_DEVICE_PER_HOUR = '1000';
+  process.env.OTP_SENDS_PER_ADDRESS_PER_HOUR = '100000';
+  process.env.OTP_FAILURES_PER_ADDRESS_PER_HOUR = '100000';
   Object.assign(process.env, overrides);
   const app = await createApp({ logger: ['error'] });
   await app.init();

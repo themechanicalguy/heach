@@ -53,7 +53,7 @@ export class OtpThrottle {
 
   /** Refuses verification from an address that has sent too many wrong codes this hour. */
   async assertVerifyAllowed(address: string): Promise<void> {
-    const key = failureKey(address);
+    const { key } = failureCap(address);
     const count = Number((await this.redis.get(key)) ?? 0);
     if (count >= this.env.OTP_FAILURES_PER_ADDRESS_PER_HOUR) {
       throw new OtpRateLimitedException(Math.max(await this.redis.ttl(key), 1));
@@ -61,7 +61,7 @@ export class OtpThrottle {
   }
 
   async recordFailure(address: string): Promise<void> {
-    await this.increment(cap(failureKey(address), 0, HOUR));
+    await this.increment(failureCap(address));
   }
 
   private async consume(caps: Cap[]): Promise<void> {
@@ -85,4 +85,4 @@ const cap = (key: string, limit: number, windowSeconds: number): Cap => ({
   windowSeconds,
 });
 
-const failureKey = (address: string) => `otp-cap:fail-h:${address}`;
+const failureCap = (address: string) => cap(`fail-h:${address}`, 0, HOUR);

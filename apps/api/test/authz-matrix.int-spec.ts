@@ -1,6 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
+import { adminSignIn } from './account-helpers.js';
 import { bearer, login, type Login, USERS } from './auth-helpers.js';
 import { bootApp } from './boot-app.js';
 
@@ -30,7 +31,8 @@ const MATRIX: {
   {
     route: 'POST /auth/logout',
     call: (s) => s.post('/v1/auth/logout').send({ allDevices: false }),
-    expect: { anonymous: 401, owner: 204, otherPatient: 204, provider: 204, admin: 204 },
+    // Admins sign out through their own realm's route (decision L-10).
+    expect: { anonymous: 401, owner: 204, otherPatient: 204, provider: 204, admin: 403 },
   },
   {
     route: 'POST /auth/refresh',
@@ -57,19 +59,23 @@ describe('Authorisation harness (SE-02.2, TS-09)', () => {
     await app.close();
   });
 
-  const callerIds: Record<Exclude<Caller, 'anonymous'>, string> = {
+  const callerIds: Record<Exclude<Caller, 'anonymous' | 'admin'>, string> = {
     owner: USERS.patientA,
     otherPatient: USERS.patientB,
     provider: USERS.provider,
-    admin: USERS.admin,
+  };
+
+  const signIn = (caller: Caller): Promise<Login | undefined> => {
+    if (caller === 'anonymous') return Promise.resolve(undefined);
+    if (caller === 'admin') return adminSignIn(app, 'super_admin');
+    return login(app, callerIds[caller]);
   };
 
   for (const row of MATRIX) {
     for (const caller of Object.keys(row.expect) as Caller[]) {
       it(`SE-02.2 ${row.route} as ${caller} returns ${String(row.expect[caller])}`, async () => {
         // A fresh session per call: logout must not affect other rows.
-        const session: Login | undefined =
-          caller === 'anonymous' ? undefined : await login(app, callerIds[caller]);
+        const session = await signIn(caller);
         const test = row.call(request(app.getHttpServer()), noteId);
         if (session) {
           void test.set(bearer(session));

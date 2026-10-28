@@ -32,7 +32,7 @@ describe('Test sign-in behind a configured key (SE-07.23)', () => {
         signIn(
           app,
           { 'X-Test-Login-Key': randomBytes(32).toString('hex') },
-          { userId: USERS.admin },
+          { userId: USERS.patientB },
         ),
         signIn(app, { 'X-Test-Login-Key': '' }, { userId: USERS.provider }),
         signIn(app, {}, { userId: 'not-a-uuid', extra: true }),
