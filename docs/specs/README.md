@@ -16,6 +16,7 @@ rules. How to write one: [spec workflow](../spec-workflow.md). Principles and ga
 | Spec | Step | Status |
 | --- | --- | --- |
 | [Secure foundation and quality gates](step-02-secure-foundation.md) | 2 | Approved; baseline for later specs. 73 of 74 criteria met; LM-02.1 Partial ([audit](../step-1-2-audit.md), 25 October 2026). Exit pending the items in the [follow-up register](../follow-up-register.md#closes-step-2) ([status](../implementation-status.md#step-2-secure-foundation-and-quality-gates)) |
+| [Accounts, identity verification and provider onboarding](step-03-accounts-onboarding.md) | 3 | Draft (charter only; 28 October 2026): 13 slices, cross-feature decisions D3-1 to D3-13 and open questions Q3-1 to Q3-9 for the owner; entry conditions E1 to E8. Slices for Steps 4 to 10 in the [web roadmap](../web-roadmap.md) |
 
 Step 1 was built before ADR 0007; its record is in [implementation status](../implementation-status.md).
 
