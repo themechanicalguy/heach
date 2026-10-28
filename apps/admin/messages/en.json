@@ -8,11 +8,94 @@
     "dashboard": "Dashboard",
     "verification": "Verification",
     "bookings": "Bookings",
-    "finance": "Finance"
+    "finance": "Finance",
+    "users": "Users",
+    "signOut": "Sign out"
   },
   "dashboard": {
     "title": "Dashboard",
     "placeholder": "Admin features arrive in later steps.",
     "refresh": "Refresh"
+  },
+  "signIn": {
+    "title": "Admin sign-in",
+    "email": "Email",
+    "password": "Password",
+    "continue": "Continue",
+    "checking": "Checking…",
+    "mfaTitle": "Enter your authenticator code",
+    "mfaIntro": "Open your authenticator app and enter the 6-digit code for HEACH Admin.",
+    "code": "6-digit code",
+    "verify": "Verify",
+    "enrolTitle": "Set up your authenticator",
+    "enrolIntro": "Two-step sign-in is required. Add this key to an authenticator app (manual entry, time based), then enter the code it shows. The key is shown only now.",
+    "enrolKey": "Setup key",
+    "enrolLink": "Open in authenticator app",
+    "restart": "Start again"
+  },
+  "errors": {
+    "invalid_credentials": "Email or password is not right, or the account is locked. Try again later or ask a super admin.",
+    "mfa_incorrect": "That code is not right. Wait for the next code and try again.",
+    "mfa_expired": "Sign-in took too long. Start again.",
+    "reverification_required": "Enter a fresh authenticator code first.",
+    "status_unchanged": "The account already has that status.",
+    "network": "No connection. Check the network and try again.",
+    "forbidden": "Your role cannot do this.",
+    "generic": "Something went wrong. Please try again."
+  },
+  "users": {
+    "title": "Users",
+    "intro": "Patients and providers. Names and numbers are masked; opening a user is recorded in the audit log.",
+    "search": "Search by mobile number or name",
+    "searchButton": "Search",
+    "status": "Status",
+    "statusAll": "All",
+    "statusActive": "Active",
+    "statusSuspended": "Suspended",
+    "caption": "Users, newest first",
+    "name": "Name",
+    "mobile": "Mobile",
+    "roles": "Roles",
+    "setup": "Setup",
+    "setupDone": "Done",
+    "setupOpen": "Not finished",
+    "created": "Created",
+    "open": "Open",
+    "empty": "No users match.",
+    "page": "Page {page} of {pages}",
+    "previous": "Previous",
+    "next": "Next",
+    "detailTitle": "User details",
+    "fullName": "Full name",
+    "suspend": "Suspend",
+    "reinstate": "Reinstate",
+    "reason": "Reason",
+    "reasons": {
+      "safety_concern": "Safety concern",
+      "fraud": "Fraud",
+      "policy_breach": "Policy breach",
+      "user_request": "User request",
+      "other": "Other"
+    },
+    "suspended": "Account suspended and signed out of every device.",
+    "reinstated": "Account reinstated.",
+    "noRole": "None yet",
+    "close": "Close"
+  },
+  "reverify": {
+    "title": "Confirm with your authenticator",
+    "intro": "Sensitive actions need a fresh code.",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "adminRoles": {
+    "super_admin": "Super admin",
+    "verifier": "Verifier",
+    "support": "Support",
+    "finance": "Finance"
+  },
+  "state": {
+    "loading": "Loading",
+    "retry": "Try again"
   }
 }

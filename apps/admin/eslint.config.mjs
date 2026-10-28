@@ -7,4 +7,9 @@ export default [
   ...base,
   reactHooks.configs.flat.recommended,
   ...i18n,
+  {
+    // E2E suites skip when the full stack is absent; that is intended.
+    files: ['e2e/**'],
+    rules: { 'sonarjs/no-skipped-tests': 'off' },
+  },
 ];
