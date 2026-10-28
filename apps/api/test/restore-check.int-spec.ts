@@ -264,7 +264,8 @@ describe('Recurring restore check: passing run (EN-10.5, EN-10.8, EN-10.9, EN-10
     expect(run.code, run.output).toBe(0);
     expect(run.output).toContain(name);
     const line = run.output.split('\n').find((l) => l.includes('"outcome":"pass"')) ?? '{}';
-    const record = JSON.parse(line) as { tables: Record<string, number>; decrypted: number };
+    const logged = JSON.parse(line) as { tables: [string, number][]; decrypted: number };
+    const record = { ...logged, tables: Object.fromEntries(logged.tables) };
     expect(record.tables['app.patient_note']).toBeGreaterThanOrEqual(noteIds.length);
     expect(record.tables['audit.entry']).toBeGreaterThan(0);
     // Up to 1,000 newest values are decrypted (EN-10.7); shared local databases may hold more.

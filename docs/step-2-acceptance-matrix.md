@@ -12,14 +12,15 @@ what is not. Regenerate the criteria table when the log changes.
   open items 4 and 5. Due dates, procedures and closure conditions for every open item are in the
   [follow-up register](follow-up-register.md#closes-step-2), not repeated here.
 - **Verdict:** **Step 2 is not complete.** 73 of the 74 acceptance criteria of the step spec have
-  passing tests or dated evidence; LM-02.1 is Partial. These remain:
+  passing tests or dated evidence; LM-02.1 was Partial until the nested-masking fix of 28 October
+  2026 (open item 4, closed). These remain:
 
 | # | Open item | Kind | Exact dependency |
 | --- | --- | --- | --- |
 | 1 | Lawyer's first review of consent wording and the Aadhaar route (guideline exit criterion, D6) | External review | The owner sends [the pack](reviews/lawyer-review-step-2.md) to a lawyer of their choice and shares the feedback; the owner is arranging it (25 October 2026) |
 | 2 | Native Odia review of the Step 2 keys (I18N-07, step spec "Screens and languages") | External review | The owner arranges a native speaker with medical vocabulary ([sheet](reviews/odia-review-step-2.md)); feedback then goes into the catalogues and is retested |
 | 3 | Spec 006 SC-001: four consecutive weekly restore-check records on the dev host | Observation period | Scheduled runs on Sundays 1, 8, 15 and 22 November 2026 (00:00 UTC); a newly enabled timer has no missed run to catch up, so 1 November is the first |
-| 4 | LM-02.1 for nested input: the shared logger writes a mobile number nested two levels down, or inside a nested string, in clear (found by the audit with synthetic values, 25 October 2026; review S-6) | Engineering | A spec (or amendment) approved by the owner, then a fix with a three-level test ([FU-27](follow-up-register.md#closes-step-2)). No current call site logs nested personal data |
+| 4 | LM-02.1 for nested input: the shared logger writes a mobile number nested two levels down, or inside a nested string, in clear (found by the audit with synthetic values, 25 October 2026; review S-6) | Engineering | Closed: fixed 28 October 2026 on branch `feat/nested-log-masking`: one recursive pass in `@heach/logger` redacts personal keys and masks mobile numbers at every depth, in errors, interpolation, child bindings and context, with placeholders past depth 8, for cycles, binary and unreadable values (LM-02.3 to LM-02.8 tests, design in [archived spec 008](archive/specs/008-nested-log-masking/spec.md)); the audit probe now writes 0 numbers in clear (2 before) ([FU-27](follow-up-register.md#closes-step-2)) |
 | 5 | Step-end demo on a real mid-range Android phone, in Odia, over a throttled network (guideline rule for every step; not tracked before the audit) | Owner demonstration | A dated record in the [log](step-2-progress.md), or a written waiver ([FU-08](follow-up-register.md#closes-step-2)) |
 
 ## Status by kind
@@ -27,7 +28,7 @@ what is not. Regenerate the criteria table when the log changes.
 | Kind | Items | State on 25 October 2026 |
 | --- | --- | --- |
 | Engineering implemented and verified | 73 of the 74 step spec criteria; the four engineering exit criteria; specs 001 to 007 built, merged, deployed and tested; spec 006 timer deployed, enabled and run by hand; failure alert path proven | Done |
-| Engineering open | LM-02.1 nested masking (open item 4) | Needs a spec, then a small fix (audit, 25 October 2026) |
+| Engineering open | None: LM-02.1 nested masking (open item 4) fixed 28 October 2026 | Done |
 | Human reviews pending | Lawyer review (open item 1); native Odia review (open item 2); real-phone demo (open item 5) | Owner arranges all three. Packs are ready, and nobody has been contacted by Claude Code |
 | Scheduled observation pending | Spec 006 SC-001, four scheduled runs (open item 3), then G4 for spec 006 | Runs on 1, 8, 15 and 22 November 2026, independent of any session. Each is recorded after it happens. The manual runs of 25 October do not count |
 
@@ -47,8 +48,8 @@ the [follow-up register](follow-up-register.md#closes-step-2)):
    ([how](runbooks/backup-restore.md#scheduled-runs-where-the-evidence-is-and-how-to-read-it)).
    After the fourth consecutive row (22 November if none is missed), record the owner's G4
    acceptance of spec 006 in its tasks file, the specs index and here, and EN-10's status.
-4. **LM-02.1.** Approve the spec, merge the fix with green CI, set LM-02.1 to Met here and LM-02 to
-   Done on the status page.
+4. **LM-02.1.** Done 28 October 2026: fix merged with green CI, LM-02.1 Met here, LM-02 Done on the
+   status page.
 5. **Real-phone demo.** Record it in the log, or record the owner's written waiver.
 
 Then set the verdict above to complete. Mark guideline Step 2 Done in
@@ -115,7 +116,7 @@ Then set the verdict above to complete. Mark guideline Step 2 Done in
 | Security middleware and scanning | SO-08.2 | Integration test | `security.int-spec.ts` | Automated (CI) | Met |
 | Security middleware and scanning | SO-08.3 | Integration test against the alert rule | `test/security.int-spec.ts`; live 24 October 2026: published 1, delivered 1; received, owner confirmed 25 October 2026 | Automated (CI) | Met |
 | Logging and monitoring | LM-01.1 | E2E test reading the trace | `apps/web/e2e/notes-flow.spec.ts`; `test/tracing.int-spec.ts` | Automated (CI) | Met |
-| Logging and monitoring | LM-02.1 | Unit test in `@heach/logger` | `packages/logger/src/index.test.ts` (top level and one level only); audit probe 25 October 2026: nested values written in clear | Automated (CI) | **Partial** (open item 4) |
+| Logging and monitoring | LM-02.1 | Unit test in `@heach/logger` | `packages/logger/src/index.test.ts`, `sanitize.test.ts` (LM-02.3 to LM-02.8, every depth); audit probe re-run 28 October 2026: 0 numbers in clear | Automated (CI) | Met |
 | Logging and monitoring | LM-02.2 | Lint fixture | `apps/api/src/lint-rules.spec.ts` | Automated (CI) | Met |
 | Logging and monitoring | LM-03.1 | Manual record | `e2e/error-tracking.spec.ts` against local GlitchTip; dated 18 October 2026 (ADR 0010: local only) | Manual, dated | Met |
 | Logging and monitoring | LM-04.1 | Manual record | dated 2026-10-18 | Manual, dated | Met |
@@ -217,7 +218,7 @@ step, not to missing Step 2 work. Every in-scope Partial requirement, classified
 | TS-06 | Real adapters and sandbox runs | Steps 3 and 5 |
 | TS-09 | Vault sharing and entitlement tests | Steps 8 and 9 |
 | LM-01 | Queue workers | Step 5 |
-| LM-02 | Masking of nested values (found by the audit, 25 October 2026) | **Step 2** (open item 4) |
+| LM-02 | Masking of nested values (found by the audit, 25 October 2026) | Done in Step 2, 28 October 2026 |
 | LM-03, LM-05 | Error tracking and dashboards on a host | Pilot (ADR 0010) |
 | LM-04 | Network type | Later (not in LM-04.1) |
 | LM-07 | Payment, OTP, video and queue alerts | Steps 3, 5 and 6 |

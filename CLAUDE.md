@@ -17,7 +17,7 @@ Read these before planning any work. Do not copy their content here; link to req
 - `docs/mvp-v1-requirements.md` — what to build: roles, journeys, requirement IDs, security, stack
 - `docs/mvp-v1-implementation-guideline.md` — in what order: 10 steps with exit criteria
 - `docs/implementation-status.md` — what is built, partial or not started, per step and requirement ID
-- `docs/local-development.md` — running everything locally, git hooks. Current: **Step 2 exit pending the lawyer and Odia reviews, four weekly restore-check runs (to 22 November 2026), LM-02.1 nested masking and a real-phone demo; Step 3 next** ([register](docs/follow-up-register.md#closes-step-2)).
+- `docs/local-development.md` — running everything locally, git hooks. Current: **Step 2 exit pending the lawyer and Odia reviews, four weekly restore-check runs (to 22 November 2026) and a real-phone demo; Step 3 next** ([register](docs/follow-up-register.md#closes-step-2)).
 - `docs/step-1-2-audit.md` — Step 1 and Step 2 audit of 25 October 2026: status of every item, Step 3 verdict
 - `docs/follow-up-register.md` — the one list of checks and actions still due, with owners, dates and closure conditions
 
