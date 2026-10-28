@@ -1,11 +1,12 @@
 'use client';
 
-import { Button, TextField } from '@heach/ui';
+import { TextField } from '@heach/ui';
 import type { OtpChallenge } from '@heach/types';
 import { useState } from 'react';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
+import { StepActions } from '../setup/StepActions';
 
 /** Ten digits starting 6 to 9, optionally with +91 or 0 (the API applies the same rule). */
 const INDIAN_MOBILE = /^(?:\+91|91|0)?[6-9]\d{9}$/;
@@ -48,11 +49,10 @@ export function MobileStep({
           setMobile(event.target.value);
         }}
       />
-      <div className="flow__actions">
-        <Button type="submit" className="flow__primary" disabled={pending} aria-busy={pending}>
-          {pending ? t('signIn.sending') : t('signIn.sendCode')}
-        </Button>
-      </div>
+      <StepActions
+        submitLabel={pending ? t('signIn.sending') : t('signIn.sendCode')}
+        pending={pending}
+      />
     </form>
   );
 }

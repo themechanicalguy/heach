@@ -17,6 +17,7 @@ import {
 } from './details-form';
 import { ErrorSummary } from './ErrorSummary';
 import { GENDERS, isProviderChoice } from './roles';
+import { StepActions } from './StepActions';
 
 const MESSAGES = {
   fullName: 'setup.details.fullNameInvalid',
@@ -102,19 +103,11 @@ export function DetailsStep({ draft }: Readonly<{ draft: SetupDraft }>) {
           {t('setup.saved')}
         </Notice>
       )}
-      <div className="flow__actions">
-        <Button
-          className="heach-button--secondary"
-          onClick={() => {
-            router.push(`/${locale}/setup/role`);
-          }}
-        >
-          {t('setup.back')}
-        </Button>
-        <Button type="submit" className="flow__primary" disabled={pending} aria-busy={pending}>
-          {t('setup.continue')}
-        </Button>
-      </div>
+      <StepActions
+        submitLabel={t('setup.continue')}
+        pending={pending}
+        back={`/${locale}/setup/role`}
+      />
       <Button
         className="heach-button--link flow__later"
         onClick={() => void saveLater()}

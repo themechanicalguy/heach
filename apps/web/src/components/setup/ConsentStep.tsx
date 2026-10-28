@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Notice } from '@heach/ui';
+import { Notice } from '@heach/ui';
 import type { AccessToken, Consent } from '@heach/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -11,6 +11,7 @@ import { destinationFor } from '../../lib/routing';
 import { useSession } from '../../lib/session';
 import { usePending } from '../../lib/use-pending';
 import { ConsentItems, toggled } from './ConsentItems';
+import { StepActions } from './StepActions';
 
 /** Last setup step: versioned consent, then the server grants the role (PR-01, decision L-3). */
 export function ConsentStep({ due }: Readonly<{ due: readonly Consent[] }>) {
@@ -52,19 +53,11 @@ export function ConsentStep({ due }: Readonly<{ due: readonly Consent[] }>) {
           {t(error)}
         </Notice>
       )}
-      <div className="flow__actions">
-        <Button
-          className="heach-button--secondary"
-          onClick={() => {
-            router.push(`/${locale}/setup/details`);
-          }}
-        >
-          {t('setup.back')}
-        </Button>
-        <Button type="submit" className="flow__primary" disabled={pending} aria-busy={pending}>
-          {t('setup.consent.finish')}
-        </Button>
-      </div>
+      <StepActions
+        submitLabel={t('setup.consent.finish')}
+        pending={pending}
+        back={`/${locale}/setup/details`}
+      />
     </form>
   );
 }

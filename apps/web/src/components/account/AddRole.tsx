@@ -12,7 +12,7 @@ import { CARE_CHOICES, PROVIDER_CHOICES, type RoleChoice } from '../setup/roles'
 import { ReverifySheet } from './ReverifySheet';
 
 /** Adds the side the account lacks; the API asks for a fresh OTP first (decision L-3). */
-export function AddRole({ me }: Readonly<{ me: Me }>) {
+export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void }>) {
   const { t } = useI18n();
   const { reload } = useAccount();
   const hasCare = me.roles.some((grant) => grant.side === 'care');
@@ -21,7 +21,6 @@ export function AddRole({ me }: Readonly<{ me: Me }>) {
   const [languages, setLanguages] = useState<string[]>([...me.setup.draft.languages]);
   const [organisationName, setOrganisationName] = useState(me.setup.draft.organisationName ?? '');
   const [verifying, setVerifying] = useState(false);
-  const [added, setAdded] = useState(false);
   const { pending, error, setError, run } = usePending();
 
   const add = () =>
@@ -40,7 +39,7 @@ export function AddRole({ me }: Readonly<{ me: Me }>) {
         }
         throw caught;
       }
-      setAdded(true);
+      onAdded();
       await reload();
     });
 
@@ -90,11 +89,6 @@ export function AddRole({ me }: Readonly<{ me: Me }>) {
       {error && (
         <Notice tone="danger" live>
           {t(error)}
-        </Notice>
-      )}
-      {added && (
-        <Notice tone="success" live>
-          {t('account.roleAdded')}
         </Notice>
       )}
       <Button onClick={() => void add()} disabled={!role || pending} aria-busy={pending}>

@@ -18,6 +18,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
   const { switchRole } = useAccount();
   const { signOut, signOutAll } = useSession();
   const [switched, setSwitched] = useState<string | undefined>();
+  const [added, setAdded] = useState(false);
   const { pending, error, run } = usePending();
   const roleName = (role: string) => t(`roles.${role as Me['activeRole']}.name`);
 
@@ -76,7 +77,19 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
           </Notice>
         )}
       </div>
-      {me.roles.length < 2 && <AddRole me={me} />}
+      {added && (
+        <Notice tone="success" live>
+          {t('account.roleAdded')}
+        </Notice>
+      )}
+      {me.roles.length < 2 && (
+        <AddRole
+          me={me}
+          onAdded={() => {
+            setAdded(true);
+          }}
+        />
+      )}
       <div className="flow__card">
         <Button
           className="heach-button--secondary"

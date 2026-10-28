@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Notice } from '@heach/ui';
+import { Notice } from '@heach/ui';
 import type { Me } from '@heach/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { useI18n } from '../../lib/i18n-context';
 import { destinationFor } from '../../lib/routing';
 import { usePending } from '../../lib/use-pending';
 import { ConsentItems, toggled } from './ConsentItems';
+import { StepActions } from './StepActions';
 
 /** A returning user accepts a newer consent text before going on (PR-01, decision L-12). */
 export function ConsentUpdate({ me }: Readonly<{ me: Me }>) {
@@ -53,11 +54,7 @@ export function ConsentUpdate({ me }: Readonly<{ me: Me }>) {
             {t(error)}
           </Notice>
         )}
-        <div className="flow__actions">
-          <Button type="submit" className="flow__primary" disabled={pending} aria-busy={pending}>
-            {t('setup.consent.accept')}
-          </Button>
-        </div>
+        <StepActions submitLabel={t('setup.consent.accept')} pending={pending} />
       </form>
     </section>
   );

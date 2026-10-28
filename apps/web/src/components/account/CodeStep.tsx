@@ -7,6 +7,7 @@ import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { useCountdown } from '../../lib/use-countdown';
 import { usePending } from '../../lib/use-pending';
+import { StepActions } from '../setup/StepActions';
 
 interface Props {
   challenge: OtpChallenge;
@@ -80,16 +81,11 @@ export function CodeStep({ challenge, lastDigits, onSignedIn, onChangeNumber }: 
           {t('signIn.changeNumber')}
         </Button>
       </div>
-      <div className="flow__actions">
-        <Button
-          type="submit"
-          className="flow__primary"
-          disabled={verify.pending || code.length !== 6}
-          aria-busy={verify.pending}
-        >
-          {verify.pending ? t('signIn.verifying') : t('signIn.verify')}
-        </Button>
-      </div>
+      <StepActions
+        submitLabel={verify.pending ? t('signIn.verifying') : t('signIn.verify')}
+        pending={verify.pending}
+        disabled={code.length !== 6}
+      />
     </form>
   );
 }

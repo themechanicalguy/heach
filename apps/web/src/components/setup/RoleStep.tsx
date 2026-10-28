@@ -1,12 +1,13 @@
 'use client';
 
-import { Button, ChoiceGroup } from '@heach/ui';
+import { ChoiceGroup } from '@heach/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { CARE_CHOICES, PROVIDER_CHOICES, type RoleChoice } from './roles';
+import { StepActions } from './StepActions';
 
 /** Which role to ask for. The server grants it at the end of setup, never from this choice alone. */
 export function RoleStep({ saved }: Readonly<{ saved: string | null }>) {
@@ -56,11 +57,7 @@ export function RoleStep({ saved }: Readonly<{ saved: string | null }>) {
         onChange={choose}
         error={missing ? t('setup.role.required') : error && t(error)}
       />
-      <div className="flow__actions">
-        <Button type="submit" className="flow__primary" disabled={pending} aria-busy={pending}>
-          {t('setup.continue')}
-        </Button>
-      </div>
+      <StepActions submitLabel={t('setup.continue')} pending={pending} />
     </form>
   );
 }

@@ -121,24 +121,38 @@ are applied where they fit; deviations are stated.
 | # | Task | State |
 | --- | --- | --- |
 | T1 | This record | Done |
-| T2 | Role model and migration 0003 | Not started |
-| T3 | Realm-aware sessions; refresh re-checks status and role | Not started |
-| T4 | OTP issue, resend, verify; throttles; SMS adapters | Not started |
-| T5 | `/v1/me`, setup save and resume, consent, locale, role switch and add | Not started |
-| T6 | Re-verification (OTP for users, TOTP for admins) | Not started |
-| T7 | Admin auth: password, TOTP enrolment and sign-in, lockout, sessions, CLI | Not started |
-| T8 | Admin users: masked list and search, view, suspend and reinstate | Not started |
-| T9 | OpenAPI and generated types | Not started |
-| T10 | i18n keys (or, en, hi) and admin catalogue | Not started |
-| T11 | Web: design tokens from the mockup, language choice, sign-in, setup, consent, application status, account, guards | Not started |
+| T2 | Role model and migration 0003 | Done |
+| T3 | Realm-aware sessions; refresh re-checks status and role | Done |
+| T4 | OTP issue, resend, verify; throttles; SMS adapters | Done |
+| T5 | `/v1/me`, setup save and resume, consent, locale, role switch and add | Done |
+| T6 | Re-verification (OTP for users, TOTP for admins) | Done |
+| T7 | Admin auth: password, TOTP enrolment and sign-in, lockout, sessions, CLI | Done |
+| T8 | Admin users: masked list and search, view, suspend and reinstate | Done |
+| T9 | OpenAPI and generated types | Done |
+| T10 | i18n keys (or, en, hi) and admin catalogue | Done (web and SMS keys; admin catalogue pending with T12) |
+| T11 | Web: design tokens from the mockup, language choice, sign-in, setup, consent, application status, account, guards | Done |
 | T12 | Admin web: sign-in with MFA, users, suspend and reinstate | Not started |
-| T13 | Tests: unit, integration, E2E (locales, viewports) | Not started |
+| T13 | Tests: unit, integration, E2E (locales, viewports) | Partial: API unit and integration done (215 integration); web unit and E2E done (27 E2E on three viewports, three languages); admin E2E pending |
 | T14 | Docs: status page, threat model, local development | Not started |
 | T15 | `pnpm check`, integration, classification, types, coverage | Not started |
 
 ## Progress
 
-Nothing committed yet beyond this record.
+Commits on the branch (newest last): `53023ed` API; `25afbb4` API integration tests; `f791bcd`
+web screens; then web E2E and fixes. State on 29 October 2026:
+
+- API: OTP issue/resend/verify with caps (Redis), accounts, setup save/resume, versioned consent,
+  role grant/switch/add with OTP re-verification, realm-aware sessions (suspension and role removal
+  end sessions at refresh), admin password + TOTP enrolment, lockout, short sessions, TOTP
+  re-verification, masked user list, audited detail, suspend/reinstate. Migration 0003.
+- Web: `/welcome` (first-launch language), `/sign-in` (OTP), `/setup/{role,details,consent}`,
+  `/consent` (re-consent), `/account` (roles, switch, add role, sign out one/all), `/provider`
+  (application status hub), route guard, safe `next`, tokens from the mockup.
+- Verified: `apps/api` unit 131+, integration 215/215; web unit; web E2E 27/27 against a production
+  build with API and Mailpit (see Next commands).
+- Remaining: admin web (sign-in with MFA, users, suspend/reinstate); Caddy `/api` on the admin
+  site; existing E2E and visual baselines after the token change; docs (status page, threat model,
+  local development, follow-up register); `pnpm check`, coverage, types check.
 
 ## Blockers and external inputs
 
@@ -157,4 +171,8 @@ export PATH=/opt/homebrew/opt/node@24/bin:$PATH   # this Mac: Homebrew's default
 pnpm install
 pnpm check
 pnpm --filter @heach/api test:e2e
+# Web E2E with the API (local): build web with FEATURE_FLAGS=sample-patient-note,accounts and
+# API_ORIGIN, start API (raised local caps) and `next start --port 3000`, then:
+E2E_API=1 E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL=http://localhost:8027 \
+  pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts
 ```
