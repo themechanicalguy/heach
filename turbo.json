@@ -10,7 +10,14 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["WEB_PORT", "ADMIN_PORT", "API_PORT"]
+      "passThroughEnv": [
+        "WEB_PORT",
+        "ADMIN_PORT",
+        "API_PORT",
+        "APP_ENV",
+        "FEATURE_FLAGS",
+        "API_ORIGIN"
+      ]
     },
     "lint": {
       "dependsOn": ["^build"]
