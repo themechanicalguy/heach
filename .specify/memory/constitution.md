@@ -1,11 +1,15 @@
 <!--
 Sync Impact Report
-- Version: template → 1.0.0 (first HEACH constitution, written by hand from the rules already
-  agreed in CLAUDE.md, CONTRIBUTING.md, ADRs 0001 to 0010 and the requirements; ADR 0011)
-- Principles added: I to IX (all derived; none is new policy)
-- Sections added: Gates, Exceptions, Governance, Proposed amendments (not in force)
-- Templates: .specify/templates/overrides/{spec,plan,tasks}-template.md written for HEACH
-- Ratified 2026-10-20 by the owner's merge of pull request #53
+- Version: 1.0.0 → 1.1.0 (MINOR: one gate condition added, one principle materially expanded)
+- Modified principles: IX. Humans approve; agents propose (how owner approvals are recorded;
+  closes FU-14)
+- Modified sections: Gates (G2 adds the /speckit-analyze condition; G1, G2, G4 checked by the
+  owner's pull request comment); Proposed amendments (PA-1 accepted and moved into G2; PA-2 to
+  PA-4 stay proposed)
+- Added sections: none
+- Removed sections: none
+- Deferred: PA-2, PA-3, PA-4 and the `spec-exempt` label remain open under FU-19
+- Takes effect when the owner merges the pull request that carries it
 -->
 
 # HEACH Constitution
@@ -18,6 +22,8 @@ Sync Impact Report
   [the guideline](../../docs/mvp-v1-implementation-guideline.md), architecture in
   [the ADRs](../../docs/adr/README.md), completion in
   [implementation status](../../docs/implementation-status.md).
+- **Amended:** v1.1.0 on 2026-10-25 (PA-1 accepted; approval records, FU-14). In force once the
+  owner merges the pull request that carries it.
 
 HEACH handles health data of patients in Odisha. Security and data protection come before speed
 in every decision. Where this constitution and another document disagree, the pull request that
@@ -121,18 +127,23 @@ Source: ADRs 0004, 0009, 0010; Step 2 spec decisions D1 to D6.
   infrastructure without the owner's authorisation for that action.
 - Infrastructure is always planned first (`tofu plan`); anything that costs money, destroys or
   replaces is applied only with the owner's approval.
+- The owner and agents act through the same GitHub account, so a merge, a status line or an
+  approval relayed by an agent from chat does not show who approved. The record of an owner
+  approval (G1, G2, G4, a gate exception under VIII, an ADR or this constitution) is a comment the
+  owner writes on the pull request, in their own words, naming what is approved. An agent never
+  writes that comment.
 
 Source: CLAUDE.md "Infrastructure changes"; owner approvals recorded in project memory and the
-Step 2 log.
+Step 2 log; follow-up register FU-14 (decided 2026-10-25).
 
 ## Gates
 
 | Gate | Before | Passes when | Checked by |
 | --- | --- | --- | --- |
-| G1 Spec approved | Plan is approved | `spec.md` complete, no open `[NEEDS CLARIFICATION]`, owner approved | Owner review; `check-specs` (structure only) |
-| G2 Plan approved | Any code for the feature | `plan.md` passes its Constitution Check; spec and plan merged as Approved | Owner review; `check-specs` |
+| G1 Spec approved | Plan is approved | `spec.md` complete, no open `[NEEDS CLARIFICATION]`, owner approved | Owner's pull request comment (IX); `check-specs` (structure only) |
+| G2 Plan approved | Any code for the feature | `plan.md` passes its Constitution Check; `/speckit-analyze` reports no critical or high finding; spec and plan merged as Approved | Owner's pull request comment (IX), citing the analyze result; `check-specs` |
 | G3 Code pull request | Merge | Links an Approved spec and the criterion IDs it satisfies; status page updated; all CI jobs green | `check-pr-spec`, `status-check`, CI |
-| G4 Done | Status set to Done | Every criterion has its test or manual evidence | Owner review of evidence |
+| G4 Done | Status set to Done | Every criterion has its test or manual evidence | Owner's pull request comment (IX) on the evidence |
 
 Structural checks in CI prove that sections, links and IDs are present. They do not prove the
 spec is correct, complete or approved; only human review does that.
@@ -155,13 +166,13 @@ Step 1 was built before ADR 0007 and has no spec.
 
 ## Proposed amendments (not in force)
 
-Listed in ADR 0011 for the owner to accept or reject. None is applied until accepted.
+Listed in ADR 0011 for the owner to accept or reject. None is applied until accepted. PA-1 was
+accepted on 2026-10-25 and is now part of G2.
 
-- **PA-1** `/speckit-analyze` reports no critical or high finding before a plan is approved.
 - **PA-2** `/speckit-converge` reports Converged before a feature is marked Done.
 - **PA-3** `tasks.md` is merged with the spec and plan (rather than with the first code pull
   request).
 - **PA-4** Custom checklists from `/speckit-checklist` are ticked only by a human reviewer and
   must be fully ticked before G2.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-20 | **Last Amended**: 2026-10-20
+**Version**: 1.1.0 | **Ratified**: 2026-10-20 | **Last Amended**: 2026-10-25
