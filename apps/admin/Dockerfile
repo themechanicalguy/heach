@@ -10,8 +10,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --filter "@heach/admin..."
 RUN pnpm --filter "@heach/admin..." build
 
-# Caddy rebuilt from source with patched Go and golang.org/x/net: the official 2.11.x images carry
-# HIGH CVEs in their Go build (SO-03.1 container scan). One extra module: caddy-ratelimit
+# Caddy rebuilt from source with patched Go, golang.org/x/net and go-jose: the official 2.11.x
+# images carry HIGH CVEs in their Go build (SO-03.1 container scan). One extra module: caddy-ratelimit
 # (Apache-2.0, approved for SO-08.2), pinned to a commit because it has no tagged releases.
 # This image also runs the edge proxy on the dev host (deploy/dev/compose.yml).
 # Cross-compiled on the build machine: fast even when the target is arm64 (dev host).
@@ -19,6 +19,7 @@ FROM --platform=$BUILDPLATFORM caddy:2.11.6-builder-alpine AS caddy
 ARG TARGETARCH
 ENV GOTOOLCHAIN=go1.26.10 GOOS=linux GOARCH=$TARGETARCH CGO_ENABLED=0
 RUN xcaddy build v2.11.6 --replace golang.org/x/net=golang.org/x/net@v0.60.0 \
+    --replace github.com/go-jose/go-jose/v4=github.com/go-jose/go-jose/v4@v4.1.6 \
     --with github.com/mholt/caddy-ratelimit@5625512f24f6f59d6f64fb3aafe5eecff0b286db \
     --output /usr/bin/caddy
 
