@@ -63,7 +63,7 @@ HEACH because the data is health data.
 | 4 | `/speckit-checklist [focus, e.g. security, i18n]` | `checklists/<focus>.md` | A human ticks items; the agent does not |
 | 5 | `/speckit-tasks` | `tasks.md` | Each criterion ID has a test task |
 | 6 | `/speckit-analyze` | Report only, no edits | Fix findings where they belong (spec, plan, tasks) and re-run |
-| — | **Gate G1 and G2**: open a docs-only PR (`docs/NNN-name-spec`) with the feature directory, the step spec link and the index row. The owner reviews, sets Status to Approved and merges. Agents never set Approved. | | |
+| — | **Gate G1 and G2**: open a docs-only PR (`docs/NNN-name-spec`) with the feature directory, the step spec link and the index row. `/speckit-analyze` must report no critical or high finding (G2). The owner reviews, approves in a pull request comment in their own words, sets Status to Approved and merges (constitution IX). Agents never set Approved and never write that comment. | | |
 | 7 | `/speckit-implement [phase or story]` | Code and tests on a `feat/NNN-name` branch | Work in stages; `pnpm check` after each |
 | 8 | `/speckit-converge` | Appends missing work to `tasks.md`, or reports Converged | Repeat 7 and 8 until Converged |
 | — | **Gate G3**: code PR with `Spec:` and `Criteria:` lines, status page updated, all CI green. | | |

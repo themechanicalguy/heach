@@ -90,7 +90,8 @@ Keep ADR 0007's rules and add feature-level specs written with Spec Kit.
   nothing. Upgrades are a reviewed `chore` pull request (`specify integration upgrade claude`),
   after checking the overrides still match the upstream templates' headings.
 - `/speckit-taskstoissues` is installed but deprecated upstream; HEACH does not use it.
-- Open for the owner (not in force until accepted): constitution amendments PA-1 to PA-4, the
+- Open for the owner (not in force until accepted): constitution amendments PA-2 to PA-4 (PA-1
+  accepted in constitution 1.1.0, 25 October 2026), the
   `spec-exempt` label, and user-invocable-only skills.
 - Revisit if Spec Kit stops being maintained, if its templates change shape in a way the overrides
   cannot follow, or if feature specs routinely need more review time than the code they govern.
