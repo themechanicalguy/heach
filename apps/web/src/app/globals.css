@@ -93,3 +93,307 @@ body {
     padding-bottom: 0;
   }
 }
+
+/*
+ * Sign-in, setup and account screens, after apps/web/design-mockups.html: one step per screen on
+ * phones (onboarding A), the steps beside the form from desktop width, the checklist hub
+ * (onboarding B) for a provider's application.
+ */
+.flow {
+  display: grid;
+  gap: 1rem;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.flow__card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--heach-border);
+  border-radius: 1.25rem;
+  background: var(--heach-surface);
+}
+
+.flow__title {
+  margin: 0;
+  font-size: 1.625rem;
+  line-height: 1.3;
+}
+
+.flow__subtitle {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.flow__muted {
+  margin: 0;
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+}
+
+.flow__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.flow__form p,
+.flow__card p {
+  margin: 0;
+}
+
+.flow__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Primary action in the thumb zone, above the bottom navigation on phones (UX-03). */
+.flow__actions {
+  position: sticky;
+  bottom: calc(var(--heach-bottom-nav-height) + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 0.75rem;
+  margin-inline: -1.25rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--heach-border);
+  background: var(--heach-background);
+}
+
+.flow__primary {
+  flex: 1;
+}
+
+.flow__later {
+  justify-self: center;
+}
+
+.flow__summary-title {
+  font-weight: 600;
+}
+
+.flow__steps {
+  display: none;
+}
+
+.flow__steps ol {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flow__steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--heach-touch);
+  padding-inline: 0.625rem;
+  color: var(--heach-muted);
+}
+
+.flow__steps li[aria-current='step'] {
+  border-radius: 0.75rem;
+  background: var(--heach-primary-soft);
+  color: var(--heach-primary);
+  font-weight: 700;
+}
+
+.flow__step-number {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--heach-border-strong);
+  border-radius: 50%;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.flow__steps li[data-done='true'] .flow__step-number {
+  border-color: var(--heach-primary);
+  background: var(--heach-primary);
+  color: var(--heach-on-primary);
+}
+
+.flow__steps li[aria-current='step'] .flow__step-number {
+  border-color: var(--heach-primary);
+}
+
+.status-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--heach-primary);
+  color: var(--heach-on-primary);
+}
+
+.status-card__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.status-card .heach-progress__label {
+  color: var(--heach-on-primary);
+}
+
+.status-card .heach-progress__bar span {
+  height: 8px;
+  background: rgb(255 255 255 / 28%);
+}
+
+.status-card .heach-progress__bar span[data-done='true'] {
+  background: var(--heach-accent);
+}
+
+.checklist {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 60px;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--heach-border);
+  border-radius: 0.875rem;
+  background: var(--heach-surface);
+}
+
+.checklist__number {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--heach-border-strong);
+  border-radius: 50%;
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.checklist__item[data-done='true'] .checklist__number {
+  border-color: var(--heach-primary);
+  background: var(--heach-primary);
+  color: var(--heach-on-primary);
+}
+
+.checklist__label {
+  flex: 1;
+  font-weight: 600;
+}
+
+.checklist__state {
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+}
+
+.checklist__item[data-done='true'] .checklist__state {
+  color: var(--heach-primary);
+  font-weight: 600;
+}
+
+.language-choices,
+.role-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.language-choices a {
+  width: 100%;
+  min-height: 60px;
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.role-list__active {
+  color: var(--heach-primary);
+  font-weight: 600;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.facts dt {
+  color: var(--heach-muted);
+}
+
+.facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.consent-item {
+  display: grid;
+  gap: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--heach-border);
+}
+
+.consent-item__summary {
+  color: var(--heach-muted);
+  font-size: 0.9375rem;
+}
+
+.emergency-note {
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  background: #fceae8;
+  color: #8c1d18;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 600px) {
+  .flow__actions {
+    position: static;
+    margin-inline: 0;
+    padding-inline: 0;
+    background: transparent;
+  }
+}
+
+@media (min-width: 1024px) {
+  .flow--steps {
+    grid-template-columns: minmax(15rem, 18.75rem) 1fr;
+    align-items: start;
+    max-width: 72.5rem;
+  }
+
+  .flow--steps .flow__steps {
+    display: block;
+    padding: 1.25rem;
+    border: 1px solid var(--heach-border);
+    border-radius: 1.25rem;
+    background: var(--heach-surface);
+  }
+
+  .flow__card {
+    padding: 1.75rem;
+  }
+
+  .flow__title {
+    font-size: 1.875rem;
+  }
+}

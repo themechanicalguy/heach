@@ -12,3 +12,23 @@ export type WebVital = components['schemas']['WebVitalDto'];
 export type CreateNote = components['schemas']['CreateNoteDto'];
 export type CreatedNote = components['schemas']['CreatedNoteDto'];
 export type Note = components['schemas']['NoteDto'];
+export type OtpRequest = components['schemas']['OtpRequestDto'];
+export type OtpChallenge = components['schemas']['OtpChallengeDto'];
+export type OtpVerify = components['schemas']['OtpVerifyDto'];
+export type Me = components['schemas']['MeDto'];
+export type RoleGrant = components['schemas']['RoleGrantDto'];
+export type SetupDraft = components['schemas']['SetupDraftDto'];
+export type SetupPatch = components['schemas']['SetupPatchDto'];
+export type Consent = components['schemas']['ConsentDto'];
+export type AddRole = components['schemas']['AddRoleDto'];
+export type AdminPasswordAccepted = components['schemas']['AdminPasswordAcceptedDto'];
+export type AdminMe = components['schemas']['AdminMeDto'];
+export type UserSummary = components['schemas']['UserSummaryDto'];
+export type UserDetail = components['schemas']['UserDetailDto'];
+export type UserPage = components['schemas']['UserPageDto'];
+
+/** The stable reason code in an API error body; the client translates it (never personal data). */
+export interface ApiErrorBody {
+  statusCode: number;
+  code?: string;
+}

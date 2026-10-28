@@ -36,22 +36,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/v1/auth/test-login': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations['AuthController_testLogin'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/v1/auth/refresh': {
     parameters: {
       query?: never;
@@ -132,6 +116,374 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/auth/otp': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SignInController_requestCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/auth/otp/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SignInController_resendCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/auth/otp/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SignInController_verifyCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/auth/switch-role': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SignInController_switchRole'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/auth/reverify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SignInController_startReverification'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/auth/reverify/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SignInController_reverify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['MeController_me'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/setup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['MeController_saveSetup'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/setup/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['MeController_completeSetup'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/locale': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['MeController_setLocale'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/consents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['MeController_acceptConsents'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/roles': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['MeController_addRole'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/auth/test-login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['TestLoginController_testLogin'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/auth/password': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminAuthController_password'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/auth/mfa': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminAuthController_mfa'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/auth/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminAuthController_refresh'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminAuthController_logout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/auth/reverify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminAuthController_reverify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminAuthController_me'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminUsersController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/users/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminUsersController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/users/{id}/suspend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminUsersController_suspend'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/users/{id}/reinstate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminUsersController_reinstate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -152,10 +504,6 @@ export interface components {
       /** @enum {string} */
       status: 'ok' | 'error';
       checks: components['schemas']['ReadinessChecksDto'];
-    };
-    TestLoginDto: {
-      /** Format: uuid */
-      userId: string;
     };
     AccessTokenDto: {
       accessToken: string;
@@ -183,6 +531,280 @@ export interface components {
       createdAt: string;
       /** @description Restricted */
       body: string;
+    };
+    OtpRequestDto: {
+      /**
+       * @description Indian mobile number, with or without +91
+       * @example 9000000001
+       */
+      mobile: string;
+      /**
+       * @description Language of the SMS and of a new account
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+    };
+    OtpChallengeDto: {
+      /** Format: uuid */
+      challengeId: string;
+      /** @description Seconds until the code expires */
+      expiresInSeconds: number;
+      /** @description Seconds until a new code may be requested */
+      resendInSeconds: number;
+    };
+    OtpResendDto: {
+      /** Format: uuid */
+      challengeId: string;
+      /** @enum {string} */
+      locale: 'or' | 'en' | 'hi';
+    };
+    OtpVerifyDto: {
+      /** Format: uuid */
+      challengeId: string;
+      /** @example 123456 */
+      code: string;
+      /** @enum {string} */
+      locale: 'or' | 'en' | 'hi';
+    };
+    SwitchRoleDto: {
+      /** @enum {string} */
+      role:
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+        | 'sample_collector'
+        | 'clinic_front_desk';
+    };
+    ReverifyDto: {
+      /** Format: uuid */
+      challengeId: string;
+      /** @example 123456 */
+      code: string;
+    };
+    RoleGrantDto: {
+      /** @enum {string} */
+      role:
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+        | 'sample_collector'
+        | 'clinic_front_desk';
+      /** @enum {string} */
+      side: 'care' | 'provider';
+      /** @enum {string|null} */
+      applicationStatus:
+        | 'draft'
+        | 'submitted'
+        | 'under_review'
+        | 'changes_requested'
+        | 'approved'
+        | 'rejected'
+        | 'suspended'
+        | null;
+      /** @description Reason code, never free text */
+      statusReason: string | null;
+    };
+    SetupDraftDto: {
+      /** @enum {string|null} */
+      role:
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+        | 'sample_collector'
+        | null;
+      fullName: string | null;
+      /** @enum {string|null} */
+      gender: 'female' | 'male' | 'other' | 'undisclosed' | null;
+      languages: ('or' | 'en' | 'hi')[];
+      organisationName: string | null;
+      adultDeclared: boolean;
+    };
+    SetupStateDto: {
+      complete: boolean;
+      /** @enum {string|null} */
+      nextStep: 'role' | 'details' | 'consent' | null;
+      draft: components['schemas']['SetupDraftDto'];
+    };
+    ConsentDto: {
+      /** @enum {string} */
+      purpose: 'terms' | 'privacy';
+      /** @example 2026-10-draft.1 */
+      version: string;
+    };
+    MeDto: {
+      /** @enum {string} */
+      locale: 'or' | 'en' | 'hi';
+      /** @description Last four digits only */
+      mobile: string | null;
+      /**
+       * @description The role this session acts in
+       * @enum {string}
+       */
+      activeRole:
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+        | 'sample_collector'
+        | 'clinic_front_desk'
+        | 'new_account';
+      roles: components['schemas']['RoleGrantDto'][];
+      setup: components['schemas']['SetupStateDto'];
+      /** @description Current consent versions not yet given */
+      consentsDue: components['schemas']['ConsentDto'][];
+    };
+    SetupPatchDto: {
+      /** @enum {string} */
+      role?:
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+        | 'sample_collector';
+      fullName?: string;
+      /** @enum {string} */
+      gender?: 'female' | 'male' | 'other' | 'undisclosed';
+      /** @description Languages spoken */
+      languages?: ('or' | 'en' | 'hi')[];
+      /** @description The lab's name (labs only) */
+      organisationName?: string;
+      /** @description The person confirms they are 18 or older */
+      adultDeclared?: boolean;
+    };
+    ConsentsDto: {
+      consents: components['schemas']['ConsentDto'][];
+    };
+    LocaleDto: {
+      /** @enum {string} */
+      locale: 'or' | 'en' | 'hi';
+    };
+    AddRoleDto: {
+      /** @enum {string} */
+      role:
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+        | 'sample_collector';
+      languages?: ('or' | 'en' | 'hi')[];
+      organisationName?: string;
+    };
+    TestLoginDto: {
+      /** Format: uuid */
+      userId: string;
+    };
+    AdminPasswordDto: {
+      /** @example verifier@heach.invalid */
+      email: string;
+      password: string;
+    };
+    AdminEnrolmentDto: {
+      /** @description Base32 secret for the authenticator app; shown once */
+      secret: string;
+      /** @description otpauth:// link with the same secret */
+      uri: string;
+    };
+    AdminPasswordAcceptedDto: {
+      /** @description Single-use ticket for the TOTP step, valid 5 minutes */
+      mfaTicket: string;
+      enrolment?: components['schemas']['AdminEnrolmentDto'];
+    };
+    AdminMfaDto: {
+      mfaTicket: string;
+      /** @example 123456 */
+      code: string;
+    };
+    AdminCodeDto: {
+      /** @example 123456 */
+      code: string;
+    };
+    AdminMeDto: {
+      email: string;
+      /** @enum {string} */
+      role: 'super_admin' | 'verifier' | 'support' | 'finance';
+    };
+    UserSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      /** @description Masked */
+      name: string | null;
+      /** @description Last four digits only */
+      mobile: string | null;
+      /** @enum {string} */
+      status: 'active' | 'suspended';
+      /** @enum {string|null} */
+      suspensionReason:
+        'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other' | null;
+      roles: components['schemas']['RoleGrantDto'][];
+      setupComplete: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      lastSignInAt: string | null;
+    };
+    UserPageDto: {
+      items: components['schemas']['UserSummaryDto'][];
+      total: number;
+      page: number;
+      pageSize: number;
+    };
+    UserDetailDto: {
+      /** Format: uuid */
+      id: string;
+      /** @description Masked */
+      name: string | null;
+      /** @description Last four digits only */
+      mobile: string | null;
+      /** @enum {string} */
+      status: 'active' | 'suspended';
+      /** @enum {string|null} */
+      suspensionReason:
+        'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other' | null;
+      roles: components['schemas']['RoleGrantDto'][];
+      setupComplete: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      lastSignInAt: string | null;
+      /** @description Full name; this read is audited */
+      fullName: string | null;
+    };
+    SuspendDto: {
+      /** @enum {string} */
+      reason: 'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other';
     };
   };
   responses: never;
@@ -235,32 +857,6 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ReadinessDto'];
-        };
-      };
-    };
-  };
-  AuthController_testLogin: {
-    parameters: {
-      query?: never;
-      header?: {
-        /** @description Required in dev */
-        'x-test-login-key'?: string;
-      };
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['TestLoginDto'];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['AccessTokenDto'];
         };
       };
     };
@@ -386,6 +982,543 @@ export interface operations {
         content: {
           'application/json': components['schemas']['NoteDto'];
         };
+      };
+    };
+  };
+  SignInController_requestCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OtpRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OtpChallengeDto'];
+        };
+      };
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SignInController_resendCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OtpResendDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OtpChallengeDto'];
+        };
+      };
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SignInController_verifyCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OtpVerifyDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessTokenDto'];
+        };
+      };
+    };
+  };
+  SignInController_switchRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SwitchRoleDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessTokenDto'];
+        };
+      };
+    };
+  };
+  SignInController_startReverification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OtpChallengeDto'];
+        };
+      };
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SignInController_reverify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReverifyDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MeController_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MeDto'];
+        };
+      };
+    };
+  };
+  MeController_saveSetup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SetupPatchDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MeController_completeSetup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConsentsDto'];
+      };
+    };
+    responses: {
+      /** @description An access token for the granted role */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessTokenDto'];
+        };
+      };
+    };
+  };
+  MeController_setLocale: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LocaleDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MeController_acceptConsents: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConsentsDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MeController_addRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AddRoleDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  TestLoginController_testLogin: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Required in dev */
+        'x-test-login-key'?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TestLoginDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessTokenDto'];
+        };
+      };
+    };
+  };
+  AdminAuthController_password: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdminPasswordDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminPasswordAcceptedDto'];
+        };
+      };
+    };
+  };
+  AdminAuthController_mfa: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdminMfaDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessTokenDto'];
+        };
+      };
+    };
+  };
+  AdminAuthController_refresh: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessTokenDto'];
+        };
+      };
+    };
+  };
+  AdminAuthController_logout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LogoutDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminAuthController_reverify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdminCodeDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminAuthController_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminMeDto'];
+        };
+      };
+    };
+  };
+  AdminUsersController_list: {
+    parameters: {
+      query?: {
+        /** @description A mobile number (exact) or part of a name */
+        q?: string;
+        status?: 'active' | 'suspended';
+        page?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserPageDto'];
+        };
+      };
+    };
+  };
+  AdminUsersController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserDetailDto'];
+        };
+      };
+    };
+  };
+  AdminUsersController_suspend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SuspendDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminUsersController_reinstate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

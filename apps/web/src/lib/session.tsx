@@ -9,15 +9,25 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { api, onSessionEnded, refreshSession, signOutOfThisDevice, startSession } from './api';
+import {
+  api,
+  onSessionEnded,
+  refreshSession,
+  signOutEverywhere,
+  signOutOfThisDevice,
+  startSession,
+} from './api';
 import type { AccessToken } from '@heach/types';
 
 type Status = 'checking' | 'signed-in' | 'signed-out';
 
 interface Session {
   status: Status;
+  /** After OTP sign-in, setup or a role switch: the access token for the session (memory only). */
+  adoptToken: (accessToken: string) => void;
   signInAsTestUser: (userId: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signOutAll: () => Promise<void>;
 }
 
 const SessionContext = createContext<Session | undefined>(undefined);
@@ -51,13 +61,21 @@ export function SessionProvider({ children }: Readonly<{ children: ReactNode }>)
     startSession(accessToken);
     setStatus('signed-in');
   }, []);
+  const adoptToken = useCallback((accessToken: string) => {
+    startSession(accessToken);
+    setStatus('signed-in');
+  }, []);
   const signOut = useCallback(async () => {
     await signOutOfThisDevice();
     setStatus('signed-out');
   }, []);
+  const signOutAll = useCallback(async () => {
+    await signOutEverywhere();
+    setStatus('signed-out');
+  }, []);
   const value = useMemo(
-    () => ({ status, signInAsTestUser, signOut }),
-    [status, signInAsTestUser, signOut],
+    () => ({ status, adoptToken, signInAsTestUser, signOut, signOutAll }),
+    [status, adoptToken, signInAsTestUser, signOut, signOutAll],
   );
   return <SessionContext value={value}>{children}</SessionContext>;
 }

@@ -4,7 +4,13 @@
     "title": "Care at home, verified and close to you",
     "findCare": "Find care"
   },
-  "nav": { "label": "Main", "home": "Home", "notes": "Notes", "account": "Account" },
+  "nav": {
+    "label": "Main",
+    "home": "Home",
+    "notes": "Notes",
+    "account": "Account",
+    "application": "Application"
+  },
   "offline": { "banner": "You are offline. Saved pages still work; changes need a connection." },
   "state": {
     "loading": "Loading",
@@ -43,5 +49,229 @@
   "sms": {
     "otp_sign_in": "{code} is your HEACH sign-in code. It expires in {minutes} minutes. Never share it with anyone.",
     "otp_reverify": "{code} is your HEACH code to confirm a change to your account. It expires in {minutes} minutes. Never share it with anyone."
+  },
+  "welcome": {
+    "title": "Choose your language",
+    "intro": "You can change it at any time from the top of any screen."
+  },
+  "signIn": {
+    "title": "Sign in or create an account",
+    "intro": "Enter your mobile number. We will send you a one-time code by SMS.",
+    "mobileLabel": "Mobile number",
+    "mobileHint": "10-digit Indian mobile number",
+    "countryCode": "+91",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "codeTitle": "Enter the code",
+    "codeIntro": "We sent a 6-digit code by SMS to the number ending {lastDigits}.",
+    "codeLabel": "6-digit code",
+    "verify": "Verify and continue",
+    "verifying": "Checking…",
+    "resendIn": "{seconds, plural, one {You can ask for a new code in # second} other {You can ask for a new code in # seconds}}",
+    "resend": "Send a new code",
+    "codeResent": "A new code is on its way.",
+    "changeNumber": "Change number",
+    "privacy": "We use your number only to sign you in and to send you messages about your care.",
+    "emergency": "Not for emergencies. In an emergency, call 108.",
+    "developerTitle": "Developer sign-in"
+  },
+  "errors": {
+    "mobile_invalid": "Enter a 10-digit Indian mobile number.",
+    "otp_incorrect": "That code is not right. Check the SMS and try again.",
+    "otp_expired": "This code has expired or was tried too many times. Ask for a new code.",
+    "otp_rate_limited": "Too many tries. Please wait a while and try again.",
+    "sms_unavailable": "We could not send the SMS just now. Please try again.",
+    "account_suspended": "This account is suspended. Please contact support.",
+    "setup_incomplete": "Some details are missing. Please check the form.",
+    "consent_outdated": "The terms have changed. Please read and accept them again.",
+    "setup_complete": "Your account is already set up.",
+    "role_not_granted": "Your account does not have that role.",
+    "reverification_required": "Please confirm it is you with a new code.",
+    "side_taken": "Your account already has a role of that kind.",
+    "details_missing": "Some details are missing.",
+    "no_mobile": "This account has no mobile number to send a code to.",
+    "network": "No connection. Check your internet and try again.",
+    "generic": "Something went wrong. Please try again."
+  },
+  "setup": {
+    "progress": "Step {current} of {total}",
+    "back": "Back",
+    "continue": "Continue",
+    "saveLater": "Save and continue later",
+    "saved": "Saved. You can come back at any time on any device.",
+    "errorSummary": "{count, plural, one {# answer needs your attention} other {# answers need your attention}}",
+    "role": {
+      "title": "How will you use HEACH?",
+      "intro": "Choose one. You can add another role later from your account.",
+      "careGroup": "Get care",
+      "providerGroup": "Give care",
+      "required": "Choose how you will use HEACH."
+    },
+    "details": {
+      "title": "About you",
+      "intro": "We need a few details to set up your account.",
+      "fullName": "Full name",
+      "fullNameHint": "As on your ID card. Odia, Hindi or English letters.",
+      "fullNameInvalid": "Enter your name in letters only, up to 100 characters.",
+      "gender": "Gender",
+      "genderRequired": "Choose an option.",
+      "languages": "Languages you speak with patients",
+      "languagesRequired": "Choose at least one language.",
+      "organisation": "Name of the lab",
+      "organisationHint": "As on your registration certificate.",
+      "organisationRequired": "Enter the lab's name.",
+      "adult": "I confirm I am 18 years or older",
+      "adultRequired": "You must be 18 or older to have an account. A family member can add you and book for you."
+    },
+    "consent": {
+      "title": "Before you start",
+      "intro": "Please read each item and agree to it.",
+      "draft": "Draft wording, still being reviewed by a lawyer.",
+      "terms": "I agree to the terms of use",
+      "termsSummary": "HEACH connects you with independent, verified care providers. It is not for emergencies. You agree to give true information and to use HEACH lawfully.",
+      "privacy": "I agree to HEACH using my details to run my account",
+      "privacySummary": "We keep your mobile number, name and choices to run your account. Health records are encrypted and shared only when you choose. You can see, correct or ask us to delete your data.",
+      "required": "You need to agree to continue.",
+      "finish": "Agree and finish",
+      "updatedTitle": "We have updated our terms",
+      "updatedIntro": "Please read and accept the new version to continue.",
+      "accept": "Accept and continue"
+    }
+  },
+  "roles": {
+    "patient": {
+      "label": "Get care for myself",
+      "hint": "Book doctors, nurses, home visits and lab tests",
+      "name": "patient"
+    },
+    "representative": {
+      "label": "Get care for my family",
+      "hint": "Book and manage care for parents, children or others",
+      "name": "family carer"
+    },
+    "doctor": {
+      "label": "Doctor",
+      "hint": "Online consultations",
+      "name": "doctor"
+    },
+    "dentist": {
+      "label": "Dentist",
+      "hint": "Clinic appointments",
+      "name": "dentist"
+    },
+    "dermatologist": {
+      "label": "Dermatologist (skin)",
+      "hint": "Clinic appointments",
+      "name": "dermatologist"
+    },
+    "physiotherapist": {
+      "label": "Physiotherapist",
+      "hint": "Home visits",
+      "name": "physiotherapist"
+    },
+    "nurse": {
+      "label": "Nurse or paramedic",
+      "hint": "Home procedures such as injections and dressings",
+      "name": "nurse"
+    },
+    "attendant": {
+      "label": "Bedside attendant",
+      "hint": "Care shifts at home or in hospital",
+      "name": "attendant"
+    },
+    "lab": {
+      "label": "Diagnostic lab",
+      "hint": "Tests, sample collection and reports",
+      "name": "lab"
+    },
+    "sample_collector": {
+      "label": "Sample collector",
+      "hint": "Collect samples at home for a lab",
+      "name": "sample collector"
+    },
+    "clinic_front_desk": {
+      "label": "Clinic front desk",
+      "hint": "Clinic check-in and appointments",
+      "name": "front desk"
+    },
+    "new_account": {
+      "label": "New account",
+      "hint": "Setup not finished",
+      "name": "new account"
+    }
+  },
+  "genders": {
+    "female": "Female",
+    "male": "Male",
+    "other": "Other",
+    "undisclosed": "Prefer not to say"
+  },
+  "application": {
+    "title": "Your application",
+    "statusLabel": "Status",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "under_review": "Under review",
+      "changes_requested": "Changes requested",
+      "approved": "Approved",
+      "rejected": "Not approved",
+      "suspended": "Suspended"
+    },
+    "statusText": {
+      "draft": "Your account is ready. To be listed for patients, you will verify your identity and qualifications. These steps are not open yet; we will tell you by SMS when they are.",
+      "submitted": "We have your application. We will tell you the result by SMS.",
+      "under_review": "Our team is checking your application. We will tell you the result by SMS.",
+      "changes_requested": "Our team needs a change to your application. Please contact support to see what is needed.",
+      "approved": "You are verified. Patients will be able to book you once your services are listed.",
+      "rejected": "Your application was not approved. Please contact support to know why and what you can do.",
+      "suspended": "Your provider profile is suspended. Patients cannot book you. Please contact support."
+    },
+    "stepsTitle": "Steps to be listed",
+    "steps": {
+      "account": "Account and basic details",
+      "identity": "Identity check (Aadhaar or DigiLocker)",
+      "documents": "Certificates and registration",
+      "profile": "Profile and photo",
+      "area": "Service area and timings",
+      "payout": "Payout account",
+      "review": "Review and submit"
+    },
+    "stepDone": "Done",
+    "stepNotOpen": "Not open yet",
+    "progress": "{done} of {total} done",
+    "reviewTime": "After you submit, our team reviews your application within a few working days."
+  },
+  "account": {
+    "title": "Your account",
+    "mobile": "Mobile number",
+    "language": "Language",
+    "rolesTitle": "Your roles",
+    "using": "Using now",
+    "switchTo": "Use as {role}",
+    "switched": "You are now using HEACH as {role}.",
+    "addTitle": "Add a role",
+    "addProvider": "Also give care as a provider",
+    "addCare": "Also get care for myself or my family",
+    "addIntro": "For your security, we will first send a code to your mobile number.",
+    "roleAdded": "Role added. You can switch to it above.",
+    "signOut": "Sign out",
+    "signOutAll": "Sign out of all devices",
+    "signOutAllHint": "Use this if you lost a phone or used a shared device.",
+    "signedOut": "You are signed out."
+  },
+  "reverify": {
+    "title": "Confirm it is you",
+    "intro": "We will send a 6-digit code to your mobile number.",
+    "sent": "We sent a code to your mobile number.",
+    "send": "Send code",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "guard": {
+    "checking": "Checking your account",
+    "wrongRole": "This page is for another role.",
+    "switchHint": "Switch role from your account page.",
+    "toAccount": "Go to your account"
   }
 }
