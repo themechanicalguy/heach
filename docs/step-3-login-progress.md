@@ -161,10 +161,10 @@ they build on its decisions (charter: "not approved against anything that is not
 | Date | Done | Commit |
 | --- | --- | --- |
 | 2026-10-28 | Audit above; design reference rendered and read (17 boards) | (this page) |
-| 2026-10-28 | Spec 008 `tasks.md` redrafted (17 tasks, LM-02.3 to LM-02.8, SC-001 to SC-003) | (first commit of this branch) |
-| 2026-10-28 | Spec 009 (slice 3.1) drafted: spec (27 criteria, 5 stories), plan, research, data model, contract, quickstart, requirements and security checklists (unticked), tasks (42); specs index and charter rows | (first commit of this branch) |
-| 2026-10-28 | `node scripts/check-specs.mjs` passes; `pnpm test:scripts` 58 of 58; `pnpm format:check` clean except the untracked mockup | (first commit of this branch) |
-| 2026-10-28 | Agent analysis (below); one high and two medium findings fixed in the drafts | (first commit of this branch) |
+| 2026-10-28 | Spec 008 `tasks.md` redrafted (17 tasks, LM-02.3 to LM-02.8, SC-001 to SC-003) | `5a8565b` |
+| 2026-10-28 | Spec 009 (slice 3.1) drafted: spec (27 criteria, 5 stories), plan, research, data model, contract, quickstart, requirements and security checklists (unticked), tasks (42); specs index and charter rows | `5a8565b` |
+| 2026-10-28 | `node scripts/check-specs.mjs` passes; `pnpm test:scripts` 58 of 58; `pnpm format:check` clean except the untracked mockup | `5a8565b` |
+| 2026-10-28 | Agent analysis (below); one high and two medium findings fixed in the drafts | `5a8565b` |
 
 ## Agent analysis (28 October 2026)
 
