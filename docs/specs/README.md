@@ -30,6 +30,7 @@ Step 1 was built before ADR 0007; its record is in [implementation status](../im
 | [Bounded re-encryption](../../specs/005-bounded-reencryption/spec.md) | 2 | EN-05, SE-05 | Done: owner accepted the evidence (gate G4) on 25 October 2026 (#70) |
 | [Recurring restore check](../../specs/006-recurring-restore-check/spec.md) | 2 | EN-10, SE-05 | Approved 2026-10-25 (amended the same day); merged #80, deployed `a2cbf6f` 25 October, first host run passed; Done after four weekly host runs (SC-001, 1 to 22 November) |
 | [Security review fixes](../../specs/007-security-review-fixes/spec.md) | 2 | SO-08, SE-07, EN-12, SO-03 | Done: owner accepted the evidence (gate G4) on 25 October 2026 (#74; infra applied and live-verified 24 and 25 October) |
+| [Nested log masking](../../specs/008-nested-log-masking/spec.md) | 2 | LM-02 | Draft: closes the LM-02.1 gap (FU-27) |
 
 <!-- Add a row per feature directory, for example:
 | [OTP login](../../specs/003-otp-login/spec.md) | 3 | AC-01, AC-02 | Draft |
