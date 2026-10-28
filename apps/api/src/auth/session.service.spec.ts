@@ -1,12 +1,18 @@
 import { UnauthorizedException } from '@nestjs/common';
 import type { AccessTokenStore } from './access-token.store.js';
+import { ADMIN_REALM, type SessionRealm, USER_REALM } from './session-realm.js';
 import type { SessionRepository, SessionRow } from './session.repository.js';
 import { SessionService } from './session.service.js';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 
 /** Repository and token-store doubles that record call order; the transaction can fail at COMMIT. */
-function setup(session: Partial<SessionRow> | undefined, commitFails = false, familyLive = true) {
+function setup(
+  session: Partial<SessionRow> | undefined,
+  commitFails = false,
+  familyLive = true,
+  realm: SessionRealm = USER_REALM,
+) {
   const log: string[] = [];
   const step = (name: string) => () => {
     log.push(name);
@@ -16,6 +22,8 @@ function setup(session: Partial<SessionRow> | undefined, commitFails = false, fa
     id: 'session-1',
     user_id: USER,
     family_id: 'family-1',
+    family_started_at: new Date(),
+    active_role: 'patient',
     role: 'patient',
     expires_at: new Date(Date.now() + 60_000),
     revoked_at: null,
@@ -47,6 +55,10 @@ function setup(session: Partial<SessionRow> | undefined, commitFails = false, fa
       return Promise.resolve('family-1');
     }),
     revokeFamily: vi.fn(step('revokeFamily')),
+    setActiveRole: vi.fn(() => {
+      log.push('setActiveRole');
+      return Promise.resolve(true);
+    }),
     familyIsLive: vi.fn(() => {
       log.push('familyIsLive');
       return Promise.resolve(familyLive);
@@ -64,6 +76,7 @@ function setup(session: Partial<SessionRow> | undefined, commitFails = false, fa
   const service = new SessionService(
     repo as unknown as SessionRepository,
     tokens as unknown as AccessTokenStore,
+    realm,
   );
   return { service, repo, tokens, log };
 }
@@ -76,7 +89,39 @@ describe('SessionService.refresh', () => {
     });
     expect(log).toEqual(['BEGIN', 'lock', 'revoke', 'insert', 'issue', 'COMMIT']);
     // The new access token joins the device's family, so a device sign-out reaches it (SE-07.21).
-    expect(tokens.issue).toHaveBeenCalledWith(expect.anything(), 'family-1');
+    expect(tokens.issue).toHaveBeenCalledWith(expect.anything(), 'family-1', 15 * 60);
+  });
+
+  it('L-10 a suspended account or a removed role ends the device at its next refresh', async () => {
+    const { service, log, tokens } = setup({ role: null });
+    await expect(service.refresh('cookie-token')).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(log).toEqual(['BEGIN', 'lock', 'revokeFamily', 'COMMIT']);
+    expect(tokens.issue).not.toHaveBeenCalled();
+  });
+
+  it('L-10 the refreshed token keeps the role the server re-checked', async () => {
+    const { service, tokens } = setup({ active_role: 'nurse', role: 'nurse' });
+    await service.refresh('cookie-token');
+    expect(tokens.issue).toHaveBeenCalledWith(
+      expect.objectContaining({ role: 'nurse', realm: 'user' }),
+      'family-1',
+      15 * 60,
+    );
+  });
+
+  it('SE-04 an admin device signs in again after eight hours, however active', async () => {
+    const started = new Date(Date.now() - 8 * 60 * 60 * 1000 - 1000);
+    const late = setup({ role: 'verifier', family_started_at: started }, false, true, ADMIN_REALM);
+    await expect(late.service.refresh('cookie-token')).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+    const fresh = setup({ role: 'verifier' }, false, true, ADMIN_REALM);
+    await fresh.service.refresh('cookie-token');
+    expect(fresh.tokens.issue).toHaveBeenCalledWith(
+      expect.objectContaining({ realm: 'admin' }),
+      'family-1',
+      10 * 60,
+    );
   });
 
   it('SE-07.14 a failed insert rolls back before any token is issued', async () => {
@@ -126,7 +171,12 @@ describe('SessionService.refresh', () => {
 });
 
 describe('SessionService.signOut', () => {
-  const principal = { userId: USER, role: 'patient' as const, sessionId: 'session-3' };
+  const principal = {
+    userId: USER,
+    role: 'patient' as const,
+    sessionId: 'session-3',
+    realm: 'user' as const,
+  };
 
   it('SE-07.21 one device: revokes its whole family under the user lock, then its tokens', async () => {
     const { service, repo, tokens, log } = setup({});
@@ -151,5 +201,41 @@ describe('SessionService.signOut', () => {
     await service.signOut(principal, 'presented-token', true);
     expect(log).toEqual(['BEGIN', 'lockUser', 'revokeAll', 'COMMIT', 'revokeAllTokens']);
     expect(tokens.revokeFamily).not.toHaveBeenCalled();
+  });
+});
+
+describe('SessionService.switchRole', () => {
+  const principal = {
+    userId: USER,
+    role: 'patient' as const,
+    sessionId: 'session-3',
+    realm: 'user' as const,
+  };
+
+  it('L-3 stores the role on the session under the user lock, then swaps the access token', async () => {
+    const { service, tokens, log } = setup({});
+    await expect(service.switchRole(principal, 'old-token', 'nurse')).resolves.toBe(
+      'new-access-token',
+    );
+    expect(log).toEqual([
+      'BEGIN',
+      'lockUser',
+      'setActiveRole',
+      'familyOf',
+      'COMMIT',
+      'revokeToken',
+      'issue',
+    ]);
+    expect(tokens.revoke).toHaveBeenCalledWith('old-token');
+    expect(tokens.issue).toHaveBeenCalledWith({ ...principal, role: 'nurse' }, 'family-1', 15 * 60);
+  });
+
+  it('L-3 a session already signed out cannot switch', async () => {
+    const { service, repo, tokens } = setup({});
+    repo.setActiveRole.mockResolvedValueOnce(false);
+    await expect(service.switchRole(principal, 'old-token', 'nurse')).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+    expect(tokens.issue).not.toHaveBeenCalled();
   });
 });

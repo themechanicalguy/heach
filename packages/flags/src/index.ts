@@ -6,6 +6,8 @@ export type AppEnv = (typeof APP_ENVS)[number];
 export const FLAG_DEFINITIONS = {
   /** The Step 2 sample entity; never outside dev and test, removed in Step 3. */
   'sample-patient-note': ['local', 'test', 'dev'],
+  /** OTP sign-in, account setup and admin sign-in; off outside dev until the Step 3 exit. */
+  accounts: ['local', 'test', 'dev'],
 } as const satisfies Record<string, readonly AppEnv[]>;
 
 export type FlagName = keyof typeof FLAG_DEFINITIONS;

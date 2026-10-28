@@ -21,4 +21,10 @@ describe('FeatureFlags', () => {
       false,
     );
   });
+
+  it('L-13 keeps the accounts flag off outside local, test and dev', () => {
+    expect(new FeatureFlags('dev', 'accounts').isOn('accounts')).toBe(true);
+    expect(new FeatureFlags('staging', 'accounts').isOn('accounts')).toBe(false);
+    expect(new FeatureFlags('production', 'accounts').isOn('accounts')).toBe(false);
+  });
 });

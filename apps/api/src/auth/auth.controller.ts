@@ -7,51 +7,25 @@ import {
   Req,
   Res,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiCookieAuth,
-  ApiHeader,
-  ApiNoContentResponse,
-  ApiOkResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiCookieAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { readCookie } from '../common/cookies.js';
-import { ROLES } from '../common/request-context.js';
-import { ACCESS_TOKEN_TTL_SECONDS } from './access-token.store.js';
-import { AccessTokenDto, LogoutDto, TestLoginDto } from './auth.dto.js';
+import { USER_ROLES } from '../common/request-context.js';
+import { AccessTokenDto, LogoutDto } from './auth.dto.js';
 import { bearerToken, principalOf } from './auth.guard.js';
 import { Public, Roles } from './roles.decorator.js';
-import { type IssuedTokens, SessionService } from './session.service.js';
-import { TEST_LOGIN_KEY_HEADER } from './test-identity.adapter.js';
-import { TestLoginGate } from './test-login.gate.js';
+import { USER_REALM } from './session-realm.js';
+import { clearRefreshCookie, sendTokens } from './session-cookie.js';
+import { SessionService } from './session.service.js';
 
-export const REFRESH_COOKIE = 'heach_refresh';
-const COOKIE_PATH = '/api/v1/auth';
+export const REFRESH_COOKIE = USER_REALM.cookieName;
 
+/** Session refresh and sign-out for patients and providers (SE-07). */
 @ApiTags('auth')
 @Controller('v1/auth')
 export class AuthController {
   constructor(private readonly sessions: SessionService) {}
-
-  /**
-   * Test identity adapter only; the module is not loaded outside dev and test (SE-07.4). On the
-   * dev host it answers only requests carrying the key of the loopback-only entry (SE-07.23); any
-   * other request gets the same 404 as a route that does not exist.
-   */
-  @Post('test-login')
-  @HttpCode(HttpStatus.OK)
-  @Public('Sign-in endpoint')
-  @UseGuards(TestLoginGate)
-  @ApiHeader({ name: TEST_LOGIN_KEY_HEADER, required: false, description: 'Required in dev' })
-  @ApiOkResponse({ type: AccessTokenDto })
-  async testLogin(
-    @Body() body: TestLoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<AccessTokenDto> {
-    return respond(response, await this.sessions.signIn(body.userId));
-  }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
@@ -63,11 +37,12 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AccessTokenDto> {
     try {
-      return respond(response, await this.sessions.refresh(readCookie(request, REFRESH_COOKIE)));
+      const tokens = await this.sessions.refresh(readCookie(request, REFRESH_COOKIE));
+      return sendTokens(response, USER_REALM, tokens);
     } catch (error) {
       // Only 401 means the session is over; on any other failure the cookie stays (SE-07.16).
       if (error instanceof UnauthorizedException) {
-        response.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH });
+        clearRefreshCookie(response, USER_REALM);
       }
       throw error;
     }
@@ -75,7 +50,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(...ROLES)
+  @Roles(...USER_ROLES)
   @ApiNoContentResponse()
   async logout(
     @Body() body: LogoutDto,
@@ -83,19 +58,6 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     await this.sessions.signOut(principalOf(request), bearerToken(request) ?? '', body.allDevices);
-    response.clearCookie(REFRESH_COOKIE, { path: COOKIE_PATH });
+    clearRefreshCookie(response, USER_REALM);
   }
-}
-
-/** Refresh token only in a Secure, HttpOnly, SameSite=Strict cookie (SE-07.1). */
-function respond(response: Response, tokens: IssuedTokens): AccessTokenDto {
-  response.cookie(REFRESH_COOKIE, tokens.refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
-    path: COOKIE_PATH,
-    expires: tokens.refreshExpiresAt,
-  });
-  response.setHeader('Cache-Control', 'no-store');
-  return { accessToken: tokens.accessToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS };
 }

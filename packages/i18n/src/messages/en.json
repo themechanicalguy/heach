@@ -39,5 +39,9 @@
   "ui": {
     "close": "Close",
     "otp": { "label": "One-time password", "digit": "Digit {index} of {total}" }
+  },
+  "sms": {
+    "otp_sign_in": "{code} is your HEACH sign-in code. It expires in {minutes} minutes. Never share it with anyone.",
+    "otp_reverify": "{code} is your HEACH code to confirm a change to your account. It expires in {minutes} minutes. Never share it with anyone."
   }
 }

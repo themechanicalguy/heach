@@ -15,11 +15,15 @@ export const ACCESS_TOKEN_TTL_SECONDS = 15 * 60; // SE-07.1: at most 15 minutes
 export class AccessTokenStore {
   constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
-  async issue(principal: Principal, familyId: string): Promise<string> {
+  async issue(
+    principal: Principal,
+    familyId: string,
+    ttlSeconds = ACCESS_TOKEN_TTL_SECONDS,
+  ): Promise<string> {
     const { token, hash } = newToken();
     await this.redis
       .multi()
-      .set(`at:${hash}`, JSON.stringify(principal), 'EX', ACCESS_TOKEN_TTL_SECONDS)
+      .set(`at:${hash}`, JSON.stringify(principal), 'EX', ttlSeconds)
       .sadd(userKey(principal.userId), hash)
       .expire(userKey(principal.userId), ACCESS_TOKEN_TTL_SECONDS)
       .sadd(familyKey(familyId), hash)

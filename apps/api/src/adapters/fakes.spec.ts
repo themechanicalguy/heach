@@ -13,8 +13,18 @@ describe('Third-party test doubles (TS-06.1)', () => {
   it('TS-06.1 the SMS double records what would be sent', async () => {
     const sms = new FakeSmsSender();
     const port: SmsSender = sms;
-    await port.send({ to: '+919000000001', templateId: 'otp', params: { code: '123456' } });
+    await port.send({
+      to: '+919000000001',
+      locale: 'en',
+      templateId: 'otp_sign_in',
+      params: { code: '123456', minutes: '5' },
+    });
     expect(sms.sent).toHaveLength(1);
+    expect(sms.lastCodeFor('+919000000001')).toBe('123456');
+    sms.failing = true;
+    await expect(
+      port.send({ to: '+919000000001', locale: 'en', templateId: 'otp_sign_in', params: {} }),
+    ).rejects.toThrow();
   });
 
   it('TS-06.1 the payment double creates orders and checks webhook signatures', async () => {

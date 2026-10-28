@@ -121,6 +121,45 @@ export class EnvVars {
   @Min(1)
   RATE_LIMIT_WINDOW_SECONDS = 60;
 
+  /**
+   * `fake` keeps SMS in memory (tests); `local` delivers them to the Mailpit inbox (local and test
+   * only). No real SMS provider exists until DLT registration (#20, decision L-8).
+   */
+  @IsIn(['fake', 'local'])
+  SMS_PROVIDER: 'fake' | 'local' = 'fake';
+
+  /** Mailpit's HTTP API, for SMS_PROVIDER=local. */
+  @Matches(/^https?:\/\/[\w.-]+(:\d+)?$/)
+  MAILPIT_API_URL = 'http://localhost:8025';
+
+  /** OTP sends per mobile number per hour and per day (SE-08, decision L-6). */
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  OTP_SENDS_PER_NUMBER_PER_HOUR = 5;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  OTP_SENDS_PER_NUMBER_PER_DAY = 10;
+
+  /** OTP sends per device cookie per hour. */
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  OTP_SENDS_PER_DEVICE_PER_HOUR = 10;
+
+  /** OTP sends, and wrong codes, per client address per hour. */
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  OTP_SENDS_PER_ADDRESS_PER_HOUR = 30;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  OTP_FAILURES_PER_ADDRESS_PER_HOUR = 30;
+
   /** SNS topic for alerts (D5); unset means alerts are logged only. */
   @IsOptional()
   @Matches(/^arn:aws:sns:ap-south-1:\d{12}:[\w-]+$/)

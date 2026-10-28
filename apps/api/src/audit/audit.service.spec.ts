@@ -20,7 +20,12 @@ describe('AuditService actor', () => {
   });
 
   it('EN-05.7 a signed-in user always wins over a system actor', async () => {
-    const principal = { userId: 'user-1', role: 'patient' as const, sessionId: 'session-1' };
+    const principal = {
+      userId: 'user-1',
+      role: 'patient' as const,
+      sessionId: 'session-1',
+      realm: 'user' as const,
+    };
     expect(await actorIn({ correlationId: 'req-1', principal, system: 'job:reencrypt' })).toEqual([
       'user-1',
       'patient',
