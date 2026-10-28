@@ -53,6 +53,9 @@ owner, naming the item, the reason and the end condition).
 | FU-18 | Admin entry through port forwarding (`https://localhost:8443` has no matching Caddy site; documentation gap 13) | Owner decides | Before Step 3 builds the admin login (AD-01) | `curl -k https://localhost:8443` through Session Manager port forwarding | Admin page served, or the documented way in | Step 3 admin panel work on dev | Decision applied and documented | Open |
 | FU-19 | Constitution proposed amendments PA-1 to PA-4 and the `spec-exempt` label (does not exist in the repository) | Owner | No date; before they are needed | Read the constitution and labels | Accepted or rejected in the constitution | Nothing | Decision recorded | Closed 28 October 2026: constitution and `spec-exempt` label retired with spec-driven development ([ADR 0013](adr/0013-retire-spec-driven-development.md)) |
 
+| FU-28 | Role-based login and account setup branch (`feat/role-based-login-account-setup`, 29 October 2026): owner review of ADR 0014 and decisions L-1 to L-14, OTP values (charter Q3-8), push and pull request | Owner | Before the branch merges | Read the [work record](login-and-account-setup.md); CI green on the PR | Owner comment on the PR | Merge of Step 3 sign-in | Owner accepts or asks for changes in writing | Open |
+| FU-29 | API-backed web and admin E2E (sign-in, setup, admin MFA) run only locally; CI's deploy-bundle job has no Mailpit or `accounts` flag | Claude Code (CI change through a PR) | Before the `accounts` flag goes on in dev | CI job runs `e2e/sign-in-setup.spec.ts` and `apps/admin/e2e/admin-users.spec.ts` | Green CI run | Confidence in the flows on every PR | Suites run in CI on every PR | Open |
+
 ## Accepted deferrals to revisit at the pilot gate
 
 Not Step 2 or Step 3 work. Each is accepted in writing in the ADR named; listed so the pilot gate
