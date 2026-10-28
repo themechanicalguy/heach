@@ -6,27 +6,6 @@
 
 <!-- Commands or steps a reviewer can run. -->
 
-## Spec
-
-<!--
-  Code PRs (apps/, packages/, infra/): name the spec already Approved on main, as a path, and the
-  criterion IDs this PR satisfies. The "Spec linked" check reads these lines. Examples:
-    Spec: specs/003-otp-login/          (feature spec, ADR 0011)
-    Spec: docs/specs/step-02-secure-foundation.md   (step spec)
-    Criteria: AC-01.1, AC-01.2
-  No behaviour change (dependency bump, refactor, tooling)? Add the `spec-exempt` label and a line
-    Spec exemption: <reason>
-  Spec-only PRs: say so, and list what the owner is asked to approve.
-  The check proves the links exist, not that the code meets the spec; review does that.
--->
-
-Spec:
-Criteria:
-
-- [ ] Built from a spec Approved on `main` (constitution gate G2); any change of behaviour is in the spec in this or an earlier PR
-- [ ] Each satisfied acceptance criterion has a test titled with its ID, or a recorded manual check
-- [ ] Feature specs: `plan.md` Constitution Check still holds; `tasks.md` updated (and `/speckit-converge` run)
-
 ## Definition of done
 
 From `docs/mvp-v1-requirements.md`. Tick what applies; explain any unticked item.

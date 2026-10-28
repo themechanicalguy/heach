@@ -94,7 +94,7 @@ async function reencryptRow(
 }
 
 /**
- * The job command (specs/005-bounded-reencryption/contracts/reencrypt-job.md): rotates first with
+ * The job command (docs/archive/specs/005-bounded-reencryption/contracts/reencrypt-job.md): rotates first with
  * `--rotate`, logs counts only, and returns the exit code, 1 when any row failed (EN-05.6).
  */
 export async function main(argv: readonly string[] = process.argv): Promise<number> {

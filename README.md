@@ -2,8 +2,7 @@
 
 Healthcare services web application for Odisha, India: patients find, book and pay verified
 care providers. See [`docs/`](docs/) for the requirements and implementation guideline, and
-[`CLAUDE.md`](CLAUDE.md) for working rules ([`AGENTS.md`](AGENTS.md) for other coding agents). Specs
-are written with GitHub Spec Kit: see the [spec workflow](docs/spec-workflow.md).
+[`CLAUDE.md`](CLAUDE.md) for working rules ([`AGENTS.md`](AGENTS.md) for other coding agents).
 
 ## Getting started
 
@@ -40,8 +39,7 @@ apps/web        Next.js PWA for patients and providers
 apps/admin      React (Vite) admin panel, desktop first
 apps/api        NestJS API
 packages/       config, ui, i18n, types, crypto, logger, flags (shared)
-docs/           requirements, guideline, step specs, status, runbooks, ADRs (index: docs/README.md)
-specs/          feature specs (Spec Kit)
+docs/           requirements, guideline, status, runbooks, ADRs, archive (index: docs/README.md)
 infra/          OpenTofu stacks
 ```
 

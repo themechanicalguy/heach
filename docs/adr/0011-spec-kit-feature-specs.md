@@ -1,6 +1,6 @@
 # 0011. Write feature specs with GitHub Spec Kit under the step specs
 
-- **Status:** Accepted (owner merged the adoption pull request #53 on 2026-10-20)
+- **Status:** Superseded by [ADR 0013](0013-retire-spec-driven-development.md) on 2026-10-28
 - **Date:** 2026-10-20
 - **Requirements:** SO-01, TS-01 to TS-09, all requirement IDs
 - **Amends:** [ADR 0007](0007-spec-driven-development.md) decisions 1 and 5

@@ -683,7 +683,7 @@ The items that make this checklist enforceable from day one are built in Steps 1
 
 ## Delivery plan, metrics, risks and open questions
 
-The first release is built in 10 steps and launched in three stages (A, B, C), so that each added service goes live on a foundation that is already secure and proven. The steps, their lengths and exit gates are in the [implementation guideline](mvp-v1-implementation-guideline.md), which is the only delivery plan. Each step starts from an approved step spec in [`docs/specs/`](specs/README.md).
+The first release is built in 10 steps and launched in three stages (A, B, C), so that each added service goes live on a foundation that is already secure and proven. The steps, their lengths and exit gates are in the [implementation guideline](mvp-v1-implementation-guideline.md), which is the only delivery plan. Each step starts from an approved step spec in [`docs/specs/`](archive/step-specs/README.md).
 
 ### Success metrics for the pilot
 

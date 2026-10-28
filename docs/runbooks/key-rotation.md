@@ -24,7 +24,7 @@ docker compose run --rm --no-deps api node dist/jobs/reencrypt.js --rotate
 docker compose run --rm --no-deps api node dist/jobs/reencrypt.js
 ```
 
-The job ([spec 005](../../specs/005-bounded-reencryption/spec.md)) walks the table once by ID and
+The job ([spec 005](../archive/specs/005-bounded-reencryption/spec.md)) walks the table once by ID and
 moves only values below the version current when it starts, so it always finishes. It logs a start
 line (`runId`, `domain`, `targetVersion`) and an end line with `reencrypted`, `skipped` and
 `failed`. It never logs values, ciphertext or row IDs.

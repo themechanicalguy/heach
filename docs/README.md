@@ -6,9 +6,7 @@
 | [Implementation guideline](mvp-v1-implementation-guideline.md) | In what order: 10 steps with exit criteria |
 | [Web roadmap](web-roadmap.md) | Draft: each guideline step as bounded feature slices in dependency order, web-only scope, Step 2 blockers, jobs, integrations, owner decisions |
 | [Requirements traceability](requirements-traceability.md) | Draft: every requirement ID and journeys J1 to J9 mapped to a slice, step, dependency and proof |
-| [Specs index](specs/README.md) | Every step spec and feature spec, with its status |
-| [Spec workflow](spec-workflow.md) | Spec Kit commands from idea to merged code, gates, resuming a feature |
-| [Constitution](../.specify/memory/constitution.md) | Principles and gates every spec, plan and PR is checked against |
+| [Archive](archive/README.md) | Retired step and feature specs (spec-driven development ended by ADR 0013); historical record only |
 | [Implementation status](implementation-status.md) | What is built, partial or not started, per step and requirement ID |
 | [Step 2 log](step-2-progress.md) | Dated evidence for every Step 2 criterion, PR plan, deploy and rollback record |
 | [Step 2 acceptance matrix](step-2-acceptance-matrix.md) | Every Step 2 criterion, corrective spec, decision and exit criterion with its evidence and what still blocks completion |

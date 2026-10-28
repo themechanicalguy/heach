@@ -1,6 +1,6 @@
 # 0007. Build every step from a written, approved spec
 
-- **Status:** Accepted. Decisions 1 and 5 amended by [ADR 0011](0011-spec-kit-feature-specs.md)
+- **Status:** Superseded by [ADR 0013](0013-retire-spec-driven-development.md) on 2026-10-28
 - **Date:** 2026-10-10
 - **Requirements:** SO-01, TS-01 to TS-09, all requirement IDs
 
@@ -17,7 +17,7 @@ so what it must do, and how that is proven, has to be agreed before it is built.
 Development is spec driven. The spec leads; code follows it.
 
 1. **Spec before code.** Before a step's code starts, a docs-only pull request adds its spec in
-   [`docs/specs/`](../specs/README.md) from the template: requirement IDs in scope, testable
+   [`docs/specs/`](../archive/step-specs/README.md) from the template: requirement IDs in scope, testable
    acceptance criteria per ID, new data fields with their class, API endpoints with the roles
    allowed, and the threat model (SO-01). Code PRs for that step start after it is merged.
 2. **Spec changes first.** When behaviour must differ from the spec, the requirements, guideline or

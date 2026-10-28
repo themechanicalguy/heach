@@ -16,10 +16,6 @@ Read these before planning any work. Do not copy their content here; link to req
 
 - `docs/mvp-v1-requirements.md` — what to build: roles, journeys, requirement IDs, security, stack
 - `docs/mvp-v1-implementation-guideline.md` — in what order: 10 steps with exit criteria
-- `.specify/memory/constitution.md` — principles and gates every spec, plan and PR is checked against
-- `docs/specs/` — index of all specs, and one step spec per step (charter; Step 2 also holds its criteria)
-- `specs/NNN-*/` — feature specs from Spec Kit: `spec.md` behaviour, `plan.md` design, `tasks.md` work
-- `docs/spec-workflow.md` — how to run `/speckit-*` from idea to merged code, gates, resuming a feature
 - `docs/implementation-status.md` — what is built, partial or not started, per step and requirement ID
 - `docs/local-development.md` — running everything locally, git hooks. Current: **Step 2 exit pending the lawyer and Odia reviews, four weekly restore-check runs (to 22 November 2026), LM-02.1 nested masking and a real-phone demo; Step 3 next** ([register](docs/follow-up-register.md#closes-step-2)).
 - `docs/step-1-2-audit.md` — Step 1 and Step 2 audit of 25 October 2026: status of every item, Step 3 verdict
@@ -62,30 +58,13 @@ packages/
   types/      Shared types and the API client generated from OpenAPI
   crypto/     Envelope and field-level encryption, blind indexes
   logger/     Structured logger with masking and correlation IDs
-docs/         Requirements, implementation guideline, ADRs, step specs
-specs/        Feature specs (Spec Kit): spec.md, plan.md, tasks.md per feature
-.specify/     Spec Kit: constitution, HEACH template overrides, scripts
+docs/         Requirements, implementation guideline, ADRs, runbooks, archive (retired specs)
 ```
 
 Package scope: `@heach/*` (for example `@heach/ui`).
 
 ## Working rules
 
-- **Spec-driven development** ([ADR 0007](docs/adr/0007-spec-driven-development.md), amended by
-  [ADR 0011](docs/adr/0011-spec-kit-feature-specs.md); rules in the
-  [constitution](.specify/memory/constitution.md); steps in the [workflow](docs/spec-workflow.md)).
-  The spec leads; code follows it:
-  - No code for a step or feature until its spec (step spec, or feature `spec.md` and `plan.md`)
-    is merged as Approved. If asked to build without one, write or update the spec first and get
-    it approved.
-  - Behaviour that differs from the spec changes the spec in the same PR or an earlier one, never
-    afterwards. Never silently implement something the spec does not say.
-  - Every acceptance criterion (`EN-03.1`) has a test whose `describe` or `it` title starts with
-    its ID, or a manual check recorded in the spec.
-  - Behaviour, permissions and data classes go in `spec.md`; endpoints, migrations, encryption and
-    the threat model in `plan.md` (or the step spec). Review checks the generated OpenAPI against it.
-  - Spec Kit commands (`/speckit-specify` ... `/speckit-converge`) are typed by the human; never
-    set a spec, plan, checklist, ADR or the constitution to Approved yourself.
 - **TypeScript strict** everywhere. No `any` without a comment explaining why; no `@ts-ignore`.
 - **No hard-coded user-facing strings.** Every visible string comes from `packages/i18n`, with keys
   in Odia, English and Hindi. Admin is English only but still uses keys.

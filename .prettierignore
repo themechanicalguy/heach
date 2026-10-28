@@ -1,5 +1,4 @@
 pnpm-lock.yaml
 docs/
-# Spec Kit managed files (checked by hash on upgrade) and the HEACH overrides beside them
-.specify/
+# Claude Code local state
 .claude/
