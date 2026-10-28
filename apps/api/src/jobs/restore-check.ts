@@ -139,7 +139,10 @@ export async function main(env: NodeJS.ProcessEnv = process.env): Promise<number
         () => false,
       );
       const result: RestoreCheckResult = audited ? checked : { ...checked, outcome: 'fail' };
-      logger.info({ runId, dump, ...result }, 'Restore check finished');
+      // Table names as values, not keys: a key such as `app.patient_note` holds a personal word
+      // and would be redacted (LM-02.3), hiding the row counts the weekly record needs.
+      const tables = Object.entries(result.tables);
+      logger.info({ runId, dump, ...result, tables }, 'Restore check finished');
       return result.outcome === 'pass' ? 0 : 1;
     });
   } finally {

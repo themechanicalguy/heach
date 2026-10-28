@@ -89,6 +89,10 @@ journalctl -u heach-restore-check.service --since -2days --no-pager -o short-iso
   | grep -E 'Start|Finished|restore-check run=|tables|Deactivated|Failed'
 ```
 
+The finished line lists row counts as `"tables":[["app.data_key",1],["app.patient_note",2],…]`
+(pairs since 28 October 2026; earlier runs wrote an object). Table names are values, so the
+logger's personal-word redaction never hides them.
+
 **Scheduled or by hand?** A scheduled run starts within a minute of Sunday 00:00 UTC (05:30 India
 time), and the timer's `LastTriggerUSec` equals that start. A run started with `systemctl start` at
 any other time is a manual run: record it with Trigger "By hand", and it never counts towards
