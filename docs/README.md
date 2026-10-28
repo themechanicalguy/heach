@@ -4,6 +4,8 @@
 | --- | --- |
 | [MVP v1 requirements](mvp-v1-requirements.md) | What to build: roles, journeys, requirement IDs, security, stack |
 | [Implementation guideline](mvp-v1-implementation-guideline.md) | In what order: 10 steps with exit criteria |
+| [Web roadmap](web-roadmap.md) | Draft: each guideline step as bounded feature slices in dependency order, web-only scope, Step 2 blockers, jobs, integrations, owner decisions |
+| [Requirements traceability](requirements-traceability.md) | Draft: every requirement ID and journeys J1 to J9 mapped to a slice, step, dependency and proof |
 | [Specs index](specs/README.md) | Every step spec and feature spec, with its status |
 | [Spec workflow](spec-workflow.md) | Spec Kit commands from idea to merged code, gates, resuming a feature |
 | [Constitution](../.specify/memory/constitution.md) | Principles and gates every spec, plan and PR is checked against |
