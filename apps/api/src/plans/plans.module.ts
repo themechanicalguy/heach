@@ -7,11 +7,12 @@ import {
   ProviderPlansController,
 } from './plans.controller.js';
 import { PlansService } from './plans.service.js';
+import { RenewalsService } from './renewals.service.js';
 
 /** Care packages, subscriptions and the entitlement ledger (Step 9: J8, PK, AD-14). */
 @Module({
   imports: [BookingsModule, OnboardingModule],
   controllers: [PlansController, ProviderPlansController, AdminPlansController],
-  providers: [PlansService],
+  providers: [PlansService, RenewalsService],
 })
 export class PlansModule {}

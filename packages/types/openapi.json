@@ -10204,12 +10204,20 @@
           "name": {
             "type": "string"
           },
+          "kind": {
+            "type": "string",
+            "enum": ["package", "subscription"]
+          },
           "status": {
             "type": "string",
             "enum": ["pending_payment", "active", "expired", "cancelled"]
           },
           "autoRenew": {
             "type": "boolean"
+          },
+          "renewalPaused": {
+            "type": "boolean",
+            "description": "Renewal stopped after failed debits until turned on again (PK-05)"
           },
           "pricePaise": {
             "type": "number"
@@ -10240,8 +10248,10 @@
           "id",
           "planId",
           "name",
+          "kind",
           "status",
           "autoRenew",
+          "renewalPaused",
           "pricePaise",
           "paidPaise",
           "refundedPaise",
@@ -10465,7 +10475,13 @@
               "coupon_validity_days",
               "referral_monthly_cap",
               "referral_join_window_days",
-              "plan_expiry_reminder_days"
+              "plan_expiry_reminder_days",
+              "renewal_notice_hours",
+              "renewal_retry_hours",
+              "renewal_max_attempts",
+              "provider_referral_bookings",
+              "provider_referral_rebate_percent",
+              "provider_referral_rebate_bookings"
             ]
           },
           "value": {
@@ -10496,7 +10512,13 @@
               "coupon_validity_days",
               "referral_monthly_cap",
               "referral_join_window_days",
-              "plan_expiry_reminder_days"
+              "plan_expiry_reminder_days",
+              "renewal_notice_hours",
+              "renewal_retry_hours",
+              "renewal_max_attempts",
+              "provider_referral_bookings",
+              "provider_referral_rebate_percent",
+              "provider_referral_rebate_bookings"
             ]
           },
           "value": {

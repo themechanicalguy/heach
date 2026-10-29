@@ -30,6 +30,7 @@ import {
   PurchaseDto,
 } from './plans.dto.js';
 import { PlansService } from './plans.service.js';
+import { RenewalsService } from './renewals.service.js';
 
 const uuid = new ParseUUIDPipe({ version: '4' });
 
@@ -38,7 +39,10 @@ const uuid = new ParseUUIDPipe({ version: '4' });
 @Controller('v1')
 @UseGuards(requireFlag('accounts'))
 export class PlansController {
-  constructor(private readonly plans: PlansService) {}
+  constructor(
+    private readonly plans: PlansService,
+    private readonly renewals: RenewalsService,
+  ) {}
 
   @Get('plans')
   @Public('Plan pages are public so terms are read before buying (PK-03)')
@@ -99,7 +103,9 @@ export class PlansController {
     @Body() body: AutoRenewDto,
     @Req() request: Request,
   ): Promise<void> {
-    await this.plans.setAutoRenew(principalOf(request).userId, id, body.enabled);
+    const buyerId = principalOf(request).userId;
+    if (body.enabled) await this.renewals.enable(buyerId, id);
+    else await this.renewals.disable(buyerId, id);
   }
 }
 

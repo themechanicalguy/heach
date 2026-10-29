@@ -116,7 +116,8 @@ function PurchaseCard({
           })}
         </p>
       ))}
-      {active && (
+      {purchase.renewalPaused && <Notice tone="warning">{t('plans.renewalPaused')}</Notice>}
+      {active && purchase.kind === 'subscription' && (
         <CheckboxField
           label={t('plans.autoRenew')}
           checked={purchase.autoRenew}
@@ -133,6 +134,7 @@ function PurchaseCard({
           }}
         />
       )}
+      {active && purchase.kind === 'subscription' && <p>{t('plans.autoRenewHint')}</p>}
       {error && (
         <Notice tone="danger" live>
           {t(error)}

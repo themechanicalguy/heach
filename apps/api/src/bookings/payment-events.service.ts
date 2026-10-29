@@ -31,6 +31,8 @@ export type PurchaseHandler = (
 @Injectable()
 export class PaymentEventsService {
   private purchaseHandler: PurchaseHandler | undefined;
+  private purchaseFailedHandler:
+    ((client: TransactionClient, purchaseId: string) => Promise<void>) | undefined;
 
   constructor(
     private readonly payments: PaymentsRepository,
@@ -76,6 +78,13 @@ export class PaymentEventsService {
     this.purchaseHandler = handler;
   }
 
+  /** Plans register what a failed plan debit does, such as a renewal retry (PK-05). */
+  onPurchaseFailed(
+    handler: (client: TransactionClient, purchaseId: string) => Promise<void>,
+  ): void {
+    this.purchaseFailedHandler = handler;
+  }
+
   private async purchases(
     client: TransactionClient,
     event: GatewayEvent,
@@ -83,6 +92,7 @@ export class PaymentEventsService {
   ): Promise<void> {
     if (event.kind === 'payment.failed') {
       await this.payments.markFailed(client, payment.id);
+      await this.purchaseFailedHandler?.(client, payment.purchaseId ?? '');
       return;
     }
     if (

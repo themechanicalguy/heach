@@ -4378,8 +4378,12 @@ export interface components {
       planId: string;
       name: string;
       /** @enum {string} */
+      kind: 'package' | 'subscription';
+      /** @enum {string} */
       status: 'pending_payment' | 'active' | 'expired' | 'cancelled';
       autoRenew: boolean;
+      /** @description Renewal stopped after failed debits until turned on again (PK-05) */
+      renewalPaused: boolean;
       pricePaise: number;
       paidPaise: number;
       refundedPaise: number;
@@ -4478,7 +4482,13 @@ export interface components {
         | 'coupon_validity_days'
         | 'referral_monthly_cap'
         | 'referral_join_window_days'
-        | 'plan_expiry_reminder_days';
+        | 'plan_expiry_reminder_days'
+        | 'renewal_notice_hours'
+        | 'renewal_retry_hours'
+        | 'renewal_max_attempts'
+        | 'provider_referral_bookings'
+        | 'provider_referral_rebate_percent'
+        | 'provider_referral_rebate_bookings';
       value: number;
     };
     SettingInputDto: {
@@ -4500,7 +4510,13 @@ export interface components {
         | 'coupon_validity_days'
         | 'referral_monthly_cap'
         | 'referral_join_window_days'
-        | 'plan_expiry_reminder_days';
+        | 'plan_expiry_reminder_days'
+        | 'renewal_notice_hours'
+        | 'renewal_retry_hours'
+        | 'renewal_max_attempts'
+        | 'provider_referral_bookings'
+        | 'provider_referral_rebate_percent'
+        | 'provider_referral_rebate_bookings';
       value: number;
     };
     CountDto: {

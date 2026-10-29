@@ -23,6 +23,23 @@ export interface PaymentGateway {
     amountPaise: number;
     reference: string;
   }): Promise<{ transferId: string }>;
+  /**
+   * Recurring payments (PK-05): a UPI Autopay or card mandate the patient authorises on the
+   * gateway's page, capped at `maxAmountPaise` per debit. The fake authorises at once; the real
+   * adapter confirms authorisation by webhook before the first charge.
+   */
+  createMandate(mandate: {
+    reference: string;
+    maxAmountPaise: number;
+  }): Promise<{ mandateId: string }>;
+  /** Debits an authorised mandate; the outcome arrives as a webhook on the returned order. */
+  chargeMandate(charge: {
+    mandateId: string;
+    amountPaise: number;
+    receipt: string;
+  }): Promise<{ orderId: string }>;
+  /** Revokes a mandate so no further debit can happen (PK-06). */
+  cancelMandate(mandateId: string): Promise<void>;
   /** The gateway's view of an order, for daily reconciliation (LM-06). */
   orderStatus(orderId: string): Promise<{ paid: boolean; amountPaise: number } | undefined>;
   /**
@@ -30,5 +47,7 @@ export interface PaymentGateway {
    * for the hosted checkout until the gateway account exists (partner issue #19).
    */
   sandboxCapture?(orderId: string): { body: string; signature: string };
+  /** Sandbox only: the signed webhook for a failed debit of this order. */
+  sandboxFail?(orderId: string): { body: string; signature: string };
 }
 export const PAYMENT_GATEWAY = Symbol('PAYMENT_GATEWAY');
