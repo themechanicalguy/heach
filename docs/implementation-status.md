@@ -171,6 +171,8 @@ classes checked. These run against test doubles and the local Mailpit inbox: no 
 sent (#20). Web screens are covered by E2E only (the coverage gate does not count untested
 components). The role-by-role matrix is in the [work record](account-flows-all-roles.md#role-by-role-matrix).
 
+Verification of the scope deferral on 29 October 2026 (local, branch `fix/defer-doctor-clinic-beyond-mvp`, [ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md)): `pnpm check` 37 of 37 tasks; API integration 282 of 282 (29 files, including `deferred-roles.int-spec.ts` 13); `format:check`, `db:check-classes`, generated types and the Storybook build pass; changed-line coverage 97.6 %; API-backed web E2E 45 of 45 and admin E2E 12 of 12 against the MVP configuration (flag off); non-API web E2E 36 passed, 0 failed (Linux visual baselines not run on macOS). A live local journey against two built APIs on one database (flag off and on) passed 16 of 16 checks: MVP roles complete setup; deferred roles are refused; a doctor grant made with the flag on loses its live token and refresh, is kept but unavailable, and cannot be switched to; a dermatologist-only account signs in with no role and recovers by adding a care role. A temporary browser check (not committed: it needs a second, flag-on API) confirmed the recovery screens in or, en and hi on three viewports. Synthetic numbers only; no SMS left the machine.
+
 ## Documentation gaps found in review
 
 Found while building this page. Open items need a decision before the source docs change; each is

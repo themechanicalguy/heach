@@ -27,6 +27,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
   const [switched, setSwitched] = useState<string | undefined>();
   const [added, setAdded] = useState(false);
   const { pending, error, run } = usePending();
+  const usable = me.activeRole !== 'new_account';
   const roleName = (role: string) => t(`roles.${role as Me['activeRole']}.name`);
 
   const chooseRole = (role: string) =>
@@ -84,8 +85,9 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
       )}
       <AccountLinks me={me} />
       <Invitations />
-      <ProfileSection me={me} />
-      <MobileChange />
+      {/* With no role it may use (ADR 0015), the account first adds one: the API refuses these. */}
+      {usable && <ProfileSection me={me} />}
+      {usable && <MobileChange />}
       {me.roles.length < 2 && (
         <AddRole
           me={me}
@@ -94,7 +96,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
           }}
         />
       )}
-      <DataRights me={me} />
+      {usable && <DataRights me={me} />}
       <SignOutCard />
     </section>
   );
@@ -125,8 +127,9 @@ function RoleAction({
 /** Pages for the people this account books for, and for a lab's or clinic's staff. */
 function AccountLinks({ me }: Readonly<{ me: Me }>) {
   const { locale, t } = useI18n();
-  const care = me.roles.some((grant) => grant.side === 'care');
-  const owner = me.roles.some((grant) => isOrganisationOwner(grant.role));
+  const usable = me.roles.filter((grant) => grant.available);
+  const care = usable.some((grant) => grant.side === 'care');
+  const owner = usable.some((grant) => isOrganisationOwner(grant.role));
   if (!care && !owner) return null;
   return (
     <nav className="flow__card" aria-label={t('account.linksLabel')}>
