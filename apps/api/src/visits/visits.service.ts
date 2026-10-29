@@ -25,6 +25,7 @@ import { JobRunner } from '../jobs/runner/job-runner.js';
 import { RefundsService } from '../payments/refunds.service.js';
 import { LedgerService } from '../payouts/ledger.service.js';
 import { Settings } from '../settings/settings.service.js';
+import { VaultFiling } from '../vault/vault-filing.js';
 import { VisitCodes } from './visit-codes.js';
 import {
   noShowSplit,
@@ -57,6 +58,7 @@ export class VisitsService implements OnModuleInit {
     private readonly settings: Settings,
     private readonly jobs: JobRunner,
     private readonly audit: AuditService,
+    private readonly filing: VaultFiling,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
   ) {}
 
@@ -100,11 +102,28 @@ export class VisitsService implements OnModuleInit {
 
   async complete(principal: Principal, bookingId: string, notes: VisitNotesDto): Promise<void> {
     const encrypted = await this.encryptor.encrypt(JSON.stringify(notes), 'health');
+    const before = await this.bookings.find(bookingId);
+    if (before?.providerId !== principal.userId) throw new NotFoundException();
+    // The same notes, filed into the patient's vault as a record issued by this provider (MV-02).
+    const filing = await this.filing.prepare(before, {
+      tags: [],
+      visitNotes: {
+        procedure: notes.procedure,
+        observations: notes.observations,
+        advice: notes.advice,
+      },
+    });
     const effects = await this.bookings.transaction(async (client) => {
       const booking = await this.mine(client, principal, bookingId);
       if (booking.kind === 'shift' || booking.status !== 'in_progress')
         throw reason(ConflictException, 'booking_transition_refused');
       await this.visits.complete(client, bookingId, encrypted);
+      await this.filing.file(client, booking, {
+        source: 'visit',
+        recordType: 'visit_note',
+        details: filing,
+        objectId: null,
+      });
       await this.lifecycle.apply(client, booking, 'complete', actorOf(principal));
       await this.ledger.earn(client, {
         providerId: principal.userId,

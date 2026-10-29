@@ -9,6 +9,7 @@ import { ProviderServicesView } from '../provider-services/ProviderServicesView'
 import { BookAny, BookChosen } from '../booking/BookPages';
 import { BookingDetailView, BookingsView } from '../booking/BookingsView';
 import { CollectionsView, LabOrdersView } from '../lab/LabOrdersView';
+import { VaultView } from '../vault/VaultView';
 import { EarningsView } from '../work/EarningsView';
 import { NotificationsView } from '../work/NotificationsView';
 import { RequestsView } from '../work/RequestsView';
@@ -98,4 +99,8 @@ export function LabOrdersPage() {
 
 export function CollectionsPage() {
   return <RequireAccount page="provider">{() => <CollectionsView />}</RequireAccount>;
+}
+
+export function VaultPage() {
+  return <RequireAccount page="care">{() => <VaultView />}</RequireAccount>;
 }

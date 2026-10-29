@@ -3389,6 +3389,670 @@
         "tags": ["admin"]
       }
     },
+    "/v1/vault": {
+      "get": {
+        "operationId": "VaultController_list",
+        "parameters": [
+          {
+            "name": "person",
+            "required": false,
+            "in": "query",
+            "description": "A linked patient ID, or `self`",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "prescription",
+                "lab_report",
+                "scan",
+                "discharge_summary",
+                "vaccination",
+                "visit_note",
+                "other"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Search titles, tags and provider names (MV-06)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecordDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/records": {
+      "post": {
+        "operationId": "VaultController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/records/{id}/file": {
+      "get": {
+        "operationId": "VaultController_file",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/records/{id}/access": {
+      "get": {
+        "operationId": "VaultController_access",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/records/{id}": {
+      "delete": {
+        "operationId": "VaultController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/usage": {
+      "get": {
+        "operationId": "VaultController_usage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/history": {
+      "get": {
+        "operationId": "VaultController_history",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      },
+      "post": {
+        "operationId": "VaultController_addHistory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HistoryInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/history/{id}": {
+      "delete": {
+        "operationId": "VaultController_removeHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/shares": {
+      "get": {
+        "operationId": "VaultController_shares",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShareDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      },
+      "post": {
+        "operationId": "VaultController_share",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/shares/{id}/revoke": {
+      "post": {
+        "operationId": "VaultController_revokeShare",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/links": {
+      "get": {
+        "operationId": "VaultController_links",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LinkDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      },
+      "post": {
+        "operationId": "VaultController_link",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkCreatedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/links/{id}/revoke": {
+      "post": {
+        "operationId": "VaultController_revokeLink",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/export": {
+      "get": {
+        "operationId": "VaultController_export",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/provider/bookings/{id}/shared": {
+      "get": {
+        "operationId": "ProviderVaultController_shared",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedRecordsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/shared/{recordId}/file": {
+      "get": {
+        "operationId": "ProviderVaultController_sharedFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/records": {
+      "post": {
+        "operationId": "ProviderVaultController_add",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderRecordInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/shared-records/{token}": {
+      "post": {
+        "operationId": "SharedLinkController_open",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkOpenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedRecordsDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["vault"]
+      }
+    },
+    "/admin/v1/vault/stats": {
+      "get": {
+        "operationId": "AdminVaultController_stats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VaultStatsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/v1/bookings/{id}/code": {
       "get": {
         "operationId": "PatientVisitsController_code",
@@ -7912,6 +8576,480 @@
           }
         },
         "required": ["listingId"]
+      },
+      "VisitNotesViewDto": {
+        "type": "object",
+        "properties": {
+          "procedure": {
+            "type": "string"
+          },
+          "observations": {
+            "type": "string"
+          },
+          "advice": {
+            "type": "string"
+          }
+        },
+        "required": ["procedure", "observations", "advice"]
+      },
+      "RecordDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "personId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Linked patient; null for the account holder"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["patient", "visit", "lab", "provider"],
+            "description": "Added by the patient, or issued on the application (MV-04)"
+          },
+          "recordType": {
+            "type": "string",
+            "enum": [
+              "prescription",
+              "lab_report",
+              "scan",
+              "discharge_summary",
+              "vaccination",
+              "visit_note",
+              "other"
+            ]
+          },
+          "recordDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "title": {
+            "type": "string"
+          },
+          "facility": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "visitNotes": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VisitNotesViewDto"
+              }
+            ]
+          },
+          "issuedBy": {
+            "type": "string",
+            "nullable": true,
+            "description": "Provider who issued it"
+          },
+          "hasFile": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "personId",
+          "source",
+          "recordType",
+          "recordDate",
+          "title",
+          "facility",
+          "tags",
+          "notes",
+          "visitNotes",
+          "issuedBy",
+          "hasFile",
+          "createdAt"
+        ]
+      },
+      "RecordInputDto": {
+        "type": "object",
+        "properties": {
+          "personId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A linked patient; the account holder when absent"
+          },
+          "recordType": {
+            "type": "string",
+            "enum": [
+              "prescription",
+              "lab_report",
+              "scan",
+              "discharge_summary",
+              "vaccination",
+              "visit_note",
+              "other"
+            ]
+          },
+          "recordDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "facility": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "file": {
+            "$ref": "#/components/schemas/UploadDto"
+          }
+        },
+        "required": ["recordType", "recordDate", "title"]
+      },
+      "AccessDto": {
+        "type": "object",
+        "properties": {
+          "accessorRole": {
+            "type": "string"
+          },
+          "accessorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "via": {
+            "type": "string",
+            "enum": ["booking_share", "external_link"]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["accessorRole", "accessorName", "via", "createdAt"]
+      },
+      "UsageDto": {
+        "type": "object",
+        "properties": {
+          "usedBytes": {
+            "type": "number"
+          },
+          "quotaBytes": {
+            "type": "number"
+          },
+          "nearlyFull": {
+            "type": "boolean",
+            "description": "Warn the user: above 80 % of the quota (MV-15)"
+          }
+        },
+        "required": ["usedBytes", "quotaBytes", "nearlyFull"]
+      },
+      "HistoryEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "personId": {
+            "type": "string",
+            "nullable": true
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "allergy",
+              "condition",
+              "medicine",
+              "surgery",
+              "blood_group",
+              "vaccination",
+              "family_history"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "addedByRole": {
+            "type": "string",
+            "description": "Who added it (MV-05)"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "personId", "kind", "text", "addedByRole", "createdAt"]
+      },
+      "HistoryInputDto": {
+        "type": "object",
+        "properties": {
+          "personId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "allergy",
+              "condition",
+              "medicine",
+              "surgery",
+              "blood_group",
+              "vaccination",
+              "family_history"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": ["kind", "text"]
+      },
+      "ShareDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "includeHistory": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["id", "bookingId", "recordIds", "includeHistory", "expiresAt", "revokedAt"]
+      },
+      "ShareInputDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recordIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "includeHistory": {
+            "type": "boolean"
+          }
+        },
+        "required": ["bookingId", "recordIds", "includeHistory"]
+      },
+      "LinkDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "records": {
+            "type": "number"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["id", "records", "expiresAt", "revokedAt"]
+      },
+      "LinkInputDto": {
+        "type": "object",
+        "properties": {
+          "recordIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hours": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 72,
+            "description": "Hours until the link expires"
+          }
+        },
+        "required": ["recordIds", "hours"]
+      },
+      "LinkCreatedDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string",
+            "description": "Part of the link; shown once"
+          },
+          "code": {
+            "type": "string",
+            "description": "The one-time code the doctor needs; shown once"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "token", "code", "expiresAt"]
+      },
+      "SharedFileDto": {
+        "type": "object",
+        "properties": {
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "contentBase64": {
+            "type": "string"
+          }
+        },
+        "required": ["recordId", "contentType", "contentBase64"]
+      },
+      "SharedRecordsDto": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecordDto"
+            }
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoryEntryDto"
+            }
+          },
+          "files": {
+            "description": "Files, for an external link only",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SharedFileDto"
+            }
+          }
+        },
+        "required": ["records", "history", "files"]
+      },
+      "ProviderRecordInputDto": {
+        "type": "object",
+        "properties": {
+          "recordType": {
+            "type": "string",
+            "enum": [
+              "prescription",
+              "lab_report",
+              "scan",
+              "discharge_summary",
+              "vaccination",
+              "visit_note",
+              "other"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "file": {
+            "$ref": "#/components/schemas/UploadDto"
+          }
+        },
+        "required": ["recordType", "title"]
+      },
+      "LinkOpenDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": ["code"]
+      },
+      "VaultStatsDto": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "number"
+          },
+          "storageBytes": {
+            "type": "number"
+          },
+          "infectedUploads": {
+            "type": "number"
+          },
+          "activeShares": {
+            "type": "number"
+          },
+          "activeLinks": {
+            "type": "number"
+          },
+          "openDeletionRequests": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "records",
+          "storageBytes",
+          "infectedUploads",
+          "activeShares",
+          "activeLinks",
+          "openDeletionRequests"
+        ]
       },
       "VisitCodeDto": {
         "type": "object",

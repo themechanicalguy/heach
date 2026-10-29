@@ -234,6 +234,16 @@ describe('Lab tests with home collection (J7; LB-02 to LB-11, AD-13)', () => {
     });
     await upload(report(sampleId, { correctionReason: 'wrong_value' })).expect(204);
     expect((await view()).reports.map((version) => version.version)).toEqual([2, 1]);
+    // Filed in the vault once; the correction replaced it (MV-02, LB-09).
+    const filed = (
+      await server().get('/v1/vault?type=lab_report').set(bearer(patient.login)).expect(200)
+    ).body as { source: string; tags: string[] }[];
+    expect(filed).toEqual([
+      expect.objectContaining({
+        source: 'lab',
+        tags: ['Complete blood count (CBC)', 'Lipid profile'],
+      }),
+    ]);
     await expectDashboards(app(), lab);
   });
 });

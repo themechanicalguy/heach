@@ -53,6 +53,7 @@ function roleLinks(me: Me | undefined): Link[] {
     return [
       home,
       { path: '/bookings', key: 'nav.bookings', icon: 'file' },
+      { path: '/vault', key: 'nav.vault', icon: 'note' },
       { path: '/notifications', key: 'nav.notifications', icon: 'note' },
     ];
   }

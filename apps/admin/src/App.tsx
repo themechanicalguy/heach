@@ -10,6 +10,7 @@ import { Finance } from './pages/Finance';
 import { Labs } from './pages/Labs';
 import { Reviews } from './pages/Reviews';
 import { Tickets } from './pages/Tickets';
+import { Vault } from './pages/Vault';
 import { Dashboard } from './pages/Dashboard';
 import { OwnPassword } from './pages/OwnPassword';
 import { SignIn } from './pages/SignIn';
@@ -42,7 +43,8 @@ function sectionsFor(role: string): Section[] {
   if (VERIFIERS.has(role)) sections.push('verification');
   if (['super_admin', 'support', 'finance'].includes(role)) sections.push('bookings');
   if (role === 'super_admin' || role === 'finance') sections.push('finance');
-  if (role === 'super_admin' || role === 'support') sections.push('tickets', 'reviews', 'labs');
+  if (role === 'super_admin' || role === 'support')
+    sections.push('tickets', 'reviews', 'labs', 'vault');
   if (role === 'super_admin' || role === 'support') sections.push('catalogue');
   if (USER_READERS.has(role)) sections.push('users');
   if (role === 'super_admin') sections.push('admins');
@@ -61,6 +63,7 @@ function Page({
   if (section === 'tickets') return <Tickets />;
   if (section === 'reviews') return <Reviews />;
   if (section === 'labs') return <Labs />;
+  if (section === 'vault') return <Vault />;
   if (section === 'catalogue') return <Catalogue canChange={role === 'super_admin'} />;
   if (section === 'users') return <Users canChange={USER_CHANGERS.has(role)} />;
   if (section === 'admins') return <Admins selfId={selfId} />;
