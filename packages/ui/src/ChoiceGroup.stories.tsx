@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ChoiceGroup } from './ChoiceGroup.js';
 
 const choices = [
-  { value: 'patient', label: 'Get care for myself', hint: 'Book doctors, nurses and tests' },
+  { value: 'patient', label: 'Get care for myself', hint: 'Book nurses, home visits and tests' },
   { value: 'nurse', label: 'I am a nurse', hint: 'Offer home visits' },
 ];
 

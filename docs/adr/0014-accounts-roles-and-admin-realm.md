@@ -54,3 +54,6 @@ Recorded in [account flows for every role](../account-flows-all-roles.md#owner-d
   only); recovery is a super-admin reset to a temporary password or of MFA; the last active super
   admin cannot be removed. The CLI remains for the first super admin.
 - **O-3:** a number change needs a fresh OTP on the current number and an OTP on the new one.
+- **Amended by [ADR 0015](0015-defer-online-consultation-and-clinic-appointments.md)** (29 October
+  2026): the clinic half of O-1 (dentist's or dermatologist's clinic, clinic front desk) is deferred
+  beyond the MVP; those roles are kept but refused by the server while `doctor-and-clinic` is off.

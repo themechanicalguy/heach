@@ -907,7 +907,7 @@ export interface components {
       /** @example 123456 */
       code: string;
     };
-    RoleGrantDto: {
+    HeldRoleDto: {
       /** @enum {string} */
       role:
         | 'patient'
@@ -935,6 +935,8 @@ export interface components {
         | null;
       /** @description Reason code, never free text */
       statusReason: string | null;
+      /** @description False while the role is deferred beyond the MVP (flag doctor-and-clinic off): kept, but it cannot be signed in to or switched to */
+      available: boolean;
     };
     SetupDraftDto: {
       /** @enum {string|null} */
@@ -1001,7 +1003,19 @@ export interface components {
         | 'sample_collector'
         | 'clinic_front_desk'
         | 'new_account';
-      roles: components['schemas']['RoleGrantDto'][];
+      roles: components['schemas']['HeldRoleDto'][];
+      /** @description Roles setup and adding a role accept now; deferred roles are left out (ADR 0015) */
+      offeredRoles: (
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+      )[];
       setup: components['schemas']['SetupStateDto'];
       /** @description Current consent versions not yet given */
       consentsDue: components['schemas']['ConsentDto'][];
@@ -1069,6 +1083,35 @@ export interface components {
       languages?: ('or' | 'en' | 'hi')[];
       /** @description The lab's name (labs only) */
       organisationName?: string;
+    };
+    RoleGrantDto: {
+      /** @enum {string} */
+      role:
+        | 'patient'
+        | 'representative'
+        | 'doctor'
+        | 'dentist'
+        | 'dermatologist'
+        | 'physiotherapist'
+        | 'nurse'
+        | 'attendant'
+        | 'lab'
+        | 'sample_collector'
+        | 'clinic_front_desk';
+      /** @enum {string} */
+      side: 'care' | 'provider';
+      /** @enum {string|null} */
+      applicationStatus:
+        | 'draft'
+        | 'submitted'
+        | 'under_review'
+        | 'changes_requested'
+        | 'approved'
+        | 'rejected'
+        | 'suspended'
+        | null;
+      /** @description Reason code, never free text */
+      statusReason: string | null;
     };
     ExportConsentDto: {
       purpose: string;
@@ -1219,7 +1262,7 @@ export interface components {
       /** @enum {string|null} */
       suspensionReason:
         'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other' | null;
-      roles: components['schemas']['RoleGrantDto'][];
+      roles: components['schemas']['HeldRoleDto'][];
       setupComplete: boolean;
       /** Format: date-time */
       createdAt: string;
@@ -1244,7 +1287,7 @@ export interface components {
       /** @enum {string|null} */
       suspensionReason:
         'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other' | null;
-      roles: components['schemas']['RoleGrantDto'][];
+      roles: components['schemas']['HeldRoleDto'][];
       setupComplete: boolean;
       /** Format: date-time */
       createdAt: string;

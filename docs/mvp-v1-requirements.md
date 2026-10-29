@@ -3,6 +3,7 @@
 - **Version:** MVP (Minimum Viable Product) Version 1 reference guide
 - **Date:** 3 October 2026
 - **Status:** Draft for review. Regulatory points and phase lengths are unverified estimates; see the notes in the security and delivery sections.
+- **Scope change (29 October 2026):** online doctor consultation and in-clinic dental and skin appointments are out of scope for the MVP and deferred beyond it, with no later release promised ([ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md); [Deferred beyond the MVP](#deferred-beyond-the-mvp)).
 
 ## Contents
 
@@ -22,7 +23,9 @@
 
 This document sets out the requirements for the Minimum Viable Product (MVP): the first release of a mobile-first web application that lets patients in Odisha find, book and pay verified care providers. "MVP" here is the release stage, not the product name. Its working name is HEACH (the final name is an open question); this document calls it "the application".
 
-The first release covers six services: online doctor consultation, physiotherapy at home, nursing procedures at home, bedside attendant care, in-clinic appointments for dental and skin treatment, and lab test booking. An e-medical report vault keeps each patient's prescriptions, reports and medical history in one encrypted place. Subscriptions, care packages and referral rewards sit across all six services.
+The first release covers four services: physiotherapy at home, nursing procedures at home, bedside attendant care, and lab test booking. An e-medical report vault keeps each patient's prescriptions, reports and medical history in one encrypted place. Subscriptions, care packages and referral rewards sit across all four services.
+
+Online doctor consultation and in-clinic appointments for dental and skin treatment are out of scope for the MVP and deferred beyond it, with no release promised ([ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md), 29 October 2026; see [Deferred beyond the MVP](#deferred-beyond-the-mvp)). Their requirements stay in this document, marked **Deferred beyond the MVP**, so their IDs stay stable.
 
 Providers onboard themselves, prove their identity through Aadhaar and DigiLocker, are verified by an admin, and then publish their services. Patients or their representatives book, receive the service, and leave a rating. A desktop-first admin panel handles verification, bookings oversight, disputes, finance and content.
 
@@ -32,14 +35,14 @@ Requirement IDs (for example `BK-03`) are stable so they can be used as backlog 
 
 ## Users and roles
 
-Ten roles use the application; one account can hold a patient role and one provider role. Every provider proves identity through Aadhaar and DigiLocker before an admin reviews professional documents.
+Ten roles are defined; eight use the first release. The doctor and the dentist or dermatologist roles are deferred beyond the MVP (ADR 0015), as is the clinic front desk that staffs their clinics. One account can hold a patient role and one provider role. Every provider proves identity through Aadhaar and DigiLocker before an admin reviews professional documents.
 
 | Role | Primary device | What they do in the first release | Verification needed |
 | --- | --- | --- | --- |
-| Patient | Mobile | Search, book, pay, attend consult or receive service, keep prescriptions, reports and medical history in the vault, rate | Mobile OTP. Aadhaar or DigiLocker identity check is optional |
+| Patient | Mobile | Search, book, pay, receive the service, keep prescriptions, reports and medical history in the vault, rate | Mobile OTP. Aadhaar or DigiLocker identity check is optional |
 | Patient representative | Mobile | Does everything a patient does, including managing the vault, on behalf of one or more linked patients (parent, child, elderly relative) | Mobile OTP, declared relationship. Aadhaar or DigiLocker identity check optional, as for patients |
-| Doctor (online consultation) | Mobile, tablet | Publishes online consultation services, sets availability and fees, conducts consults, issues prescriptions | Aadhaar identity check; DigiLocker documents (PAN, degree certificate where issued); medical council registration number and certificate |
-| Dentist or dermatologist (in-clinic) | Mobile, tablet | Publishes clinic, treatments and fees; manages appointment slots; records visit summary | Aadhaar identity check; DigiLocker documents; State Dental Council or medical council registration; clinic address proof and clinical establishment registration |
+| Doctor (online consultation). **Deferred beyond the MVP** | Mobile, tablet | Not in the first release. When offered: publishes online consultation services, sets availability and fees, conducts consults, issues prescriptions | Aadhaar identity check; DigiLocker documents (PAN, degree certificate where issued); medical council registration number and certificate |
+| Dentist or dermatologist (in-clinic). **Deferred beyond the MVP** | Mobile, tablet | Not in the first release. When offered: publishes clinic, treatments and fees; manages appointment slots; records visit summary | Aadhaar identity check; DigiLocker documents; State Dental Council or medical council registration; clinic address proof and clinical establishment registration |
 | Physiotherapist | Mobile | Publishes home-visit services, service area and fees; accepts and completes visits | Aadhaar identity check; DigiLocker documents (degree where issued); BPT/MPT degree; council or association registration where available |
 | Nurse / paramedical staff | Mobile | Posts home-visit procedures (injection, wound cleaning and dressing, and similar); accepts and completes visits | Aadhaar identity check; DigiLocker documents; nursing council registration (ANM/GNM/B.Sc) |
 | Bedside care attendant | Mobile, often low-end Android | Self-onboards, lists shift types and rates, accepts assignments | Aadhaar identity check with photo match; DigiLocker documents where available; address proof; training certificate if any; one reference |
@@ -63,19 +66,17 @@ Design implications:
 
 ## Scope of the first release
 
-The first release delivers one complete loop for each of the six services: onboard, list, discover, book, deliver, pay, rate.
+The first release delivers one complete loop for each of the four services: onboard, list, discover, book, deliver, pay, rate.
 
 ### In scope
 
 - Mobile OTP sign-up and login for all non-admin roles
 - Aadhaar and DigiLocker identity verification, mandatory for providers and optional for patients
-- Self-onboarding with document upload for doctors, dentists, dermatologists, physiotherapists, nurses, attendants and labs
+- Self-onboarding with document upload for physiotherapists, nurses, attendants and labs
 - Admin verification before any listing goes live
-- Online doctor consultation with video, audio fallback and digital prescription
 - Physiotherapy home visits
 - Nursing home visits (injection, wound cleaning and dressing, and similar)
 - Bedside attendant care by shift
-- In-clinic appointment booking for dental and skin treatment
 - Lab test booking with home sample collection or lab walk-in, and digital reports
 - E-medical report vault for prescriptions, reports and medical history, with consent-based sharing
 - Search and filter by service type, location (district, town, PIN code), language, fee, availability and rating
@@ -93,12 +94,28 @@ The first release delivers one complete loop for each of the six services: onboa
 
 - Native Android or iOS apps (the PWA is installable)
 - Emergency or ambulance services; the app shows a clear "not for emergencies, call 108" notice
-- In-clinic booking for specialities other than dental and skin
+- Online doctor consultation, and in-clinic appointments for any speciality, including dental and skin (deferred beyond the MVP, below)
 - Pharmacy ordering and insurance claims
 - Wallet (stored balance for refunds, reward credits or top-up); refunds go back to the original payment method
 - ABDM (ABHA) integration and exchange of records with hospital systems
 - Live GPS tracking of providers en route
 - AI symptom checker or triage
+
+### Deferred beyond the MVP
+
+Scope decision of the owner, 29 October 2026, recorded in [ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md): online doctor consultation and in-clinic dental and skin appointments are out of scope for the MVP. They are deferred beyond it; no release or date is promised. Deferred work is not unfinished MVP work: no MVP step or exit gate depends on it.
+
+| Item | Deferred parts |
+| --- | --- |
+| Roles | Doctor; dentist or dermatologist; clinic front desk (staff of a dental or skin clinic) |
+| Journeys | J2 (online doctor consultation), J6 (in-clinic appointment) |
+| Modules | OC (online consultation), IC (in-clinic appointments) |
+| Requirements in other modules | SL-01, SL-08, EN-08, A11Y-06 whole; the deferred part of AC-04 (roles), PO-05 (doctor registration number), BK-03 (instant confirmation of consultations), PR-01 (teleconsultation consent), MV-02 (prescriptions, consultation notes and clinic visit summaries issued on the application), LB-09 (sharing with a doctor on the application), PK-01 and PK-02 (dental plans, consultation entitlements), AD-04 (consultation specialities), AD-13 (clinics), LM-06 and LM-07 (video metrics and alerts) |
+| Regulatory points | Telemedicine Practice Guidelines; dental and medical council and clinical establishment registration for clinics |
+
+- Code already written for these roles stays in the repository behind the server feature flag `doctor-and-clinic`. The flag may be on only in local, test and dev; staging and production never turn it on. While it is off, the doctor, dentist, dermatologist and clinic front desk roles are not offered, granted, signed in to or switched to; existing grants, setup drafts and invitations are kept, not deleted (AC-04, ADR 0015).
+- Prescriptions from outside doctors stay in the first release: patients upload them to the vault (MV-03), bookings that need one ask for it (SL-06, LB-04, J3), records name the doctor or facility (MV-04), and patients share records with a doctor outside the application (MV-09). Only prescriptions issued on the application (OC-05, IC-08) are deferred.
+- If the owner later schedules either service, its requirements are reviewed as written before any build.
 
 ### Assumptions
 
@@ -106,7 +123,7 @@ The first release delivers one complete loop for each of the six services: onboa
 - The application is an intermediary: it connects patients to independent providers, clinics and labs, and does not employ them.
 - Revenue comes from a commission per completed booking, plus plan fees; percentages are admin-configurable.
 - Most patient traffic is on Android phones over 4G with patchy coverage outside cities.
-- With six services, the vault, plans and referrals in scope, the first release is built and released in stages (see the delivery plan) rather than in one launch.
+- With four services, the vault, plans and referrals in scope, the first release is built and released in stages (see the delivery plan) rather than in one launch.
 
 ## Security and data protection by design
 
@@ -134,7 +151,7 @@ Every field in the data model carries one of four classes; the class decides enc
 | EN-05 | Key rotation: master keys at least yearly, data keys on a schedule and immediately on suspected compromise; old data stays readable through key versioning. |
 | EN-06 | Separate keys per environment and per data domain (health records, identity, payments, documents), so one compromised key exposes one domain only. |
 | EN-07 | Uploaded files (reports, prescriptions, identity and qualification documents) are encrypted per object, stored in private buckets, virus-scanned, and served only through short-lived signed URLs after an access check. |
-| EN-08 | Video and audio consultation media are encrypted in transit (DTLS-SRTP); calls are not recorded; the video provider must not store media. |
+| EN-08 | **Deferred beyond the MVP.** Video and audio consultation media are encrypted in transit (DTLS-SRTP); calls are not recorded; the video provider must not store media. |
 | EN-09 | Searchable Restricted fields (for example mobile number lookup) use keyed hashes (blind indexes), not plaintext copies. |
 | EN-10 | Backups are encrypted with separate keys, stored in the project's India Region with a further encrypted copy outside the cloud account, and restore-tested quarterly. |
 | EN-11 | On the device: no Restricted data (including vault records) in localStorage, service-worker caches or URLs; offline data is limited to non-sensitive booking summaries and is wiped at logout. |
@@ -159,7 +176,7 @@ Every field in the data model carries one of four classes; the class decides enc
 
 | ID | Requirement |
 | --- | --- |
-| PR-01 | Purpose-specific, plain-language consent in the user's language at sign-up, before identity verification, before teleconsultation and before sharing a report with a provider; consent records are stored and can be withdrawn. |
+| PR-01 | Purpose-specific, plain-language consent in the user's language at sign-up, before identity verification, before teleconsultation (deferred beyond the MVP with OC-03) and before sharing a report with a provider; consent records are stored and can be withdrawn. |
 | PR-02 | Data minimisation: each feature collects only the fields it needs; the data model review rejects unused personal fields. |
 | PR-03 | The full Aadhaar number is never stored or logged; only a masked reference and the verification result are kept. |
 | PR-04 | Users can view, correct, export and request deletion of their data; requests are completed within a defined time. |
@@ -186,8 +203,8 @@ Every field in the data model carries one of four classes; the class decides enc
 
 - **Digital Personal Data Protection Act, 2023 and its Rules.** Notice and consent, purpose limitation, rights to access, correct and erase, breach notification, and verifiable consent of a parent or guardian for children's data.
 - **Aadhaar and DigiLocker.** Aadhaar-based verification is available to private applications only through permitted routes (for example DigiLocker, offline Aadhaar verification, or a licensed verification partner). The route, the consent wording and the rule against storing Aadhaar numbers need confirming.
-- **Telemedicine Practice Guidelines (2020).** Online consultation is limited to registered medical practitioners; the doctor's registration number must appear on the profile and prescription; patient consent and identification are required; certain medicine categories cannot be prescribed by teleconsult.
-- **Professional and establishment registration.** Doctors with the state medical council or National Medical Register; dentists with the State Dental Council; nurses with the Odisha Nurses and Midwives Council; physiotherapists under the allied and healthcare professions framework; clinics and labs under Odisha's clinical establishments law.
+- **Telemedicine Practice Guidelines (2020)** (deferred beyond the MVP with online consultation). Online consultation is limited to registered medical practitioners; the doctor's registration number must appear on the profile and prescription; patient consent and identification are required; certain medicine categories cannot be prescribed by teleconsult.
+- **Professional and establishment registration.** Doctors with the state medical council or National Medical Register and dentists with the State Dental Council (both deferred beyond the MVP); nurses with the Odisha Nurses and Midwives Council; physiotherapists under the allied and healthcare professions framework; labs (and, once deferred in-clinic appointments are offered, clinics) under Odisha's clinical establishments law.
 - **Bedside attendants** are non-clinical caregivers. Listings and UI must not present them as nurses or allow them to offer clinical procedures.
 - **Home procedures and lab tests.** Injections and similar procedures should require a valid prescription upload; some lab tests may also need one.
 - **Medical records.** How long provider-issued records (prescriptions, visit notes, lab reports) must be kept, and how that interacts with a patient's request to erase data, needs confirming.
@@ -198,12 +215,12 @@ Every field in the data model carries one of four classes; the class decides enc
 
 ## Core user journeys
 
-Nine journeys define the first release; each must be completable on a 360 px wide phone in the user's chosen language.
+Nine journeys are defined; seven make up the first release. J2 and J6 are deferred beyond the MVP (ADR 0015). Each must be completable on a 360 px wide phone in the user's chosen language.
 
 ### J1. Provider self-onboarding (all provider types)
 
 1. Choose language, enter mobile number, verify OTP.
-2. Choose role: doctor, physiotherapist, nurse or paramedic, bedside attendant.
+2. Choose role: physiotherapist, nurse or paramedic, bedside attendant, lab (doctor, dentist and dermatologist are deferred beyond the MVP).
 3. Fill profile: name, photo, gender, languages spoken, experience, qualifications.
 4. Give consent and complete Aadhaar and DigiLocker identity verification; details are filled in from the verified record.
 5. Upload role-specific professional documents (camera capture supported).
@@ -212,7 +229,9 @@ Nine journeys define the first release; each must be completable on a 360 px wid
 8. Admin approves, rejects with reason, or asks for re-upload; provider is notified by SMS.
 9. Once approved, provider creates listings and sets availability.
 
-### J2. Patient books an online doctor consultation
+### J2. Patient books an online doctor consultation (deferred beyond the MVP)
+
+Deferred beyond the MVP (ADR 0015): not in the first release.
 
 1. Search by speciality, symptom keyword or doctor name; filter by language, fee, next available slot.
 2. Open doctor profile; choose patient (self or linked person) and a slot.
@@ -246,7 +265,9 @@ Nine journeys define the first release; each must be completable on a 360 px wid
 3. Approve, reject with a reason from a standard list, or request a re-upload.
 4. Every decision is written to an audit log with admin ID and timestamp.
 
-### J6. Patient books an in-clinic appointment (dental or skin)
+### J6. Patient books an in-clinic appointment, dental or skin (deferred beyond the MVP)
+
+Deferred beyond the MVP (ADR 0015): not in the first release.
 
 1. Choose "Dental" or "Skin", then a treatment or a general consultation.
 2. See clinics by distance, fee, rating and next available slot; open a clinic profile with address, map and photos.
@@ -262,7 +283,7 @@ Nine journeys define the first release; each must be completable on a 360 px wid
 3. Upload a prescription where the test requires one; pay.
 4. For home collection, a sample collector is assigned; the patient confirms collection with an OTP.
 5. Track status: booked, collector assigned, sample collected, at lab, report ready.
-6. Download the report in the app; optionally share it with a doctor on the application for a consultation.
+6. Download the report in the app; optionally share it with a provider for a booking, or with a doctor outside the application (MV-09). Sharing for an online consultation is deferred beyond the MVP.
 
 ### J8. Patient buys a care package or subscription, and uses a referral reward
 
@@ -284,7 +305,7 @@ Nine journeys define the first release; each must be completable on a 360 px wid
 
 ## Functional requirements
 
-Every requirement below is a "Must" for the first release; fast-follow items are listed at the end of the section.
+Every requirement below is a "Must" for the first release, except those marked **Deferred beyond the MVP** (ADR 0015), which no MVP exit gate needs; fast-follow items are listed at the end of the section.
 
 ### Accounts and access (AC)
 
@@ -293,7 +314,7 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 | AC-01 | Sign up and log in with mobile number and SMS OTP; no password for patients and providers. |
 | AC-02 | Language is chosen on first launch and can be changed at any time from any screen. |
 | AC-03 | A user can add, edit and remove linked patients (name, age, gender, relationship) and book for them. |
-| AC-04 | Role-based access control: patient, representative, each provider type, admin sub-roles. |
+| AC-04 | Role-based access control: patient, representative, each provider type of the MVP (physiotherapist, nurse, attendant, lab and its sample collectors), admin sub-roles. The deferred roles (doctor, dentist, dermatologist, clinic front desk) keep their existing grants but cannot act while deferred (ADR 0015). |
 | AC-05 | Sessions persist on the device; sensitive actions (payout details, account deletion) re-verify by OTP. |
 | AC-06 | Users can view, correct and request deletion of their personal data. |
 
@@ -305,7 +326,7 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 | PO-02 | Document upload from camera or files (JPEG, PNG, PDF up to 5 MB), with client-side compression; files are encrypted and virus-scanned on receipt. |
 | PO-03 | Onboarding can be saved and resumed; progress indicator shows steps left. |
 | PO-04 | Profile status: Draft, Submitted, Under review, Changes requested, Approved, Rejected, Suspended. |
-| PO-05 | Public profile shows photo, qualifications, registration number (doctors, nurses), experience, languages, rating, and a "Verified" badge. |
+| PO-05 | Public profile shows photo, qualifications, registration number (nurses; doctors once that role is no longer deferred), experience, languages, rating, and a "Verified" badge. |
 | PO-06 | Provider enters bank account or UPI ID for payouts; changes require OTP. |
 | PO-07 | Attendant onboarding works with voice-assisted prompts and minimal text entry; an assisted mode lets an admin or field agent complete it for them. |
 
@@ -327,14 +348,14 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 
 | ID | Requirement |
 | --- | --- |
-| SL-01 | Doctors list online consultation services: speciality, consult type (video, audio), duration, fee, follow-up policy. |
+| SL-01 | **Deferred beyond the MVP.** Doctors list online consultation services: speciality, consult type (video, audio), duration, fee, follow-up policy. |
 | SL-02 | Physiotherapists list home-visit services from a standard catalogue (for example orthopaedic rehab, neuro rehab, post-operative, geriatric) with session length and fee. |
 | SL-03 | Nurses list home-visit procedures from a standard catalogue: injection (IM, IV, SC), wound cleaning and dressing, catheter care, vitals check, IV fluids; each with a fee. |
 | SL-04 | Attendants list shift types, daily rate, care settings (home, hospital), tasks they perform, and gender. |
 | SL-05 | Home-visit providers define a service area by district and PIN codes, and an optional travel surcharge. |
 | SL-06 | Catalogue items flag whether a doctor's prescription is mandatory before booking (for example injections). |
 | SL-07 | Providers can pause and resume a listing without admin action. |
-| SL-08 | Dentists and dermatologists list a clinic (name, address, map pin, photos, timings) and treatments from a standard catalogue with fee or fee range. |
+| SL-08 | **Deferred beyond the MVP.** Dentists and dermatologists list a clinic (name, address, map pin, photos, timings) and treatments from a standard catalogue with fee or fee range. |
 | SL-09 | Labs list tests and test packages from a standard catalogue with price, preparation instructions, sample type, report time, and whether home collection is offered. |
 
 ### Availability and scheduling (AV)
@@ -350,7 +371,7 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 
 | ID | Requirement |
 | --- | --- |
-| SD-01 | Home screen offers the six service types as large tiles, with "My records" and plans reachable from the main navigation. |
+| SD-01 | Home screen offers the four service types as large tiles, with "My records" and plans reachable from the main navigation. |
 | SD-02 | Search by speciality, service name or provider name, with tolerance for Odia, Hindi and English spellings. |
 | SD-03 | Filters: location, language spoken, gender, fee range, earliest availability, rating. |
 | SD-04 | Home-visit results are limited to providers serving the patient's PIN code. |
@@ -362,7 +383,7 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 | --- | --- |
 | BK-01 | A booking records: booker, care recipient, provider, service, slot or shift range, address (home services), fee breakdown, status. |
 | BK-02 | Statuses: Pending payment, Requested, Confirmed, In progress, Completed, Cancelled (by patient, provider or admin), No-show, Refunded. |
-| BK-03 | Consultation bookings confirm instantly on payment; home-visit and attendant bookings need provider acceptance within a configurable window, else auto-cancel and refund. |
+| BK-03 | Home-visit and attendant bookings need provider acceptance within a configurable window, else auto-cancel and refund. Deferred beyond the MVP: consultation bookings confirm instantly on payment. |
 | BK-04 | Patient and provider can cancel or reschedule under a policy that is shown before payment. |
 | BK-05 | Patient can attach reports, photos and prescriptions to a booking, from the device or from the vault. |
 | BK-06 | Reminders are sent 24 hours and 15 minutes before the slot. |
@@ -371,6 +392,8 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 | BK-09 | Follow-up or repeat bookings can be created from a completed booking in one step. |
 
 ### Online consultation (OC)
+
+**Deferred beyond the MVP** (ADR 0015): the whole module.
 
 | ID | Requirement |
 | --- | --- |
@@ -394,6 +417,8 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 | HS-06 | Both parties have an in-app "Report a safety concern" action that raises a high-priority ticket. |
 
 ### In-clinic appointments: dental and skin (IC)
+
+**Deferred beyond the MVP** (ADR 0015): the whole module.
 
 | ID | Requirement |
 | --- | --- |
@@ -420,7 +445,7 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 | LB-06 | Sample collection is confirmed by a one-time code from the patient; each sample carries a booking-linked identifier. |
 | LB-07 | Status tracking: booked, collector assigned, sample collected, received at lab, report ready, with a notification at each step. |
 | LB-08 | The lab uploads the report as PDF; it is stored encrypted as Restricted data and visible only to the patient, the booker and the lab. |
-| LB-09 | Reports are filed in the patient's vault automatically and shared with doctors through vault sharing (MV-07). |
+| LB-09 | Reports are filed in the patient's vault automatically; the patient shares them with a provider through vault sharing (MV-07) or with a doctor outside the application (MV-09). Sharing with a doctor on the application is deferred with online consultation. |
 | LB-10 | Re-collection and report correction flows, with reasons recorded. |
 | LB-11 | Lab dashboard: today's collections, pending reports, turnaround time against promised time. |
 
@@ -429,7 +454,7 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 | ID | Requirement |
 | --- | --- |
 | MV-01 | Every patient, and every linked patient, has a vault holding documents and a medical history profile. |
-| MV-02 | Records created on the application are filed automatically: prescriptions, consultation notes meant for the patient, home-visit notes, clinic visit summaries and lab reports. |
+| MV-02 | Records created on the application are filed automatically: home-visit notes and lab reports. Deferred beyond the MVP with OC and IC: prescriptions and consultation notes meant for the patient, and clinic visit summaries. |
 | MV-03 | Patients can upload their own records by camera or file (JPEG, PNG, PDF up to 10 MB): old prescriptions, lab reports, scans, discharge summaries, vaccination records. |
 | MV-04 | Each record has a type, record date, doctor or facility, the person it belongs to, optional tags and notes; uploaded records are marked "added by patient" and application records "issued by" the provider. |
 | MV-05 | Medical history profile with structured entries: allergies, long-term conditions, current medicines, past surgeries and hospital stays, blood group, vaccinations, family history. Each entry shows who added it and when. |
@@ -449,8 +474,8 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 
 | ID | Requirement |
 | --- | --- |
-| PK-01 | Admin and providers can define care packages: a fixed bundle of sessions or visits at a package price (for example 10 physiotherapy sessions, 7 daily dressings, 30 days of attendant care, a dental treatment plan). Provider-defined packages need admin approval. |
-| PK-02 | Admin can define subscriptions: recurring plans (monthly, quarterly, yearly) with entitlements such as a number of consultations, discounts on lab tests and home visits, and family members covered. |
+| PK-01 | Admin and providers can define care packages: a fixed bundle of sessions or visits at a package price (for example 10 physiotherapy sessions, 7 daily dressings, 30 days of attendant care; dental treatment plans are deferred with in-clinic appointments). Provider-defined packages need admin approval. |
+| PK-02 | Admin can define subscriptions: recurring plans (monthly, quarterly, yearly) with entitlements such as a number of home visits or sessions, discounts on lab tests and home visits, and family members covered. Consultation entitlements are deferred with online consultation. |
 | PK-03 | Plan page shows inclusions, exclusions, validity, renewal date, price and cancellation terms before purchase, in the user's language. |
 | PK-04 | Entitlement ledger tracks what is used and what is left per plan and per covered person; bookings draw on entitlements automatically at checkout. |
 | PK-05 | Subscriptions renew through UPI Autopay or card mandate, with a pre-debit notice; failed renewals retry and then pause the plan. |
@@ -504,7 +529,7 @@ Every requirement below is a "Must" for the first release; fast-follow items are
 - WhatsApp notifications and booking links
 - Favourite providers and rebooking in one tap
 - Live location sharing during home visits
-- In-clinic booking for further specialities
+- In-clinic booking for further specialities (after dental and skin clinics, which are deferred beyond the MVP)
 - ABHA linking and health record sharing
 
 ## Admin panel (desktop first)
@@ -516,7 +541,7 @@ The admin panel is a separate application optimised for 1280 px and wider, usabl
 | AD-01 | Admin login with email, password and mandatory MFA; sub-roles: super admin, verifier, support, finance. Lists show masked personal data; health data needs a break-glass action (SE-03). |
 | AD-02 | Verification queue showing the Aadhaar and DigiLocker result and any mismatch flags, with filters by role, district and age of request; document viewer with zoom and rotate; approve, reject, request changes. |
 | AD-03 | User management: search, view, suspend and reinstate patients and providers, with reason. |
-| AD-04 | Service catalogue management: specialities, nursing procedures, physiotherapy services, attendant tasks, each with translations in three languages. |
+| AD-04 | Service catalogue management: specialities (deferred beyond the MVP with online consultation), nursing procedures, physiotherapy services, attendant tasks, each with translations in three languages. |
 | AD-05 | Bookings console: search and filter all bookings, view timeline, cancel, reassign, refund. |
 | AD-06 | Complaints and safety tickets: queue, assignment, status, internal notes, resolution. |
 | AD-07 | Finance: transactions, commission settings, refunds, payout runs, export to CSV. |
@@ -525,7 +550,7 @@ The admin panel is a separate application optimised for 1280 px and wider, usabl
 | AD-10 | Dashboard: sign-ups, verified providers by role and district, bookings by service and status, completion and cancellation rates, revenue. |
 | AD-11 | Immutable audit log of every admin action; super admin can search and export it. |
 | AD-12 | Assisted onboarding: a support admin can create and complete a provider profile on the provider's behalf, with the provider's OTP consent. |
-| AD-13 | Clinic and lab management: approve clinics and labs, manage their staff accounts, monitor lab turnaround time and report corrections. |
+| AD-13 | Lab management: approve labs, manage their staff accounts (sample collectors), monitor lab turnaround time and report corrections. Clinic approval and front-desk accounts are deferred beyond the MVP. |
 | AD-14 | Plans: create and approve care packages and subscriptions, set prices and entitlements, view active plans, renewals and cancellations. |
 | AD-15 | Medical report vault operations: storage use, upload failures and sharing volumes, with no view of record content; handling of export and deletion requests. |
 | AD-16 | Referrals: configure reward rules, coupon values and caps, review flagged referrals, cancel fraudulent coupons. |
@@ -558,7 +583,7 @@ Alongside security (see the earlier section), these six areas are set up in spri
 | A11Y-03 | Touch targets at least 48 × 48 px; text contrast at least 4.5:1; layouts hold at 200% text zoom. |
 | A11Y-04 | Every form field has a visible label, clear error text, and an error summary; no information by colour alone. |
 | A11Y-05 | `lang` attribute is set per language so screen readers pronounce Odia and Hindi correctly. |
-| A11Y-06 | Video consultation controls are labelled and keyboard reachable; in-call chat is available as a text alternative. |
+| A11Y-06 | **Deferred beyond the MVP.** Video consultation controls are labelled and keyboard reachable; in-call chat is available as a text alternative. |
 | A11Y-07 | Automated axe checks run in unit and E2E suites; a manual screen-reader pass is done before each release. |
 
 ### Multi-language support (I18N)
@@ -596,8 +621,8 @@ Alongside security (see the earlier section), these six areas are set up in spri
 | LM-03 | Front-end error tracking with source maps, release tags and user role (not identity). |
 | LM-04 | Real-user monitoring of Core Web Vitals, split by route, device class and network type. |
 | LM-05 | API metrics: request rate, error rate, latency percentiles; distributed tracing via OpenTelemetry. |
-| LM-06 | Business-event metrics: OTP delivery success, payment success, booking acceptance, video call connect rate and drop rate. |
-| LM-07 | Alerts with on-call routing for: API error rate, payment failures, OTP failures, video connect failures, queue backlog. |
+| LM-06 | Business-event metrics: OTP delivery success, payment success, booking acceptance, and, once online consultation is no longer deferred, video call connect rate and drop rate. |
+| LM-07 | Alerts with on-call routing for: API error rate, payment failures, OTP failures, queue backlog; video connect failures once online consultation is no longer deferred. |
 | LM-08 | Uptime checks from within India; public status page. Availability target 99.5% monthly for the first release. |
 | LM-09 | Audit trail for access to patient data and for all admin actions, retained separately from application logs. |
 
@@ -623,9 +648,9 @@ flowchart TD
     P["Patient web app<br/>Mobile-first PWA, server rendered"] --> API
     V["Provider web app<br/>Mobile-first PWA, same codebase"] --> API
     A["Admin panel<br/>Desktop-first, separate app"] --> API
-    API["API and background workers<br/>Auth, identity, catalogue, booking, clinics, labs, vault, plans, referrals, notifications<br/>Encrypts sensitive fields before storage; adapters wrap every outside provider"]
+    API["API and background workers<br/>Auth, identity, catalogue, booking, labs, vault, plans, referrals, notifications<br/>Encrypts sensitive fields before storage; adapters wrap every outside provider"]
     API --> D["Data stores, India region<br/>PostgreSQL: users, bookings, payments<br/>Redis: cache, slot locks, job queue<br/>Object storage: vault records, documents<br/>Key management service: encryption keys"]
-    API --> T["Third-party services<br/>SMS and OTP gateway<br/>Payment gateway: UPI, Autopay, cards, refunds<br/>Video: managed WebRTC rooms<br/>Identity: Aadhaar and DigiLocker partner<br/>Error tracking, metrics, uptime checks"]
+    API --> T["Third-party services<br/>SMS and OTP gateway<br/>Payment gateway: UPI, Autopay, cards, refunds<br/>Video: managed WebRTC rooms (deferred beyond the MVP)<br/>Identity: Aadhaar and DigiLocker partner<br/>Error tracking, metrics, uptime checks"]
 ```
 
 All three front ends call one API; the API alone talks to the database, the key management service and outside providers.
@@ -642,7 +667,7 @@ All three front ends call one API; the API alone talks to the database, the key 
 | Encryption and keys | Managed key management service (India region), envelope encryption library shared by all services, secrets manager | Field-level encryption and key rotation from the first sprint |
 | Identity verification | DigiLocker and Aadhaar verification through an authorised partner, behind an adapter | Verified identity without storing Aadhaar numbers |
 | Background jobs | Queue workers for notifications, reminders, auto-cancel, payouts | Keeps API responses fast and retries failures |
-| Video | Managed WebRTC provider with media servers in India; chosen after a low-bandwidth trial | Avoids running media infrastructure in the first release |
+| Video | Deferred beyond the MVP with online consultation. If offered: managed WebRTC provider with media servers in India, chosen after a low-bandwidth trial | Avoids running media infrastructure |
 | Payments | Indian payment gateway with UPI, UPI Autopay mandates, refunds and split settlement | UPI is the default payment habit; mandates power subscriptions |
 | SMS | DLT-registered SMS provider with Odia and Hindi template support | Required for OTP and transactional messages in India |
 | Unit and component tests | Vitest, Testing Library, axe | Fast feedback on every commit |
@@ -654,7 +679,9 @@ All three front ends call one API; the API alone talks to the database, the key 
 
 ### Core data entities
 
-User, Role, LinkedPatient, ProviderProfile, ProviderDocument, VerificationDecision, ServiceCatalogueItem, Listing, ServiceArea, AvailabilityRule, Slot, Booking, BookingEvent, Consultation, Prescription, VisitNote, ShiftCheckIn, Payment, Refund, Payout, Review, Ticket, Notification, ConsentRecord, AuditLog, IdentityVerification, Clinic, ClinicStaff, Treatment, Lab, LabTest, LabOrder, Sample, LabReport, Plan, PlanPurchase, Entitlement, Mandate, MedicalRecord, MedicalHistoryEntry, RecordShare, RecordAccessEvent, ReferralCode, ReferralReward, Coupon.
+User, Role, LinkedPatient, ProviderProfile, ProviderDocument, VerificationDecision, ServiceCatalogueItem, Listing, ServiceArea, AvailabilityRule, Slot, Booking, BookingEvent, VisitNote, ShiftCheckIn, Payment, Refund, Payout, Review, Ticket, Notification, ConsentRecord, AuditLog, IdentityVerification, Lab, LabTest, LabOrder, Sample, LabReport, Plan, PlanPurchase, Entitlement, Mandate, MedicalRecord, MedicalHistoryEntry, RecordShare, RecordAccessEvent, ReferralCode, ReferralReward, Coupon.
+
+Deferred beyond the MVP (ADR 0015), not modelled for the first release: Consultation, Prescription (issued on the application), Clinic, ClinicStaff, Treatment. The account roles and the clinic organisation and staff membership already in the code are kept behind the `doctor-and-clinic` flag.
 
 ## Definition of done for every feature
 
@@ -691,7 +718,7 @@ The first release is built in 10 steps and launched in three stages (A, B, C), s
 - Verified providers per role per district
 - Search-to-booking conversion and booking acceptance rate
 - Completion rate, cancellation rate and no-show rate per service
-- Video call connect rate and share of calls that fell back to audio
+- Video call connect rate and share of calls that fell back to audio (only once online consultation is no longer deferred)
 - Payment success rate and OTP delivery success rate
 - Identity verification success rate and share needing manual fallback
 - Lab report turnaround against promised time
@@ -708,7 +735,7 @@ Targets for each metric should be set with the business owner before the pilot s
 
 | Risk | Effect | Mitigation |
 | --- | --- | --- |
-| Weak mobile networks outside cities | Failed video calls, abandoned bookings | Audio fallback, low-bitrate profiles, offline-tolerant PWA, SMS as backup channel |
+| Weak mobile networks outside cities | Abandoned bookings (and failed video calls, once online consultation is no longer deferred) | Low-bitrate profiles, offline-tolerant PWA, SMS as backup channel; audio fallback for video |
 | Too few verified providers at launch | Empty search results | Onboard providers before patient launch; assisted onboarding; district-by-district rollout |
 | Slow manual verification | Provider drop-off | Clear checklists, SLA dashboard, standard rejection reasons |
 | Safety incidents during home visits | Harm to patients or providers, reputational damage | Verification, start OTP, safety-concern button, code of conduct, rapid suspension |
@@ -731,14 +758,14 @@ Targets for each metric should be set with the business owner before the pilot s
 - [ ] Is payment online-only, or is cash or UPI at the time of home service allowed?
 - [ ] What commission and cancellation policy apply for each service type?
 - [ ] Are attendants individual freelancers only, or can agencies onboard and manage several attendants?
-- [ ] Should doctors registered with councils outside Odisha be allowed to consult patients in Odisha?
+- [ ] Should doctors registered with councils outside Odisha be allowed to consult patients in Odisha? (deferred with online consultation)
 - [ ] Is background or police verification required for home-visit providers and attendants?
-- [ ] Are audio-only and chat-only consultations offered as separate, lower-priced services?
+- [ ] Are audio-only and chat-only consultations offered as separate, lower-priced services? (deferred with online consultation)
 - [ ] What is the expected load at launch (users, bookings per day) for sizing and load tests?
 - [ ] Is Hindi required at launch, or are Odia and English sufficient for the pilot?
 - [ ] Which Aadhaar and DigiLocker route is used: direct registration or a licensed verification partner?
 - [ ] Should identity verification be mandatory for patients in any case (for example attendant bookings)?
-- [ ] Do clinics collect the balance themselves, or must all in-clinic payments go through the application?
+- [ ] Do clinics collect the balance themselves, or must all in-clinic payments go through the application? (deferred with in-clinic appointments)
 - [ ] Are labs limited to NABL-accredited ones, and who handles sample logistics: the lab's own collectors or the application's?
 - [ ] How long are vault records kept, what storage quota applies per account, and is extra storage a paid feature?
 - [ ] May providers download shared records, or view only?

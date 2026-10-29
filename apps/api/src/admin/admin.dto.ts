@@ -12,7 +12,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { RoleGrantDto } from '../accounts/accounts.dto.js';
+import { HeldRoleDto } from '../accounts/accounts.dto.js';
 import { ADMIN_ROLES } from '../common/request-context.js';
 
 export const SUSPENSION_REASONS = [
@@ -126,8 +126,8 @@ export class UserSummaryDto {
   @ApiProperty({ enum: SUSPENSION_REASONS, nullable: true, type: String })
   suspensionReason!: string | null;
 
-  @ApiProperty({ type: [RoleGrantDto] })
-  roles!: RoleGrantDto[];
+  @ApiProperty({ type: [HeldRoleDto] })
+  roles!: HeldRoleDto[];
 
   @ApiProperty()
   setupComplete!: boolean;

@@ -212,6 +212,15 @@ export class RoleGrantDto {
   statusReason!: string | null;
 }
 
+/** A grant as its holder and admins see it: kept even while its role is deferred (ADR 0015). */
+export class HeldRoleDto extends RoleGrantDto {
+  @ApiProperty({
+    description:
+      'False while the role is deferred beyond the MVP (flag doctor-and-clinic off): kept, but it cannot be signed in to or switched to',
+  })
+  available!: boolean;
+}
+
 export class SetupDraftDto {
   @ApiProperty({ enum: [...SELF_REGISTRABLE_ROLES, ...STAFF_ROLES], nullable: true, type: String })
   role!: SetupRole | null;
@@ -253,8 +262,15 @@ export class MeDto {
   @ApiProperty({ enum: USER_ROLES, description: 'The role this session acts in' })
   activeRole!: string;
 
-  @ApiProperty({ type: [RoleGrantDto] })
-  roles!: RoleGrantDto[];
+  @ApiProperty({ type: [HeldRoleDto] })
+  roles!: HeldRoleDto[];
+
+  @ApiProperty({
+    enum: SELF_REGISTRABLE_ROLES,
+    isArray: true,
+    description: 'Roles setup and adding a role accept now; deferred roles are left out (ADR 0015)',
+  })
+  offeredRoles!: RegistrableRole[];
 
   @ApiProperty({ type: SetupStateDto })
   setup!: SetupStateDto;

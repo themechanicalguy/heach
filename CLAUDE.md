@@ -3,10 +3,13 @@
 ## What this is
 
 HEACH is a mobile-first web application that lets patients in Odisha, India find, book and pay
-verified care providers: online doctor consultation, home physiotherapy, home nursing, bedside
-attendants, dental and skin clinic appointments, and lab tests. Providers onboard themselves, prove
-identity through Aadhaar and DigiLocker, and are verified by an admin before they can list services;
-patients keep prescriptions, reports and history in an encrypted medical record vault.
+verified care providers: home physiotherapy, home nursing, bedside attendants and lab tests.
+Online doctor consultation and dental and skin clinic appointments are out of scope for the MVP and
+deferred beyond it ([ADR 0015](docs/adr/0015-defer-online-consultation-and-clinic-appointments.md));
+their roles stay in code behind the `doctor-and-clinic` flag, never on in staging or production.
+Providers onboard themselves, prove identity through Aadhaar and DigiLocker, and are verified by an
+admin before they can list services; patients keep prescriptions, reports and history in an
+encrypted medical record vault.
 It handles sensitive health data, so security and data protection come before speed in every decision.
 
 ## Source of truth

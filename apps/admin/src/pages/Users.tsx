@@ -4,10 +4,11 @@ import { useCallback, useState } from 'react';
 import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
+import { roleLabel } from './role-label';
 import { UserPanel } from './UserPanel';
 
 const roleList = (user: UserSummary) =>
-  user.roles.map((grant) => grant.role).join(', ') || t('users.noRole');
+  user.roles.map((grant) => roleLabel(grant)).join(', ') || t('users.noRole');
 
 /** Masked columns (AD-01); `onOpen` shows one user's details. */
 function userColumns(onOpen: (id: string) => void) {

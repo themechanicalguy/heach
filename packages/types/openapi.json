@@ -1819,7 +1819,7 @@
         },
         "required": ["challengeId", "code"]
       },
-      "RoleGrantDto": {
+      "HeldRoleDto": {
         "type": "object",
         "properties": {
           "role": {
@@ -1859,9 +1859,13 @@
             "type": "string",
             "nullable": true,
             "description": "Reason code, never free text"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "False while the role is deferred beyond the MVP (flag doctor-and-clinic off): kept, but it cannot be signed in to or switched to"
           }
         },
-        "required": ["role", "side", "applicationStatus", "statusReason"]
+        "required": ["role", "side", "applicationStatus", "statusReason", "available"]
       },
       "SetupDraftDto": {
         "type": "object",
@@ -1994,7 +1998,25 @@
           "roles": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleGrantDto"
+              "$ref": "#/components/schemas/HeldRoleDto"
+            }
+          },
+          "offeredRoles": {
+            "type": "array",
+            "description": "Roles setup and adding a role accept now; deferred roles are left out (ADR 0015)",
+            "items": {
+              "type": "string",
+              "enum": [
+                "patient",
+                "representative",
+                "doctor",
+                "dentist",
+                "dermatologist",
+                "physiotherapist",
+                "nurse",
+                "attendant",
+                "lab"
+              ]
             }
           },
           "setup": {
@@ -2032,6 +2054,7 @@
           "mobile",
           "activeRole",
           "roles",
+          "offeredRoles",
           "setup",
           "consentsDue",
           "membership",
@@ -2166,6 +2189,50 @@
             "description": "The lab's name (labs only)"
           }
         }
+      },
+      "RoleGrantDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "representative",
+              "doctor",
+              "dentist",
+              "dermatologist",
+              "physiotherapist",
+              "nurse",
+              "attendant",
+              "lab",
+              "sample_collector",
+              "clinic_front_desk"
+            ]
+          },
+          "side": {
+            "type": "string",
+            "enum": ["care", "provider"]
+          },
+          "applicationStatus": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "under_review",
+              "changes_requested",
+              "approved",
+              "rejected",
+              "suspended"
+            ],
+            "nullable": true
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Reason code, never free text"
+          }
+        },
+        "required": ["role", "side", "applicationStatus", "statusReason"]
       },
       "ExportConsentDto": {
         "type": "object",
@@ -2549,7 +2616,7 @@
           "roles": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleGrantDto"
+              "$ref": "#/components/schemas/HeldRoleDto"
             }
           },
           "setupComplete": {
@@ -2627,7 +2694,7 @@
           "roles": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleGrantDto"
+              "$ref": "#/components/schemas/HeldRoleDto"
             }
           },
           "setupComplete": {

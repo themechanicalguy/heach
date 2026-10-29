@@ -88,10 +88,14 @@ export class MeController {
     await this.accounts.acceptConsents(principalOf(request), body.consents);
   }
 
-  /** Adds the other side of the account; needs a fresh OTP (AC-05, decision L-11). */
+  /**
+   * Adds the other side of the account; needs a fresh OTP (AC-05, decision L-11). Also open to a
+   * finished account left with no offered role (`new_account`, ADR 0015); the service refuses an
+   * account still in setup.
+   */
   @Post('roles')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(...GRANTED_USER_ROLES)
+  @Roles(...USER_ROLES)
   @UseGuards(RequireReverification)
   @ApiNoContentResponse()
   @ApiForbiddenResponse({ description: 'reverification_required' })

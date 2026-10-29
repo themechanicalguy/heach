@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
+import { roleLabel } from './role-label';
 import { StatusControls } from './StatusControls';
 
 interface Props {
@@ -29,11 +30,7 @@ export function UserPanel({ id, canChange, onChanged, onClose }: Readonly<Props>
   }
   if (loaded.state === 'loading') return <Skeleton label={t('state.loading')} />;
   const user = loaded.value;
-  const roles = user.roles
-    .map((grant) =>
-      grant.applicationStatus ? `${grant.role} (${grant.applicationStatus})` : grant.role,
-    )
-    .join(', ');
+  const roles = user.roles.map((grant) => roleLabel(grant, true)).join(', ');
   return (
     <aside className="admin-panel" aria-label={t('users.detailTitle')}>
       <h2>{t('users.detailTitle')}</h2>

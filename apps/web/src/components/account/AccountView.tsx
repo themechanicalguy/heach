@@ -16,7 +16,10 @@ import { Invitations } from './Invitations';
 import { MobileChange } from './MobileChange';
 import { ProfileSection } from './ProfileSection';
 
-/** Account details, roles and role switching, and sign-out of one or every device (AC-05, SE-07). */
+/**
+ * Account details, roles and role switching, and sign-out of one or every device (AC-05, SE-07).
+ * A role deferred beyond the MVP (ADR 0015) is listed as kept but not offered, with no switch.
+ */
 export function AccountView({ me }: Readonly<{ me: Me }>) {
   const { t } = useI18n();
   const router = useRouter();
@@ -24,6 +27,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
   const [switched, setSwitched] = useState<string | undefined>();
   const [added, setAdded] = useState(false);
   const { pending, error, run } = usePending();
+  const usable = me.activeRole !== 'new_account';
   const roleName = (role: string) => t(`roles.${role as Me['activeRole']}.name`);
 
   const chooseRole = (role: string) =>
@@ -46,21 +50,19 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
           <dd lang={me.locale}>{t(`locale.${me.locale}`)}</dd>
         </dl>
         <h2 className="flow__subtitle">{t('account.rolesTitle')}</h2>
+        {me.activeRole === 'new_account' && (
+          <Notice tone="warning">{t('account.noUsableRole')}</Notice>
+        )}
         <ul className="role-list">
           {me.roles.map((grant) => (
             <li key={grant.role}>
               <Card title={t(`roles.${grant.role}.label`)}>
-                {grant.role === me.activeRole ? (
-                  <p className="role-list__active">{t('account.using')}</p>
-                ) : (
-                  <Button
-                    className="heach-button--secondary"
-                    disabled={pending}
-                    onClick={() => void chooseRole(grant.role)}
-                  >
-                    {t('account.switchTo', { role: roleName(grant.role) })}
-                  </Button>
-                )}
+                <RoleAction
+                  grant={grant}
+                  active={grant.role === me.activeRole}
+                  disabled={pending}
+                  onSwitch={() => void chooseRole(grant.role)}
+                />
               </Card>
             </li>
           ))}
@@ -83,8 +85,9 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
       )}
       <AccountLinks me={me} />
       <Invitations />
-      <ProfileSection me={me} />
-      <MobileChange />
+      {/* With no role it may use (ADR 0015), the account first adds one: the API refuses these. */}
+      {usable && <ProfileSection me={me} />}
+      {usable && <MobileChange />}
       {me.roles.length < 2 && (
         <AddRole
           me={me}
@@ -93,17 +96,40 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
           }}
         />
       )}
-      <DataRights me={me} />
+      {usable && <DataRights me={me} />}
       <SignOutCard />
     </section>
+  );
+}
+
+/** What a role's card offers: the role in use, a switch to it, or why it cannot be used. */
+function RoleAction({
+  grant,
+  active,
+  disabled,
+  onSwitch,
+}: Readonly<{
+  grant: Me['roles'][number];
+  active: boolean;
+  disabled: boolean;
+  onSwitch: () => void;
+}>) {
+  const { t } = useI18n();
+  if (active) return <p className="role-list__active">{t('account.using')}</p>;
+  if (!grant.available) return <p className="flow__muted">{t('account.roleUnavailable')}</p>;
+  return (
+    <Button className="heach-button--secondary" disabled={disabled} onClick={onSwitch}>
+      {t('account.switchTo', { role: t(`roles.${grant.role}.name`) })}
+    </Button>
   );
 }
 
 /** Pages for the people this account books for, and for a lab's or clinic's staff. */
 function AccountLinks({ me }: Readonly<{ me: Me }>) {
   const { locale, t } = useI18n();
-  const care = me.roles.some((grant) => grant.side === 'care');
-  const owner = me.roles.some((grant) => isOrganisationOwner(grant.role));
+  const usable = me.roles.filter((grant) => grant.available);
+  const care = usable.some((grant) => grant.side === 'care');
+  const owner = usable.some((grant) => isOrganisationOwner(grant.role));
   if (!care && !owner) return null;
   return (
     <nav className="flow__card" aria-label={t('account.linksLabel')}>

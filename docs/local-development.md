@@ -172,10 +172,16 @@ on. The work records are [login and account setup](login-and-account-setup.md) a
   `finance`. The CLI is for the first super admin; after that a super admin adds admins in the
   Admins section, which shows a temporary password once (it expires after 24 hours and is
   replaced at the first sign-in).
-- **Staff (clinic front desk, sample collector).** Sign up a lab (or a dentist or dermatologist,
-  who names the clinic first), open Account, then Your team, and invite another synthetic number.
+- **Staff (clinic front desk, sample collector).** Sign up a lab (or, with `doctor-and-clinic`
+  in `FEATURE_FLAGS`, a dentist or dermatologist, who names the clinic first), open Account, then Your team, and invite another synthetic number.
   No SMS is sent for an invitation: sign in with the invited number and choose the invitation on
   the role step.
+- **Roles deferred beyond the MVP.** Doctor, dentist, dermatologist and clinic front desk are out
+  of scope for the MVP ([ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md)): not offered, and refused by the API, by default. To work on
+  their retained code locally, add `doctor-and-clinic` to `FEATURE_FLAGS` in `.env` and restart
+  the API and the web app. Never set it for staging or production (the flag refuses to turn on
+  there). Accounts that took one of these roles while the flag was on keep it; with the flag off
+  they sign in in another role, or with none, and the account page explains it.
 - **Linked patients, data and number change.** A patient or representative opens Account, then
   People I book for. Export, the deletion request and number change ask for a fresh code; the
   codes for a new number arrive in Mailpit like any other.

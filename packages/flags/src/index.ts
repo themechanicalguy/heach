@@ -8,6 +8,12 @@ export const FLAG_DEFINITIONS = {
   'sample-patient-note': ['local', 'test', 'dev'],
   /** OTP sign-in, account setup and admin sign-in; off outside dev until the Step 3 exit. */
   accounts: ['local', 'test', 'dev'],
+  /**
+   * Doctor (online consultation), dentist, dermatologist and clinic front desk (in-clinic) roles,
+   * deferred beyond the MVP (ADR 0015). Their code is kept for local and dev work only; this flag
+   * is never on in staging or production.
+   */
+  'doctor-and-clinic': ['local', 'test', 'dev'],
 } as const satisfies Record<string, readonly AppEnv[]>;
 
 export type FlagName = keyof typeof FLAG_DEFINITIONS;

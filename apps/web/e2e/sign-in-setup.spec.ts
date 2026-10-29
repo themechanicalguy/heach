@@ -26,6 +26,11 @@ test.describe('Sign-up and account setup', () => {
     }, info) => {
       await signInByOtp(page, locale, syntheticMobile());
       await expect(page).toHaveURL(new RegExp(`/${locale}/setup/role$`));
+      // Doctor, dentist and dermatologist are deferred beyond the MVP and not offered (ADR 0015).
+      await expect(page.getByRole('radio', { name: t.roles.nurse.label })).toBeVisible();
+      for (const role of ['doctor', 'dentist', 'dermatologist'] as const) {
+        await expect(page.getByRole('radio', { name: t.roles[role].label })).toHaveCount(0);
+      }
       if (SHOTS)
         await page.screenshot({
           path: `${SHOTS}/setup-role-${locale}-${info.project.name}.png`,

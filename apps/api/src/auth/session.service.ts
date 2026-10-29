@@ -31,6 +31,8 @@ export class SessionService {
     private readonly sessions: SessionRepository,
     private readonly accessTokens: AccessTokenStore,
     readonly realm: SessionRealm = USER_REALM,
+    /** False for a role that may not act now (ADR 0015): its sessions end at the next refresh. */
+    private readonly isOffered: (role: Role) => boolean = () => true,
   ) {}
 
   async signIn(userId: string, role: Role): Promise<IssuedTokens> {
@@ -169,8 +171,9 @@ export class SessionService {
       await this.sessions.revokeAllForUser(session.user_id, client);
       return { kind: 'replay', userId: session.user_id };
     }
-    // Suspended, role removed or past the realm's absolute limit: this device signs in again.
-    if (!session.role || this.pastAbsoluteLimit(session)) {
+    // Suspended, role removed or no longer offered, or past the realm's absolute limit: this
+    // device signs in again.
+    if (!session.role || !this.isOffered(session.role) || this.pastAbsoluteLimit(session)) {
       await this.sessions.revokeFamily(client, session.family_id);
       return { kind: 'ended' };
     }

@@ -31,8 +31,9 @@ const AccountContext = createContext<Account | undefined>(undefined);
 
 async function fetchMe(): Promise<Me> {
   const me = await api<Me>('/me');
-  const first = me.roles[0];
+  const first = me.roles.find((grant) => grant.available);
   // Setup finished in another tab: this session still acts as `new_account` until it switches.
+  // An account whose only roles are deferred (ADR 0015) stays without one: nothing to switch to.
   if (me.activeRole === 'new_account' && me.setup.complete && first) {
     const { accessToken } = await api<AccessToken>('/auth/switch-role', {
       method: 'POST',

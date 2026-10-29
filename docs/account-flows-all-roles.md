@@ -38,6 +38,8 @@ Recorded by Claude Code from the owner's answers in the session (FU-14: same Git
 | O-3 | Phone-number change and lost number | In-app change needs a fresh OTP on the current number and an OTP on the new number; the new number must not belong to another account; other devices are signed out. Lost old number: support-assisted recovery, not built now (owner and lawyer to define) |
 | O-4 | Provider identity and professional verification (KY, PO-02, AD-02) | Excluded. Boundary L-5 stands: providers finish account setup and land on a Draft application with later steps shown as not open |
 
+Amended 29 October 2026 by the scope decision in [ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md): the clinic half of O-1 (a dentist's or dermatologist's clinic and its front desk) is deferred beyond the MVP with in-clinic appointments. Its code and data stay behind the `doctor-and-clinic` flag; the lab half (a lab and its sample collectors) is unchanged.
+
 ## Implementation defaults (Claude Code; owner may change)
 
 | # | Default | Why |
@@ -73,11 +75,11 @@ been sent for any role (FU-30).
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Patient | Self, OTP | OTP | Language, name, gender, adult, consent | Own account, own linked patients | Home | Active, suspended | Number change (two codes); lost number: FU-33 | `role-journeys`, `linked-patients`, `account-data`; web E2E | Booking (Step 5) |
 | Representative | Self, OTP | OTP | As patient | As patient; books for linked patients later | Home | As patient | As patient | As patient | Booking; vault transfer MV-13 |
-| Doctor, dentist, dermatologist, physiotherapist, nurse, attendant | Self, OTP | OTP | Plus spoken languages | Own account; application Draft; no provider work (none exists) | Application page | Account active, suspended; application Draft to Suspended (only Draft reachable) | As patient | `role-journeys`; E2E provider setup | Verification (KY, PO, AD-02), excluded (O-4); approval gates on later work routes |
+| Physiotherapist, nurse, attendant; doctor, dentist, dermatologist (deferred beyond the MVP, ADR 0015: `doctor-and-clinic` flag only) | Self, OTP | OTP | Plus spoken languages | Own account; application Draft; no provider work (none exists) | Application page | Account active, suspended; application Draft to Suspended (only Draft reachable) | As patient | `role-journeys`; E2E provider setup | Verification (KY, PO, AD-02), excluded (O-4); approval gates on later work routes |
 | Lab | Self, OTP | OTP | Plus lab name | As provider; manages its lab's collectors | Application page; Your team | As provider | As patient | `role-journeys`, `staff-membership`; E2E | As provider |
-| Dentist, dermatologist as clinic | Self, OTP | OTP | As provider; names the clinic on Your team | Manages front desk staff | Application page; Your team | As provider | As patient | `staff-membership`, `role-journeys` | Clinic profile (Step 7) |
+| Dentist, dermatologist as clinic (deferred beyond the MVP, ADR 0015) | Self, OTP | OTP | As provider; names the clinic on Your team | Manages front desk staff | Application page; Your team | As provider | As patient | `staff-membership`, `role-journeys` | Clinic profile (Step 7) |
 | Sample collector | Invitation from a lab, accepted after OTP (in setup, or on Account after a fresh code) | OTP | Name, gender, adult, consent | Sign-in and staff home only; own application Draft; lab work only when the lab is approved (none exists) | Staff home | Invited, active, removed (signed out at once), expired, declined, revoked | As patient; removed member re-invited | `staff-membership` (13), `role-journeys`; E2E | Lab work (Step 7); own verification (excluded) |
-| Clinic front desk | Invitation from a clinic | OTP | As collector | Sign-in and staff home only; no application | Staff home | As collector | As collector | As collector | Clinic work (Step 7) |
+| Clinic front desk (deferred beyond the MVP, ADR 0015) | Invitation from a clinic | OTP | As collector | Sign-in and staff home only; no application | Staff home | As collector | As collector | As collector | Clinic work (Step 7) |
 | Super admin | First by CLI; others by a super admin | Email, password, TOTP | TOTP enrolment; temporary password replaced | All admin sections, admin management | Dashboard | Active, disabled, locked | Another super admin resets password or MFA; last super admin protected | `admin-management` (9), `role-journeys`; admin E2E | Break-glass (Step 6) |
 | Verifier, support, finance | By a super admin | As super admin | As super admin | Verifier and support: users (support changes); finance: none yet | Dashboard | As super admin | Super admin reset | As super admin | Their consoles (later steps) |
 

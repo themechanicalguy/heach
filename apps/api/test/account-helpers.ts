@@ -53,7 +53,7 @@ export async function otpSignIn(app: INestApplication<App>, mobile = syntheticMo
   return { mobile, login: fromResponse(response) };
 }
 
-const PATIENT_SETUP = {
+export const PATIENT_SETUP = {
   role: 'patient',
   fullName: 'Synthetic Person',
   gender: 'female',

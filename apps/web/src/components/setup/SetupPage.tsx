@@ -13,7 +13,7 @@ export function SetupPage({ step }: Readonly<{ step: SetupStep }>) {
     <RequireAccount page="setup">
       {(me) => (
         <SetupFrame step={step}>
-          {step === 'role' && <RoleStep saved={me.setup.draft.role} />}
+          {step === 'role' && <RoleStep me={me} />}
           {step === 'details' && <DetailsStep draft={me.setup.draft} />}
           {step === 'consent' && <ConsentStep due={me.consentsDue} />}
         </SetupFrame>

@@ -9,6 +9,7 @@ import {
   syntheticMobile,
   useApp,
 } from './account-helpers.js';
+import { WITH_DEFERRED_ROLES } from './boot-app.js';
 
 /** Setup answers for each self-registrable role (decision L-5). */
 const SELF_REGISTERED: Record<string, Record<string, unknown>> = {
@@ -37,7 +38,9 @@ function expectedFor(role: string): Record<string, number> {
 }
 
 describe('Every role signs up or is provisioned, signs in again and gets only its access (AC-04)', () => {
-  const { app, server } = useApp();
+  // Every role, including those deferred beyond the MVP (ADR 0015), whose code is kept behind the
+  // doctor-and-clinic flag; deferred-roles.int-spec.ts covers the MVP set with the flag off.
+  const { app, server } = useApp(WITH_DEFERRED_ROLES);
 
   async function statuses(login: Login): Promise<Record<string, number>> {
     const out: Record<string, number> = {};

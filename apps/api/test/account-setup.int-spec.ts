@@ -202,11 +202,14 @@ describe('Role switching and re-verification (L-3, AC-05)', () => {
     expect(blocked.body).toMatchObject({ code: 'reverification_required' });
     await reverify(app(), mobile, login);
     await server().post('/v1/me/roles').set(bearer(login)).send(add).expect(204);
-    await server()
+    // A second provider role is refused as the side already taken; an offered role is used so
+    // the deferred-role check (ADR 0015) cannot answer first.
+    const second = await server()
       .post('/v1/me/roles')
       .set(bearer(login))
-      .send({ role: 'doctor', languages: ['en'] })
+      .send({ role: 'physiotherapist', languages: ['en'] })
       .expect(409);
+    expect(second.body).toMatchObject({ code: 'side_taken' });
     const switched = await server()
       .post('/v1/auth/switch-role')
       .set(bearer(login))

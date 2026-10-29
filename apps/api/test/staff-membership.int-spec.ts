@@ -8,6 +8,7 @@ import {
   syntheticMobile,
   useApp,
 } from './account-helpers.js';
+import { WITH_DEFERRED_ROLES } from './boot-app.js';
 import { bearer, type Login } from './auth-helpers.js';
 
 const LAB = { role: 'lab', languages: ['or'], organisationName: 'Synthetic Path Lab' };
@@ -64,7 +65,8 @@ function membershipCalls({ app, server }: ReturnType<typeof useApp>) {
 }
 
 describe('Staff memberships: invitations and setup (owner decision O-1)', () => {
-  const context = useApp();
+  // Clinics belong to the deferred in-clinic roles (ADR 0015): their retained code is tested here.
+  const context = useApp(WITH_DEFERRED_ROLES);
   const { app, server } = context;
   const { me, organisation, invitationsOf, labOwner, invite, joinAsNew } = membershipCalls(context);
 

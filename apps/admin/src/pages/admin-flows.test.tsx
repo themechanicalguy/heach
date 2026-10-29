@@ -92,6 +92,11 @@ describe('Admin users (AD-03)', () => {
     fakeAdminApi({ role: 'verifier' });
     const panel = await openUser();
     expect(await screen.findByText('Synthetic Patient')).toBeTruthy();
+    // ADR 0015: a deferred grant is shown as kept but inactive, in the list and the details.
+    expect(panel.textContent).toContain(`doctor (draft, ${en.users.roleDeferred})`);
+    expect(screen.getByRole('table').textContent).toContain(
+      `patient, doctor (${en.users.roleDeferred})`,
+    );
     expect(panel.querySelector('button.heach-button--danger')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: en.users.close }));
     await waitFor(() => {
