@@ -18,7 +18,9 @@
     "bookings": "बुकिंग",
     "requests": "अनुरोध",
     "earnings": "कमाई",
-    "notifications": "सूचनाएँ"
+    "notifications": "सूचनाएँ",
+    "lab": "लैब ऑर्डर",
+    "collections": "संग्रह"
   },
   "offline": {
     "banner": "आप ऑफ़लाइन हैं। सहेजे गए पेज काम करते हैं; बदलाव के लिए कनेक्शन चाहिए।"
@@ -79,7 +81,10 @@
     "booking_balance_due": "{time} से शुरू होने वाली आपकी HEACH बुकिंग की बाकी राशि चुकाएँ। भुगतान के लिए ऐप खोलें।",
     "visit_started": "आपकी HEACH विज़िट शुरू हो गई है।",
     "visit_completed": "आपकी HEACH विज़िट पूरी हो गई। रेटिंग देने के लिए ऐप खोलें।",
-    "lab_report_ready": "आपकी HEACH लैब रिपोर्ट तैयार है। देखने के लिए ऐप खोलें।"
+    "lab_report_ready": "आपकी HEACH लैब रिपोर्ट तैयार है। देखने के लिए ऐप खोलें।",
+    "lab_collector_assigned": "आपकी लैब जाँच के लिए HEACH सैंपल कलेक्टर तय हो गया है। कौन आ रहा है, देखने के लिए ऐप खोलें।",
+    "lab_sample_collected": "आपका HEACH लैब सैंपल ले लिया गया है।",
+    "lab_sample_received": "आपका HEACH लैब सैंपल लैब पहुँच गया है।"
   },
   "welcome": {
     "title": "अपनी भाषा चुनें",
@@ -167,7 +172,13 @@
     "no_show_too_early": "यह बताने के लिए अभी बहुत जल्दी है।",
     "review_not_allowed": "विज़िट पूरी होने के बाद रेटिंग दे सकते हैं।",
     "review_exists": "आप इस विज़िट को पहले ही रेटिंग दे चुके हैं।",
-    "break_glass_required": "पहले टिकट की निजी जानकारी खोलें।"
+    "break_glass_required": "पहले टिकट की निजी जानकारी खोलें।",
+    "lab_cart_invalid": "ये सभी जाँचें एक ही लैब की नहीं हैं।",
+    "collector_not_in_lab": "वह कलेक्टर आपकी लैब में नहीं है।",
+    "sample_mismatch": "सैंपल ID इस बुकिंग से मेल नहीं खाता।",
+    "no_report_now": "सैंपल अभी लैब नहीं पहुँचा।",
+    "correction_reason_required": "सुधार का कारण दें।",
+    "lab_stage_refused": "यह कदम अभी संभव नहीं।"
   },
   "setup": {
     "progress": "{total} में से चरण {current}",
@@ -800,5 +811,54 @@
     "intro": "सहायता कर्मचारी आपकी निजी जानकारी केवल खुले टिकट के लिए, सीमित समय के लिए खोल सकते हैं, और हर बार यहाँ दर्ज होता है।",
     "empty": "किसी ने नहीं।",
     "entry": "{time} पर {role}: {reason}"
+  },
+  "lab": {
+    "title": "लैब जाँच",
+    "cart": "इस बुकिंग की जाँचें",
+    "addTest": "बुकिंग में जोड़ें",
+    "collection": "सैंपल संग्रह",
+    "home": "घर पर",
+    "walkIn": "लैब पर",
+    "stage": {
+      "booked": "बुक",
+      "collector_assigned": "कलेक्टर तय",
+      "sample_collected": "सैंपल लिया गया",
+      "received": "लैब पहुँचा",
+      "report_ready": "रिपोर्ट तैयार"
+    },
+    "collector": "कलेक्टर: {name}",
+    "verified": "सत्यापित",
+    "sampleId": "सैंपल ID: {id}",
+    "due": "{time} तक रिपोर्ट अपेक्षित",
+    "showCode": "संग्रह कोड दिखाएँ",
+    "report": "रिपोर्ट डाउनलोड करें",
+    "version": "संस्करण {version}",
+    "corrected": "सुधारा गया: {reason}",
+    "ordersTitle": "लैब ऑर्डर",
+    "ordersEmpty": "कोई ऑर्डर नहीं।",
+    "assign": "कलेक्टर तय करें",
+    "chooseCollector": "कलेक्टर",
+    "received": "पहुँचा चिह्नित करें",
+    "uploadReport": "रिपोर्ट अपलोड करें (PDF)",
+    "sampleCheck": "ट्यूब पर सैंपल ID",
+    "upload": "अपलोड",
+    "correction": "सुधार का कारण",
+    "recollect": "नया सैंपल माँगें",
+    "recollectReason": "क्यों",
+    "collectionsTitle": "संग्रह",
+    "collectionsEmpty": "कोई संग्रह तय नहीं।",
+    "enterCode": "मरीज़ का कोड",
+    "collect": "संग्रह की पुष्टि करें",
+    "collected": "सैंपल लिया गया। सैंपल ID {id}।",
+    "dashboard": "आज: {today} संग्रह · {pending} रिपोर्ट बाकी · औसत {hours} घंटे · {late} देर से",
+    "reasons": {
+      "wrong_value": "ग़लत मान",
+      "wrong_patient_detail": "मरीज़ की ग़लत जानकारी",
+      "missing_test": "जाँच छूटी",
+      "other": "अन्य",
+      "sample_haemolysed": "सैंपल ख़राब",
+      "insufficient_sample": "सैंपल कम",
+      "sample_lost": "सैंपल खो गया"
+    }
   }
 }

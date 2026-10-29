@@ -33,6 +33,9 @@ export function BookChosen({ listingId }: Readonly<{ listingId: string }>) {
                   target={{ kind: 'chosen', listingId }}
                   facts={listing}
                   startsAt={start}
+                  labTests={data.listings.filter(
+                    (entry) => entry.kind === 'lab_test' && entry.listingId !== listingId,
+                  )}
                 />
               </>
             );

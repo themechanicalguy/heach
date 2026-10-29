@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsDate,
   IsIn,
   IsInt,
@@ -83,6 +85,24 @@ export class CreateBookingDto {
   @IsOptional()
   @IsIn(LOCALES)
   locale?: (typeof LOCALES)[number];
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Lab cart: more tests from the same lab (LB-03)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsUUID('4', { each: true })
+  extraListingIds?: string[];
+
+  @ApiPropertyOptional({
+    enum: ['home', 'walk_in'],
+    description: 'Lab tests: where the sample is taken (LB-02)',
+  })
+  @IsOptional()
+  @IsIn(['home', 'walk_in'])
+  collection?: 'home' | 'walk_in';
 }
 
 export class CheckoutDto {

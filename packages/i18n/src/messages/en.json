@@ -18,7 +18,9 @@
     "bookings": "Bookings",
     "requests": "Requests",
     "earnings": "Earnings",
-    "notifications": "Alerts"
+    "notifications": "Alerts",
+    "lab": "Lab orders",
+    "collections": "Collections"
   },
   "offline": {
     "banner": "You are offline. Saved pages still work; changes need a connection."
@@ -79,7 +81,10 @@
     "booking_balance_due": "Please pay the balance for your HEACH booking starting {time}. Open the app to pay.",
     "visit_started": "Your HEACH visit has started.",
     "visit_completed": "Your HEACH visit is complete. Open the app to rate it.",
-    "lab_report_ready": "Your HEACH lab report is ready. Open the app to see it."
+    "lab_report_ready": "Your HEACH lab report is ready. Open the app to see it.",
+    "lab_collector_assigned": "A HEACH sample collector is assigned to your lab test. Open the app to see who is coming.",
+    "lab_sample_collected": "Your HEACH lab sample has been collected.",
+    "lab_sample_received": "Your HEACH lab sample has reached the lab."
   },
   "welcome": {
     "title": "Choose your language",
@@ -167,7 +172,13 @@
     "no_show_too_early": "It is too early to report this.",
     "review_not_allowed": "You can rate after the visit is complete.",
     "review_exists": "You have already rated this visit.",
-    "break_glass_required": "Open the ticket's private details first."
+    "break_glass_required": "Open the ticket's private details first.",
+    "lab_cart_invalid": "These tests are not all from the same lab.",
+    "collector_not_in_lab": "That collector is not in your lab.",
+    "sample_mismatch": "The sample ID does not match this booking.",
+    "no_report_now": "The sample has not been received yet.",
+    "correction_reason_required": "Give a reason for the correction.",
+    "lab_stage_refused": "This step is not possible now."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -800,5 +811,54 @@
     "intro": "Support staff can open your private details only for an open ticket, for a limited time, and every time is listed here.",
     "empty": "Nobody has.",
     "entry": "{role} on {time}: {reason}"
+  },
+  "lab": {
+    "title": "Lab test",
+    "cart": "Tests in this booking",
+    "addTest": "Add to booking",
+    "collection": "Sample collection",
+    "home": "At home",
+    "walkIn": "At the lab",
+    "stage": {
+      "booked": "Booked",
+      "collector_assigned": "Collector assigned",
+      "sample_collected": "Sample collected",
+      "received": "Received at lab",
+      "report_ready": "Report ready"
+    },
+    "collector": "Collector: {name}",
+    "verified": "Verified",
+    "sampleId": "Sample ID: {id}",
+    "due": "Report expected by {time}",
+    "showCode": "Show collection code",
+    "report": "Download report",
+    "version": "Version {version}",
+    "corrected": "Corrected: {reason}",
+    "ordersTitle": "Lab orders",
+    "ordersEmpty": "No orders.",
+    "assign": "Assign collector",
+    "chooseCollector": "Collector",
+    "received": "Mark received",
+    "uploadReport": "Upload report (PDF)",
+    "sampleCheck": "Sample ID on the tube",
+    "upload": "Upload",
+    "correction": "Correction reason",
+    "recollect": "Ask for a new sample",
+    "recollectReason": "Why",
+    "collectionsTitle": "Collections",
+    "collectionsEmpty": "No collections assigned.",
+    "enterCode": "Patient's code",
+    "collect": "Confirm collection",
+    "collected": "Collected. Sample ID {id}.",
+    "dashboard": "Today: {today} collections · {pending} reports pending · average {hours} h · {late} late",
+    "reasons": {
+      "wrong_value": "Wrong value",
+      "wrong_patient_detail": "Wrong patient detail",
+      "missing_test": "Missing test",
+      "other": "Other",
+      "sample_haemolysed": "Sample haemolysed",
+      "insufficient_sample": "Not enough sample",
+      "sample_lost": "Sample lost"
+    }
   }
 }

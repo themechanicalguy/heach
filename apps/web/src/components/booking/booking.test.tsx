@@ -247,3 +247,43 @@ describe('My bookings (BK-04, BK-07)', () => {
     });
   });
 });
+
+describe('A lab cart (LB-02, LB-03)', () => {
+  it('LB-03 adds another test of the same lab and chooses walk-in', async () => {
+    const LAB = '00000000-0000-4000-8000-000000000041';
+    route({
+      '/providers/p1': {
+        id: 'p1',
+        name: 'Synthetic Lab',
+        listings: [
+          {
+            listingId: LISTING,
+            itemName: 'CBC',
+            kind: 'lab_test',
+            prescriptionRequired: false,
+            feePaise: 30_000,
+          },
+          {
+            listingId: LAB,
+            itemName: 'Lipid profile',
+            kind: 'lab_test',
+            prescriptionRequired: false,
+            feePaise: 50_000,
+          },
+        ],
+      },
+      '/bookings': booking({ status: 'pending_payment' }),
+    });
+    inEnglish(<BookChosen listingId={LISTING} />);
+    fireEvent.click(await screen.findByLabelText('Lipid profile · ₹500.00'));
+    fireEvent.click(screen.getByLabelText('At the lab'));
+    fireEvent.change(screen.getByLabelText('Full address'), {
+      target: { value: '12 Synthetic Lane' },
+    });
+    fireEvent.change(screen.getByLabelText('PIN code'), { target: { value: '751001' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to payment' }));
+    await waitFor(() => {
+      expect(bodyOf('/bookings')).toMatchObject({ collection: 'walk_in', extraListingIds: [LAB] });
+    });
+  });
+});

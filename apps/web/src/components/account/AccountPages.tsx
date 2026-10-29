@@ -8,6 +8,7 @@ import { OnboardingView } from '../onboarding/OnboardingView';
 import { ProviderServicesView } from '../provider-services/ProviderServicesView';
 import { BookAny, BookChosen } from '../booking/BookPages';
 import { BookingDetailView, BookingsView } from '../booking/BookingsView';
+import { CollectionsView, LabOrdersView } from '../lab/LabOrdersView';
 import { EarningsView } from '../work/EarningsView';
 import { NotificationsView } from '../work/NotificationsView';
 import { RequestsView } from '../work/RequestsView';
@@ -89,4 +90,12 @@ export function EarningsPage() {
 
 export function NotificationsPage() {
   return <RequireAccount page="any">{() => <NotificationsView />}</RequireAccount>;
+}
+
+export function LabOrdersPage() {
+  return <RequireAccount page="provider">{() => <LabOrdersView />}</RequireAccount>;
+}
+
+export function CollectionsPage() {
+  return <RequireAccount page="provider">{() => <CollectionsView />}</RequireAccount>;
 }

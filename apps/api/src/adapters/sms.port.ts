@@ -15,7 +15,10 @@ export type SmsTemplate =
   | 'booking_balance_due'
   | 'visit_started'
   | 'visit_completed'
-  | 'lab_report_ready';
+  | 'lab_report_ready'
+  | 'lab_collector_assigned'
+  | 'lab_sample_collected'
+  | 'lab_sample_received';
 
 export interface SmsMessage {
   to: string;

@@ -1764,6 +1764,230 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/bookings/{id}/lab': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PatientLabController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/lab/code': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PatientLabController_code'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/lab/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PatientLabController_report'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LabController_orders'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/collectors': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LabController_collectors'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/dashboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LabController_dashboard'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/orders/{id}/collector': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['LabController_assign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/orders/{id}/collect': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['LabController_collect'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/orders/{id}/received': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['LabController_received'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/orders/{id}/recollect': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['LabController_recollect'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/lab/orders/{id}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LabController_reportFile'];
+    put?: never;
+    post: operations['LabController_report'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/collections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CollectionsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/collections/{id}/collect': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CollectionsController_collect'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/labs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminLabsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/bookings/{id}/review': {
     parameters: {
       query?: never;
@@ -2964,6 +3188,13 @@ export interface components {
       prescription?: components['schemas']['UploadDto'];
       /** @enum {string} */
       locale?: 'or' | 'en' | 'hi';
+      /** @description Lab cart: more tests from the same lab (LB-03) */
+      extraListingIds?: string[];
+      /**
+       * @description Lab tests: where the sample is taken (LB-02)
+       * @enum {string}
+       */
+      collection?: 'home' | 'walk_in';
     };
     PartyDto: {
       /** Format: uuid */
@@ -3227,6 +3458,94 @@ export interface components {
       procedure: string;
       observations: string;
       advice: string;
+    };
+    LabItemDto: {
+      itemCode: string;
+      name: string;
+      feePaise: number;
+      sampleType: string | null;
+    };
+    CollectorDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      /** @description Verified identity badge (LB-05) */
+      verified: boolean;
+    };
+    LabEventDto: {
+      stage: string;
+      reason: string | null;
+      actorRole: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    LabReportVersionDto: {
+      version: number;
+      correctionReason: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    LabOrderDto: {
+      /** Format: uuid */
+      bookingId: string;
+      status: string;
+      /** @enum {string} */
+      collection: 'home' | 'walk_in';
+      /** @enum {string} */
+      stage: 'booked' | 'collector_assigned' | 'sample_collected' | 'received' | 'report_ready';
+      /** Format: date-time */
+      startsAt: string;
+      items: components['schemas']['LabItemDto'][];
+      collector: components['schemas']['CollectorDto'] | null;
+      sampleId: string | null;
+      /** @description Report promised within this many hours of collection */
+      reportHours: number;
+      /** Format: date-time */
+      reportDueAt: string | null;
+      events: components['schemas']['LabEventDto'][];
+      reports: components['schemas']['LabReportVersionDto'][];
+      /** @description For the collector of a home collection */
+      address: string | null;
+    };
+    LabDashboardDto: {
+      todayCollections: number;
+      pendingReports: number;
+      averageTurnaroundHours: number | null;
+      /** @description Reports ready later than promised */
+      lateReports: number;
+    };
+    AssignCollectorDto: {
+      /** Format: uuid */
+      collectorId: string;
+    };
+    SampleCodeDto: {
+      code: string;
+    };
+    RecollectDto: {
+      /** @enum {string} */
+      reason: 'sample_haemolysed' | 'insufficient_sample' | 'sample_lost' | 'other';
+    };
+    ReportUploadDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+      /** @description The sample's identifier, checked against the booking (edge case 14) */
+      sampleId: string;
+      /** @enum {string} */
+      correctionReason?: 'wrong_value' | 'wrong_patient_detail' | 'missing_test' | 'other';
+    };
+    AdminLabDto: {
+      todayCollections: number;
+      pendingReports: number;
+      averageTurnaroundHours: number | null;
+      /** @description Reports ready later than promised */
+      lateReports: number;
+      /** Format: uuid */
+      labId: string;
+      name: string;
+      orders: number;
+      corrections: number;
     };
     ReviewInputDto: {
       stars: number;
@@ -5911,6 +6230,325 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  PatientLabController_view: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LabOrderDto'];
+        };
+      };
+    };
+  };
+  PatientLabController_code: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VisitCodeDto'];
+        };
+      };
+    };
+  };
+  PatientLabController_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  LabController_orders: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LabOrderDto'][];
+        };
+      };
+    };
+  };
+  LabController_collectors: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CollectorDto'][];
+        };
+      };
+    };
+  };
+  LabController_dashboard: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LabDashboardDto'];
+        };
+      };
+    };
+  };
+  LabController_assign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssignCollectorDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LabController_collect: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SampleCodeDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LabController_received: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LabController_recollect: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RecollectDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LabController_reportFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  LabController_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReportUploadDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CollectionsController_list: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LabOrderDto'][];
+        };
+      };
+    };
+  };
+  CollectionsController_collect: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SampleCodeDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminLabsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminLabDto'][];
+        };
       };
     };
   };

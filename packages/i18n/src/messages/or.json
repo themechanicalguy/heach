@@ -18,7 +18,9 @@
     "bookings": "ବୁକିଂ",
     "requests": "ଅନୁରୋଧ",
     "earnings": "ଆୟ",
-    "notifications": "ସୂଚନା"
+    "notifications": "ସୂଚନା",
+    "lab": "ଲ୍ୟାବ୍ ଅର୍ଡର୍",
+    "collections": "ସଂଗ୍ରହ"
   },
   "offline": {
     "banner": "ଆପଣ ଅଫଲାଇନ୍ ଅଛନ୍ତି। ସଞ୍ଚିତ ପୃଷ୍ଠା କାମ କରୁଛି; ପରିବର୍ତ୍ତନ ପାଇଁ ସଂଯୋଗ ଦରକାର।"
@@ -79,7 +81,10 @@
     "booking_balance_due": "{time} ରୁ ଆରମ୍ଭ ହେଉଥିବା ଆପଣଙ୍କ HEACH ବୁକିଂର ବାକି ଟଙ୍କା ଦିଅନ୍ତୁ। ଦେବାକୁ ଆପ୍ ଖୋଲନ୍ତୁ।",
     "visit_started": "ଆପଣଙ୍କ HEACH ଭିଜିଟ୍ ଆରମ୍ଭ ହୋଇଛି।",
     "visit_completed": "ଆପଣଙ୍କ HEACH ଭିଜିଟ୍ ସମ୍ପୂର୍ଣ୍ଣ। ରେଟିଂ ଦେବାକୁ ଆପ୍ ଖୋଲନ୍ତୁ।",
-    "lab_report_ready": "ଆପଣଙ୍କ HEACH ଲ୍ୟାବ୍ ରିପୋର୍ଟ ପ୍ରସ୍ତୁତ। ଦେଖିବାକୁ ଆପ୍ ଖୋଲନ୍ତୁ।"
+    "lab_report_ready": "ଆପଣଙ୍କ HEACH ଲ୍ୟାବ୍ ରିପୋର୍ଟ ପ୍ରସ୍ତୁତ। ଦେଖିବାକୁ ଆପ୍ ଖୋଲନ୍ତୁ।",
+    "lab_collector_assigned": "ଆପଣଙ୍କ ଲ୍ୟାବ୍ ପରୀକ୍ଷା ପାଇଁ ଜଣେ HEACH ନମୁନା ସଂଗ୍ରାହକ ନିଯୁକ୍ତ ହୋଇଛନ୍ତି। କିଏ ଆସୁଛନ୍ତି ଦେଖିବାକୁ ଆପ୍ ଖୋଲନ୍ତୁ।",
+    "lab_sample_collected": "ଆପଣଙ୍କ HEACH ଲ୍ୟାବ୍ ନମୁନା ସଂଗ୍ରହ ହୋଇଛି।",
+    "lab_sample_received": "ଆପଣଙ୍କ HEACH ଲ୍ୟାବ୍ ନମୁନା ଲ୍ୟାବ୍ ରେ ପହଞ୍ଚିଛି।"
   },
   "welcome": {
     "title": "ଆପଣଙ୍କ ଭାଷା ବାଛନ୍ତୁ",
@@ -167,7 +172,13 @@
     "no_show_too_early": "ଏହା ଜଣାଇବା ପାଇଁ ବହୁତ ଶୀଘ୍ର।",
     "review_not_allowed": "ଭିଜିଟ୍ ସମ୍ପୂର୍ଣ୍ଣ ହେବା ପରେ ରେଟିଂ ଦେଇପାରିବେ।",
     "review_exists": "ଆପଣ ଏହି ଭିଜିଟ୍ କୁ ଆଗରୁ ରେଟିଂ ଦେଇଛନ୍ତି।",
-    "break_glass_required": "ପ୍ରଥମେ ଟିକେଟ୍ ର ବ୍ୟକ୍ତିଗତ ବିବରଣୀ ଖୋଲନ୍ତୁ।"
+    "break_glass_required": "ପ୍ରଥମେ ଟିକେଟ୍ ର ବ୍ୟକ୍ତିଗତ ବିବରଣୀ ଖୋଲନ୍ତୁ।",
+    "lab_cart_invalid": "ଏହି ପରୀକ୍ଷାଗୁଡ଼ିକ ସମସ୍ତ ଏକା ଲ୍ୟାବ୍ ର ନୁହେଁ।",
+    "collector_not_in_lab": "ସେହି ସଂଗ୍ରାହକ ଆପଣଙ୍କ ଲ୍ୟାବ୍ ରେ ନାହାନ୍ତି।",
+    "sample_mismatch": "ନମୁନା ID ଏହି ବୁକିଂ ସହ ମେଳ ଖାଉନାହିଁ।",
+    "no_report_now": "ନମୁନା ଏପର୍ଯ୍ୟନ୍ତ ପହଞ୍ଚିନାହିଁ।",
+    "correction_reason_required": "ସଂଶୋଧନ ପାଇଁ କାରଣ ଦିଅନ୍ତୁ।",
+    "lab_stage_refused": "ଏହି ପଦକ୍ଷେପ ଏବେ ସମ୍ଭବ ନୁହେଁ।"
   },
   "setup": {
     "progress": "{total} ମଧ୍ୟରୁ ପଦକ୍ଷେପ {current}",
@@ -800,5 +811,54 @@
     "intro": "ସହାୟତା କର୍ମଚାରୀ କେବଳ ଏକ ଖୋଲା ଟିକେଟ୍ ପାଇଁ, ସୀମିତ ସମୟ ପାଇଁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ବିବରଣୀ ଖୋଲିପାରିବେ, ଏବଂ ପ୍ରତିଥର ଏଠାରେ ତାଲିକାଭୁକ୍ତ ହୁଏ।",
     "empty": "କେହି ଦେଖିନାହାନ୍ତି।",
     "entry": "{time} ରେ {role}: {reason}"
+  },
+  "lab": {
+    "title": "ଲ୍ୟାବ୍ ପରୀକ୍ଷା",
+    "cart": "ଏହି ବୁକିଂର ପରୀକ୍ଷା",
+    "addTest": "ବୁକିଂରେ ଯୋଡନ୍ତୁ",
+    "collection": "ନମୁନା ସଂଗ୍ରହ",
+    "home": "ଘରେ",
+    "walkIn": "ଲ୍ୟାବ୍ ରେ",
+    "stage": {
+      "booked": "ବୁକ୍ ହୋଇଛି",
+      "collector_assigned": "ସଂଗ୍ରାହକ ନିଯୁକ୍ତ",
+      "sample_collected": "ନମୁନା ସଂଗ୍ରହ ହୋଇଛି",
+      "received": "ଲ୍ୟାବ୍ ରେ ପହଞ୍ଚିଛି",
+      "report_ready": "ରିପୋର୍ଟ ପ୍ରସ୍ତୁତ"
+    },
+    "collector": "ସଂଗ୍ରାହକ: {name}",
+    "verified": "ଯାଞ୍ଚିତ",
+    "sampleId": "ନମୁନା ID: {id}",
+    "due": "{time} ସୁଦ୍ଧା ରିପୋର୍ଟ ଆଶା",
+    "showCode": "ସଂଗ୍ରହ କୋଡ୍ ଦେଖାନ୍ତୁ",
+    "report": "ରିପୋର୍ଟ ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
+    "version": "ସଂସ୍କରଣ {version}",
+    "corrected": "ସଂଶୋଧିତ: {reason}",
+    "ordersTitle": "ଲ୍ୟାବ୍ ଅର୍ଡର୍",
+    "ordersEmpty": "କୌଣସି ଅର୍ଡର୍ ନାହିଁ।",
+    "assign": "ସଂଗ୍ରାହକ ନିଯୁକ୍ତ କରନ୍ତୁ",
+    "chooseCollector": "ସଂଗ୍ରାହକ",
+    "received": "ପହଞ୍ଚିଲା ବୋଲି ଚିହ୍ନିତ କରନ୍ତୁ",
+    "uploadReport": "ରିପୋର୍ଟ ଅପଲୋଡ୍ (PDF)",
+    "sampleCheck": "ଟ୍ୟୁବ୍ ଉପରେ ନମୁନା ID",
+    "upload": "ଅପଲୋଡ୍",
+    "correction": "ସଂଶୋଧନ କାରଣ",
+    "recollect": "ନୂଆ ନମୁନା ମାଗନ୍ତୁ",
+    "recollectReason": "କାହିଁକି",
+    "collectionsTitle": "ସଂଗ୍ରହ",
+    "collectionsEmpty": "କୌଣସି ସଂଗ୍ରହ ନିଯୁକ୍ତ ନାହିଁ।",
+    "enterCode": "ରୋଗୀଙ୍କ କୋଡ୍",
+    "collect": "ସଂଗ୍ରହ ନିଶ୍ଚିତ କରନ୍ତୁ",
+    "collected": "ସଂଗ୍ରହ ହେଲା। ନମୁନା ID {id}।",
+    "dashboard": "ଆଜି: {today} ସଂଗ୍ରହ · {pending} ରିପୋର୍ଟ ବାକି · ହାରାହାରି {hours} ଘଣ୍ଟା · {late} ଡେରି",
+    "reasons": {
+      "wrong_value": "ଭୁଲ ମୂଲ୍ୟ",
+      "wrong_patient_detail": "ଭୁଲ ରୋଗୀ ବିବରଣୀ",
+      "missing_test": "ପରୀକ୍ଷା ବାଦ୍ ପଡିଛି",
+      "other": "ଅନ୍ୟ",
+      "sample_haemolysed": "ନମୁନା ନଷ୍ଟ",
+      "insufficient_sample": "ପର୍ଯ୍ୟାପ୍ତ ନମୁନା ନାହିଁ",
+      "sample_lost": "ନମୁନା ହଜିଗଲା"
+    }
   }
 }

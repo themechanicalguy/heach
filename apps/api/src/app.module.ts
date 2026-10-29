@@ -22,6 +22,7 @@ import { BookingsModule } from './bookings/bookings.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { TicketsModule } from './tickets/tickets.module.js';
 import { VisitsModule } from './visits/visits.module.js';
+import { LabsModule } from './labs/labs.module.js';
 import { JobsModule } from './jobs/runner/jobs.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { PayoutsModule } from './payouts/payouts.module.js';
@@ -66,6 +67,7 @@ export class AppModule {
         TicketsModule,
         BookingsModule,
         VisitsModule,
+        LabsModule,
         ReviewsModule,
       ],
       controllers: [HealthController],

@@ -23,9 +23,11 @@ export function PatientVisitPanel({
   const done = booking.status === 'completed';
   return (
     <>
-      {LIVE.has(booking.status) && <ShowCode bookingId={booking.id} />}
+      {LIVE.has(booking.status) && booking.kind !== 'lab_test' && (
+        <ShowCode bookingId={booking.id} />
+      )}
       {booking.kind === 'shift' && LIVE.has(booking.status) && <Shifts bookingId={booking.id} />}
-      {done && booking.kind !== 'shift' && <Notes bookingId={booking.id} />}
+      {done && booking.kind === 'visit' && <Notes bookingId={booking.id} />}
       {done && <RateForm bookingId={booking.id} />}
       {done && booking.provider && booking.listingId && (
         <Link

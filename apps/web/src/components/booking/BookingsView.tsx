@@ -17,6 +17,7 @@ import {
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
+import { PatientLabPanel } from '../lab/PatientLabPanel';
 import { PatientVisitPanel } from '../visit/PatientVisitPanel';
 import { money } from './money';
 
@@ -189,6 +190,9 @@ function BookingDetail({
             </li>
           ))}
         </ol>
+        {booking.kind === 'lab_test' && booking.status !== 'pending_payment' && (
+          <PatientLabPanel bookingId={booking.id} />
+        )}
         <PatientVisitPanel booking={booking} onChanged={onChanged} />
         {booking.canCancel && <CancelBooking booking={booking} onChanged={onChanged} />}
       </div>
