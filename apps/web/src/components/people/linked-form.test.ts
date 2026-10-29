@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EMPTY_LINKED, linkedBody, linkedErrors } from './linked-form';
+import { EMPTY_LINKED, linkedBody, linkedErrors, linkedFrom } from './linked-form';
 
 describe('linked patient form (AC-03)', () => {
   it('requires every field and a plausible year of birth', () => {
@@ -29,5 +29,17 @@ describe('linked patient form (AC-03)', () => {
       gender: 'female',
       relationship: 'parent',
     });
+  });
+});
+
+describe('linked patient edit form', () => {
+  it('starts from the saved person, with the year as text', () => {
+    const person = {
+      fullName: 'Sita',
+      birthYear: 1950,
+      gender: 'female',
+      relationship: 'parent',
+    } as const;
+    expect(linkedFrom(person)).toEqual({ ...person, birthYear: '1950' });
   });
 });
