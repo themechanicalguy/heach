@@ -85,15 +85,26 @@ export class BookingTimers implements OnModuleInit {
       const order = await this.gateway.orderStatus(payment.orderId);
       if (!order?.paid || order.amountPaise !== payment.amountPaise) mismatches += 1;
     }
+    mismatches += await this.ledgerMismatches();
     if (mismatches > 0) {
       appLogger.warn({ mismatches }, 'Payment reconciliation mismatch');
       await this.alerts.publish(
         'Payment reconciliation mismatch',
-        `${String(mismatches)} payments differ from the gateway.`,
+        `${String(mismatches)} payments or plan entitlements differ from the gateway or the ledger.`,
       );
     }
     await this.scheduleReconcile(now);
     return mismatches;
+  }
+
+  /** Plan entitlements whose units used differ from the uses recorded against them (Step 9 check). */
+  async ledgerMismatches(): Promise<number> {
+    const { rows } = await this.pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM app.entitlement e
+        WHERE e.units_used <> (SELECT coalesce(sum(u.units), 0) FROM app.entitlement_use u
+                                WHERE u.entitlement_id = e.id AND u.reversed_at IS NULL)`,
+    );
+    return rows[0]?.n ?? 0;
   }
 
   async scheduleReconcile(now: Date): Promise<void> {

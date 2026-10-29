@@ -125,7 +125,8 @@ CREATE TABLE app.entitlement_use (
   id uuid PRIMARY KEY,
   entitlement_id uuid NOT NULL REFERENCES app.entitlement (id) ON DELETE CASCADE,
   booking_id uuid NOT NULL UNIQUE REFERENCES app.booking (id) ON DELETE CASCADE,
-  units integer NOT NULL CHECK (units >= 1),
+  -- 0 when only the plan's discount applied: cancelling must not give back a unit never drawn.
+  units integer NOT NULL CHECK (units >= 0),
   value_paise integer NOT NULL CHECK (value_paise >= 0),
   reversed_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now()

@@ -97,7 +97,7 @@ export class DiscountsService {
           randomUUID(),
           discount.entitlementId,
           bookingId,
-          Math.max(discount.units, 1),
+          discount.units,
           discount.entitlementPaise,
         ],
       );

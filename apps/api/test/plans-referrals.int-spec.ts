@@ -1,6 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
+import { BookingTimers } from '../src/bookings/booking-timers.js';
 import { adminSignIn, nextTotp, signedUp, useApp } from './account-helpers.js';
 import { bearer, type Login } from './auth-helpers.js';
 import {
@@ -24,6 +25,7 @@ async function packagePlan(
   itemCode: string,
   units: number,
   pricePaise: number,
+  discountPercent = 0,
 ) {
   const admin = await adminSignIn(app, 'super_admin');
   const created = await request(app.getHttpServer())
@@ -33,7 +35,7 @@ async function packagePlan(
       kind: 'package',
       itemCode,
       units,
-      discountPercent: 0,
+      discountPercent,
       familyMembers: 0,
       validityDays: 60,
       pricePaise,
@@ -308,5 +310,41 @@ describe('Admin console (AD-08, AD-10, AD-17)', () => {
       .send({ key: 'commission_bps', value: 0 })
       .expect(403);
     await server().get('/admin/v1/referrals?status=flagged').set(bearer(support)).expect(200);
+  });
+});
+
+describe('Entitlement ledger invariants (PK-04, Step 9 checks)', () => {
+  const { app, server } = useApp();
+
+  it('PK-04 a discount-only booking on a used-up package gives back no unit when cancelled', async () => {
+    const physio = await listedProvider(app(), 'physiotherapist', 'physio_neuro_rehab', {
+      feePaise: 50_000,
+    });
+    const planId = await packagePlan(app(), 'physio_neuro_rehab', 1, 45_000, 20);
+    const patient = await signedUp(app());
+    const purchaseId = await buy(app(), patient.login, planId);
+    const book = async (nth: number) =>
+      (
+        await createBooking(app(), patient.login, {
+          listingId: physio.listingId,
+          startsAt: await firstSlot(app(), physio.accountId, physio.listingId, nth * 4),
+          purchaseId,
+        }).expect(201)
+      ).body as Booking;
+    await book(0);
+    const discounted = await book(1);
+    expect(discounted.fees).toMatchObject({ discountPaise: 10_000 });
+    await server()
+      .post(`/v1/bookings/${discounted.id}/cancel`)
+      .set(bearer(patient.login))
+      .send({ reason: 'changed_plans' })
+      .expect(200);
+    expect((await plansOf(app(), patient.login))[0]?.entitlements[0]).toMatchObject({
+      unitsTotal: 1,
+      unitsUsed: 1,
+    });
+    // Entitlement use never exceeds the purchase, and the ledger reconciles (Step 9 checks).
+    expect((await book(2)).fees).toMatchObject({ discountPaise: 10_000 });
+    expect(await app().get(BookingTimers).ledgerMismatches()).toBe(0);
   });
 });
