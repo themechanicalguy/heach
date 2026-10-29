@@ -5,6 +5,7 @@ export { Card, type CardProps } from './Card.js';
 export { Sheet, type SheetProps } from './Sheet.js';
 export { Table, type TableColumn, type TableProps } from './Table.js';
 export { Toast, type ToastProps } from './Toast.js';
+export { Icon, type IconName, type IconProps } from './Icon.js';
 export { BottomNav, type BottomNavItem, type BottomNavProps } from './BottomNav.js';
 export { Progress, type ProgressProps } from './Progress.js';
 export { type Choice, ChoiceGroup, type ChoiceGroupProps } from './ChoiceGroup.js';

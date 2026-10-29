@@ -9,7 +9,8 @@
     "home": "Home",
     "notes": "Notes",
     "account": "Account",
-    "application": "Application"
+    "application": "Application",
+    "signIn": "Sign in"
   },
   "offline": { "banner": "You are offline. Saved pages still work; changes need a connection." },
   "state": {

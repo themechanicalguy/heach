@@ -5,6 +5,8 @@ for (const locale of LOCALES) {
   test(`TS-07.1 the shell in ${locale} matches its visual baseline`, async ({ page }) => {
     await page.goto(`/${locale}`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(CATALOGUES[locale].home.title);
+    // The sign-in button appears once the session check ends; wait so the render is stable.
+    await expect(page.getByRole('link', { name: CATALOGUES[locale].nav.signIn })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     await expect(page).toHaveScreenshot(`shell-${locale}.png`, { fullPage: true });
   });
@@ -35,6 +37,32 @@ test('the navigation sits in the one top header and stays there while the page s
     window.scrollTo(0, 1000);
   });
   expect((await header.boundingBox())?.y).toBe(0);
+});
+
+test('AC-02 the language pill opens the three languages and goes to the chosen one', async ({
+  page,
+}) => {
+  await page.goto('/en');
+  const languages = page.getByRole('navigation', { name: CATALOGUES.en.locale.label });
+  const pill = languages.getByRole('button', { name: CATALOGUES.en.locale.en });
+  await pill.click();
+  await expect(pill).toHaveAttribute('aria-expanded', 'true');
+  await page.keyboard.press('Escape');
+  await expect(pill).toHaveAttribute('aria-expanded', 'false');
+  await expect(pill).toBeFocused();
+  await pill.click();
+  await languages.getByRole('link', { name: CATALOGUES.hi.locale.hi }).click();
+  await expect(page).toHaveURL(/\/hi$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(CATALOGUES.hi.home.title);
+});
+
+test('a signed-out visitor can sign in or sign up from the header', async ({ page }) => {
+  await page.goto('/en');
+  await page.getByRole('banner').getByRole('link', { name: CATALOGUES.en.nav.signIn }).click();
+  await expect(page).toHaveURL(/\/en\/sign-in$/);
+  await expect(
+    page.getByRole('banner').getByRole('link', { name: CATALOGUES.en.nav.signIn }),
+  ).toHaveCount(0);
 });
 
 test('I18N-06.1 Odia and Devanagari fonts are bundled and text 40 percent longer does not overflow', async ({
