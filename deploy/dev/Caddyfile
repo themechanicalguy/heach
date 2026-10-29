@@ -57,7 +57,25 @@ https://{$PUBLIC_HOST}:8443 {
 	tls internal
 	import security_headers
 	header Cache-Control "no-store"
-	reverse_proxy admin:8080
+	# The admin app calls the API on its own origin (AD-01); only admin routes, never test sign-in.
+	handle_path /api/* {
+		route {
+			rate_limit {
+				zone admin_api_per_ip {
+					key {remote_host}
+					events 300
+					window 1m
+				}
+			}
+			@not_admin not path /admin/*
+			respond @not_admin 404
+			request_header -X-Test-Login-Key
+			reverse_proxy api:3001
+		}
+	}
+	handle {
+		reverse_proxy admin:8080
+	}
 }
 
 # Web and API with test sign-in, for trusted developers: published on the host's loopback only,

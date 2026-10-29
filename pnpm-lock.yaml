@@ -201,6 +201,9 @@ importers:
       '@heach/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@heach/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@heach/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -268,6 +271,9 @@ importers:
       '@heach/flags':
         specifier: workspace:*
         version: link:../../packages/flags
+      '@heach/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@heach/logger':
         specifier: workspace:*
         version: link:../../packages/logger

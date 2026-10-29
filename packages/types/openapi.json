@@ -49,45 +49,6 @@
         "tags": ["health"]
       }
     },
-    "/v1/auth/test-login": {
-      "post": {
-        "operationId": "AuthController_testLogin",
-        "parameters": [
-          {
-            "name": "x-test-login-key",
-            "in": "header",
-            "description": "Required in dev",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TestLoginDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccessTokenDto"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["auth"]
-      }
-    },
     "/v1/auth/refresh": {
       "post": {
         "operationId": "AuthController_refresh",
@@ -247,6 +208,709 @@
         ],
         "tags": ["sample"]
       }
+    },
+    "/v1/auth/otp": {
+      "post": {
+        "operationId": "SignInController_requestCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallengeDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": ""
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/v1/auth/otp/resend": {
+      "post": {
+        "operationId": "SignInController_resendCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpResendDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallengeDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": ""
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/v1/auth/otp/verify": {
+      "post": {
+        "operationId": "SignInController_verifyCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpVerifyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/v1/auth/switch-role": {
+      "post": {
+        "operationId": "SignInController_switchRole",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["auth"]
+      }
+    },
+    "/v1/auth/reverify": {
+      "post": {
+        "operationId": "SignInController_startReverification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallengeDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["auth"]
+      }
+    },
+    "/v1/auth/reverify/verify": {
+      "post": {
+        "operationId": "SignInController_reverify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverifyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["auth"]
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "operationId": "MeController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/setup": {
+      "put": {
+        "operationId": "MeController_saveSetup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupPatchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/setup/complete": {
+      "post": {
+        "operationId": "MeController_completeSetup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An access token for the granted role",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/locale": {
+      "put": {
+        "operationId": "MeController_setLocale",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocaleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/consents": {
+      "post": {
+        "operationId": "MeController_acceptConsents",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/roles": {
+      "post": {
+        "operationId": "MeController_addRole",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/auth/test-login": {
+      "post": {
+        "operationId": "TestLoginController_testLogin",
+        "parameters": [
+          {
+            "name": "x-test-login-key",
+            "in": "header",
+            "description": "Required in dev",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/admin/v1/auth/password": {
+      "post": {
+        "operationId": "AdminAuthController_password",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPasswordAcceptedDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/auth/mfa": {
+      "post": {
+        "operationId": "AdminAuthController_mfa",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminMfaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/auth/refresh": {
+      "post": {
+        "operationId": "AdminAuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "heach_admin_refresh": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/auth/logout": {
+      "post": {
+        "operationId": "AdminAuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/auth/reverify": {
+      "post": {
+        "operationId": "AdminAuthController_reverify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/me": {
+      "get": {
+        "operationId": "AdminAuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/users": {
+      "get": {
+        "operationId": "AdminUsersController_list",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "A mobile number (exact) or part of a name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["active", "suspended"]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/users/{id}": {
+      "get": {
+        "operationId": "AdminUsersController_view",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/users/{id}/suspend": {
+      "post": {
+        "operationId": "AdminUsersController_suspend",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuspendDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/users/{id}/reinstate": {
+      "post": {
+        "operationId": "AdminUsersController_reinstate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
     }
   },
   "info": {
@@ -299,16 +963,6 @@
           }
         },
         "required": ["status", "checks"]
-      },
-      "TestLoginDto": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": ["userId"]
       },
       "AccessTokenDto": {
         "type": "object",
@@ -378,6 +1032,613 @@
           }
         },
         "required": ["id", "createdAt", "body"]
+      },
+      "OtpRequestDto": {
+        "type": "object",
+        "properties": {
+          "mobile": {
+            "type": "string",
+            "description": "Indian mobile number, with or without +91",
+            "example": "9000000001"
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"],
+            "description": "Language of the SMS and of a new account"
+          }
+        },
+        "required": ["mobile", "locale"]
+      },
+      "OtpChallengeDto": {
+        "type": "object",
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresInSeconds": {
+            "type": "number",
+            "description": "Seconds until the code expires"
+          },
+          "resendInSeconds": {
+            "type": "number",
+            "description": "Seconds until a new code may be requested"
+          }
+        },
+        "required": ["challengeId", "expiresInSeconds", "resendInSeconds"]
+      },
+      "OtpResendDto": {
+        "type": "object",
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          }
+        },
+        "required": ["challengeId", "locale"]
+      },
+      "OtpVerifyDto": {
+        "type": "object",
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "123456"
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          }
+        },
+        "required": ["challengeId", "code", "locale"]
+      },
+      "SwitchRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "representative",
+              "doctor",
+              "dentist",
+              "dermatologist",
+              "physiotherapist",
+              "nurse",
+              "attendant",
+              "lab",
+              "sample_collector",
+              "clinic_front_desk"
+            ]
+          }
+        },
+        "required": ["role"]
+      },
+      "ReverifyDto": {
+        "type": "object",
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "example": "123456"
+          }
+        },
+        "required": ["challengeId", "code"]
+      },
+      "RoleGrantDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "representative",
+              "doctor",
+              "dentist",
+              "dermatologist",
+              "physiotherapist",
+              "nurse",
+              "attendant",
+              "lab",
+              "sample_collector",
+              "clinic_front_desk"
+            ]
+          },
+          "side": {
+            "type": "string",
+            "enum": ["care", "provider"]
+          },
+          "applicationStatus": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "under_review",
+              "changes_requested",
+              "approved",
+              "rejected",
+              "suspended"
+            ],
+            "nullable": true
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Reason code, never free text"
+          }
+        },
+        "required": ["role", "side", "applicationStatus", "statusReason"]
+      },
+      "SetupDraftDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "representative",
+              "doctor",
+              "dentist",
+              "dermatologist",
+              "physiotherapist",
+              "nurse",
+              "attendant",
+              "lab",
+              "sample_collector"
+            ],
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male", "other", "undisclosed"],
+            "nullable": true
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          },
+          "organisationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "adultDeclared": {
+            "type": "boolean"
+          }
+        },
+        "required": ["role", "fullName", "gender", "languages", "organisationName", "adultDeclared"]
+      },
+      "SetupStateDto": {
+        "type": "object",
+        "properties": {
+          "complete": {
+            "type": "boolean"
+          },
+          "nextStep": {
+            "type": "string",
+            "enum": ["role", "details", "consent"],
+            "nullable": true
+          },
+          "draft": {
+            "$ref": "#/components/schemas/SetupDraftDto"
+          }
+        },
+        "required": ["complete", "nextStep", "draft"]
+      },
+      "ConsentDto": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": ["terms", "privacy"]
+          },
+          "version": {
+            "type": "string",
+            "example": "2026-10-draft.1"
+          }
+        },
+        "required": ["purpose", "version"]
+      },
+      "MeDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true,
+            "description": "Last four digits only"
+          },
+          "activeRole": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "representative",
+              "doctor",
+              "dentist",
+              "dermatologist",
+              "physiotherapist",
+              "nurse",
+              "attendant",
+              "lab",
+              "sample_collector",
+              "clinic_front_desk",
+              "new_account"
+            ],
+            "description": "The role this session acts in"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleGrantDto"
+            }
+          },
+          "setup": {
+            "$ref": "#/components/schemas/SetupStateDto"
+          },
+          "consentsDue": {
+            "description": "Current consent versions not yet given",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentDto"
+            }
+          }
+        },
+        "required": ["locale", "mobile", "activeRole", "roles", "setup", "consentsDue"]
+      },
+      "SetupPatchDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "representative",
+              "doctor",
+              "dentist",
+              "dermatologist",
+              "physiotherapist",
+              "nurse",
+              "attendant",
+              "lab",
+              "sample_collector"
+            ]
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male", "other", "undisclosed"]
+          },
+          "languages": {
+            "type": "array",
+            "description": "Languages spoken",
+            "items": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          },
+          "organisationName": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "The lab's name (labs only)"
+          },
+          "adultDeclared": {
+            "type": "boolean",
+            "description": "The person confirms they are 18 or older"
+          }
+        }
+      },
+      "ConsentsDto": {
+        "type": "object",
+        "properties": {
+          "consents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentDto"
+            }
+          }
+        },
+        "required": ["consents"]
+      },
+      "LocaleDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          }
+        },
+        "required": ["locale"]
+      },
+      "AddRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "representative",
+              "doctor",
+              "dentist",
+              "dermatologist",
+              "physiotherapist",
+              "nurse",
+              "attendant",
+              "lab",
+              "sample_collector"
+            ]
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          },
+          "organisationName": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "required": ["role"]
+      },
+      "TestLoginDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["userId"]
+      },
+      "AdminPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "verifier@heach.invalid"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "AdminEnrolmentDto": {
+        "type": "object",
+        "properties": {
+          "secret": {
+            "type": "string",
+            "description": "Base32 secret for the authenticator app; shown once"
+          },
+          "uri": {
+            "type": "string",
+            "description": "otpauth:// link with the same secret"
+          }
+        },
+        "required": ["secret", "uri"]
+      },
+      "AdminPasswordAcceptedDto": {
+        "type": "object",
+        "properties": {
+          "mfaTicket": {
+            "type": "string",
+            "description": "Single-use ticket for the TOTP step, valid 5 minutes"
+          },
+          "enrolment": {
+            "$ref": "#/components/schemas/AdminEnrolmentDto"
+          }
+        },
+        "required": ["mfaTicket"]
+      },
+      "AdminMfaDto": {
+        "type": "object",
+        "properties": {
+          "mfaTicket": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "example": "123456"
+          }
+        },
+        "required": ["mfaTicket", "code"]
+      },
+      "AdminCodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "123456"
+          }
+        },
+        "required": ["code"]
+      },
+      "AdminMeDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["super_admin", "verifier", "support", "finance"]
+          }
+        },
+        "required": ["email", "role"]
+      },
+      "UserSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Masked"
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true,
+            "description": "Last four digits only"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "suspended"]
+          },
+          "suspensionReason": {
+            "type": "string",
+            "enum": ["safety_concern", "fraud", "policy_breach", "user_request", "other"],
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleGrantDto"
+            }
+          },
+          "setupComplete": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSignInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "mobile",
+          "status",
+          "suspensionReason",
+          "roles",
+          "setupComplete",
+          "createdAt",
+          "lastSignInAt"
+        ]
+      },
+      "UserPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserSummaryDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": ["items", "total", "page", "pageSize"]
+      },
+      "UserDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Masked"
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true,
+            "description": "Last four digits only"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "suspended"]
+          },
+          "suspensionReason": {
+            "type": "string",
+            "enum": ["safety_concern", "fraud", "policy_breach", "user_request", "other"],
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleGrantDto"
+            }
+          },
+          "setupComplete": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSignInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Full name; this read is audited"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "mobile",
+          "status",
+          "suspensionReason",
+          "roles",
+          "setupComplete",
+          "createdAt",
+          "lastSignInAt",
+          "fullName"
+        ]
+      },
+      "SuspendDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": ["safety_concern", "fraud", "policy_breach", "user_request", "other"]
+          }
+        },
+        "required": ["reason"]
       }
     }
   }

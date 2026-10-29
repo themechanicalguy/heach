@@ -1,6 +1,8 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { AccountsModule } from './accounts/accounts.module.js';
 import { AdaptersModule } from './adapters/adapters.module.js';
+import { AdminModule } from './admin/admin.module.js';
 import { AuditModule } from './audit/audit.module.js';
 import { AuthGuard } from './auth/auth.guard.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -33,6 +35,8 @@ export class AppModule {
         AuthModule.register(appEnv),
         ObservabilityModule,
         SampleNotesModule,
+        AccountsModule,
+        AdminModule,
       ],
       controllers: [HealthController],
       providers: [

@@ -8,6 +8,8 @@ import { OfflineStatus } from '../../components/OfflineStatus';
 import { ServiceWorker } from '../../components/ServiceWorker';
 import { ShellNav } from '../../components/ShellNav';
 import { WebVitals } from '../../components/WebVitals';
+import { AccountProvider } from '../../lib/account';
+import { serverFlags } from '../../lib/flags';
 import { I18nProvider } from '../../lib/i18n-context';
 import { SessionProvider } from '../../lib/session';
 import { fontClassNames } from '../fonts';
@@ -42,21 +44,25 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const { t } = translatorFor(locale);
+  const flags = serverFlags();
+  const accounts = flags.isOn('accounts');
   return (
     <html lang={locale} className={fontClassNames}>
       <body>
         <I18nProvider locale={locale}>
           <SessionProvider>
-            <header className="shell-header">
-              <a href={`/${locale}`} className="shell-header__name">
-                {t('app.name')}
-              </a>
-              <LanguageSwitch />
-            </header>
-            <OfflineStatus />
-            {children}
-            <ShellNav />
-            <ErrorTracking />
+            <AccountProvider enabled={accounts}>
+              <header className="shell-header">
+                <a href={`/${locale}`} className="shell-header__name">
+                  {t('app.name')}
+                </a>
+                <LanguageSwitch />
+              </header>
+              <OfflineStatus />
+              {children}
+              <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
+              <ErrorTracking />
+            </AccountProvider>
           </SessionProvider>
           <ServiceWorker />
           <WebVitals />

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@heach/i18n": "workspace:*",
+    "@heach/types": "workspace:*",
     "@heach/ui": "workspace:*",
     "react": "19.3.0",
     "react-dom": "19.3.0"

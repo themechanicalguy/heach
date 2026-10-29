@@ -122,9 +122,8 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 ## Logs, traces and metrics (Step 2, LM-01 to LM-05)
 
 - The API logs JSON lines through `@heach/logger`: every line carries `correlationId` and, when
-  tracing is on, `traceId`. Names, mobile numbers and Restricted fields are masked at the top
-  level and one level deep; deeper values are not yet (LM-02.1,
-  [FU-27](follow-up-register.md#closes-step-2)).
+  tracing is on, `traceId`. Names, mobile numbers and Restricted fields are masked at every
+  depth (LM-02.1, [FU-27](follow-up-register.md#closes-step-2), closed 28 October 2026).
 - `pnpm dev:up` starts the OpenTelemetry Collector and Jaeger. Open http://localhost:16686 and
   search service `heach-api`, or tag `heach.correlation_id=<id>` from a response's
   `x-correlation-id` header, to see the request with its PostgreSQL and Redis spans.
@@ -134,7 +133,8 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 
 ## Web app shell and the sample note (Step 2)
 
-- Pages live under `/or`, `/en` and `/hi`; `/` redirects by browser language, Odia by default.
+- Pages live under `/or`, `/en` and `/hi`; `/` redirects by browser language, Odia by default
+  (with `accounts` on: to the language choice on a first visit, then to the language last used).
 - With `pnpm dev:up` running, open http://localhost:3000/or/sign-in, choose a synthetic patient,
   and write a note at `/or/notes`. The note is encrypted before it reaches PostgreSQL and every
   read is in `audit.entry`. The pages exist only while `sample-patient-note` is on (FF-01).
@@ -147,3 +147,29 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 - Front-end errors go to GlitchTip only when `NEXT_PUBLIC_GLITCHTIP_DSN` is set at build time.
 - `docker compose --profile observability up -d` adds GlitchTip, Prometheus and Grafana (the
   LM-05.1 dashboard) locally; see [the runbook](runbooks/error-tracking.md).
+
+## Sign-in, account setup and admin sign-in (Step 3, flag `accounts`)
+
+Everything here is behind the `accounts` flag (local, test and dev only); `.env.example` turns it
+on. The work record is [login and account setup](login-and-account-setup.md).
+
+- **OTP sign-in.** Open http://localhost:3000 (first visit: choose a language), then sign in with
+  any synthetic 10-digit number starting 6 to 9. With `SMS_PROVIDER=local` the API delivers each
+  SMS to Mailpit (`MAILPIT_API_URL`, the inbox at the `MAILPIT_UI_PORT` port): the code is in the
+  newest message to `91<number>@sms.heach.local`. Nothing leaves the machine.
+- **Caps.** OTP sends are capped per number, device cookie and address (`OTP_*` in
+  `.env.example`). Counters live in Redis for an hour; to reset them locally:
+  `docker compose exec redis redis-cli --tls --cacert /certs/ca.pem -a "$REDIS_PASSWORD" --scan --pattern 'otp-cap:*'`
+  and delete the keys, or wait.
+- **Admins.** Create one with the CLI; the password is read from standard input (never an
+  argument): `printf '%s' "<synthetic password, 12+ chars>" | pnpm --filter @heach/api admin:create --email you@heach.invalid --role super_admin`
+  (build the API first). Then open http://localhost:5173: the first sign-in shows a TOTP key
+  to add to an authenticator app (manual entry). Roles: `super_admin`, `verifier`, `support`,
+  `finance`.
+- **Browser tests with the API.** Build the web app with `FEATURE_FLAGS=sample-patient-note,accounts`
+  and `API_ORIGIN`, start it with `next start`, start the API with the address caps raised (one
+  test machine sends many codes), then
+  `E2E_API=1 E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL=http://localhost:<MAILPIT_UI_PORT> pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts`
+  and `E2E_API=1 pnpm --filter @heach/admin test:e2e` (admin preview proxies `/api` to `API_ORIGIN`).
+- **Test sign-in** still works for the four Step 2 synthetic accounts only; an account made by
+  OTP can never be reached through it.

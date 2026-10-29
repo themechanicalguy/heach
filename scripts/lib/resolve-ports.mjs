@@ -14,7 +14,7 @@ export const PORTS = [
   { key: 'REDIS_PORT', fallback: 6379, url: 'REDIS_URL', label: 'Redis' },
   { key: 'S3_PORT', fallback: 8333, url: 'S3_ENDPOINT', label: 'S3 store' },
   { key: 'SMTP_PORT', fallback: 1025, label: 'Mailpit SMTP' },
-  { key: 'MAILPIT_UI_PORT', fallback: 8025, label: 'Mailpit inbox' },
+  { key: 'MAILPIT_UI_PORT', fallback: 8025, url: 'MAILPIT_API_URL', label: 'Mailpit inbox' },
   {
     key: 'OTEL_HTTP_PORT',
     fallback: 4318,

@@ -1,10 +1,25 @@
-import type { AccessToken } from '@heach/types';
+import type { AccessToken, ApiErrorBody } from '@heach/types';
 
-/** HTTP status from the API; the body is never shown, it may echo nothing useful anyway. */
+/**
+ * HTTP status from the API and its stable reason code, if any; the rest of the body is never
+ * shown. The code maps to a translated message (errors.*).
+ */
 export class ApiError extends Error {
-  constructor(readonly status: number) {
+  constructor(
+    readonly status: number,
+    readonly code?: string,
+  ) {
     super(`API responded ${String(status)}`);
     this.name = 'ApiError';
+  }
+}
+
+async function errorFrom(response: Response): Promise<ApiError> {
+  try {
+    const body = (await response.json()) as Partial<ApiErrorBody>;
+    return new ApiError(response.status, typeof body.code === 'string' ? body.code : undefined);
+  } catch {
+    return new ApiError(response.status);
   }
 }
 
@@ -144,7 +159,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     if (epoch !== started) throw new ApiError(401);
     response = await retryAfter401(path, init, sentWith);
   }
-  if (!response.ok) throw new ApiError(response.status);
+  if (!response.ok) throw await errorFrom(response);
   return (response.status === 204 ? undefined : await response.json()) as T;
 }
 
@@ -157,6 +172,15 @@ export async function signOutOfThisDevice(): Promise<void> {
   try {
     await inFlight;
     await withRefreshLock(logoutWithFreshToken);
+  } finally {
+    endSession();
+  }
+}
+
+/** Signs every device of this account out (SE-07.3), then this tab and its siblings. */
+export async function signOutEverywhere(): Promise<void> {
+  try {
+    await api('/auth/logout', { method: 'POST', body: JSON.stringify({ allDevices: true }) });
   } finally {
     endSession();
   }

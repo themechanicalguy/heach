@@ -1,7 +1,7 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import type { IdentityVerifier } from './identity.port.js';
 import type { PaymentGateway } from './payments.port.js';
-import type { SmsSender } from './sms.port.js';
+import type { SmsMessage, SmsSender } from './sms.port.js';
 import type { VideoRooms } from './video.port.js';
 
 /**
@@ -9,11 +9,21 @@ import type { VideoRooms } from './video.port.js';
  * network. Only adapters.module.ts and tests may import this file (lint boundary).
  */
 export class FakeSmsSender implements SmsSender {
-  readonly sent: Parameters<SmsSender['send']>[0][] = [];
+  readonly sent: SmsMessage[] = [];
+  /** Set by a test to make the next sends fail, as a provider outage would. */
+  failing = false;
 
-  send(message: Parameters<SmsSender['send']>[0]): Promise<{ id: string }> {
+  send(message: SmsMessage): Promise<{ id: string }> {
+    if (this.failing) {
+      return Promise.reject(new Error('SMS provider unavailable'));
+    }
     this.sent.push(message);
     return Promise.resolve({ id: randomUUID() });
+  }
+
+  /** The code in the last SMS sent to this number; tests only. */
+  lastCodeFor(to: string): string | undefined {
+    return this.sent.findLast((message) => message.to === to)?.params.code;
   }
 }
 

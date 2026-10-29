@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto';
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { appLogger } from '../common/app-logger.js';
-import type { Principal } from '../common/request-context.js';
+import type { Principal, Role } from '../common/request-context.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
-import { AccessTokenStore } from './access-token.store.js';
-import { SessionRepository } from './session.repository.js';
+import type { AccessTokenStore } from './access-token.store.js';
+import { type SessionRealm, USER_REALM } from './session-realm.js';
+import type { SessionRepository, SessionRow } from './session.repository.js';
 import { hashToken, newToken } from './token-hash.js';
 
-export const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+export const REFRESH_TOKEN_TTL_MS = USER_REALM.refreshTtlMs;
 
 export interface IssuedTokens {
   accessToken: string;
@@ -20,20 +21,38 @@ type Rotation =
   | { kind: 'replay'; userId: string }
   | { kind: 'ended' };
 
-/** Sign-in, refresh-token rotation with replay detection, and logout (SE-07). */
-@Injectable()
+/**
+ * Sign-in, refresh-token rotation with replay detection, role switching and logout (SE-07). One
+ * instance per realm (decision L-10); the caller has already authenticated the owner and decided
+ * the role, which the server alone grants.
+ */
 export class SessionService {
   constructor(
     private readonly sessions: SessionRepository,
     private readonly accessTokens: AccessTokenStore,
+    readonly realm: SessionRealm = USER_REALM,
   ) {}
 
-  async signIn(userId: string): Promise<IssuedTokens> {
-    const role = await this.sessions.findUserRole(userId);
-    if (!role) {
-      throw new NotFoundException();
-    }
-    return this.issue({ userId, role, sessionId: randomUUID() }, randomUUID());
+  async signIn(userId: string, role: Role): Promise<IssuedTokens> {
+    const principal = { userId, role, sessionId: randomUUID(), realm: this.realm.name };
+    return this.issue(principal, { id: randomUUID(), startedAt: new Date() });
+  }
+
+  /**
+   * Makes `role` the active role of this device's session and returns a new access token for it;
+   * the old token stops working. The caller has checked that the account holds the role.
+   */
+  async switchRole(principal: Principal, accessToken: string, role: Role): Promise<string> {
+    const familyId = await this.sessions.transaction(async (client) => {
+      await this.sessions.lockUser(client, principal.userId);
+      if (!(await this.sessions.setActiveRole(client, principal.sessionId, role))) {
+        throw new UnauthorizedException();
+      }
+      return this.sessions.familyOf(client, principal.sessionId);
+    });
+    if (!familyId) throw new UnauthorizedException();
+    await this.accessTokens.revoke(accessToken);
+    return this.accessTokens.issue({ ...principal, role }, familyId, this.realm.accessTtlSeconds);
   }
 
   /**
@@ -118,30 +137,52 @@ export class SessionService {
       await this.sessions.revokeAllForUser(session.user_id, client);
       return { kind: 'replay', userId: session.user_id };
     }
+    // Suspended, role removed or past the realm's absolute limit: this device signs in again.
+    if (!session.role || this.pastAbsoluteLimit(session)) {
+      await this.sessions.revokeFamily(client, session.family_id);
+      return { kind: 'ended' };
+    }
     await this.sessions.revokeIfActive(session.id, client);
-    const principal = { userId: session.user_id, role: session.role, sessionId: randomUUID() };
-    return { kind: 'rotated', tokens: await this.issue(principal, session.family_id, client) };
+    const principal = {
+      userId: session.user_id,
+      role: session.role,
+      sessionId: randomUUID(),
+      realm: this.realm.name,
+    };
+    const family = { id: session.family_id, startedAt: session.family_started_at };
+    return { kind: 'rotated', tokens: await this.issue(principal, family, client) };
+  }
+
+  private pastAbsoluteLimit(session: SessionRow): boolean {
+    const limit = this.realm.absoluteTtlMs;
+    return limit !== undefined && session.family_started_at.getTime() + limit < Date.now();
   }
 
   /** Stores the session, then issues its access token (inside the caller's transaction, if any). */
   private async issue(
     principal: Principal,
-    familyId: string,
+    family: { id: string; startedAt: Date },
     client?: TransactionClient,
   ): Promise<IssuedTokens> {
     const refresh = newToken();
-    const refreshExpiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
+    const refreshExpiresAt = new Date(Date.now() + this.realm.refreshTtlMs);
     await this.sessions.create(
       {
         id: principal.sessionId,
         userId: principal.userId,
-        familyId,
+        familyId: family.id,
+        familyStartedAt: family.startedAt,
+        role: principal.role,
         hash: refresh.hash,
         expiresAt: refreshExpiresAt,
       },
       client,
     );
-    const accessToken = await this.accessTokens.issue(principal, familyId);
+    const accessToken = await this.accessTokens.issue(
+      principal,
+      family.id,
+      this.realm.accessTtlSeconds,
+    );
     return { accessToken, refreshToken: refresh.token, refreshExpiresAt };
   }
 }

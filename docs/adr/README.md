@@ -18,3 +18,4 @@ Start from [the template](0000-template.md) and take the next number.
 | [0011](0011-spec-kit-feature-specs.md) | Feature specs with GitHub Spec Kit under the step specs (amends 0007) | Superseded by 0013 |
 | [0012](0012-off-account-recovery-of-restricted-fields.md) | Decide how backups are recovered without the AWS account | Accepted |
 | [0013](0013-retire-spec-driven-development.md) | Retire spec-driven development and Spec Kit | Accepted |
+- [0014. Keep patient and provider accounts and admins in separate sign-in realms](0014-accounts-roles-and-admin-realm.md) (Proposed)

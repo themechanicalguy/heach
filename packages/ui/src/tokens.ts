@@ -22,18 +22,28 @@ export function deviceClass(width: number): DeviceClass {
   return width >= breakpoints.tablet.min ? 'tablet' : 'mobile';
 }
 
+/**
+ * Lavender and peach palette from the design reference (apps/web/design-mockups.html). Text
+ * colours meet 4.5:1 on the surfaces they sit on (A11Y-03).
+ */
 export const colors = {
-  primary: '#1f4e79',
+  primary: '#6b4fa3',
+  primarySoft: '#efeaf8',
   onPrimary: '#ffffff',
-  focus: '#f5a623',
-  text: '#1a1a1a',
-  muted: '#4a5560',
+  accent: '#ffb48f',
+  accentSoft: '#ffebdd',
+  onAccent: '#7a3410',
+  focus: '#b0501f',
+  text: '#241a38',
+  muted: '#5e5473',
   surface: '#ffffff',
-  background: '#f6f8fa',
-  border: '#c9d1d9',
-  danger: '#a61b1b',
-  success: '#1b6e3a',
-  warning: '#7a4b00',
+  background: '#f8f6fb',
+  border: '#e2dcec',
+  danger: '#b3261e',
+  dangerSoft: '#fbe5e3',
+  success: '#14602b',
+  successSoft: '#d6efdd',
+  warning: '#7a3410',
 } as const;
 
 /** Minimum touch target in CSS pixels (A11Y-03). */

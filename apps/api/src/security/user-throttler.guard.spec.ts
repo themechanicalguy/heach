@@ -14,6 +14,7 @@ const principalOf = (userId: string): Principal => ({
   userId,
   role: 'patient',
   sessionId: 'session-1',
+  realm: 'user',
 });
 
 type Resolve = AccessTokenStore['resolve'];

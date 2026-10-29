@@ -2,12 +2,11 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 
-/** Synthetic identities seeded by migration 0002. */
+/** Synthetic accounts seeded by migration 0002 and carried over by 0003 (test sign-in only). */
 export const USERS = {
   patientA: '00000000-0000-4000-8000-000000000001',
   patientB: '00000000-0000-4000-8000-000000000002',
   provider: '00000000-0000-4000-8000-000000000003',
-  admin: '00000000-0000-4000-8000-000000000004',
 } as const;
 
 export interface Login {

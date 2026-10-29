@@ -21,7 +21,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const http = host.switchToHttp();
     const request = http.getRequest<Request>();
     const body = this.toBody(exception, request.path);
-    http.getResponse<Response>().status(body.statusCode).json(body);
+    const response = http.getResponse<Response>();
+    // A throttled answer says when to try again (SE-08), as the rate-limit guard does.
+    const retryAfter = (exception as { retryAfterSeconds?: unknown } | null)?.retryAfterSeconds;
+    if (typeof retryAfter === 'number') response.setHeader('Retry-After', String(retryAfter));
+    response.status(body.statusCode).json(body);
   }
 
   private toBody(exception: unknown, path: string): ErrorResponse {
@@ -41,11 +45,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 }
 
-function readHttpMessage(exception: HttpException): Pick<ErrorResponse, 'error' | 'message'> {
+function readHttpMessage(
+  exception: HttpException,
+): Pick<ErrorResponse, 'error' | 'message' | 'code'> {
   const response = exception.getResponse();
   if (typeof response === 'string') {
     return { error: exception.name, message: response };
   }
-  const { error, message } = response as Partial<Pick<ErrorResponse, 'error' | 'message'>>;
-  return { error: error ?? exception.name, message: message ?? exception.message };
+  const { error, message, code } = response as Partial<ErrorResponse>;
+  return {
+    error: error ?? exception.name,
+    message: message ?? exception.message,
+    ...(code ? { code } : {}),
+  };
 }
