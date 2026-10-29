@@ -8,8 +8,10 @@ type Queryable = Pick<pg.Pool, 'query'>;
 
 export interface PaymentRow {
   id: string;
-  bookingId: string;
-  purpose: 'booking' | 'balance';
+  /** The booking paid for, or null for a plan purchase (then `purchaseId` is set). */
+  bookingId: string | null;
+  purchaseId: string | null;
+  purpose: 'booking' | 'balance' | 'plan';
   orderId: string;
   gatewayPaymentId: string | null;
   amountPaise: number;
@@ -28,7 +30,7 @@ export interface RefundRow {
   createdAt: Date;
 }
 
-const PAYMENT_COLUMNS = `p.id, p.booking_id AS "bookingId", p.purpose, p.gateway_order_id AS "orderId",
+const PAYMENT_COLUMNS = `p.id, p.booking_id AS "bookingId", p.purchase_id AS "purchaseId", p.purpose, p.gateway_order_id AS "orderId",
   p.gateway_payment_id AS "gatewayPaymentId", p.amount_paise AS "amountPaise", p.status,
   coalesce((SELECT sum(r.amount_paise) FROM app.refund r WHERE r.payment_id = p.id AND r.status <> 'failed'), 0)::int AS "refundedPaise"`;
 
@@ -68,6 +70,51 @@ export class PaymentsRepository {
       [bookingId],
     );
     return rows;
+  }
+
+  async createForPurchase(
+    client: Queryable,
+    payment: { purchaseId: string; orderId: string; amountPaise: number },
+  ): Promise<string> {
+    const id = randomUUID();
+    await client.query(
+      `INSERT INTO app.payment (id, purchase_id, purpose, gateway_order_id, amount_paise) VALUES ($1, $2, 'plan', $3, $4)`,
+      [id, payment.purchaseId, payment.orderId, payment.amountPaise],
+    );
+    return id;
+  }
+
+  async forPurchase(purchaseId: string, client: Queryable = this.pool): Promise<PaymentRow[]> {
+    const { rows } = await client.query<PaymentRow>(
+      `SELECT ${PAYMENT_COLUMNS} FROM app.payment p WHERE p.purchase_id = $1 ORDER BY p.created_at`,
+      [purchaseId],
+    );
+    return rows;
+  }
+
+  async insertPurchaseRefund(
+    client: TransactionClient,
+    refund: {
+      purchaseId: string;
+      paymentId: string;
+      amountPaise: number;
+      reason: string;
+      actorRole: string;
+    },
+  ): Promise<string> {
+    const id = randomUUID();
+    await client.query(
+      `INSERT INTO app.refund (id, purchase_id, payment_id, amount_paise, reason, actor_role) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        id,
+        refund.purchaseId,
+        refund.paymentId,
+        refund.amountPaise,
+        refund.reason,
+        refund.actorRole,
+      ],
+    );
+    return id;
   }
 
   /** Records a webhook event once; false when it was seen before (duplicate delivery). */

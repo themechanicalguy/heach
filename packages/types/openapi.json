@@ -4900,6 +4900,648 @@
         "tags": ["admin"]
       }
     },
+    "/v1/plans": {
+      "get": {
+        "operationId": "PlansController_list",
+        "parameters": [
+          {
+            "name": "service",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["plans"]
+      }
+    },
+    "/v1/plans/{id}": {
+      "get": {
+        "operationId": "PlansController_one",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["plans"]
+      }
+    },
+    "/v1/plans/{id}/purchase": {
+      "post": {
+        "operationId": "PlansController_purchase",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseCheckoutDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["plans"]
+      }
+    },
+    "/v1/me/plans": {
+      "get": {
+        "operationId": "PlansController_mine",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PurchaseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["plans"]
+      }
+    },
+    "/v1/me/plans/{id}/cancel": {
+      "post": {
+        "operationId": "PlansController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["plans"]
+      }
+    },
+    "/v1/me/plans/{id}/auto-renew": {
+      "post": {
+        "operationId": "PlansController_autoRenew",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutoRenewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["plans"]
+      }
+    },
+    "/v1/provider/plans": {
+      "get": {
+        "operationId": "ProviderPlansController_mine",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      },
+      "post": {
+        "operationId": "ProviderPlansController_define",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/admin/v1/plans": {
+      "get": {
+        "operationId": "AdminPlansController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      },
+      "post": {
+        "operationId": "AdminPlansController_define",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/plans/{id}/approve": {
+      "post": {
+        "operationId": "AdminPlansController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/plans/{id}/retire": {
+      "post": {
+        "operationId": "AdminPlansController_retire",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/v1/me/referral": {
+      "get": {
+        "operationId": "ReferralsController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["referrals"]
+      }
+    },
+    "/v1/me/referral/join": {
+      "post": {
+        "operationId": "ReferralsController_join",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["referrals"]
+      }
+    },
+    "/admin/v1/referrals": {
+      "get": {
+        "operationId": "AdminReferralsController_queue",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["joined", "rewarded", "flagged", "rejected"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminReferralDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/referrals/{id}/release": {
+      "post": {
+        "operationId": "AdminReferralsController_release",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/referrals/{id}/reject": {
+      "post": {
+        "operationId": "AdminReferralsController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/coupons/{id}/cancel": {
+      "post": {
+        "operationId": "AdminReferralsController_cancelCoupon",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/settings": {
+      "get": {
+        "operationId": "ConsoleController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SettingDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      },
+      "put": {
+        "operationId": "ConsoleController_set",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/dashboard": {
+      "get": {
+        "operationId": "ConsoleController_dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/security": {
+      "get": {
+        "operationId": "ConsoleController_security",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/v1/bookings/{id}/review": {
       "post": {
         "operationId": "ReviewsController_rate",
@@ -7895,6 +8537,16 @@
             "type": "string",
             "enum": ["home", "walk_in"],
             "description": "Lab tests: where the sample is taken (LB-02)"
+          },
+          "purchaseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A plan purchase whose entitlement pays (BK-08, PK-04)"
+          },
+          "couponId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "One coupon per booking (RR-08)"
           }
         },
         "required": ["startsAt", "pin", "address"]
@@ -9414,6 +10066,567 @@
           "name",
           "orders",
           "corrections"
+        ]
+      },
+      "PlanDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["package", "subscription"]
+          },
+          "providerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "providerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "service": {
+            "type": "string",
+            "nullable": true
+          },
+          "units": {
+            "type": "number"
+          },
+          "discountPercent": {
+            "type": "number"
+          },
+          "period": {
+            "type": "string",
+            "nullable": true
+          },
+          "familyMembers": {
+            "type": "number"
+          },
+          "validityDays": {
+            "type": "number"
+          },
+          "pricePaise": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending_approval", "active", "retired"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "inclusions": {
+            "type": "string"
+          },
+          "exclusions": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "providerId",
+          "providerName",
+          "itemCode",
+          "service",
+          "units",
+          "discountPercent",
+          "period",
+          "familyMembers",
+          "validityDays",
+          "pricePaise",
+          "status",
+          "name",
+          "inclusions",
+          "exclusions"
+        ]
+      },
+      "PurchaseCheckoutDto": {
+        "type": "object",
+        "properties": {
+          "purchaseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string"
+          },
+          "amountPaise": {
+            "type": "number"
+          },
+          "sandbox": {
+            "type": "boolean"
+          }
+        },
+        "required": ["purchaseId", "orderId", "amountPaise", "sandbox"]
+      },
+      "EntitlementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "service": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitsTotal": {
+            "type": "number"
+          },
+          "unitsUsed": {
+            "type": "number"
+          }
+        },
+        "required": ["id", "itemCode", "service", "unitsTotal", "unitsUsed"]
+      },
+      "PurchaseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending_payment", "active", "expired", "cancelled"]
+          },
+          "autoRenew": {
+            "type": "boolean"
+          },
+          "pricePaise": {
+            "type": "number"
+          },
+          "paidPaise": {
+            "type": "number"
+          },
+          "refundedPaise": {
+            "type": "number"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "entitlements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntitlementDto"
+            }
+          },
+          "refundIfCancelledPaise": {
+            "type": "number",
+            "description": "What cancelling now would refund, pro-rata (PK-07)"
+          }
+        },
+        "required": [
+          "id",
+          "planId",
+          "name",
+          "status",
+          "autoRenew",
+          "pricePaise",
+          "paidPaise",
+          "refundedPaise",
+          "endsAt",
+          "entitlements",
+          "refundIfCancelledPaise"
+        ]
+      },
+      "AutoRenewDto": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": ["enabled"]
+      },
+      "PlanTextDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "inclusions": {
+            "type": "string",
+            "maxLength": 600
+          },
+          "exclusions": {
+            "type": "string",
+            "maxLength": 600
+          }
+        },
+        "required": ["name", "inclusions", "exclusions"]
+      },
+      "PlanTextsDto": {
+        "type": "object",
+        "properties": {
+          "or": {
+            "$ref": "#/components/schemas/PlanTextDto"
+          },
+          "en": {
+            "$ref": "#/components/schemas/PlanTextDto"
+          },
+          "hi": {
+            "$ref": "#/components/schemas/PlanTextDto"
+          }
+        },
+        "required": ["or", "en", "hi"]
+      },
+      "PlanInputDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["package", "subscription"]
+          },
+          "itemCode": {
+            "type": "string",
+            "description": "Packages: the catalogue item covered"
+          },
+          "service": {
+            "type": "string",
+            "enum": ["physiotherapy", "nursing", "attendant", "lab"],
+            "description": "Subscriptions: the service covered"
+          },
+          "units": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 365,
+            "description": "Sessions, visits or days included"
+          },
+          "discountPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 50,
+            "description": "Discount once the included units are used"
+          },
+          "period": {
+            "type": "string",
+            "enum": ["monthly", "quarterly", "yearly"]
+          },
+          "familyMembers": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "validityDays": {
+            "type": "number",
+            "minimum": 7,
+            "maximum": 400
+          },
+          "pricePaise": {
+            "type": "number",
+            "minimum": 100
+          },
+          "texts": {
+            "$ref": "#/components/schemas/PlanTextsDto"
+          }
+        },
+        "required": [
+          "kind",
+          "units",
+          "discountPercent",
+          "familyMembers",
+          "validityDays",
+          "pricePaise",
+          "texts"
+        ]
+      },
+      "InviteeDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["joined", "rewarded", "flagged", "rejected"],
+            "description": "No health or booking detail (RR-07)"
+          },
+          "joinedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["status", "joinedAt"]
+      },
+      "CouponDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valuePaise": {
+            "type": "number"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "used", "cancelled"]
+          }
+        },
+        "required": ["id", "valuePaise", "expiresAt", "status"]
+      },
+      "ReferralDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "invitees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InviteeDto"
+            }
+          },
+          "coupons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CouponDto"
+            }
+          },
+          "invited": {
+            "type": "boolean",
+            "description": "This account joined with someone’s code"
+          }
+        },
+        "required": ["code", "invitees", "coupons", "invited"]
+      },
+      "JoinDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": ["code"]
+      },
+      "AdminReferralDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "flagReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "status", "flagReason", "createdAt"]
+      },
+      "SettingDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "acceptance_window_minutes",
+              "commission_bps",
+              "attendant_advance_percent",
+              "free_cancellation_hours",
+              "late_cancellation_refund_percent",
+              "dispatch_wave_size",
+              "dispatch_wave_minutes",
+              "payout_hold_hours",
+              "patient_no_show_fee_percent",
+              "no_show_wait_minutes",
+              "vault_quota_mb",
+              "referral_reward_paise",
+              "referral_invitee_reward_paise",
+              "coupon_validity_days",
+              "referral_monthly_cap",
+              "referral_join_window_days",
+              "plan_expiry_reminder_days"
+            ]
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": ["key", "value"]
+      },
+      "SettingInputDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "acceptance_window_minutes",
+              "commission_bps",
+              "attendant_advance_percent",
+              "free_cancellation_hours",
+              "late_cancellation_refund_percent",
+              "dispatch_wave_size",
+              "dispatch_wave_minutes",
+              "payout_hold_hours",
+              "patient_no_show_fee_percent",
+              "no_show_wait_minutes",
+              "vault_quota_mb",
+              "referral_reward_paise",
+              "referral_invitee_reward_paise",
+              "coupon_validity_days",
+              "referral_monthly_cap",
+              "referral_join_window_days",
+              "plan_expiry_reminder_days"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          }
+        },
+        "required": ["key", "value"]
+      },
+      "CountDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": ["label", "count"]
+      },
+      "DashboardDto": {
+        "type": "object",
+        "properties": {
+          "signUps": {
+            "type": "number"
+          },
+          "providersByRole": {
+            "description": "Verified providers by role",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountDto"
+            }
+          },
+          "providersByDistrict": {
+            "description": "Verified providers by district served",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountDto"
+            }
+          },
+          "bookingsByService": {
+            "description": "Bookings by service",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountDto"
+            }
+          },
+          "bookingsByStatus": {
+            "description": "Bookings by status",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountDto"
+            }
+          },
+          "completionRate": {
+            "type": "number"
+          },
+          "cancellationRate": {
+            "type": "number"
+          },
+          "revenuePaise": {
+            "type": "number",
+            "description": "Commission on completed bookings and plan sales, in paise"
+          }
+        },
+        "required": [
+          "signUps",
+          "providersByRole",
+          "providersByDistrict",
+          "bookingsByService",
+          "bookingsByStatus",
+          "completionRate",
+          "cancellationRate",
+          "revenuePaise"
+        ]
+      },
+      "BreakGlassEntryDto": {
+        "type": "object",
+        "properties": {
+          "adminRole": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "grantedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["adminRole", "reason", "grantedAt", "expiresAt"]
+      },
+      "SecurityDto": {
+        "type": "object",
+        "properties": {
+          "breakGlass": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BreakGlassEntryDto"
+            }
+          },
+          "openStrikeReviews": {
+            "type": "number",
+            "description": "Provider strike reviews still open (A12)"
+          },
+          "flaggedReferrals": {
+            "type": "number",
+            "description": "Referrals held for review (RR-06)"
+          },
+          "infectedUploads": {
+            "type": "number",
+            "description": "Uploads quarantined by the scanner"
+          },
+          "recordReads24h": {
+            "type": "number",
+            "description": "Records read through shares in the last 24 hours (unusual-read watch)"
+          }
+        },
+        "required": [
+          "breakGlass",
+          "openStrikeReviews",
+          "flaggedReferrals",
+          "infectedUploads",
+          "recordReads24h"
         ]
       },
       "ReviewInputDto": {

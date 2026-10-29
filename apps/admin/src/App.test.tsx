@@ -2,6 +2,17 @@ import { render, screen } from '@testing-library/react';
 import { App } from './App';
 import en from '../messages/en.json';
 
+const EMPTY_DASHBOARD = {
+  signUps: 0,
+  providersByRole: [],
+  providersByDistrict: [],
+  bookingsByService: [],
+  bookingsByStatus: [],
+  completionRate: 0,
+  cancellationRate: 0,
+  revenuePaise: 0,
+};
+
 /** Answers the admin API like a server would, for one signed-in sub-role or none. */
 function serve(role?: string) {
   vi.stubGlobal(
@@ -13,6 +24,7 @@ function serve(role?: string) {
         return role ? json(200, { accessToken: 'synthetic-token', expiresIn: 600 }) : json(401, {});
       }
       if (url.endsWith('/me')) return json(200, { email: 'admin@heach.invalid', role });
+      if (url.endsWith('/dashboard')) return json(200, EMPTY_DASHBOARD);
       return json(200, { items: [], total: 0, page: 1, pageSize: 25 });
     }),
   );

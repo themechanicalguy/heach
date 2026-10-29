@@ -16,6 +16,11 @@ import { CancellationService } from './cancellation.service.js';
 import { DispatchService } from './dispatch.service.js';
 
 export type WebhookOutcome = 'processed' | 'duplicate' | 'ignored';
+export type PurchaseHandler = (
+  client: TransactionClient,
+  purchaseId: string,
+  paidPaise: number,
+) => Promise<void>;
 
 /**
  * Gateway webhooks, the only thing that moves a booking out of Pending payment (PY-01). Each is
@@ -25,6 +30,8 @@ export type WebhookOutcome = 'processed' | 'duplicate' | 'ignored';
  */
 @Injectable()
 export class PaymentEventsService {
+  private purchaseHandler: PurchaseHandler | undefined;
+
   constructor(
     private readonly payments: PaymentsRepository,
     private readonly bookings: BookingRepository,
@@ -45,7 +52,13 @@ export class PaymentEventsService {
         return { outcome: 'duplicate' as const, effects: noEffects() };
       const payment = await this.payments.byOrder(event.orderId, client);
       if (!payment) return { outcome: 'ignored' as const, effects: noEffects() };
-      const booking = await this.bookings.lock(client, payment.bookingId);
+      if (payment.purchaseId) {
+        await this.purchases(client, event, payment);
+        return { outcome: 'processed' as const, effects: noEffects() };
+      }
+      const booking = payment.bookingId
+        ? await this.bookings.lock(client, payment.bookingId)
+        : undefined;
       if (!booking) return { outcome: 'ignored' as const, effects: noEffects() };
       const effects = await this.apply(client, event, payment, booking, now);
       await this.audit.record(
@@ -56,6 +69,46 @@ export class PaymentEventsService {
     });
     await this.effects.run(result.effects);
     return result.outcome;
+  }
+
+  /** Plans register how a paid purchase becomes active (PK-04); bookings know nothing of plans. */
+  onPurchasePaid(handler: PurchaseHandler): void {
+    this.purchaseHandler = handler;
+  }
+
+  private async purchases(
+    client: TransactionClient,
+    event: GatewayEvent,
+    payment: PaymentRow,
+  ): Promise<void> {
+    if (event.kind === 'payment.failed') {
+      await this.payments.markFailed(client, payment.id);
+      return;
+    }
+    if (
+      event.amountPaise !== payment.amountPaise ||
+      !(await this.payments.markPaid(client, payment.id, event.paymentId))
+    )
+      return;
+    await this.purchaseHandler?.(client, payment.purchaseId ?? '', payment.amountPaise);
+  }
+
+  /** A booking fully covered by a plan or coupon needs no payment: it is requested at once. */
+  async coveredWithoutPayment(bookingId: string, now = new Date()): Promise<void> {
+    const effects = await this.bookings.transaction(async (client) => {
+      const booking = await this.bookings.lock(client, bookingId);
+      if (booking?.status !== 'pending_payment' || booking.totalPaise !== 0) return noEffects();
+      await this.lifecycle.apply(client, booking, 'paid', SYSTEM, 'covered_by_plan');
+      const result = await this.dispatch.open(client, { ...booking, status: 'requested' }, now);
+      if (booking.providerId)
+        result.releaseHolds.push({
+          providerId: booking.providerId,
+          start: booking.startsAt,
+          holder: booking.bookerId,
+        });
+      return result;
+    });
+    await this.effects.run(effects);
   }
 
   private async apply(

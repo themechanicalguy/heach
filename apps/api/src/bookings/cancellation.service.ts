@@ -6,6 +6,7 @@ import type { BookingActor } from './booking-actor.js';
 import { type Effects, noEffects } from './booking-effects.js';
 import { BookingLifecycle } from './booking-lifecycle.js';
 import type { BookingRow } from './booking.repository.js';
+import { DiscountsService } from './discounts.service.js';
 import { DispatchRepository } from './dispatch.repository.js';
 import { cancellationRefund } from './fees.js';
 
@@ -20,6 +21,7 @@ export class CancellationService {
     private readonly refunds: RefundsService,
     private readonly dispatch: DispatchRepository,
     private readonly settings: Settings,
+    private readonly discounts: DiscountsService,
   ) {}
 
   /** What cancelling now would refund, for the policy shown before the patient confirms. */
@@ -72,6 +74,7 @@ export class CancellationService {
   ): Promise<Effects> {
     const refundPaise = options.refundPaise ?? (await this.refundIfCancelled(booking, actor.kind));
     await this.lifecycle.apply(client, booking, options.event ?? 'cancel', actor, why);
+    await this.discounts.giveBack(client, booking.id);
     await this.dispatch.closeOthers(
       client,
       booking.id,

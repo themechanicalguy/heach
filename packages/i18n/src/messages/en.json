@@ -21,7 +21,9 @@
     "notifications": "Alerts",
     "lab": "Lab orders",
     "collections": "Collections",
-    "vault": "My records"
+    "vault": "My records",
+    "plans": "Plans",
+    "referral": "Invite"
   },
   "offline": {
     "banner": "You are offline. Saved pages still work; changes need a connection."
@@ -85,7 +87,9 @@
     "lab_report_ready": "Your HEACH lab report is ready. Open the app to see it.",
     "lab_collector_assigned": "A HEACH sample collector is assigned to your lab test. Open the app to see who is coming.",
     "lab_sample_collected": "Your HEACH lab sample has been collected.",
-    "lab_sample_received": "Your HEACH lab sample has reached the lab."
+    "lab_sample_received": "Your HEACH lab sample has reached the lab.",
+    "plan_expiring": "Your HEACH plan ends on {time}. Open the app to see what is left.",
+    "coupon_issued": "You have a new HEACH discount coupon. Open the app to see it."
   },
   "welcome": {
     "title": "Choose your language",
@@ -182,7 +186,13 @@
     "lab_stage_refused": "This step is not possible now.",
     "record_not_deletable": "Records issued by a provider cannot be deleted.",
     "vault_quota": "Your storage is full. Delete some records first.",
-    "booking_not_shareable": "Records can be shared only for an active booking."
+    "booking_not_shareable": "Records can be shared only for an active booking.",
+    "entitlement_unavailable": "This plan does not cover this booking, or nothing is left on it.",
+    "coupon_unavailable": "This coupon can no longer be used.",
+    "plan_not_active": "This plan is not active.",
+    "referral_not_allowed": "This code cannot be used for your account.",
+    "plan_item_required": "Choose the service the package covers.",
+    "plan_invalid": "Check the plan's details."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -943,5 +953,65 @@
     "code": "Code",
     "open": "Open records",
     "download": "Open file"
+  },
+  "plans": {
+    "title": "Care plans",
+    "intro": "Packages and subscriptions that cover visits, sessions and tests, often for less.",
+    "empty": "No plans for this service yet.",
+    "package": "Package",
+    "subscription": "Subscription",
+    "units": "{units} included",
+    "validity": "Valid for {days} days",
+    "family": "Covers {count} family members",
+    "discount": "{percent}% off after the included visits",
+    "includes": "Includes: {text}",
+    "excludes": "Does not include: {text}",
+    "terms": "If you cancel, the unused part is refunded in proportion to what is left.",
+    "buy": "Buy for {amount}",
+    "mine": "My plans",
+    "left": "{left} of {total} left",
+    "ends": "Ends {time}",
+    "cancel": "Cancel plan",
+    "cancelRefund": "Cancelling now refunds {amount}.",
+    "autoRenew": "Renew automatically",
+    "status": {
+      "pending_payment": "Waiting for payment",
+      "active": "Active",
+      "expired": "Ended",
+      "cancelled": "Cancelled"
+    },
+    "usePlan": "Pay with my plan",
+    "noPlan": "Pay normally",
+    "useCoupon": "Apply a coupon",
+    "noCoupon": "No coupon",
+    "by": "By {name}"
+  },
+  "referral": {
+    "title": "Invite friends and family",
+    "intro": "Share your code. When someone you invite completes their first booking, you both get a discount coupon.",
+    "code": "Your code: {code}",
+    "copy": "Copy link",
+    "copied": "Copied.",
+    "whatsapp": "Share on WhatsApp",
+    "sms": "Share by SMS",
+    "haveCode": "Were you invited? Enter their code",
+    "join": "Use code",
+    "joined": "Thank you. Your coupon arrives after your first completed booking.",
+    "invitees": "People you invited",
+    "invitee": "Invited {time}: {status}",
+    "inviteeStatus": {
+      "joined": "Joined",
+      "rewarded": "Completed a booking",
+      "flagged": "Under review",
+      "rejected": "Not eligible"
+    },
+    "coupons": "My coupons",
+    "coupon": "{value} off, until {time}",
+    "couponStatus": {
+      "active": "Ready to use",
+      "used": "Used",
+      "cancelled": "Cancelled"
+    },
+    "noCoupons": "No coupons yet."
   }
 }

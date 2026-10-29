@@ -8,6 +8,10 @@ import { Bookings } from './pages/Bookings';
 import { Catalogue } from './pages/Catalogue';
 import { Finance } from './pages/Finance';
 import { Labs } from './pages/Labs';
+import { Plans } from './pages/Plans';
+import { Referrals } from './pages/Referrals';
+import { Security } from './pages/Security';
+import { Settings } from './pages/Settings';
 import { Reviews } from './pages/Reviews';
 import { Tickets } from './pages/Tickets';
 import { Vault } from './pages/Vault';
@@ -45,7 +49,10 @@ function sectionsFor(role: string): Section[] {
   if (role === 'super_admin' || role === 'finance') sections.push('finance');
   if (role === 'super_admin' || role === 'support')
     sections.push('tickets', 'reviews', 'labs', 'vault');
-  if (role === 'super_admin' || role === 'support') sections.push('catalogue');
+  if (['super_admin', 'support', 'finance'].includes(role)) sections.push('plans');
+  if (role === 'super_admin' || role === 'support') sections.push('referrals', 'catalogue');
+  if (['super_admin', 'support', 'finance'].includes(role)) sections.push('settings');
+  if (role === 'super_admin') sections.push('security');
   if (USER_READERS.has(role)) sections.push('users');
   if (role === 'super_admin') sections.push('admins');
   sections.push('password');
@@ -64,6 +71,10 @@ function Page({
   if (section === 'reviews') return <Reviews />;
   if (section === 'labs') return <Labs />;
   if (section === 'vault') return <Vault />;
+  if (section === 'plans') return <Plans canChange={role === 'super_admin'} />;
+  if (section === 'referrals') return <Referrals />;
+  if (section === 'settings') return <Settings canChange={role === 'super_admin'} />;
+  if (section === 'security') return <Security />;
   if (section === 'catalogue') return <Catalogue canChange={role === 'super_admin'} />;
   if (section === 'users') return <Users canChange={USER_CHANGERS.has(role)} />;
   if (section === 'admins') return <Admins selfId={selfId} />;
