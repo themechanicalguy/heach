@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { isLocale, LOCALES } from '@heach/i18n';
 import { ErrorTracking } from '../../components/ErrorTracking';
+import { HeaderAccount } from '../../components/HeaderAccount';
 import { LanguageSwitch } from '../../components/LanguageSwitch';
-import { SignInLink } from '../../components/SignInLink';
 import { OfflineStatus } from '../../components/OfflineStatus';
 import { ServiceWorker } from '../../components/ServiceWorker';
 import { ShellNav } from '../../components/ShellNav';
@@ -61,7 +61,7 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
                 <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
                 <div className="shell-header__actions">
                   <LanguageSwitch />
-                  <SignInLink />
+                  <HeaderAccount />
                 </div>
               </header>
               <OfflineStatus />

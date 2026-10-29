@@ -106,7 +106,10 @@ test.describe('Sign-up and account setup', () => {
     await signInByOtp(page, 'hi', mobile);
     await completePatientSetup(page, 'hi', 'सीता साहू');
     await page.getByRole('link', { name: t.nav.account }).click();
-    await page.getByRole('button', { name: t.account.signOut, exact: true }).click();
+    await page
+      .getByRole('main')
+      .getByRole('button', { name: t.account.signOut, exact: true })
+      .click();
     await expect(page).toHaveURL(/\/hi\/sign-in(\?next=.*)?$/);
     await page.goto('/hi/account');
     await expect(page).toHaveURL(/\/hi\/sign-in\?next=%2Fhi%2Faccount$/);
@@ -143,6 +146,22 @@ test.describe('Roles and sessions', () => {
       .click();
     await expect(page).toHaveURL(/\/or\/provider$/);
     await expect(page.getByText(t.application.status.draft)).toBeVisible();
+  });
+
+  test('SE-07.10 the header swaps sign-in for Account and sign-out, and back', async ({ page }) => {
+    const t = CATALOGUES.en;
+    const header = page.getByRole('banner');
+    await signInByOtp(page, 'en', syntheticMobile());
+    await completePatientSetup(page, 'en', 'Synthetic Person');
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(header.getByRole('link', { name: t.nav.signIn })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: t.nav.account })).toBeVisible();
+    await header.getByRole('button', { name: t.nav.signOut }).click();
+    await expect(header.getByRole('link', { name: t.nav.signIn })).toBeVisible();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.getByRole('link', { name: t.nav.account })).toHaveCount(0);
+    await page.goto('/en/account');
+    await expect(page).toHaveURL(/\/en\/sign-in\?next=/);
   });
 
   test('SE-07.3 signing out of all devices ends the other browser too', async ({ browser }) => {

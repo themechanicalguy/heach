@@ -1,9 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../lib/i18n-context';
+import { HeaderAccount } from './HeaderAccount';
 import { LanguageSwitch } from './LanguageSwitch';
-import { SignInLink } from './SignInLink';
+import { ShellNav } from './ShellNav';
 
 interface HeaderState {
   pathname: string;
@@ -13,11 +14,21 @@ interface HeaderState {
 
 const state = vi.hoisted(() => {
   const initial: HeaderState = { pathname: '', status: 'signed-out', account: { state: 'idle' } };
-  return { ...initial, api: vi.fn(() => Promise.resolve()) };
+  return {
+    ...initial,
+    api: vi.fn(() => Promise.resolve()),
+    signOut: vi.fn(() => Promise.resolve()),
+    replace: vi.fn(),
+  };
 });
 
-vi.mock('next/navigation', () => ({ usePathname: () => state.pathname }));
-vi.mock('../lib/session', () => ({ useSession: () => ({ status: state.status }) }));
+vi.mock('next/navigation', () => ({
+  usePathname: () => state.pathname,
+  useRouter: () => ({ replace: state.replace }),
+}));
+vi.mock('../lib/session', () => ({
+  useSession: () => ({ status: state.status, signOut: state.signOut }),
+}));
 vi.mock('../lib/account', () => ({ useAccount: () => ({ account: state.account }) }));
 vi.mock('../lib/api', () => ({ api: state.api }));
 
@@ -28,6 +39,8 @@ beforeEach(() => {
   state.status = 'signed-out';
   state.account = { state: 'idle' };
   state.api.mockClear();
+  state.signOut.mockReset().mockResolvedValue(undefined);
+  state.replace.mockClear();
 });
 
 describe('LanguageSwitch', () => {
@@ -74,21 +87,61 @@ describe('LanguageSwitch', () => {
   });
 });
 
-describe('SignInLink', () => {
-  it('shows once the visitor is known to be signed out', () => {
-    inEnglish(<SignInLink />);
-    expect(screen.getByRole('link', { name: 'Sign in' }).getAttribute('href')).toBe('/en/sign-in');
+describe('HeaderAccount', () => {
+  it('offers sign-in or sign-up once the visitor is known to be signed out', () => {
+    inEnglish(<HeaderAccount />);
+    expect(screen.getByRole('link', { name: 'Sign in / Sign up' }).getAttribute('href')).toBe(
+      '/en/sign-in',
+    );
   });
 
   it.each([
     ['while the session is checked', 'checking', '/en'],
-    ['when signed in', 'signed-in', '/en'],
     ['on the sign-in page', 'signed-out', '/en/sign-in'],
     ['during setup', 'signed-out', '/en/setup/role'],
-  ] as const)('is hidden %s', (_, status, pathname) => {
+  ] as const)('shows nothing %s', (_, status, pathname) => {
     state.status = status;
     state.pathname = pathname;
-    inEnglish(<SignInLink />);
+    inEnglish(<HeaderAccount />);
     expect(screen.queryByRole('link')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('SE-07.10 signed in, signs this device out and goes home', async () => {
+    state.status = 'signed-in';
+    inEnglish(<HeaderAccount />);
+    expect(screen.queryByRole('link')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    await waitFor(() => {
+      expect(state.replace).toHaveBeenCalledWith('/en');
+    });
+    expect(state.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('goes home even when the logout call fails, as the session has ended here', async () => {
+    state.status = 'signed-in';
+    state.signOut.mockRejectedValue(new Error('network'));
+    inEnglish(<HeaderAccount />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    await waitFor(() => {
+      expect(state.replace).toHaveBeenCalledWith('/en');
+    });
+  });
+});
+
+describe('ShellNav', () => {
+  const linkNames = () => screen.getAllByRole('link').map((link) => link.textContent);
+
+  it.each(['checking', 'signed-out'] as const)('leaves Account out while %s', (status) => {
+    state.status = status;
+    inEnglish(<ShellNav accounts sample={false} />);
+    expect(linkNames()).toEqual(['Home']);
+  });
+
+  it('shows Account once signed in', () => {
+    state.status = 'signed-in';
+    inEnglish(<ShellNav accounts sample={false} />);
+    expect(linkNames()).toEqual(['Home', 'Account']);
+    expect(screen.getByRole('link', { name: 'Account' }).getAttribute('href')).toBe('/en/account');
   });
 });
