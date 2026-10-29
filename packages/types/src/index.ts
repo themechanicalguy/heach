@@ -71,6 +71,16 @@ export type Finance = components['schemas']['FinanceDto'];
 export type PayoutRun = components['schemas']['PayoutRunDto'];
 export type AppNotification = components['schemas']['NotificationDto'];
 export type BookingPolicy = components['schemas']['BookingPolicyDto'];
+export type VisitCode = components['schemas']['VisitCodeDto'];
+export type Shift = components['schemas']['ShiftDto'];
+export type VisitRecord = components['schemas']['VisitRecordDto'];
+export type VisitNotes = components['schemas']['VisitNotesDto'];
+export type Ticket = components['schemas']['TicketDto'];
+export type TicketInput = components['schemas']['TicketInputDto'];
+export type TicketRestricted = components['schemas']['TicketRestrictedDto'];
+export type AccessEntry = components['schemas']['AccessEntryDto'];
+export type Review = components['schemas']['ReviewDto'];
+export type AdminReview = components['schemas']['AdminReviewDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

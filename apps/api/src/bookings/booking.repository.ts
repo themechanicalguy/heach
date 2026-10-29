@@ -219,6 +219,24 @@ export class BookingRepository {
     );
   }
 
+  /** One shift row per day of an attendant booking, created when it is confirmed (HS-05). */
+  async createShifts(
+    client: TransactionClient,
+    booking: BookingRow,
+    attendantId: string,
+  ): Promise<void> {
+    const shiftMs =
+      booking.endsAt.getTime() - booking.startsAt.getTime() - (booking.shiftDays - 1) * 86_400_000;
+    for (let day = 0; day < booking.shiftDays; day += 1) {
+      const start = new Date(booking.startsAt.getTime() + day * 86_400_000);
+      await client.query(
+        `INSERT INTO app.shift (id, booking_id, day_index, attendant_account_id, starts_at, ends_at)
+         VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (booking_id, day_index) DO NOTHING`,
+        [randomUUID(), booking.id, day, attendantId, start, new Date(start.getTime() + shiftMs)],
+      );
+    }
+  }
+
   /** Whether the provider has another live booking overlapping this time. */
   async providerBusy(
     client: Queryable,

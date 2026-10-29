@@ -9,6 +9,8 @@ export type Section =
   | 'verification'
   | 'bookings'
   | 'finance'
+  | 'tickets'
+  | 'reviews'
   | 'catalogue'
   | 'users'
   | 'admins'

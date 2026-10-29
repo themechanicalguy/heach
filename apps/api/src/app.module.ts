@@ -19,6 +19,9 @@ import { CatalogueModule } from './catalogue/catalogue.module.js';
 import { ListingsModule } from './listings/listings.module.js';
 import { SearchModule } from './search/search.module.js';
 import { BookingsModule } from './bookings/bookings.module.js';
+import { ReviewsModule } from './reviews/reviews.module.js';
+import { TicketsModule } from './tickets/tickets.module.js';
+import { VisitsModule } from './visits/visits.module.js';
 import { JobsModule } from './jobs/runner/jobs.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { PayoutsModule } from './payouts/payouts.module.js';
@@ -60,7 +63,10 @@ export class AppModule {
         JobsModule,
         PaymentsModule,
         PayoutsModule,
+        TicketsModule,
         BookingsModule,
+        VisitsModule,
+        ReviewsModule,
       ],
       controllers: [HealthController],
       providers: [

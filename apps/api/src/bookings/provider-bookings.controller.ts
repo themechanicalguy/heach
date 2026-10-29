@@ -37,6 +37,8 @@ import {
 import { CancellationService } from './cancellation.service.js';
 import { DispatchRepository } from './dispatch.repository.js';
 import { DispatchService } from './dispatch.service.js';
+import { StrikesService } from './strikes.service.js';
+import { Settings } from '../settings/settings.service.js';
 
 const uuid = new ParseUUIDPipe({ version: '4' });
 
@@ -55,6 +57,8 @@ export class ProviderBookingsController {
     private readonly effects: BookingEffects,
     private readonly uploads: UploadsService,
     private readonly access: ProviderAccess,
+    private readonly strikes: StrikesService,
+    private readonly settings: Settings,
   ) {}
 
   @Get('requests')
@@ -152,6 +156,16 @@ export class ProviderBookingsController {
     const effects = await this.bookings.transaction(async (client) => {
       const booking = await this.bookings.lock(client, id);
       if (booking?.providerId !== principal.userId) throw new NotFoundException();
+      const freeHours = await this.settings.get('free_cancellation_hours');
+      const late =
+        booking.status === 'confirmed' &&
+        booking.startsAt.getTime() - Date.now() < freeHours * 3_600_000;
+      if (late)
+        await this.strikes.record(client, {
+          providerId: principal.userId,
+          bookingId: id,
+          reason: 'late_cancellation',
+        });
       return this.cancellation.cancel(client, booking, actorOf(principal), body.reason);
     });
     await this.effects.run(effects);

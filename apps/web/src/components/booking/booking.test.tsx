@@ -44,6 +44,7 @@ const summary: BookingSummary = {
   itemName: 'Injection',
   kind: 'visit',
   matching: 'chosen',
+  listingId: '00000000-0000-4000-8000-000000000021',
   startsAt: START,
   endsAt: START,
   shiftDays: 1,

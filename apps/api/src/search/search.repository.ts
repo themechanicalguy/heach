@@ -13,13 +13,16 @@ const PUBLISHED = `
   JOIN app.account a ON a.id = l.provider_account_id AND a.status = 'active'
   JOIN app.account_profile p ON p.account_id = l.provider_account_id
   LEFT JOIN app.organisation o ON o.owner_account_id = l.provider_account_id
-  LEFT JOIN app.provider_schedule s ON s.account_id = l.provider_account_id`;
+  LEFT JOIN app.provider_schedule s ON s.account_id = l.provider_account_id
+  LEFT JOIN LATERAL (SELECT round(avg(v.stars)::numeric, 1)::float AS rating, count(*)::int AS n
+                       FROM app.review v WHERE v.provider_account_id = l.provider_account_id
+                        AND NOT v.hidden) rv ON true`;
 
 const RESULT_COLUMNS = `l.id AS "listingId", l.provider_account_id AS "providerId",
   coalesce(o.name, p.full_name) AS name, r.role, p.gender, p.languages,
   i.code AS "itemCode", t.name AS "itemName", i.kind, i.prescription_required AS "prescriptionRequired",
   l.fee_paise AS "feePaise", coalesce(s.travel_surcharge_paise, 0) AS "travelSurchargePaise",
-  l.duration_minutes AS "durationMinutes", NULL::float AS rating, 0 AS "ratingCount"`;
+  l.duration_minutes AS "durationMinutes", rv.rating, rv.n AS "ratingCount"`;
 
 /** Public search and profiles (SD-02 to SD-05): Public data of Approved providers only. */
 @Injectable()
@@ -43,6 +46,7 @@ export class SearchRepository {
           AND ($8::text IS NULL OR lower(coalesce(o.name, p.full_name)) LIKE $8
                OR EXISTS (SELECT 1 FROM app.catalogue_item_text tt
                            WHERE tt.item_id = i.id AND tt.search_name LIKE $8))
+          AND ($9::int IS NULL OR rv.rating >= $9)
         ORDER BY l.fee_paise
         LIMIT 50`,
       [
@@ -54,6 +58,7 @@ export class SearchRepository {
         query.language ?? null,
         query.maxFeePaise ?? null,
         text,
+        query.minRating ?? null,
       ],
     );
     return rows;

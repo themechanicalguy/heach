@@ -142,6 +142,7 @@ export class BookingViews {
       itemName: names?.itemName ?? booking.itemCode,
       kind: booking.kind,
       matching: booking.matching,
+      listingId: booking.listingId,
       startsAt: booking.startsAt,
       endsAt: booking.endsAt,
       shiftDays: booking.shiftDays,
