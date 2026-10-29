@@ -281,6 +281,16 @@
   background: var(--heach-primary-soft);
 }
 
+/* An icon over its label, the current one in a soft pill (design reference, patient home) */
+.heach-bottom-nav a > span[aria-hidden='true'] {
+  display: inline-flex;
+  padding: 0.25rem 1rem;
+}
+
+.heach-icon {
+  flex: none;
+}
+
 /* Progress: one segment per step (design reference, onboarding A) */
 .heach-progress {
   display: grid;
@@ -461,10 +471,10 @@
     background: transparent;
   }
 
+  /* Text pills from tablet width, the current one filled, no icons */
   .heach-bottom-nav ul {
     justify-content: flex-start;
-    gap: var(--heach-space);
-    padding-inline: var(--heach-space);
+    gap: 0.25rem;
   }
 
   .heach-bottom-nav li {
@@ -473,8 +483,19 @@
 
   .heach-bottom-nav a {
     flex-direction: row;
-    gap: 0.5rem;
-    padding-inline: 0.5rem;
+    padding-inline: 1rem;
+    border-radius: 999px;
+    color: var(--heach-muted);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .heach-bottom-nav a > span[aria-hidden='true'] {
+    display: none;
+  }
+
+  .heach-bottom-nav a[aria-current='page'] {
+    background: var(--heach-primary-soft);
   }
 }
 

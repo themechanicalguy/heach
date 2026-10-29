@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { isLocale, LOCALES } from '@heach/i18n';
 import { ErrorTracking } from '../../components/ErrorTracking';
 import { LanguageSwitch } from '../../components/LanguageSwitch';
+import { SignInLink } from '../../components/SignInLink';
 import { OfflineStatus } from '../../components/OfflineStatus';
 import { ServiceWorker } from '../../components/ServiceWorker';
 import { ShellNav } from '../../components/ShellNav';
@@ -54,10 +55,14 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
             <AccountProvider enabled={accounts}>
               <header className="shell-header">
                 <a href={`/${locale}`} className="shell-header__name">
-                  {t('app.name')}
+                  <span className="shell-header__mark" aria-hidden="true" />
+                  <span className="shell-header__label">{t('app.name')}</span>
                 </a>
                 <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
-                <LanguageSwitch />
+                <div className="shell-header__actions">
+                  <LanguageSwitch />
+                  <SignInLink />
+                </div>
               </header>
               <OfflineStatus />
               {children}
