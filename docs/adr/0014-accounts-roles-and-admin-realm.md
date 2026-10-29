@@ -1,6 +1,8 @@
 # 0014. Keep patient and provider accounts and admins in separate sign-in realms
 
-- **Status:** Proposed (the owner accepts or changes it on the pull request)
+- **Status:** Proposed. Implemented and merged in #94 on 29 October 2026 by the shared account,
+  with no review or comment, so the owner has not accepted it in writing (FU-28, FU-14). Extended
+  by the owner decisions O-1 to O-3 of 29 October 2026 (below).
 - **Date:** 2026-10-29
 - **Requirements:** AC-01 to AC-05, AD-01, AD-03, SE-04, SE-07, SE-08, PR-01, PO-04
 
@@ -39,3 +41,16 @@ the existing guard. TOTP, scrypt and the OTP keyed hash use `node:crypto`; no ne
   still to build. TOTP enrolment happens at first sign-in, so the first password must be passed
   to the admin securely.
 - Revisit if a second sign-in method (for example passkeys for admins) is added.
+
+## Amendments (29 October 2026, owner decisions relayed in chat)
+
+Recorded in [account flows for every role](../account-flows-all-roles.md#owner-decisions-relayed-in-chat-29-october-2026).
+
+- **O-1:** clinic front desk and sample collector hold their role only through an organisation
+  membership (a lab account's lab, a dentist's or dermatologist's clinic), invited by mobile number
+  and accepted after OTP sign-in; sample collector is no longer self-registrable. A front desk role
+  has no provider application of its own. Removing a member ends that role's sessions at once.
+- **O-2:** the admin console for creating admins and changing sub-roles now exists (super admins
+  only); recovery is a super-admin reset to a temporary password or of MFA; the last active super
+  admin cannot be removed. The CLI remains for the first super admin.
+- **O-3:** a number change needs a fresh OTP on the current number and an OTP on the new one.
