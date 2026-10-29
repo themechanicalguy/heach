@@ -37,6 +37,17 @@ export type Membership = components['schemas']['MembershipDto'];
 export type AdminSummary = components['schemas']['AdminSummaryDto'];
 export type CreatedAdmin = components['schemas']['CreatedAdminDto'];
 export type TemporaryPassword = components['schemas']['TemporaryPasswordDto'];
+export type Application = components['schemas']['ApplicationDto'];
+export type ChecklistEntry = components['schemas']['ChecklistEntryDto'];
+export type ProviderDocument = components['schemas']['DocumentDto'];
+export type DocumentUpload = components['schemas']['DocumentUploadDto'];
+export type PayoutDetails = components['schemas']['PayoutDetailsDto'];
+export type IdentityRedirect = components['schemas']['IdentityRedirectDto'];
+export type ApplicationSummary = components['schemas']['ApplicationSummaryDto'];
+export type ApplicationReview = components['schemas']['ApplicationReviewDto'];
+export type Decision = components['schemas']['DecisionDto'];
+export type DocumentReview = components['schemas']['DocumentReviewDto'];
+export type StoredFile = components['schemas']['StoredFileDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

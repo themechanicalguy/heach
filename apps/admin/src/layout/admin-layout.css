@@ -197,3 +197,9 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.admin-list {
+  display: grid;
+  gap: 0.5rem;
+  padding-left: 1.25rem;
+}

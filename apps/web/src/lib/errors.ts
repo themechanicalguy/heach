@@ -1,35 +1,8 @@
-import type { MessageKey, Messages } from '@heach/i18n';
+import { type MessageKey, type Messages, messagesFor } from '@heach/i18n';
 import { ApiError } from './api';
 
-const KNOWN = new Set([
-  'mobile_invalid',
-  'otp_incorrect',
-  'otp_expired',
-  'otp_rate_limited',
-  'sms_unavailable',
-  'account_suspended',
-  'setup_incomplete',
-  'consent_outdated',
-  'setup_complete',
-  'role_not_granted',
-  'reverification_required',
-  'side_taken',
-  'details_missing',
-  'role_unavailable',
-  'no_mobile',
-  'mobile_unchanged',
-  'mobile_in_use',
-  'invitation_closed',
-  'already_invited',
-  'cannot_invite_self',
-  'invitation_limit',
-  'organisation_unnamed',
-  'membership_closed',
-  'linked_patient_limit',
-  'birth_year_invalid',
-  'field_not_for_role',
-  'no_deletion_request',
-]);
+// Every reason code the catalogue has a message for; the API only sends stable codes.
+const KNOWN = new Set(Object.keys(messagesFor('en').errors));
 
 /**
  * The message for a failed call: the API's reason code when it has one, "no connection" when the

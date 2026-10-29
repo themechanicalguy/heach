@@ -1288,6 +1288,385 @@
         "tags": ["admin"]
       }
     },
+    "/v1/provider/application": {
+      "get": {
+        "operationId": "OnboardingController_view",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/application/documents/{item}": {
+      "put": {
+        "operationId": "OnboardingController_upload",
+        "parameters": [
+          {
+            "name": "item",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/application/identity/start": {
+      "post": {
+        "operationId": "OnboardingController_startIdentity",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityStartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityRedirectDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/application/identity/complete": {
+      "post": {
+        "operationId": "OnboardingController_completeIdentity",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityCompleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/application/payout": {
+      "put": {
+        "operationId": "OnboardingController_payout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayoutDetailsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/application/submit": {
+      "post": {
+        "operationId": "OnboardingController_submit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/admin/v1/applications": {
+      "get": {
+        "operationId": "VerificationController_queue",
+        "parameters": [
+          {
+            "name": "view",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["open", "decided"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/applications/{accountId}": {
+      "get": {
+        "operationId": "VerificationController_review",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationReviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/applications/{accountId}/documents/{documentId}": {
+      "get": {
+        "operationId": "VerificationController_document",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/applications/{accountId}/documents": {
+      "post": {
+        "operationId": "VerificationController_reviewDocument",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/applications/{accountId}/decision": {
+      "post": {
+        "operationId": "VerificationController_decide",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/v1/organisation": {
       "get": {
         "operationId": "OrganisationsController_view",
@@ -2743,6 +3122,441 @@
           }
         },
         "required": ["reason"]
+      },
+      "PayoutSummaryDto": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": ["bank", "upi"]
+          },
+          "holderName": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string",
+            "description": "Last four characters of the account number or UPI ID"
+          }
+        },
+        "required": ["method", "holderName", "hint"]
+      },
+      "DocumentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scanStatus": {
+            "type": "string",
+            "enum": ["pending", "clean", "infected"]
+          },
+          "reference": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": ["pending", "accepted", "rejected"]
+          },
+          "reviewReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "uploadedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "scanStatus",
+          "reference",
+          "expiresOn",
+          "reviewStatus",
+          "reviewReason",
+          "uploadedAt"
+        ]
+      },
+      "ChecklistEntryDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "reference": {
+            "type": "boolean",
+            "description": "A registration or certificate number is needed"
+          },
+          "expiry": {
+            "type": "boolean",
+            "description": "The document has an expiry date"
+          },
+          "document": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentDto"
+              }
+            ]
+          }
+        },
+        "required": ["key", "required", "reference", "expiry", "document"]
+      },
+      "ApplicationDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "under_review",
+              "changes_requested",
+              "approved",
+              "rejected",
+              "suspended"
+            ]
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "type": "string",
+            "enum": ["not_started", "pending", "verified", "failed"]
+          },
+          "needsPayout": {
+            "type": "boolean"
+          },
+          "payout": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PayoutSummaryDto"
+              }
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChecklistEntryDto"
+            }
+          },
+          "missing": {
+            "description": "What still stops submission",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "The application may be changed now"
+          }
+        },
+        "required": [
+          "role",
+          "status",
+          "statusReason",
+          "identity",
+          "needsPayout",
+          "payout",
+          "items",
+          "missing",
+          "editable"
+        ]
+      },
+      "DocumentUploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string",
+            "description": "The file, base64 encoded; at most 5 MB decoded"
+          },
+          "reference": {
+            "type": "string",
+            "maxLength": 60,
+            "description": "Registration or certificate number"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": ["contentType", "contentBase64"]
+      },
+      "IdentityStartDto": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"],
+            "description": "Language of the page to return to"
+          }
+        },
+        "required": ["locale"]
+      },
+      "IdentityRedirectDto": {
+        "type": "object",
+        "properties": {
+          "redirectUrl": {
+            "type": "string"
+          }
+        },
+        "required": ["redirectUrl"]
+      },
+      "IdentityCompleteDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "reference": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        "required": ["code", "reference"]
+      },
+      "PayoutDetailsDto": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": ["bank", "upi"]
+          },
+          "holderName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "Bank account number, 9 to 18 digits"
+          },
+          "ifsc": {
+            "type": "string",
+            "description": "IFSC of the branch"
+          },
+          "upiId": {
+            "type": "string",
+            "description": "UPI ID, for example name@bank"
+          }
+        },
+        "required": ["method", "holderName"]
+      },
+      "ApplicationSummaryDto": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "under_review",
+              "changes_requested",
+              "approved",
+              "rejected",
+              "suspended"
+            ]
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["accountId", "role", "status", "fullName", "submittedAt"]
+      },
+      "ApplicationEventDto": {
+        "type": "object",
+        "properties": {
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorRole": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["fromStatus", "toStatus", "reason", "actorRole", "createdAt"]
+      },
+      "ApplicationReviewDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "under_review",
+              "changes_requested",
+              "approved",
+              "rejected",
+              "suspended"
+            ]
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "type": "string",
+            "enum": ["not_started", "pending", "verified", "failed"]
+          },
+          "needsPayout": {
+            "type": "boolean"
+          },
+          "payout": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PayoutSummaryDto"
+              }
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChecklistEntryDto"
+            }
+          },
+          "missing": {
+            "description": "What still stops submission",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "The application may be changed now"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApplicationEventDto"
+            }
+          }
+        },
+        "required": [
+          "role",
+          "status",
+          "statusReason",
+          "identity",
+          "needsPayout",
+          "payout",
+          "items",
+          "missing",
+          "editable",
+          "accountId",
+          "fullName",
+          "history"
+        ]
+      },
+      "StoredFileDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string"
+          }
+        },
+        "required": ["contentType", "contentBase64"]
+      },
+      "DocumentReviewDto": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["accepted", "rejected"]
+          },
+          "reason": {
+            "type": "string",
+            "description": "Required when rejected"
+          }
+        },
+        "required": ["documentId", "status"]
+      },
+      "DecisionDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": ["approve", "reject", "request_changes"]
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "documents_unclear",
+              "documents_expired",
+              "identity_mismatch",
+              "qualification_not_recognised",
+              "police_verification_failed",
+              "other"
+            ],
+            "description": "Required unless approving"
+          }
+        },
+        "required": ["decision"]
       },
       "MemberDto": {
         "type": "object",

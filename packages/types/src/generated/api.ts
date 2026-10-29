@@ -660,6 +660,182 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/provider/application': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OnboardingController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/application/documents/{item}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OnboardingController_upload'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/application/identity/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['OnboardingController_startIdentity'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/application/identity/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['OnboardingController_completeIdentity'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/application/payout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OnboardingController_payout'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/application/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['OnboardingController_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VerificationController_queue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VerificationController_review'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/documents/{documentId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VerificationController_document'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/documents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VerificationController_reviewDocument'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/decision': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VerificationController_decide'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/organisation': {
     parameters: {
       query?: never;
@@ -1301,6 +1477,172 @@ export interface components {
     SuspendDto: {
       /** @enum {string} */
       reason: 'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other';
+    };
+    PayoutSummaryDto: {
+      /** @enum {string} */
+      method: 'bank' | 'upi';
+      holderName: string;
+      /** @description Last four characters of the account number or UPI ID */
+      hint: string;
+    };
+    DocumentDto: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      scanStatus: 'pending' | 'clean' | 'infected';
+      reference: string | null;
+      /** Format: date */
+      expiresOn: string | null;
+      /** @enum {string} */
+      reviewStatus: 'pending' | 'accepted' | 'rejected';
+      reviewReason: string | null;
+      /** Format: date-time */
+      uploadedAt: string;
+    };
+    ChecklistEntryDto: {
+      key: string;
+      required: boolean;
+      /** @description A registration or certificate number is needed */
+      reference: boolean;
+      /** @description The document has an expiry date */
+      expiry: boolean;
+      document: components['schemas']['DocumentDto'] | null;
+    };
+    ApplicationDto: {
+      role: string;
+      /** @enum {string} */
+      status:
+        | 'draft'
+        | 'submitted'
+        | 'under_review'
+        | 'changes_requested'
+        | 'approved'
+        | 'rejected'
+        | 'suspended';
+      statusReason: string | null;
+      /** @enum {string} */
+      identity: 'not_started' | 'pending' | 'verified' | 'failed';
+      needsPayout: boolean;
+      payout: components['schemas']['PayoutSummaryDto'] | null;
+      items: components['schemas']['ChecklistEntryDto'][];
+      /** @description What still stops submission */
+      missing: string[];
+      /** @description The application may be changed now */
+      editable: boolean;
+    };
+    DocumentUploadDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+      /** @description Registration or certificate number */
+      reference?: string;
+      /** Format: date */
+      expiresOn?: string;
+    };
+    IdentityStartDto: {
+      /**
+       * @description Language of the page to return to
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+    };
+    IdentityRedirectDto: {
+      redirectUrl: string;
+    };
+    IdentityCompleteDto: {
+      code: string;
+      reference: string;
+    };
+    PayoutDetailsDto: {
+      /** @enum {string} */
+      method: 'bank' | 'upi';
+      holderName: string;
+      /** @description Bank account number, 9 to 18 digits */
+      accountNumber?: string;
+      /** @description IFSC of the branch */
+      ifsc?: string;
+      /** @description UPI ID, for example name@bank */
+      upiId?: string;
+    };
+    ApplicationSummaryDto: {
+      /** Format: uuid */
+      accountId: string;
+      role: string;
+      /** @enum {string} */
+      status:
+        | 'draft'
+        | 'submitted'
+        | 'under_review'
+        | 'changes_requested'
+        | 'approved'
+        | 'rejected'
+        | 'suspended';
+      fullName: string | null;
+      /** Format: date-time */
+      submittedAt: string | null;
+    };
+    ApplicationEventDto: {
+      fromStatus: string;
+      toStatus: string;
+      reason: string | null;
+      actorRole: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ApplicationReviewDto: {
+      role: string;
+      /** @enum {string} */
+      status:
+        | 'draft'
+        | 'submitted'
+        | 'under_review'
+        | 'changes_requested'
+        | 'approved'
+        | 'rejected'
+        | 'suspended';
+      statusReason: string | null;
+      /** @enum {string} */
+      identity: 'not_started' | 'pending' | 'verified' | 'failed';
+      needsPayout: boolean;
+      payout: components['schemas']['PayoutSummaryDto'] | null;
+      items: components['schemas']['ChecklistEntryDto'][];
+      /** @description What still stops submission */
+      missing: string[];
+      /** @description The application may be changed now */
+      editable: boolean;
+      /** Format: uuid */
+      accountId: string;
+      fullName: string | null;
+      history: components['schemas']['ApplicationEventDto'][];
+    };
+    StoredFileDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      contentBase64: string;
+    };
+    DocumentReviewDto: {
+      /** Format: uuid */
+      documentId: string;
+      /** @enum {string} */
+      status: 'accepted' | 'rejected';
+      /** @description Required when rejected */
+      reason?: string;
+    };
+    DecisionDto: {
+      /** @enum {string} */
+      decision: 'approve' | 'reject' | 'request_changes';
+      /**
+       * @description Required unless approving
+       * @enum {string}
+       */
+      reason?:
+        | 'documents_unclear'
+        | 'documents_expired'
+        | 'identity_mismatch'
+        | 'qualification_not_recognised'
+        | 'police_verification_failed'
+        | 'other';
     };
     MemberDto: {
       /** Format: uuid */
@@ -2384,6 +2726,255 @@ export interface operations {
       };
       /** @description reverification_required */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OnboardingController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        item: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DocumentUploadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_startIdentity: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IdentityStartDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['IdentityRedirectDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_completeIdentity: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IdentityCompleteDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_payout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PayoutDetailsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OnboardingController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationDto'];
+        };
+      };
+    };
+  };
+  VerificationController_queue: {
+    parameters: {
+      query?: {
+        view?: 'open' | 'decided';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationSummaryDto'][];
+        };
+      };
+    };
+  };
+  VerificationController_review: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationReviewDto'];
+        };
+      };
+    };
+  };
+  VerificationController_document: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+        documentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  VerificationController_reviewDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DocumentReviewDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VerificationController_decide: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DecisionDto'];
+      };
+    };
+    responses: {
+      204: {
         headers: {
           [name: string]: unknown;
         };

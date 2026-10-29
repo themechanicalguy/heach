@@ -128,6 +128,10 @@ export class EnvVars {
   @IsIn(['fake', 'local'])
   SMS_PROVIDER: 'fake' | 'local' = 'fake';
 
+  /** The web app's origin, for links partners send people back to (identity, payments). */
+  @Matches(/^https?:\/\/[\w.-]+(:\d+)?$/)
+  WEB_ORIGIN = 'http://localhost:3000';
+
   /** Mailpit's HTTP API, for SMS_PROVIDER=local. */
   @Matches(/^https?:\/\/[\w.-]+(:\d+)?$/)
   MAILPIT_API_URL = 'http://localhost:8025';

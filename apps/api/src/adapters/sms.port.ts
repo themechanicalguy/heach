@@ -1,7 +1,13 @@
 import type { Locale } from '@heach/i18n';
 
 /** Templates registered with the SMS provider (DLT in India); text is in the i18n catalogue. */
-export type SmsTemplate = 'otp_sign_in' | 'otp_reverify' | 'otp_change_mobile';
+export type SmsTemplate =
+  | 'otp_sign_in'
+  | 'otp_reverify'
+  | 'otp_change_mobile'
+  | 'application_approved'
+  | 'application_rejected'
+  | 'application_changes_requested';
 
 export interface SmsMessage {
   to: string;

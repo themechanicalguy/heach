@@ -50,7 +50,8 @@
     "password_change_required": "This password is temporary. Choose a new password to continue.",
     "password_too_short": "Use at least 12 characters.",
     "password_too_long": "Use at most 200 characters.",
-    "password_reused": "Choose a password different from the current one."
+    "password_reused": "Choose a password different from the current one.",
+    "application_not_in_review": "This application is not in review any more. Reload the list."
   },
   "users": {
     "title": "Users",
@@ -147,5 +148,71 @@
     "changed": "Password changed. Your other devices were signed out.",
     "temporaryTitle": "Choose a new password",
     "temporaryIntro": "You signed in with a temporary password. Choose your own password; it replaces the temporary one."
+  },
+  "verification": {
+    "title": "Provider verification",
+    "intro": "Applications waiting for review, oldest first. Opening one starts its review and is recorded.",
+    "viewOpen": "Waiting",
+    "viewDecided": "Decided",
+    "empty": "No applications here.",
+    "name": "Name",
+    "role": "Provider type",
+    "status": "Status",
+    "submitted": "Submitted",
+    "open": "Review",
+    "detailTitle": "Application",
+    "identity": "Identity check",
+    "payout": "Payout account",
+    "payoutNone": "Not given",
+    "documents": "Documents",
+    "noDocument": "Not uploaded",
+    "optional": "optional",
+    "reference": "Number",
+    "expires": "Valid until",
+    "scan": {
+      "pending": "Scan pending",
+      "clean": "Scan clean",
+      "infected": "Infected: quarantined"
+    },
+    "review": {
+      "pending": "Not reviewed",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    },
+    "download": "Open file",
+    "accept": "Accept",
+    "reject": "Reject",
+    "missing": "Still missing",
+    "history": "History",
+    "decisionTitle": "Decision",
+    "reason": "Reason",
+    "approve": "Approve",
+    "requestChanges": "Request changes",
+    "rejectApplication": "Reject application",
+    "decided": "Decision saved. The provider has been told by SMS.",
+    "close": "Close",
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "under_review": "Under review",
+      "changes_requested": "Changes requested",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "suspended": "Suspended"
+    },
+    "identityStates": {
+      "not_started": "Not started",
+      "pending": "Pending",
+      "verified": "Verified",
+      "failed": "Failed"
+    },
+    "reasons": {
+      "documents_unclear": "Document not clear",
+      "documents_expired": "Document expired",
+      "identity_mismatch": "Name does not match identity",
+      "qualification_not_recognised": "Qualification not recognised",
+      "police_verification_failed": "Police verification not cleared",
+      "other": "Other (support will explain)"
+    }
   }
 }

@@ -5,10 +5,14 @@ import {
   FakePaymentGateway,
   FakeSmsSender,
   FakeVideoRooms,
+  FakeVirusScanner,
+  InMemoryObjectStore,
 } from './fakes.js';
 import { IDENTITY_VERIFIER } from './identity.port.js';
 import { MailpitSmsSender } from './mailpit-sms.adapter.js';
+import { OBJECT_STORE } from './object-store.port.js';
 import { PAYMENT_GATEWAY } from './payments.port.js';
+import { VIRUS_SCANNER } from './scanner.port.js';
 import { SMS_SENDER, type SmsSender } from './sms.port.js';
 import { VIDEO_ROOMS } from './video.port.js';
 
@@ -37,7 +41,16 @@ export function createSmsSender(env: EnvVars): SmsSender {
     { provide: PAYMENT_GATEWAY, useClass: FakePaymentGateway },
     { provide: VIDEO_ROOMS, useClass: FakeVideoRooms },
     { provide: IDENTITY_VERIFIER, useClass: FakeIdentityVerifier },
+    { provide: OBJECT_STORE, useClass: InMemoryObjectStore },
+    { provide: VIRUS_SCANNER, useClass: FakeVirusScanner },
   ],
-  exports: [SMS_SENDER, PAYMENT_GATEWAY, VIDEO_ROOMS, IDENTITY_VERIFIER],
+  exports: [
+    SMS_SENDER,
+    PAYMENT_GATEWAY,
+    VIDEO_ROOMS,
+    IDENTITY_VERIFIER,
+    OBJECT_STORE,
+    VIRUS_SCANNER,
+  ],
 })
 export class AdaptersModule {}
