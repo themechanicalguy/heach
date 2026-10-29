@@ -1667,6 +1667,571 @@
         "tags": ["admin"]
       }
     },
+    "/v1/catalogue": {
+      "get": {
+        "operationId": "CatalogueController_list",
+        "parameters": [
+          {
+            "name": "service",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogueItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["catalogue"]
+      }
+    },
+    "/admin/v1/catalogue": {
+      "get": {
+        "operationId": "CatalogueAdminController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogueItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/catalogue/{code}": {
+      "put": {
+        "operationId": "CatalogueAdminController_change",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogueChangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/pins": {
+      "get": {
+        "operationId": "CatalogueAdminController_pins",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PinCodeDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/pins/{pin}": {
+      "put": {
+        "operationId": "CatalogueAdminController_setPin",
+        "parameters": [
+          {
+            "name": "pin",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PinChangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/v1/provider/listings": {
+      "get": {
+        "operationId": "ListingsController_view",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderListingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/listings/{code}": {
+      "put": {
+        "operationId": "ListingsController_save",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderListingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/service-area": {
+      "put": {
+        "operationId": "ListingsController_area",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceAreaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderListingsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/availability": {
+      "get": {
+        "operationId": "AvailabilityController_view",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      },
+      "put": {
+        "operationId": "AvailabilityController_replace",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/availability/blocks": {
+      "post": {
+        "operationId": "AvailabilityController_block",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/availability/blocks/{id}": {
+      "delete": {
+        "operationId": "AvailabilityController_unblock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/search": {
+      "get": {
+        "operationId": "SearchController_find",
+        "parameters": [
+          {
+            "name": "service",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+            }
+          },
+          {
+            "name": "pin",
+            "required": true,
+            "in": "query",
+            "description": "Patient's PIN code: results are limited to it (SD-04)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "item",
+            "required": false,
+            "in": "query",
+            "description": "Catalogue item code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Provider or service name, any of the three languages",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gender",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["female", "male"]
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "description": "Language the provider speaks",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          },
+          {
+            "name": "maxFeePaise",
+            "required": false,
+            "in": "query",
+            "description": "Highest fee in paise",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Language of the result text",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
+    "/v1/providers/{id}": {
+      "get": {
+        "operationId": "SearchController_profile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
+    "/v1/providers/{id}/slots": {
+      "get": {
+        "operationId": "SearchController_slots",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listing",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 14,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotsDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
     "/v1/organisation": {
       "get": {
         "operationId": "OrganisationsController_view",
@@ -3557,6 +4122,574 @@
           }
         },
         "required": ["decision"]
+      },
+      "CatalogueItemDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string",
+            "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "clinical": {
+            "type": "boolean"
+          },
+          "prescriptionRequired": {
+            "type": "boolean",
+            "description": "A prescription must be attached before booking (SL-06)"
+          },
+          "durationMinutes": {
+            "type": "number"
+          },
+          "sampleType": {
+            "type": "string",
+            "nullable": true
+          },
+          "reportHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "service",
+          "kind",
+          "clinical",
+          "prescriptionRequired",
+          "durationMinutes",
+          "sampleType",
+          "reportHours",
+          "name",
+          "preparation",
+          "active"
+        ]
+      },
+      "ItemNamesDto": {
+        "type": "object",
+        "properties": {
+          "or": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
+          },
+          "hi": {
+            "type": "string"
+          }
+        },
+        "required": ["or", "en", "hi"]
+      },
+      "CatalogueChangeDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "names": {
+            "$ref": "#/components/schemas/ItemNamesDto"
+          }
+        }
+      },
+      "PinCodeDto": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "serviceable": {
+            "type": "boolean"
+          }
+        },
+        "required": ["pin", "district", "serviceable"]
+      },
+      "PinChangeDto": {
+        "type": "object",
+        "properties": {
+          "serviceable": {
+            "type": "boolean"
+          }
+        },
+        "required": ["serviceable"]
+      },
+      "ListingDto": {
+        "type": "object",
+        "properties": {
+          "feePaise": {
+            "type": "number",
+            "description": "Fee in paise",
+            "minimum": 100
+          },
+          "durationMinutes": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 1440
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Pause and resume without admin action (SL-07)"
+          },
+          "careSettings": {
+            "type": "array",
+            "description": "Attendants (SL-04)",
+            "items": {
+              "type": "string",
+              "enum": ["home", "hospital"]
+            }
+          },
+          "homeCollection": {
+            "type": "boolean",
+            "description": "Labs: sample collection at home is offered (SL-09)"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "feePaise",
+          "durationMinutes",
+          "active",
+          "careSettings",
+          "homeCollection",
+          "id"
+        ]
+      },
+      "ListableItemDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "prescriptionRequired": {
+            "type": "boolean"
+          },
+          "defaultDurationMinutes": {
+            "type": "number"
+          },
+          "listing": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ListingDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "kind",
+          "prescriptionRequired",
+          "defaultDurationMinutes",
+          "listing"
+        ]
+      },
+      "ProviderListingsDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListableItemDto"
+            }
+          },
+          "pins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "travelSurchargePaise": {
+            "type": "number"
+          },
+          "serviceablePins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PinCodeDto"
+            }
+          }
+        },
+        "required": ["role", "items", "pins", "travelSurchargePaise", "serviceablePins"]
+      },
+      "ListingInputDto": {
+        "type": "object",
+        "properties": {
+          "feePaise": {
+            "type": "number",
+            "description": "Fee in paise",
+            "minimum": 100
+          },
+          "durationMinutes": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 1440
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Pause and resume without admin action (SL-07)"
+          },
+          "careSettings": {
+            "type": "array",
+            "description": "Attendants (SL-04)",
+            "items": {
+              "type": "string",
+              "enum": ["home", "hospital"]
+            }
+          },
+          "homeCollection": {
+            "type": "boolean",
+            "description": "Labs: sample collection at home is offered (SL-09)"
+          }
+        },
+        "required": ["feePaise", "durationMinutes", "active", "careSettings", "homeCollection"]
+      },
+      "ServiceAreaDto": {
+        "type": "object",
+        "properties": {
+          "pins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "travelSurchargePaise": {
+            "type": "number",
+            "description": "Travel surcharge in paise (SL-05)",
+            "minimum": 0
+          }
+        },
+        "required": ["pins", "travelSurchargePaise"]
+      },
+      "WeeklyRuleDto": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6,
+            "description": "0 is Sunday"
+          },
+          "startMinute": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1439,
+            "description": "Minutes after midnight IST"
+          },
+          "endMinute": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1440
+          }
+        },
+        "required": ["weekday", "startMinute", "endMinute"]
+      },
+      "BlockDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "end": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["start", "end", "id"]
+      },
+      "AvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeeklyRuleDto"
+            }
+          },
+          "bufferMinutes": {
+            "type": "number"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlockDto"
+            }
+          }
+        },
+        "required": ["rules", "bufferMinutes", "blocks"]
+      },
+      "AvailabilityInputDto": {
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeeklyRuleDto"
+            }
+          },
+          "bufferMinutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120
+          }
+        },
+        "required": ["rules", "bufferMinutes"]
+      },
+      "BlockInputDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "end": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["start", "end"]
+      },
+      "SearchResultDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "listingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "prescriptionRequired": {
+            "type": "boolean"
+          },
+          "feePaise": {
+            "type": "number"
+          },
+          "travelSurchargePaise": {
+            "type": "number"
+          },
+          "durationMinutes": {
+            "type": "number"
+          },
+          "earliestSlot": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Earliest bookable time in the next 7 days"
+          },
+          "rating": {
+            "type": "number",
+            "nullable": true,
+            "description": "Average rating, 1 to 5"
+          },
+          "ratingCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "providerId",
+          "listingId",
+          "name",
+          "role",
+          "gender",
+          "languages",
+          "itemCode",
+          "itemName",
+          "kind",
+          "prescriptionRequired",
+          "feePaise",
+          "travelSurchargePaise",
+          "durationMinutes",
+          "earliestSlot",
+          "rating",
+          "ratingCount"
+        ]
+      },
+      "ProfileListingDto": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "prescriptionRequired": {
+            "type": "boolean"
+          },
+          "feePaise": {
+            "type": "number"
+          },
+          "durationMinutes": {
+            "type": "number"
+          },
+          "preparation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "listingId",
+          "itemCode",
+          "itemName",
+          "kind",
+          "prescriptionRequired",
+          "feePaise",
+          "durationMinutes",
+          "preparation"
+        ]
+      },
+      "ProviderProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "identityVerified": {
+            "type": "boolean",
+            "description": "\"Verified identity\" badge (KY-09)"
+          },
+          "registrationNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nursing council registration (PO-05)"
+          },
+          "listings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileListingDto"
+            }
+          },
+          "pins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "travelSurchargePaise": {
+            "type": "number"
+          },
+          "rating": {
+            "type": "number",
+            "nullable": true
+          },
+          "ratingCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "gender",
+          "languages",
+          "identityVerified",
+          "registrationNumber",
+          "listings",
+          "pins",
+          "travelSurchargePaise",
+          "rating",
+          "ratingCount"
+        ]
+      },
+      "SlotsDto": {
+        "type": "object",
+        "properties": {
+          "slots": {
+            "type": "array",
+            "items": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        },
+        "required": ["slots"]
       },
       "MemberDto": {
         "type": "object",

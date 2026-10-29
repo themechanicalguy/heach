@@ -4,6 +4,7 @@ import { t } from './i18n';
 import { AdminLayout, type Section } from './layout/AdminLayout';
 import { Admins } from './pages/Admins';
 import { Applications } from './pages/Applications';
+import { Catalogue } from './pages/Catalogue';
 import { Dashboard } from './pages/Dashboard';
 import { OwnPassword } from './pages/OwnPassword';
 import { SignIn } from './pages/SignIn';
@@ -34,6 +35,7 @@ function Shell() {
 function sectionsFor(role: string): Section[] {
   const sections: Section[] = ['dashboard'];
   if (VERIFIERS.has(role)) sections.push('verification');
+  if (role === 'super_admin' || role === 'support') sections.push('catalogue');
   if (USER_READERS.has(role)) sections.push('users');
   if (role === 'super_admin') sections.push('admins');
   sections.push('password');
@@ -46,6 +48,7 @@ function Page({
   selfId,
 }: Readonly<{ section: Section; role: string; selfId: string | undefined }>) {
   if (section === 'verification') return <Applications />;
+  if (section === 'catalogue') return <Catalogue canChange={role === 'super_admin'} />;
   if (section === 'users') return <Users canChange={USER_CHANGERS.has(role)} />;
   if (section === 'admins') return <Admins selfId={selfId} />;
   if (section === 'password') return <OwnPassword />;

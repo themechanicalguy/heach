@@ -13,7 +13,8 @@
     "account": "Account",
     "application": "Application",
     "signIn": "Sign in / Sign up",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "services": "My services"
   },
   "offline": {
     "banner": "You are offline. Saved pages still work; changes need a connection."
@@ -131,7 +132,10 @@
     "upload_infected": "This file may contain a virus and was refused.",
     "application_incomplete": "Some steps are not done yet.",
     "application_not_editable": "Your application cannot be changed while it is being reviewed.",
-    "identity_not_pending": "This identity check has ended. Start it again."
+    "identity_not_pending": "This identity check has ended. Start it again.",
+    "provider_not_approved": "Your application is not approved yet.",
+    "pin_not_serviceable": "One of these PIN codes is not served yet.",
+    "availability_invalid": "Check the times: each must end after it starts."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -391,7 +395,20 @@
     "title": "Your details",
     "edit": "Correct my details",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "verified": "Verified identity",
+    "registration": "Registration number: {number}",
+    "languages": "Speaks: {languages}",
+    "services": "Services",
+    "prescription": "Needs a doctor's prescription",
+    "duration": "{minutes} minutes",
+    "times": "Free times",
+    "noTimes": "No free time in the next 7 days.",
+    "book": "Book {time}",
+    "area": "Visits PIN codes: {pins}",
+    "rating": "Rated {rating} by {count, plural, one {# patient} other {# patients}}",
+    "noRating": "No ratings yet",
+    "preparation": "Preparation: {text}"
   },
   "mobileChange": {
     "title": "Mobile number",
@@ -473,5 +490,79 @@
     "workLater": "Daily work screens (appointments, sample collection) are not open yet. We will tell you when they are.",
     "collectorVerification": "As a sample collector, you will also verify your own identity and qualification. These steps are not open yet.",
     "noMembership": "You are not part of a team now. Ask the lab or clinic to invite you again."
+  },
+  "services": {
+    "physiotherapy": "Physiotherapy at home",
+    "nursing": "Nursing at home",
+    "attendant": "Bedside attendant",
+    "lab": "Lab tests"
+  },
+  "servicesHint": {
+    "physiotherapy": "Rehabilitation and exercise therapy",
+    "nursing": "Injections, dressings and care",
+    "attendant": "Day, night or 24-hour care",
+    "lab": "Sample collection at home"
+  },
+  "search": {
+    "title": "Find {service}",
+    "pin": "Your PIN code",
+    "pinHint": "We show providers who visit this PIN code.",
+    "item": "Service",
+    "anyItem": "Any service",
+    "language": "Speaks",
+    "anyLanguage": "Any language",
+    "gender": "Provider",
+    "anyGender": "Anyone",
+    "genderFemale": "Woman",
+    "genderMale": "Man",
+    "find": "Search",
+    "results": "{count, plural, =0 {No providers found} one {# provider found} other {# providers found}}",
+    "empty": "No verified provider visits this PIN code for this service yet. Try another service or PIN code.",
+    "fee": "{fee} per visit",
+    "surcharge": "+ {fee} travel",
+    "earliest": "Earliest: {time}",
+    "noSlot": "No free time in the next 7 days",
+    "view": "View and book",
+    "pinInvalid": "Enter a 6-digit PIN code."
+  },
+  "providerServices": {
+    "title": "My services",
+    "intro": "Choose what you offer, where you visit and when you are free. Patients can book you only in these times.",
+    "listings": "Services and fees",
+    "fee": "Fee (₹)",
+    "duration": "Minutes",
+    "offered": "Offered",
+    "paused": "Paused",
+    "save": "Save",
+    "saved": "Saved.",
+    "area": "Area you visit",
+    "areaIntro": "Choose the PIN codes you travel to.",
+    "surcharge": "Travel charge (₹)",
+    "saveArea": "Save area",
+    "hours": "Weekly hours",
+    "from": "From",
+    "to": "To",
+    "buffer": "Gap between visits (minutes)",
+    "saveHours": "Save hours",
+    "leave": "Leave",
+    "leaveFrom": "First day",
+    "leaveTo": "Last day",
+    "addLeave": "Add leave",
+    "removeLeave": "Remove",
+    "noLeave": "No leave planned.",
+    "careSettings": "Where you work",
+    "home": "At home",
+    "hospital": "In hospital",
+    "homeCollection": "Home collection offered",
+    "notApproved": "You can set up your services once your application is approved."
+  },
+  "weekdays": {
+    "0": "Sunday",
+    "1": "Monday",
+    "2": "Tuesday",
+    "3": "Wednesday",
+    "4": "Thursday",
+    "5": "Friday",
+    "6": "Saturday"
   }
 }

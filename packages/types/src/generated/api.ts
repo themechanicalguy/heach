@@ -836,6 +836,230 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/catalogue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CatalogueController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/catalogue': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CatalogueAdminController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/catalogue/{code}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['CatalogueAdminController_change'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/pins': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CatalogueAdminController_pins'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/pins/{pin}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['CatalogueAdminController_setPin'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/listings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ListingsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/listings/{code}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['ListingsController_save'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/service-area': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['ListingsController_area'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/availability': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AvailabilityController_view'];
+    put: operations['AvailabilityController_replace'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/availability/blocks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AvailabilityController_block'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/availability/blocks/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['AvailabilityController_unblock'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SearchController_find'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/providers/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SearchController_profile'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/providers/{id}/slots': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SearchController_slots'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/organisation': {
     parameters: {
       query?: never;
@@ -1643,6 +1867,172 @@ export interface components {
         | 'qualification_not_recognised'
         | 'police_verification_failed'
         | 'other';
+    };
+    CatalogueItemDto: {
+      code: string;
+      /** @enum {string} */
+      service: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      clinical: boolean;
+      /** @description A prescription must be attached before booking (SL-06) */
+      prescriptionRequired: boolean;
+      durationMinutes: number;
+      sampleType: string | null;
+      reportHours: number | null;
+      name: string;
+      preparation: string | null;
+      active: boolean;
+    };
+    ItemNamesDto: {
+      or: string;
+      en: string;
+      hi: string;
+    };
+    CatalogueChangeDto: {
+      active?: boolean;
+      names?: components['schemas']['ItemNamesDto'];
+    };
+    PinCodeDto: {
+      pin: string;
+      district: string;
+      serviceable: boolean;
+    };
+    PinChangeDto: {
+      serviceable: boolean;
+    };
+    ListingDto: {
+      /** @description Fee in paise */
+      feePaise: number;
+      durationMinutes: number;
+      /** @description Pause and resume without admin action (SL-07) */
+      active: boolean;
+      /** @description Attendants (SL-04) */
+      careSettings: ('home' | 'hospital')[];
+      /** @description Labs: sample collection at home is offered (SL-09) */
+      homeCollection: boolean;
+      /** Format: uuid */
+      id: string;
+    };
+    ListableItemDto: {
+      code: string;
+      name: string;
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      prescriptionRequired: boolean;
+      defaultDurationMinutes: number;
+      listing: components['schemas']['ListingDto'] | null;
+    };
+    ProviderListingsDto: {
+      role: string;
+      items: components['schemas']['ListableItemDto'][];
+      pins: string[];
+      travelSurchargePaise: number;
+      serviceablePins: components['schemas']['PinCodeDto'][];
+    };
+    ListingInputDto: {
+      /** @description Fee in paise */
+      feePaise: number;
+      durationMinutes: number;
+      /** @description Pause and resume without admin action (SL-07) */
+      active: boolean;
+      /** @description Attendants (SL-04) */
+      careSettings: ('home' | 'hospital')[];
+      /** @description Labs: sample collection at home is offered (SL-09) */
+      homeCollection: boolean;
+    };
+    ServiceAreaDto: {
+      pins: string[];
+      /** @description Travel surcharge in paise (SL-05) */
+      travelSurchargePaise: number;
+    };
+    WeeklyRuleDto: {
+      /** @description 0 is Sunday */
+      weekday: number;
+      /** @description Minutes after midnight IST */
+      startMinute: number;
+      endMinute: number;
+    };
+    BlockDto: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      /** Format: uuid */
+      id: string;
+    };
+    AvailabilityDto: {
+      rules: components['schemas']['WeeklyRuleDto'][];
+      bufferMinutes: number;
+      blocks: components['schemas']['BlockDto'][];
+    };
+    AvailabilityInputDto: {
+      rules: components['schemas']['WeeklyRuleDto'][];
+      bufferMinutes: number;
+    };
+    BlockInputDto: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+    };
+    SearchResultDto: {
+      /** Format: uuid */
+      providerId: string;
+      /** Format: uuid */
+      listingId: string;
+      name: string;
+      role: string;
+      gender: string | null;
+      languages: string[];
+      itemCode: string;
+      itemName: string;
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      prescriptionRequired: boolean;
+      feePaise: number;
+      travelSurchargePaise: number;
+      durationMinutes: number;
+      /**
+       * Format: date-time
+       * @description Earliest bookable time in the next 7 days
+       */
+      earliestSlot: string | null;
+      /** @description Average rating, 1 to 5 */
+      rating: number | null;
+      ratingCount: number;
+    };
+    ProfileListingDto: {
+      /** Format: uuid */
+      listingId: string;
+      itemCode: string;
+      itemName: string;
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      prescriptionRequired: boolean;
+      feePaise: number;
+      durationMinutes: number;
+      preparation: string | null;
+    };
+    ProviderProfileDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      role: string;
+      gender: string | null;
+      languages: string[];
+      /** @description "Verified identity" badge (KY-09) */
+      identityVerified: boolean;
+      /** @description Nursing council registration (PO-05) */
+      registrationNumber: string | null;
+      listings: components['schemas']['ProfileListingDto'][];
+      pins: string[];
+      travelSurchargePaise: number;
+      rating: number | null;
+      ratingCount: number;
+    };
+    SlotsDto: {
+      slots: string[];
     };
     MemberDto: {
       /** Format: uuid */
@@ -2979,6 +3369,344 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  CatalogueController_list: {
+    parameters: {
+      query?: {
+        service?: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CatalogueItemDto'][];
+        };
+      };
+    };
+  };
+  CatalogueAdminController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CatalogueItemDto'][];
+        };
+      };
+    };
+  };
+  CatalogueAdminController_change: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CatalogueChangeDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CatalogueAdminController_pins: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PinCodeDto'][];
+        };
+      };
+    };
+  };
+  CatalogueAdminController_setPin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        pin: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PinChangeDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ListingsController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderListingsDto'];
+        };
+      };
+    };
+  };
+  ListingsController_save: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ListingInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderListingsDto'];
+        };
+      };
+    };
+  };
+  ListingsController_area: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ServiceAreaDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderListingsDto'];
+        };
+      };
+    };
+  };
+  AvailabilityController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AvailabilityDto'];
+        };
+      };
+    };
+  };
+  AvailabilityController_replace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AvailabilityInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AvailabilityDto'];
+        };
+      };
+    };
+  };
+  AvailabilityController_block: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['BlockInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BlockDto'];
+        };
+      };
+    };
+  };
+  AvailabilityController_unblock: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SearchController_find: {
+    parameters: {
+      query: {
+        service: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+        /** @description Patient's PIN code: results are limited to it (SD-04) */
+        pin: string;
+        /** @description Catalogue item code */
+        item?: string;
+        /** @description Provider or service name, any of the three languages */
+        q?: string;
+        gender?: 'female' | 'male';
+        /** @description Language the provider speaks */
+        language?: 'or' | 'en' | 'hi';
+        /** @description Highest fee in paise */
+        maxFeePaise?: number;
+        /** @description Language of the result text */
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchResultDto'][];
+        };
+      };
+    };
+  };
+  SearchController_profile: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderProfileDto'];
+        };
+      };
+    };
+  };
+  SearchController_slots: {
+    parameters: {
+      query: {
+        listing: string;
+        days?: number;
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SlotsDto'];
+        };
       };
     };
   };

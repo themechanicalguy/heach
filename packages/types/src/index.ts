@@ -48,6 +48,17 @@ export type ApplicationReview = components['schemas']['ApplicationReviewDto'];
 export type Decision = components['schemas']['DecisionDto'];
 export type DocumentReview = components['schemas']['DocumentReviewDto'];
 export type StoredFile = components['schemas']['StoredFileDto'];
+export type CatalogueItem = components['schemas']['CatalogueItemDto'];
+export type PinCode = components['schemas']['PinCodeDto'];
+export type ProviderListings = components['schemas']['ProviderListingsDto'];
+export type ListableItem = components['schemas']['ListableItemDto'];
+export type ListingInput = components['schemas']['ListingInputDto'];
+export type Availability = components['schemas']['AvailabilityDto'];
+export type WeeklyRule = components['schemas']['WeeklyRuleDto'];
+export type SearchResult = components['schemas']['SearchResultDto'];
+export type ProviderProfile = components['schemas']['ProviderProfileDto'];
+export type ProfileListing = components['schemas']['ProfileListingDto'];
+export type Slots = components['schemas']['SlotsDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

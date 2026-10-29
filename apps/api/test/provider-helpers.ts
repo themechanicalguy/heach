@@ -51,7 +51,8 @@ export async function verifyIdentity(app: INestApplication<App>, login: Login): 
 
 /** A provider with every checklist item, identity and payout details, then submitted. */
 export async function submittedProvider(app: INestApplication<App>, role: OnboardingRole) {
-  const { mobile, login } = await signedUp(app, { role, languages: ['or', 'en'] });
+  const setup = role === 'lab' ? { organisationName: 'Synthetic Diagnostics' } : {};
+  const { mobile, login } = await signedUp(app, { role, languages: ['or', 'en'], ...setup });
   for (const item of CHECKLISTS[role]) {
     await uploadDocument(app, login, item.key, {
       ...(item.reference ? { reference: 'SYN-12345' } : {}),
@@ -89,4 +90,52 @@ export async function approvedProvider(app: INestApplication<App>, role: Onboard
     .send({ decision: 'approve' })
     .expect(204);
   return provider;
+}
+
+export const PILOT_PIN = '751001';
+const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
+  weekday,
+  startMinute: 0,
+  endMinute: 1440,
+}));
+
+/** An Approved provider listing one catalogue item in the pilot PIN, open all week (Step 4). */
+export async function listedProvider(
+  app: INestApplication<App>,
+  role: OnboardingRole,
+  item: string,
+  options: { feePaise?: number; pins?: string[]; bufferMinutes?: number } = {},
+) {
+  const provider = await approvedProvider(app, role);
+  const server = () => request(app.getHttpServer());
+  await server()
+    .put(`/v1/provider/listings/${item}`)
+    .set(bearer(provider.login))
+    .send({
+      feePaise: options.feePaise ?? 60_000,
+      durationMinutes: role === 'attendant' ? 720 : 45,
+      active: true,
+      careSettings: role === 'attendant' ? ['home'] : [],
+      homeCollection: true,
+    })
+    .expect(200);
+  await server()
+    .put('/v1/provider/service-area')
+    .set(bearer(provider.login))
+    .send({ pins: options.pins ?? [PILOT_PIN], travelSurchargePaise: 5_000 })
+    .expect(200);
+  await server()
+    .put('/v1/provider/availability')
+    .set(bearer(provider.login))
+    .send({ rules: EVERY_DAY, bufferMinutes: options.bufferMinutes ?? 15 })
+    .expect(200);
+  const listings = await server()
+    .get('/v1/provider/listings')
+    .set(bearer(provider.login))
+    .expect(200);
+  const listing = (
+    listings.body as { items: { code: string; listing: { id: string } | null }[] }
+  ).items.find((entry) => entry.code === item)?.listing;
+  if (!listing) throw new Error('Listing not saved');
+  return { ...provider, listingId: listing.id };
 }
