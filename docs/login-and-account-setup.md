@@ -187,7 +187,7 @@ export PATH=/opt/homebrew/opt/node@24/bin:$PATH   # this Mac: Homebrew's default
 pnpm install
 pnpm check
 pnpm --filter @heach/api test:e2e
-# Web E2E with the API (local): build web with FEATURE_FLAGS=sample-patient-note,accounts and
+# Web E2E with the API (local): build web with FEATURE_FLAGS=accounts and
 # API_ORIGIN, start API (raised local caps) and `next start --port 3000`, then:
 E2E_API=1 E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL=http://localhost:8027 \
   pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts
