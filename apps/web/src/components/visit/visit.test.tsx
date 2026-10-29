@@ -81,6 +81,10 @@ const providerBooking = (
 function route(responses: Record<string, unknown>) {
   state.api.mockImplementation((path: string, init?: RequestInit) => {
     const key = Object.keys(responses).find((prefix) => path.startsWith(prefix));
+    // Panels a test does not care about answer with their empty shape.
+    if (path.endsWith('/shared')) return Promise.resolve({ records: [], history: [], files: [] });
+    if (path === '/me/referral')
+      return Promise.resolve({ code: 'SYNTH123', invitees: [], coupons: [], invited: false });
     if (key) return Promise.resolve(responses[key]);
     return Promise.resolve(init?.method ? undefined : []);
   });
