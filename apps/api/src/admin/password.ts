@@ -37,3 +37,20 @@ export async function verifyPassword(password: string, stored: string): Promise<
  * (no enumeration). Its password is random and thrown away.
  */
 export const DUMMY_HASH_PROMISE: Promise<string> = hashPassword(randomBytes(24).toString('hex'));
+
+/** Longest password accepted: long passphrases are welcome (OWASP), unbounded input is not. */
+export const MAX_PASSWORD_LENGTH = 200;
+/** A temporary password from a super-admin reset stops working after this long (O-2). */
+export const TEMPORARY_PASSWORD_HOURS = 24;
+
+/** A random one-time password a super admin passes on; 144 bits, URL-safe. */
+export function newTemporaryPassword(): string {
+  return randomBytes(18).toString('base64url');
+}
+
+/** Why a new password is refused, as a reason code, or undefined. */
+export function newPasswordProblem(password: string): string | undefined {
+  if (password.length < MIN_PASSWORD_LENGTH) return 'password_too_short';
+  if (password.length > MAX_PASSWORD_LENGTH) return 'password_too_long';
+  return undefined;
+}

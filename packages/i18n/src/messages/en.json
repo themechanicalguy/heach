@@ -49,7 +49,8 @@
   },
   "sms": {
     "otp_sign_in": "{code} is your HEACH sign-in code. It expires in {minutes} minutes. Never share it with anyone.",
-    "otp_reverify": "{code} is your HEACH code to confirm a change to your account. It expires in {minutes} minutes. Never share it with anyone."
+    "otp_reverify": "{code} is your HEACH code to confirm a change to your account. It expires in {minutes} minutes. Never share it with anyone.",
+    "otp_change_mobile": "{code} is your HEACH code to move your account to this number. It expires in {minutes} minutes. Never share it with anyone."
   },
   "welcome": {
     "title": "Choose your language",

@@ -51,6 +51,10 @@ function sessionStatements(realm: SessionRealm) {
     familyIsLive: `SELECT EXISTS (SELECT 1 FROM ${table}
                     WHERE family_id = $1 AND revoked_at IS NULL AND expires_at > now()) AS live`,
     revokeAllForUser: `${revoke} user_id = $1`,
+    liveFamiliesInRole: `SELECT DISTINCT family_id FROM ${table}
+                          WHERE user_id = $1 AND active_role = $2 AND revoked_at IS NULL`,
+    otherLiveFamilies: `SELECT DISTINCT family_id FROM ${table}
+                         WHERE user_id = $1 AND family_id <> $2 AND revoked_at IS NULL`,
   } as const;
 }
 
@@ -135,5 +139,23 @@ export class SessionRepository {
 
   async revokeAllForUser(userId: string, client: Queryable = this.pool): Promise<void> {
     await client.query(this.sql.revokeAllForUser, [userId]);
+  }
+
+  /** Devices of the user whose session acts in this role (revocation policy D-7). */
+  async liveFamiliesInRole(client: TransactionClient, userId: string, role: Role) {
+    const { rows } = await client.query<{ family_id: string }>(this.sql.liveFamiliesInRole, [
+      userId,
+      role,
+    ]);
+    return rows.map((row) => row.family_id);
+  }
+
+  /** Every other device of the user (sign-out after a number change, O-3). */
+  async otherLiveFamilies(client: TransactionClient, userId: string, keepFamilyId: string) {
+    const { rows } = await client.query<{ family_id: string }>(this.sql.otherLiveFamilies, [
+      userId,
+      keepFamilyId,
+    ]);
+    return rows.map((row) => row.family_id);
   }
 }

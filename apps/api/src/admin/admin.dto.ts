@@ -50,6 +50,9 @@ export class AdminPasswordAcceptedDto {
 
   @ApiPropertyOptional({ type: AdminEnrolmentDto })
   enrolment?: AdminEnrolmentDto;
+
+  @ApiProperty({ description: 'A temporary password: send a new one with the TOTP code (O-2)' })
+  passwordChangeRequired!: boolean;
 }
 
 export class AdminMfaDto {
@@ -61,6 +64,12 @@ export class AdminMfaDto {
   @ApiProperty({ example: '123456' })
   @Matches(/^\d{6}$/)
   code!: string;
+
+  @ApiPropertyOptional({ description: 'Required when the password is temporary (O-2)' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(400)
+  newPassword?: string;
 }
 
 export class AdminCodeDto {
@@ -130,6 +139,9 @@ export class UserSummaryDto {
 export class UserDetailDto extends UserSummaryDto {
   @ApiProperty({ nullable: true, type: String, description: 'Full name; this read is audited' })
   fullName!: string | null;
+
+  @ApiProperty({ format: 'date-time', nullable: true, type: String })
+  deletionRequestedAt!: string | null;
 }
 
 export class UserPageDto {
@@ -150,4 +162,61 @@ export class SuspendDto {
   @ApiProperty({ enum: SUSPENSION_REASONS })
   @IsIn(SUSPENSION_REASONS)
   reason!: SuspensionReason;
+}
+
+/** An admin's own password change: the current one, a new one and a fresh TOTP before (O-2). */
+export class AdminPasswordChangeDto {
+  @ApiProperty()
+  @IsString()
+  @Length(1, 200)
+  currentPassword!: string;
+
+  @ApiProperty({ minLength: 12 })
+  @IsString()
+  @MaxLength(400)
+  newPassword!: string;
+}
+
+export class AdminSummaryDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() email!: string;
+  @ApiProperty({ enum: ADMIN_ROLES }) role!: string;
+  @ApiProperty({ enum: ['active', 'disabled'] }) status!: 'active' | 'disabled';
+  @ApiProperty() mfaEnrolled!: boolean;
+  @ApiProperty() mustChangePassword!: boolean;
+  @ApiProperty() locked!: boolean;
+  @ApiProperty({ format: 'date-time' }) createdAt!: string;
+  @ApiProperty({ format: 'date-time', nullable: true, type: String }) lastSignInAt!: string | null;
+}
+
+export class NewAdminDto {
+  @ApiProperty({ example: 'support@heach.invalid' })
+  @IsEmail()
+  @MaxLength(254)
+  email!: string;
+
+  @ApiProperty({ enum: ADMIN_ROLES })
+  @IsIn(ADMIN_ROLES)
+  role!: (typeof ADMIN_ROLES)[number];
+}
+
+export class AdminRoleDto {
+  @ApiProperty({ enum: ADMIN_ROLES })
+  @IsIn(ADMIN_ROLES)
+  role!: (typeof ADMIN_ROLES)[number];
+}
+
+export class AdminStatusDto {
+  @ApiProperty({ enum: ['active', 'disabled'] })
+  @IsIn(['active', 'disabled'])
+  status!: 'active' | 'disabled';
+}
+
+export class TemporaryPasswordDto {
+  @ApiProperty({ description: 'Shown once; expires in 24 hours; changed at the next sign-in' })
+  temporaryPassword!: string;
+}
+
+export class CreatedAdminDto extends TemporaryPasswordDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
 }

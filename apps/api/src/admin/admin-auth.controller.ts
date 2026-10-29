@@ -22,6 +22,7 @@ import {
 import type { Request, Response } from 'express';
 import { AccessTokenDto, LogoutDto } from '../auth/auth.dto.js';
 import { bearerToken, principalOf } from '../auth/auth.guard.js';
+import { RequireReverification } from '../auth/reverification.js';
 import { ADMIN_SESSIONS } from '../auth/auth.module.js';
 import { Public, Roles } from '../auth/roles.decorator.js';
 import { ADMIN_REALM } from '../auth/session-realm.js';
@@ -35,6 +36,7 @@ import {
   AdminMeDto,
   AdminMfaDto,
   AdminPasswordAcceptedDto,
+  AdminPasswordChangeDto,
   AdminPasswordDto,
 } from './admin.dto.js';
 import { AdminAuthService } from './admin-auth.service.js';
@@ -69,7 +71,8 @@ export class AdminAuthController {
     @Body() body: AdminMfaDto,
     @Res({ passthrough: true }) response: Response,
   ): Promise<AccessTokenDto> {
-    return sendTokens(response, ADMIN_REALM, await this.auth.checkCode(body.mfaTicket, body.code));
+    const tokens = await this.auth.checkCode(body.mfaTicket, body.code, body.newPassword);
+    return sendTokens(response, ADMIN_REALM, tokens);
   }
 
   @Post('auth/refresh')
@@ -112,6 +115,20 @@ export class AdminAuthController {
   @ApiNoContentResponse()
   async reverify(@Body() body: AdminCodeDto, @Req() request: Request): Promise<void> {
     await this.auth.reverify(principalOf(request), body.code);
+  }
+
+  /** The admin's own password; needs a fresh TOTP code first (O-2). */
+  @Post('auth/password/change')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(...ADMIN_ROLES)
+  @UseGuards(RequireReverification)
+  @ApiBearerAuth()
+  @ApiNoContentResponse()
+  async changePassword(
+    @Body() body: AdminPasswordChangeDto,
+    @Req() request: Request,
+  ): Promise<void> {
+    await this.auth.changePassword(principalOf(request), body.currentPassword, body.newPassword);
   }
 
   @Get('me')

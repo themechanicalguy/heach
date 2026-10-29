@@ -45,7 +45,11 @@ type Check = { kind: 'gone' } | { kind: 'wrong' } | { kind: 'ok'; row: OtpChalle
 type Resend =
   { kind: 'gone' } | { kind: 'early'; waitSeconds: number } | { kind: 'ok'; row: OtpChallengeRow };
 
-const TEMPLATES = { sign_in: 'otp_sign_in', reverify: 'otp_reverify' } as const;
+const TEMPLATES = {
+  sign_in: 'otp_sign_in',
+  reverify: 'otp_reverify',
+  change_mobile: 'otp_change_mobile',
+} as const;
 
 /** Every expired, used-up or unknown challenge gives the same answer (no enumeration). */
 const expired = () =>

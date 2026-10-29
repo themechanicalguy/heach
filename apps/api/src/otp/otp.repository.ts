@@ -4,7 +4,7 @@ import type pg from 'pg';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { type TransactionClient, withTransaction } from '../data-stores/transaction.js';
 
-export type OtpPurpose = 'sign_in' | 'reverify';
+export type OtpPurpose = 'sign_in' | 'reverify' | 'change_mobile';
 
 export interface OtpChallengeRow {
   id: string;

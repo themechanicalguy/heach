@@ -125,6 +125,38 @@ export class SessionService {
     await this.accessTokens.revokeAllForUser(userId);
   }
 
+  /**
+   * Signs out at once every device acting in `role`, which the account no longer holds (removed
+   * membership or revoked role, D-7). Devices in another role keep their session.
+   */
+  async signOutRole(userId: string, role: Role): Promise<void> {
+    await this.signOutFamilies(userId, (client) =>
+      this.sessions.liveFamiliesInRole(client, userId, role),
+    );
+  }
+
+  /** Signs out every device of the user except this one (after a number change, O-3). */
+  async signOutOtherDevices(principal: Principal): Promise<void> {
+    await this.signOutFamilies(principal.userId, async (client) => {
+      const own = await this.sessions.familyOf(client, principal.sessionId);
+      return own ? this.sessions.otherLiveFamilies(client, principal.userId, own) : [];
+    });
+  }
+
+  /** Under the user's lock, as sign-out of one device (SE-07.21). */
+  private async signOutFamilies(
+    userId: string,
+    select: (client: TransactionClient) => Promise<string[]>,
+  ): Promise<void> {
+    const families = await this.sessions.transaction(async (client) => {
+      await this.sessions.lockUser(client, userId);
+      const chosen = await select(client);
+      for (const family of chosen) await this.sessions.revokeFamily(client, family);
+      return chosen;
+    });
+    for (const family of families) await this.accessTokens.revokeFamily(family);
+  }
+
   private async rotate(client: TransactionClient, hash: string): Promise<Rotation> {
     const session = await this.sessions.lockByHash(client, hash);
     if (!session || session.expires_at.getTime() < Date.now()) {
