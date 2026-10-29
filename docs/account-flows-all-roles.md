@@ -53,17 +53,30 @@ Recorded by Claude Code from the owner's answers in the session (FU-14: same Git
 
 | # | Task | State |
 | --- | --- | --- |
-| A1 | This record; role matrix | In progress |
-| A2 | Migration 0004 (linked patients, deletion requests, organisations, memberships, admin password change, OTP purpose) | |
-| A3 | Linked patients API (AC-03) | |
-| A4 | Profile correction, export, deletion request API (AC-06, PR-04) | |
-| A5 | Phone-number change API (O-3) | |
-| A6 | Organisations, invitations, membership lifecycle API (O-1) | |
-| A7 | Admin management, recovery, own password change, last super admin (O-2) | |
-| A8 | Purge job (D-5) | |
-| A9 | OpenAPI and generated types | |
+| A1 | This record; role matrix | Record done; matrix with A13 |
+| A2 | Migration 0004 (linked patients, deletion requests, organisations, memberships, admin password change, OTP purpose) | Done (`d822be7`) |
+| A3 | Linked patients API (AC-03) | Done |
+| A4 | Profile correction, export, deletion request API (AC-06, PR-04) | Done |
+| A5 | Phone-number change API (O-3) | Done |
+| A6 | Organisations, invitations, membership lifecycle API (O-1) | Done |
+| A7 | Admin management, recovery, own password change, last super admin (O-2) | Done |
+| A8 | Purge job (D-5) | Done; not scheduled on a host |
+| A9 | OpenAPI and generated types | Done (`251a9a3`) |
 | A10 | Web screens and i18n (or, en, hi) | |
 | A11 | Admin screens | |
 | A12 | Tests: unit, integration, E2E | |
 | A13 | Docs: status page, register, ADR 0014 status, earlier record | |
 | A14 | `pnpm check`, CI, PR | |
+
+## Progress
+
+- 29 October 2026, `d822be7` and `251a9a3`: API complete for A2 to A9. Integration 269 of 269
+  (215 before, 54 new: `role-journeys`, `staff-membership`, `linked-patients`, `account-data`,
+  `admin-management`, `purge-expired`), unit 133 of 133. Found and fixed on the way: a membership
+  CHECK that made a removed member violate the table (caught by the D-7 test).
+- Local setup for this worktree: its own `.env` copy points PostgreSQL at database
+  `heach_flows` and Redis at db 1, so tests never touch the owner's `heach_local` or their dev
+  sessions. Migration 0004 was briefly applied to `heach_local` by mistake and reverted by hand
+  the same minute (tables were empty; ledger back to 0003).
+- The secret-scan hook failed in a git worktree (gitleaks in Docker could not see the common
+  `.git`); `scripts/hooks/secrets.mjs` now mounts it read-only, with a unit test.

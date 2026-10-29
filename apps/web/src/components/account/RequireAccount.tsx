@@ -7,10 +7,10 @@ import { type ReactNode, useEffect } from 'react';
 import { useAccount } from '../../lib/account';
 import { errorMessageKey } from '../../lib/errors';
 import { useI18n } from '../../lib/i18n-context';
-import { destinationFor, isCareRole, isProviderRole } from '../../lib/routing';
+import { destinationFor, isCareRole, isOrganisationOwner, isProviderRole } from '../../lib/routing';
 import { useSession } from '../../lib/session';
 
-export type PageKind = 'setup' | 'consent' | 'care' | 'provider' | 'any';
+export type PageKind = 'setup' | 'consent' | 'care' | 'provider' | 'owner' | 'any';
 
 interface Props {
   page: PageKind;
@@ -31,6 +31,7 @@ function redirectFor(me: Me, page: PageKind, pathname: string): string | undefin
 function roleFits(role: string, page: PageKind): boolean {
   if (page === 'care') return isCareRole(role);
   if (page === 'provider') return isProviderRole(role);
+  if (page === 'owner') return isOrganisationOwner(role);
   return true;
 }
 

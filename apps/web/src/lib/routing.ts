@@ -14,6 +14,11 @@ export function isProviderRole(role: string): boolean {
   return !isCareRole(role) && role !== 'new_account';
 }
 
+/** Roles that run a lab or a clinic and manage its staff (owner decision O-1). */
+export function isOrganisationOwner(role: string): boolean {
+  return ['lab', 'dentist', 'dermatologist'].includes(role);
+}
+
 /**
  * A `next` path is followed only if it is a page of this app: one leading slash, a locale
  * prefix, no scheme, host, backslash or encoded slash. Anything else is dropped (no open
@@ -58,5 +63,7 @@ export function destinationFor(me: Me, next?: string): string {
 function allowedFor(role: string, path: string): boolean {
   const section = path.split('/')[2] ?? '';
   if (section === 'provider') return isProviderRole(role);
+  if (section === 'people') return isCareRole(role);
+  if (section === 'team') return isOrganisationOwner(role);
   return section !== 'setup' && section !== 'consent';
 }
