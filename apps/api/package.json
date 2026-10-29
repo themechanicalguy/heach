@@ -18,7 +18,8 @@
     "job:reencrypt": "node --env-file-if-exists=../../.env dist/jobs/reencrypt.js",
     "job:restore-check": "node --env-file-if-exists=../../.env dist/jobs/restore-check.js",
     "admin:create": "node --env-file-if-exists=../../.env dist/jobs/create-admin.js",
-    "job:purge-expired": "node --env-file-if-exists=../../.env dist/jobs/purge-expired.js"
+    "job:purge-expired": "node --env-file-if-exists=../../.env dist/jobs/purge-expired.js",
+    "job:worker": "node --env-file-if-exists=../../.env dist/jobs/worker.js"
   },
   "dependencies": {
     "@aws-sdk/client-kms": "3.1146.0",

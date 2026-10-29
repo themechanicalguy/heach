@@ -91,6 +91,14 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
           }}
           onSubmit={submit}
         />
+        {results.state === 'ready' && filters.item && PIN_PATTERN.test(filters.pin) && (
+          <Link
+            className="heach-button heach-button--secondary"
+            href={`/${locale}/book/any/${filters.item}?pin=${filters.pin}`}
+          >
+            {t('book.anyTitle')}
+          </Link>
+        )}
         <ResultList results={results} onRetry={() => void run(filters)} />
       </div>
     </section>

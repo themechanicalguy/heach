@@ -1,3 +1,4 @@
+import { CATALOGUES } from '@heach/i18n';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Application } from '@heach/types';
 import type { ReactNode } from 'react';
@@ -58,7 +59,12 @@ function first<T>(items: readonly T[]): T {
   return item;
 }
 
-const inEnglish = (node: ReactNode) => render(<I18nProvider locale="en">{node}</I18nProvider>);
+const inEnglish = (node: ReactNode) =>
+  render(
+    <I18nProvider locale="en" messages={CATALOGUES.en}>
+      {node}
+    </I18nProvider>,
+  );
 
 beforeEach(() => {
   state.api.mockReset();

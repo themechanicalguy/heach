@@ -1,6 +1,7 @@
 import { APP_ENVS, type AppEnv } from '@heach/flags';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsIn,
   IsInt,
@@ -127,6 +128,12 @@ export class EnvVars {
    */
   @IsIn(['fake', 'local'])
   SMS_PROVIDER: 'fake' | 'local' = 'fake';
+
+  /** Run due jobs inside the API process (local development); hosts run `job:worker`. */
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  JOBS_IN_PROCESS = false;
 
   /** The web app's origin, for links partners send people back to (identity, payments). */
   @Matches(/^https?:\/\/[\w.-]+(:\d+)?$/)

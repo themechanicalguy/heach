@@ -1,3 +1,4 @@
+import { CATALOGUES } from '@heach/i18n';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -32,7 +33,12 @@ vi.mock('../lib/session', () => ({
 vi.mock('../lib/account', () => ({ useAccount: () => ({ account: state.account }) }));
 vi.mock('../lib/api', () => ({ api: state.api }));
 
-const inEnglish = (node: ReactNode) => render(<I18nProvider locale="en">{node}</I18nProvider>);
+const inEnglish = (node: ReactNode) =>
+  render(
+    <I18nProvider locale="en" messages={CATALOGUES.en}>
+      {node}
+    </I18nProvider>,
+  );
 
 beforeEach(() => {
   state.pathname = '/en/account';

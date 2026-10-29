@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { isLocale, LOCALES } from '@heach/i18n';
+import { isLocale, LOCALES, messagesFor } from '@heach/i18n';
 import { ErrorTracking } from '../../components/ErrorTracking';
 import { HeaderAccount } from '../../components/HeaderAccount';
 import { LanguageSwitch } from '../../components/LanguageSwitch';
@@ -50,7 +50,7 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
   return (
     <html lang={locale} className={fontClassNames}>
       <body>
-        <I18nProvider locale={locale}>
+        <I18nProvider locale={locale} messages={messagesFor(locale)}>
           <SessionProvider>
             <AccountProvider enabled={accounts}>
               <header className="shell-header">

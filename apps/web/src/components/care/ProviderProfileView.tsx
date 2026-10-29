@@ -121,7 +121,7 @@ function SlotPicker({
           <li key={slot}>
             <Link
               className="heach-button heach-button--secondary"
-              href={`/${locale}/book/${listingId}?start=${encodeURIComponent(slot)}`}
+              href={`/${locale}/book/${listingId}?provider=${providerId}&start=${encodeURIComponent(slot)}`}
             >
               {t('profile.book', { time: formatDateTime(new Date(slot), locale) })}
             </Link>

@@ -1,7 +1,7 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import type { IdentityVerifier } from './identity.port.js';
 import type { ObjectStore } from './object-store.port.js';
-import type { PaymentGateway } from './payments.port.js';
+import type { GatewayEvent, PaymentGateway } from './payments.port.js';
 import type { VirusScanner } from './scanner.port.js';
 import type { SmsMessage, SmsSender } from './sms.port.js';
 import type { VideoRooms } from './video.port.js';
@@ -30,13 +30,18 @@ export class FakeSmsSender implements SmsSender {
 }
 
 export class FakePaymentGateway implements PaymentGateway {
-  readonly orders: { amountPaise: number; receipt: string }[] = [];
+  readonly orders = new Map<string, { amountPaise: number; receipt: string; paid: boolean }>();
+  readonly refunds: { paymentId: string; amountPaise: number }[] = [];
+  readonly transfers: { providerId: string; amountPaise: number; reference: string }[] = [];
+  /** Set by a test to make refunds fail, as a gateway outage would. */
+  failingRefunds = false;
 
   constructor(private readonly webhookSecret = 'fake-webhook-secret') {}
 
   createOrder(order: { amountPaise: number; receipt: string }): Promise<{ orderId: string }> {
-    this.orders.push(order);
-    return Promise.resolve({ orderId: `order_${randomUUID()}` });
+    const orderId = `order_${randomUUID()}`;
+    this.orders.set(orderId, { ...order, paid: false });
+    return Promise.resolve({ orderId });
   }
 
   /** Same scheme as common gateways: hex HMAC-SHA-256 of the raw payload. */
@@ -46,6 +51,49 @@ export class FakePaymentGateway implements PaymentGateway {
 
   verifyWebhook(payload: string, signature: string): boolean {
     return this.sign(payload) === signature;
+  }
+
+  parseEvent(payload: string): GatewayEvent {
+    return JSON.parse(payload) as GatewayEvent;
+  }
+
+  /** The signed webhook the gateway would send when the patient pays this order. */
+  sandboxCapture(
+    orderId: string,
+    eventId = `evt_${randomUUID()}`,
+  ): { body: string; signature: string } {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error('Unknown order');
+    order.paid = true;
+    const event: GatewayEvent = {
+      id: eventId,
+      kind: 'payment.captured',
+      orderId,
+      paymentId: `pay_${orderId.slice(6, 20)}`,
+      amountPaise: order.amountPaise,
+    };
+    const body = JSON.stringify(event);
+    return { body, signature: this.sign(body) };
+  }
+
+  refund(payment: { paymentId: string; amountPaise: number }): Promise<{ refundId: string }> {
+    if (this.failingRefunds) return Promise.reject(new Error('Gateway unavailable'));
+    this.refunds.push(payment);
+    return Promise.resolve({ refundId: `rfnd_${randomUUID().slice(0, 14)}` });
+  }
+
+  transfer(payout: {
+    providerId: string;
+    amountPaise: number;
+    reference: string;
+  }): Promise<{ transferId: string }> {
+    this.transfers.push(payout);
+    return Promise.resolve({ transferId: `trf_${randomUUID().slice(0, 14)}` });
+  }
+
+  orderStatus(orderId: string): Promise<{ paid: boolean; amountPaise: number } | undefined> {
+    const order = this.orders.get(orderId);
+    return Promise.resolve(order && { paid: order.paid, amountPaise: order.amountPaise });
   }
 }
 

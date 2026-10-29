@@ -1,3 +1,4 @@
+import { CATALOGUES } from '@heach/i18n';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ProviderProfile, SearchResult } from '@heach/types';
 import type { ReactNode } from 'react';
@@ -20,7 +21,12 @@ vi.mock('../../lib/api', async (original) => ({
   api: state.api,
 }));
 
-const inEnglish = (node: ReactNode) => render(<I18nProvider locale="en">{node}</I18nProvider>);
+const inEnglish = (node: ReactNode) =>
+  render(
+    <I18nProvider locale="en" messages={CATALOGUES.en}>
+      {node}
+    </I18nProvider>,
+  );
 
 const result: SearchResult = {
   providerId: '00000000-0000-4000-8000-000000000011',
@@ -158,7 +164,7 @@ describe('ProviderProfileView (PO-05, AV-02)', () => {
     expect(screen.getByText('Preparation: Keep the area dry.')).toBeTruthy();
     const book = await screen.findByRole('link', { name: /^Book/ });
     expect(book.getAttribute('href')).toBe(
-      `/en/book/${result.listingId}?start=${encodeURIComponent('2026-10-30T04:30:00.000Z')}`,
+      `/en/book/${result.listingId}?provider=${profile.id}&start=${encodeURIComponent('2026-10-30T04:30:00.000Z')}`,
     );
     await waitFor(() => {
       expect(screen.getByText('No free time in the next 7 days.')).toBeTruthy();
