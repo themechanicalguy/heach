@@ -4,7 +4,7 @@ import { t } from '../i18n';
 import { useSession } from '../session';
 import './admin-layout.css';
 
-export type Section = 'dashboard' | 'users';
+export type Section = 'dashboard' | 'users' | 'admins' | 'password';
 
 interface Props {
   sections: readonly Section[];

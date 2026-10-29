@@ -1161,6 +1161,8 @@ export interface components {
       newPassword: string;
     };
     AdminMeDto: {
+      /** Format: uuid */
+      id: string;
       email: string;
       /** @enum {string} */
       role: 'super_admin' | 'verifier' | 'support' | 'finance';

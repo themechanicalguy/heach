@@ -147,10 +147,10 @@ export class AdminAuthService {
     await this.record('admin.reverified', admin.id);
   }
 
-  async profile(principal: Principal): Promise<Pick<AdminAccount, 'email' | 'role'>> {
+  async profile(principal: Principal): Promise<Pick<AdminAccount, 'id' | 'email' | 'role'>> {
     const admin = await this.admins.findById(principal.userId);
     if (!admin) throw fail('invalid_credentials');
-    return { email: admin.email, role: admin.role };
+    return { id: admin.id, email: admin.email, role: admin.role };
   }
 
   private async refuse(admin: AdminAccount, passwordMatched: boolean): Promise<void> {

@@ -1,10 +1,10 @@
 import { Button, Notice } from '@heach/ui';
 import type { UserDetail } from '@heach/types';
 import { useState } from 'react';
-import { api, ApiError } from '../api';
+import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { usePending } from '../use-pending';
-import { ReverifySheet } from './ReverifySheet';
+import { useReverified } from '../use-reverified';
 
 const REASONS = ['safety_concern', 'fraud', 'policy_breach', 'user_request', 'other'] as const;
 
@@ -14,24 +14,16 @@ export function StatusControls({
   onChanged,
 }: Readonly<{ user: UserDetail; onChanged: (message: string) => void }>) {
   const [reason, setReason] = useState<(typeof REASONS)[number]>('other');
-  const [verify, setVerify] = useState(false);
   const { pending, error, run } = usePending();
+  const { attempt, sheet } = useReverified(run);
   const suspend = user.status === 'active';
 
   const change = () =>
-    run(async () => {
-      try {
-        await api(`/users/${user.id}/${suspend ? 'suspend' : 'reinstate'}`, {
-          method: 'POST',
-          ...(suspend ? { body: JSON.stringify({ reason }) } : {}),
-        });
-      } catch (caught) {
-        if (caught instanceof ApiError && caught.code === 'reverification_required') {
-          setVerify(true);
-          return;
-        }
-        throw caught;
-      }
+    attempt(async () => {
+      await api(`/users/${user.id}/${suspend ? 'suspend' : 'reinstate'}`, {
+        method: 'POST',
+        ...(suspend ? { body: JSON.stringify({ reason }) } : {}),
+      });
       onChanged(suspend ? t('users.suspended') : t('users.reinstated'));
     });
 
@@ -66,16 +58,7 @@ export function StatusControls({
       >
         {suspend ? t('users.suspend') : t('users.reinstate')}
       </Button>
-      <ReverifySheet
-        open={verify}
-        onClose={() => {
-          setVerify(false);
-        }}
-        onVerified={() => {
-          setVerify(false);
-          void change();
-        }}
-      />
+      {sheet}
     </div>
   );
 }

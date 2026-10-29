@@ -10,7 +10,9 @@
     "bookings": "Bookings",
     "finance": "Finance",
     "users": "Users",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "admins": "Admins",
+    "password": "My password"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -41,7 +43,14 @@
     "status_unchanged": "The account already has that status.",
     "network": "No connection. Check the network and try again.",
     "forbidden": "Your role cannot do this.",
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "email_in_use": "An admin with this email already exists.",
+    "self_change_refused": "You cannot change your own admin account here.",
+    "last_super_admin": "This is the last active super admin. Make another super admin first.",
+    "password_change_required": "This password is temporary. Choose a new password to continue.",
+    "password_too_short": "Use at least 12 characters.",
+    "password_too_long": "Use at most 200 characters.",
+    "password_reused": "Choose a password different from the current one."
   },
   "users": {
     "title": "Users",
@@ -97,5 +106,45 @@
   "state": {
     "loading": "Loading",
     "retry": "Try again"
+  },
+  "admins": {
+    "title": "Admins",
+    "intro": "Admin accounts and sub-roles. Every change needs a fresh authenticator code and signs that admin out of every device. You cannot change your own account here.",
+    "caption": "Admin accounts",
+    "email": "Email",
+    "role": "Sub-role",
+    "state": "State",
+    "actions": "Actions",
+    "you": "This is you",
+    "active": "Active",
+    "disabled": "Disabled",
+    "mfaPending": "authenticator not set up",
+    "temporary": "temporary password",
+    "locked": "locked after failed passwords",
+    "createTitle": "Add an admin",
+    "create": "Create admin",
+    "temporaryShown": "Temporary password, shown only now. Pass it on securely; it works for 24 hours and must be changed at first sign-in:",
+    "changeRole": "Change sub-role",
+    "roleChanged": "Sub-role changed. That admin was signed out.",
+    "enable": "Enable",
+    "disable": "Disable",
+    "enabled": "Admin enabled.",
+    "disabledDone": "Admin disabled and signed out.",
+    "resetPassword": "Reset password",
+    "passwordReset": "Password reset. That admin was signed out.",
+    "resetMfa": "Reset authenticator",
+    "mfaReset": "Authenticator reset. That admin sets it up again at the next sign-in."
+  },
+  "password": {
+    "title": "My password",
+    "current": "Current password",
+    "new": "New password",
+    "repeat": "New password again",
+    "rules": "At least 12 characters. A long phrase is best.",
+    "mismatch": "The two passwords do not match.",
+    "change": "Change password",
+    "changed": "Password changed. Your other devices were signed out.",
+    "temporaryTitle": "Choose a new password",
+    "temporaryIntro": "You signed in with a temporary password. Choose your own password; it replaces the temporary one."
   }
 }

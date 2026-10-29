@@ -2399,6 +2399,10 @@
       "AdminMeDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "email": {
             "type": "string"
           },
@@ -2407,7 +2411,7 @@
             "enum": ["super_admin", "verifier", "support", "finance"]
           }
         },
-        "required": ["email", "role"]
+        "required": ["id", "email", "role"]
       },
       "AdminSummaryDto": {
         "type": "object",

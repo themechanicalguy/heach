@@ -79,6 +79,9 @@ export class AdminCodeDto {
 }
 
 export class AdminMeDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
   @ApiProperty()
   email!: string;
 
