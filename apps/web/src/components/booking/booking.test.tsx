@@ -1,3 +1,4 @@
+import { CATALOGUES } from '@heach/i18n';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Booking, BookingSummary } from '@heach/types';
 import type { ReactNode } from 'react';
@@ -23,7 +24,12 @@ vi.mock('../../lib/api', async (original) => ({
   api: state.api,
 }));
 
-const inEnglish = (node: ReactNode) => render(<I18nProvider locale="en">{node}</I18nProvider>);
+const inEnglish = (node: ReactNode) =>
+  render(
+    <I18nProvider locale="en" messages={CATALOGUES.en}>
+      {node}
+    </I18nProvider>,
+  );
 const START = '2026-11-02T04:30:00.000Z';
 const LISTING = '00000000-0000-4000-8000-000000000021';
 
@@ -38,6 +44,7 @@ const summary: BookingSummary = {
   itemName: 'Injection',
   kind: 'visit',
   matching: 'chosen',
+  listingId: '00000000-0000-4000-8000-000000000021',
   startsAt: START,
   endsAt: START,
   shiftDays: 1,
@@ -78,9 +85,11 @@ const booking = (overrides: Partial<Booking> = {}): Booking => ({
 });
 
 function route(responses: Record<string, unknown>) {
-  state.api.mockImplementation((path: string) => {
+  state.api.mockImplementation((path: string, init?: RequestInit) => {
     const key = Object.keys(responses).find((prefix) => path.startsWith(prefix));
-    return key ? Promise.resolve(responses[key]) : Promise.resolve(undefined);
+    // Reads the test does not care about get an empty list; writes get no body.
+    if (key) return Promise.resolve(responses[key]);
+    return Promise.resolve(init?.method ? undefined : []);
   });
 }
 
@@ -220,6 +229,8 @@ describe('My bookings (BK-04, BK-07)', () => {
       refunds: [{ amountPaise: 1_000, reason: 'goodwill', status: 'processed' }],
     });
     route({
+      [`/bookings/${summary.id}/shifts`]: [],
+      [`/bookings/${summary.id}/code`]: { code: '123456', moment: 'shift:0:in' },
       [`/bookings/${summary.id}/balance`]: {
         orderId: 'order_b',
         amountPaise: 210_000,

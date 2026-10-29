@@ -1,3 +1,4 @@
+import { CATALOGUES } from '@heach/i18n';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -14,13 +15,20 @@ vi.mock('../../lib/api', async (original) => ({
   api: state.api,
 }));
 
-const inEnglish = (node: ReactNode) => render(<I18nProvider locale="en">{node}</I18nProvider>);
+const inEnglish = (node: ReactNode) =>
+  render(
+    <I18nProvider locale="en" messages={CATALOGUES.en}>
+      {node}
+    </I18nProvider>,
+  );
 const START = '2026-11-02T04:30:00.000Z';
 
 function route(responses: Record<string, unknown>) {
-  state.api.mockImplementation((path: string) => {
+  state.api.mockImplementation((path: string, init?: RequestInit) => {
     const key = Object.keys(responses).find((prefix) => path.startsWith(prefix));
-    return Promise.resolve(key ? responses[key] : undefined);
+    // Reads the test does not care about get an empty list; writes get no body.
+    if (key) return Promise.resolve(responses[key]);
+    return Promise.resolve(init?.method ? undefined : []);
   });
 }
 

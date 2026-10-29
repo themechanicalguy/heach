@@ -1,3 +1,4 @@
+import { CATALOGUES } from '@heach/i18n';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Availability, ProviderListings } from '@heach/types';
 import type { ReactNode } from 'react';
@@ -12,7 +13,12 @@ vi.mock('../../lib/api', async (original) => ({
   api: state.api,
 }));
 
-const inEnglish = (node: ReactNode) => render(<I18nProvider locale="en">{node}</I18nProvider>);
+const inEnglish = (node: ReactNode) =>
+  render(
+    <I18nProvider locale="en" messages={CATALOGUES.en}>
+      {node}
+    </I18nProvider>,
+  );
 
 const listings: ProviderListings = {
   role: 'attendant',
