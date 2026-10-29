@@ -110,6 +110,75 @@ jobs:
         env:
           CI: true
 
+  # OTP sign-up, setup, roles and sessions in or/en/hi on three viewports, then admin sign-in with
+  # TOTP and suspension (AC-01 to AC-05, AD-01, AD-03; FU-29). The local development stack:
+  # codes go to Mailpit through the local SMS adapter (decision L-8), so no SMS leaves the runner.
+  api-e2e:
+    name: API-backed E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: true
+      E2E_API: 1
+      API_ORIGIN: http://localhost:3001
+      FEATURE_FLAGS: accounts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start PostgreSQL, Redis and Mailpit; schema from an empty database
+        run: |
+          node scripts/setup.mjs
+          docker compose up -d --wait postgres redis mailpit
+          pnpm --filter @heach/api... --filter @heach/admin... --filter @heach/web^... build
+          pnpm --filter @heach/api db:bootstrap
+          pnpm --filter @heach/api db:migrate
+      # Turborepo does not pass API_ORIGIN to builds, and the web rewrite to the API is fixed at
+      # build time, so the web app is built directly.
+      - run: pnpm --filter @heach/web exec next build
+      # One runner sends every code, so the per-address caps are raised; the per-number caps stay.
+      - name: Start the API and the web app
+        run: |
+          cd apps/api
+          RATE_LIMIT_PER_ADDRESS_PER_MINUTE=100000 RATE_LIMIT_PER_MINUTE=100000 \
+          OTP_SENDS_PER_ADDRESS_PER_HOUR=100000 OTP_SENDS_PER_DEVICE_PER_HOUR=100000 \
+          OTP_FAILURES_PER_ADDRESS_PER_HOUR=100000 \
+            nohup node --env-file=../../.env dist/main.js > ../../api-e2e-api.log 2>&1 &
+          cd ../web
+          APP_ENV=local nohup pnpm exec next start --port 3000 > ../../api-e2e-web.log 2>&1 &
+          for i in $(seq 1 60); do curl -fs http://localhost:3001/readyz && break; sleep 2; done
+          for i in $(seq 1 60); do curl -fs http://localhost:3000/healthz && break; sleep 2; done
+          curl -fs http://localhost:3001/readyz | grep -q '"postgres":"ok"'
+      - name: Install Chromium
+        run: pnpm --filter @heach/web exec playwright install --with-deps chromium
+      - name: Web sign-up, setup, roles and sessions
+        run: |
+          mailpit="$(grep '^MAILPIT_API_URL=' .env | cut -d= -f2-)"
+          E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL="$mailpit" \
+            pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts
+      # After the web suite: the admin suite opens one of the OTP accounts it made.
+      - name: Admin sign-in with TOTP, masked users, suspend and reinstate
+        run: pnpm --filter @heach/admin exec playwright test e2e/admin-users.spec.ts
+      - name: Upload Playwright reports on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-api-e2e
+          path: |
+            apps/web/test-results
+            apps/admin/test-results
+          retention-days: 7
+      # Synthetic data only; the API never logs codes, tokens or personal data (LM-02).
+      - name: Logs on failure
+        if: failure()
+        run: tail -n 200 api-e2e-api.log api-e2e-web.log
+
   docker:
     name: API image
     runs-on: ubuntu-latest
