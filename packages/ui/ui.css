@@ -453,11 +453,12 @@
     border-radius: var(--heach-radius);
   }
 
+  /* Inline in the page header from tablet width; the header draws the bar. */
   .heach-bottom-nav {
     position: static;
     height: auto;
     border-top: none;
-    border-bottom: 1px solid var(--heach-border);
+    background: transparent;
   }
 
   .heach-bottom-nav ul {

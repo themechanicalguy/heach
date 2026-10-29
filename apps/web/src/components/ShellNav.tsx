@@ -13,7 +13,10 @@ interface Props {
   sample: boolean;
 }
 
-/** Bottom navigation in the thumb zone on phones (UX-03); marks the current page. */
+/**
+ * The app's one navigation, in the top header: the links sit in the thumb zone at the bottom on
+ * phones (UX-03) and between the name and the languages from tablet width. Marks the current page.
+ */
 export function ShellNav({ accounts, sample }: Readonly<Props>) {
   const { locale, t } = useI18n();
   const pathname = usePathname();

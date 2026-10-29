@@ -56,11 +56,11 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
                 <a href={`/${locale}`} className="shell-header__name">
                   {t('app.name')}
                 </a>
+                <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
                 <LanguageSwitch />
               </header>
               <OfflineStatus />
               {children}
-              <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
               <ErrorTracking />
             </AccountProvider>
           </SessionProvider>

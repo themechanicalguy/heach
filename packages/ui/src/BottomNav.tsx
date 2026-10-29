@@ -13,8 +13,8 @@ export interface BottomNavProps {
 }
 
 /**
- * Primary navigation fixed to the bottom edge on phones, in the thumb zone (UX-03); it moves to
- * the top from the tablet breakpoint.
+ * Primary navigation fixed to the bottom edge on phones, in the thumb zone (UX-03); from the
+ * tablet breakpoint it sits inline where it is placed, which is the page header.
  */
 export function BottomNav({ label, items }: Readonly<BottomNavProps>) {
   return (

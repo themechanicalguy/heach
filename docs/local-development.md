@@ -159,8 +159,8 @@ on. The work record is [login and account setup](login-and-account-setup.md).
   newest message to `91<number>@sms.heach.local`. Nothing leaves the machine.
 - **Caps.** OTP sends are capped per number, device cookie and address (`OTP_*` in
   `.env.example`). Counters live in Redis for an hour; to reset them locally:
-  `docker compose exec redis redis-cli --tls --cacert /certs/ca.pem -a "$REDIS_PASSWORD" --scan --pattern 'otp-cap:*'`
-  and delete the keys, or wait.
+  `REDISCLI_AUTH="$(grep '^REDIS_PASSWORD=' .env | cut -d= -f2-)" docker compose exec -T -e REDISCLI_AUTH redis sh -c 'redis-cli --tls --cacert /tls/ca.crt --scan --pattern "otp-cap:*" | xargs -r redis-cli --tls --cacert /tls/ca.crt del'`
+  (the password goes through the environment, never the command line), or wait an hour.
 - **Admins.** Create one with the CLI; the password is read from standard input (never an
   argument): `printf '%s' "<synthetic password, 12+ chars>" | pnpm --filter @heach/api admin:create --email you@heach.invalid --role super_admin`
   (build the API first). Then open http://localhost:5173: the first sign-in shows a TOTP key
