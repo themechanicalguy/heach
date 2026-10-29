@@ -8,6 +8,7 @@ import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
+import { AccessSection, TicketsSection } from './SupportSections';
 
 /** The in-app notification centre (NT-02): the same words as the SMS, in the reader's language. */
 export function NotificationsView() {
@@ -56,6 +57,8 @@ export function NotificationsView() {
             )
           }
         </ResourceView>
+        <TicketsSection />
+        <AccessSection />
       </div>
     </section>
   );

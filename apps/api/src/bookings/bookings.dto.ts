@@ -189,6 +189,13 @@ export class BookingSummaryDto {
   @ApiProperty({ enum: ['chosen', 'any'] })
   matching!: 'chosen' | 'any';
 
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'To book the same again in one step (BK-09)',
+  })
+  listingId!: string | null;
+
   @ApiProperty()
   startsAt!: Date;
 
@@ -407,4 +414,7 @@ export class BookingPolicyDto {
 
   @ApiProperty()
   acceptanceWindowMinutes!: number;
+
+  @ApiProperty({ description: 'How long a provider waits before marking a patient absent (A15)' })
+  noShowWaitMinutes!: number;
 }

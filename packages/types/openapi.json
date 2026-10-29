@@ -2172,6 +2172,17 @@
               "type": "string",
               "enum": ["or", "en", "hi"]
             }
+          },
+          {
+            "name": "minRating",
+            "required": false,
+            "in": "query",
+            "description": "Lowest average rating (SD-03)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -2359,6 +2370,296 @@
               "application/json": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/v1/tickets": {
+      "post": {
+        "operationId": "TicketsController_raise",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["tickets"]
+      },
+      "get": {
+        "operationId": "TicketsController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TicketDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["tickets"]
+      }
+    },
+    "/v1/me/access-history": {
+      "get": {
+        "operationId": "TicketsController_history",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["tickets"]
+      }
+    },
+    "/admin/v1/tickets": {
+      "get": {
+        "operationId": "AdminTicketsController_queue",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["open", "assigned", "resolved"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TicketDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/tickets/{id}/assign": {
+      "post": {
+        "operationId": "AdminTicketsController_assign",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/tickets/{id}/notes": {
+      "post": {
+        "operationId": "AdminTicketsController_note",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/tickets/{id}/resolve": {
+      "post": {
+        "operationId": "AdminTicketsController_resolve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/tickets/{id}/break-glass": {
+      "post": {
+        "operationId": "AdminTicketsController_breakGlass",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BreakGlassDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/tickets/{id}/restricted": {
+      "get": {
+        "operationId": "AdminTicketsController_restricted",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketRestrictedDto"
                 }
               }
             }
@@ -3071,6 +3372,519 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ReassignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/v1/bookings/{id}/code": {
+      "get": {
+        "operationId": "PatientVisitsController_code",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitCodeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}/shifts": {
+      "get": {
+        "operationId": "PatientVisitsController_shifts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShiftDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}/visit-notes": {
+      "get": {
+        "operationId": "PatientVisitsController_notes",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitRecordDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}/provider-no-show": {
+      "post": {
+        "operationId": "PatientVisitsController_providerAbsent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/provider/bookings/{id}/start": {
+      "post": {
+        "operationId": "ProviderVisitsController_start",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/complete": {
+      "post": {
+        "operationId": "ProviderVisitsController_complete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VisitNotesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/no-show": {
+      "post": {
+        "operationId": "ProviderVisitsController_patientAbsent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/shifts": {
+      "get": {
+        "operationId": "ProviderVisitsController_shifts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShiftDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/shifts/{day}/check-in": {
+      "post": {
+        "operationId": "ProviderVisitsController_checkIn",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "day",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/shifts/{day}/check-out": {
+      "post": {
+        "operationId": "ProviderVisitsController_checkOut",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "day",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/bookings/{id}/review": {
+      "post": {
+        "operationId": "ReviewsController_rate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["reviews"]
+      }
+    },
+    "/v1/providers/{id}/reviews": {
+      "get": {
+        "operationId": "ReviewsController_list",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["reviews"]
+      }
+    },
+    "/v1/provider/reviews/{id}/report": {
+      "post": {
+        "operationId": "ReviewsController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["reviews"]
+      }
+    },
+    "/admin/v1/reviews": {
+      "get": {
+        "operationId": "AdminReviewsController_reported",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminReviewDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/reviews/{id}/hide": {
+      "post": {
+        "operationId": "AdminReviewsController_hide",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HideDto"
               }
             }
           }
@@ -5678,6 +6492,166 @@
         },
         "required": ["paidPaise", "refundedPaise", "commissionPaise", "commissionBps", "runs"]
       },
+      "TicketInputDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["safety", "complaint", "help"]
+          },
+          "topic": {
+            "type": "string",
+            "enum": [
+              "safety_threat",
+              "harassment",
+              "clinical_emergency",
+              "service_quality",
+              "billing",
+              "no_show",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": ["kind", "topic"]
+      },
+      "TicketDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "nullable": true
+          },
+          "kind": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "assigned", "resolved"]
+          },
+          "resolution": {
+            "type": "string",
+            "nullable": true
+          },
+          "raisedByRole": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "bookingId",
+          "kind",
+          "priority",
+          "topic",
+          "status",
+          "resolution",
+          "raisedByRole",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AccessEntryDto": {
+        "type": "object",
+        "properties": {
+          "adminRole": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "grantedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["adminRole", "reason", "grantedAt", "expiresAt"]
+      },
+      "NoteInputDto": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": ["note"]
+      },
+      "ResolveDto": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "resolved_with_patient",
+              "resolved_with_provider",
+              "refund_issued",
+              "provider_suspended",
+              "no_action_needed",
+              "duplicate"
+            ]
+          }
+        },
+        "required": ["resolution"]
+      },
+      "BreakGlassDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": ["safety_investigation", "complaint_investigation", "legal_request"]
+          }
+        },
+        "required": ["reason"]
+      },
+      "TicketRestrictedDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "grantExpiresAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["description", "notes", "grantExpiresAt"]
+      },
       "UploadDto": {
         "type": "object",
         "properties": {
@@ -5910,6 +6884,11 @@
             "type": "string",
             "enum": ["chosen", "any"]
           },
+          "listingId": {
+            "type": "string",
+            "nullable": true,
+            "description": "To book the same again in one step (BK-09)"
+          },
           "startsAt": {
             "format": "date-time",
             "type": "string"
@@ -5997,6 +6976,7 @@
           "itemName",
           "kind",
           "matching",
+          "listingId",
           "startsAt",
           "endsAt",
           "shiftDays",
@@ -6064,6 +7044,11 @@
             "type": "string",
             "enum": ["chosen", "any"]
           },
+          "listingId": {
+            "type": "string",
+            "nullable": true,
+            "description": "To book the same again in one step (BK-09)"
+          },
           "startsAt": {
             "format": "date-time",
             "type": "string"
@@ -6111,6 +7096,7 @@
           "itemName",
           "kind",
           "matching",
+          "listingId",
           "startsAt",
           "endsAt",
           "shiftDays",
@@ -6172,13 +7158,18 @@
           },
           "acceptanceWindowMinutes": {
             "type": "number"
+          },
+          "noShowWaitMinutes": {
+            "type": "number",
+            "description": "How long a provider waits before marking a patient absent (A15)"
           }
         },
         "required": [
           "freeCancellationHours",
           "lateRefundPercent",
           "attendantAdvancePercent",
-          "acceptanceWindowMinutes"
+          "acceptanceWindowMinutes",
+          "noShowWaitMinutes"
         ]
       },
       "ProviderRequestDto": {
@@ -6300,6 +7291,11 @@
             "type": "string",
             "enum": ["chosen", "any"]
           },
+          "listingId": {
+            "type": "string",
+            "nullable": true,
+            "description": "To book the same again in one step (BK-09)"
+          },
           "startsAt": {
             "format": "date-time",
             "type": "string"
@@ -6367,6 +7363,7 @@
           "itemName",
           "kind",
           "matching",
+          "listingId",
           "startsAt",
           "endsAt",
           "shiftDays",
@@ -6406,6 +7403,192 @@
           }
         },
         "required": ["listingId"]
+      },
+      "VisitCodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Show this to the provider only when they are at the door"
+          },
+          "moment": {
+            "type": "string",
+            "description": "`visit`, or the shift and whether it checks in or out"
+          }
+        },
+        "required": ["code", "moment"]
+      },
+      "ShiftDto": {
+        "type": "object",
+        "properties": {
+          "dayIndex": {
+            "type": "number"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["scheduled", "checked_in", "checked_out", "missed", "replaced"]
+          },
+          "checkedInAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "checkedOutAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["dayIndex", "startsAt", "endsAt", "status", "checkedInAt", "checkedOutAt"]
+      },
+      "VisitRecordDto": {
+        "type": "object",
+        "properties": {
+          "procedure": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "observations": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "advice": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["procedure", "observations", "advice", "completedAt"]
+      },
+      "CodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          }
+        },
+        "required": ["code"]
+      },
+      "VisitNotesDto": {
+        "type": "object",
+        "properties": {
+          "procedure": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "observations": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "advice": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": ["procedure", "observations", "advice"]
+      },
+      "ReviewInputDto": {
+        "type": "object",
+        "properties": {
+          "stars": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Shown publicly on the provider profile"
+          }
+        },
+        "required": ["stars"]
+      },
+      "ReviewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stars": {
+            "type": "number"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["id", "stars", "comment", "createdAt"]
+      },
+      "AdminReviewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stars": {
+            "type": "number"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reported": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "hiddenReason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "stars",
+          "comment",
+          "createdAt",
+          "providerId",
+          "reported",
+          "hidden",
+          "hiddenReason"
+        ]
+      },
+      "HideDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": ["abusive", "personal_data", "not_about_service", "fake"]
+          }
+        },
+        "required": ["reason"]
       },
       "MemberDto": {
         "type": "object",

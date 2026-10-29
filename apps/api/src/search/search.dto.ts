@@ -56,6 +56,14 @@ export class SearchQueryDto {
   @IsOptional()
   @IsIn(LOCALES)
   locale?: (typeof LOCALES)[number];
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5, description: 'Lowest average rating (SD-03)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  minRating?: number;
 }
 
 export class SearchResultDto {

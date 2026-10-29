@@ -72,12 +72,14 @@ export class LedgerService implements OnModuleInit {
       amountPaise: number;
       kind: 'earning' | 'no_show_fee';
       at: Date;
+      /** `visit`, or `shift:N` when each shift is paid on its own (PK-07). */
+      sessionKey?: string;
     },
   ): Promise<void> {
     const holdHours = await this.settings.get('payout_hold_hours');
     await client.query(
-      `INSERT INTO app.ledger_entry (id, provider_account_id, booking_id, kind, amount_paise, available_at)
-       VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`,
+      `INSERT INTO app.ledger_entry (id, provider_account_id, booking_id, kind, amount_paise, available_at, session_key)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING`,
       [
         randomUUID(),
         entry.providerId,
@@ -85,6 +87,7 @@ export class LedgerService implements OnModuleInit {
         entry.kind,
         entry.amountPaise,
         new Date(entry.at.getTime() + holdHours * 3_600_000),
+        entry.sessionKey ?? 'visit',
       ],
     );
   }
@@ -92,7 +95,7 @@ export class LedgerService implements OnModuleInit {
   /** Takes back from the provider what a refund after completion returned to the patient. */
   async reverse(client: TransactionClient, bookingId: string, amountPaise: number): Promise<void> {
     const { rows } = await client.query<{ provider_account_id: string }>(
-      `SELECT provider_account_id FROM app.ledger_entry WHERE booking_id = $1 AND kind IN ('earning', 'no_show_fee')`,
+      `SELECT provider_account_id FROM app.ledger_entry WHERE booking_id = $1 AND kind IN ('earning', 'no_show_fee') LIMIT 1`,
       [bookingId],
     );
     const provider = rows[0]?.provider_account_id;

@@ -17,6 +17,7 @@ import {
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
+import { PatientVisitPanel } from '../visit/PatientVisitPanel';
 import { money } from './money';
 
 /** The patient's bookings (BK-07); the last list stays readable offline until sign-out. */
@@ -188,6 +189,7 @@ function BookingDetail({
             </li>
           ))}
         </ol>
+        <PatientVisitPanel booking={booking} onChanged={onChanged} />
         {booking.canCancel && <CancelBooking booking={booking} onChanged={onChanged} />}
       </div>
     </section>
