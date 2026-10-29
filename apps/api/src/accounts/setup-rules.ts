@@ -8,8 +8,9 @@ import {
 } from '../common/request-context.js';
 
 /**
- * Roles a person may ask for at registration (decision L-2). Clinic front desk accounts are made
- * by a clinic (Step 7), never chosen here. Asking is not getting: the server grants (L-3).
+ * Roles a person may ask for at registration (decision L-2). Staff roles come only from an
+ * organisation's invitation (owner decision O-1), never chosen here. Asking is not getting: the
+ * server grants (L-3).
  */
 export const SELF_REGISTRABLE_ROLES = [
   'patient',
@@ -21,17 +22,24 @@ export const SELF_REGISTRABLE_ROLES = [
   'nurse',
   'attendant',
   'lab',
-  'sample_collector',
 ] as const satisfies readonly GrantedUserRole[];
 
+/** Provider roles held only through an organisation's membership (O-1). */
+export const STAFF_ROLES = ['clinic_front_desk', 'sample_collector'] as const;
+
 export type RegistrableRole = (typeof SELF_REGISTRABLE_ROLES)[number];
+export type StaffRole = (typeof STAFF_ROLES)[number];
+/** The role setup will grant: one asked for, or one an accepted invitation carries. */
+export type SetupRole = RegistrableRole | StaffRole;
 export type Side = 'care' | 'provider';
+// Names in Odia, Devanagari or Latin script (I18N-04); no digits or markup.
+export const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
 export const GENDERS = ['female', 'male', 'other', 'undisclosed'] as const;
 export type Gender = (typeof GENDERS)[number];
 
 /** What setup has saved so far (decision L-5). */
 export interface SetupDraft {
-  role: RegistrableRole | null;
+  role: SetupRole | null;
   fullName: string | null;
   gender: Gender | null;
   languages: readonly string[];
@@ -46,6 +54,10 @@ export function isRegistrableRole(value: string): value is RegistrableRole {
   return (SELF_REGISTRABLE_ROLES as readonly string[]).includes(value);
 }
 
+export function isStaffRole(value: string): value is StaffRole {
+  return (STAFF_ROLES as readonly string[]).includes(value);
+}
+
 export function sideOf(role: GrantedUserRole): Side {
   return (CARE_ROLES as readonly string[]).includes(role) ? 'care' : 'provider';
 }
@@ -57,7 +69,8 @@ export function missingFields(draft: SetupDraft): MissingField[] {
   if (!draft.fullName) missing.push('fullName');
   if (!draft.gender) missing.push('gender');
   if (!draft.adultDeclared) missing.push('adult');
-  if (sideOf(draft.role) === 'provider' && draft.languages.length === 0) missing.push('languages');
+  const needsLanguages = sideOf(draft.role) === 'provider' && !isStaffRole(draft.role);
+  if (needsLanguages && draft.languages.length === 0) missing.push('languages');
   if (draft.role === 'lab' && !draft.organisationName) missing.push('organisation');
   return missing;
 }

@@ -4,12 +4,12 @@ import { Button, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { Me } from '@heach/types';
 import { LOCALES } from '@heach/i18n';
 import { useState } from 'react';
-import { api, ApiError } from '../../lib/api';
+import { api } from '../../lib/api';
 import { useAccount } from '../../lib/account';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { CARE_CHOICES, PROVIDER_CHOICES, type RoleChoice } from '../setup/roles';
-import { ReverifySheet } from './ReverifySheet';
+import { useReverified } from './use-reverified';
 
 /** Adds the side the account lacks; the API asks for a fresh OTP first (decision L-3). */
 export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void }>) {
@@ -20,25 +20,17 @@ export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void 
   const [role, setRole] = useState<string>('');
   const [languages, setLanguages] = useState<string[]>([...me.setup.draft.languages]);
   const [organisationName, setOrganisationName] = useState(me.setup.draft.organisationName ?? '');
-  const [verifying, setVerifying] = useState(false);
   const { pending, error, setError, run } = usePending();
+  const { attempt, sheet } = useReverified(run);
 
   const add = () =>
-    run(async () => {
+    attempt(async () => {
       const body = {
         role,
         ...(hasCare ? { languages } : {}),
         ...(role === 'lab' ? { organisationName } : {}),
       };
-      try {
-        await api('/me/roles', { method: 'POST', body: JSON.stringify(body) });
-      } catch (caught) {
-        if (caught instanceof ApiError && caught.code === 'reverification_required') {
-          setVerifying(true);
-          return;
-        }
-        throw caught;
-      }
+      await api('/me/roles', { method: 'POST', body: JSON.stringify(body) });
       onAdded();
       await reload();
     });
@@ -94,16 +86,7 @@ export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void 
       <Button onClick={() => void add()} disabled={!role || pending} aria-busy={pending}>
         {t('account.addTitle')}
       </Button>
-      <ReverifySheet
-        open={verifying}
-        onClose={() => {
-          setVerifying(false);
-        }}
-        onVerified={() => {
-          setVerifying(false);
-          void add();
-        }}
-      />
+      {sheet}
     </section>
   );
 }

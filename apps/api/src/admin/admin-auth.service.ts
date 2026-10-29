@@ -1,5 +1,5 @@
 import type { FieldEncryptor } from '@heach/crypto';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { AuditService } from '../audit/audit.service.js';
 import { ADMIN_SESSIONS } from '../auth/auth.module.js';
@@ -11,7 +11,13 @@ import type { Principal } from '../common/request-context.js';
 import { FIELD_ENCRYPTOR } from '../crypto/crypto.tokens.js';
 import { REDIS_CLIENT } from '../data-stores/data-stores.tokens.js';
 import { type AdminAccount, AdminAccountRepository } from './admin-account.repository.js';
-import { DUMMY_HASH_PROMISE, verifyPassword } from './password.js';
+import { reason } from '../common/error-response.js';
+import {
+  DUMMY_HASH_PROMISE,
+  hashPassword,
+  newPasswordProblem,
+  verifyPassword,
+} from './password.js';
 import { matchTotp, newTotpSecret, otpauthUri } from './totp.js';
 
 /** Between the password and the TOTP code: 5 minutes and 5 codes at most (decision L-9). */
@@ -22,6 +28,8 @@ export interface PasswordAccepted {
   mfaTicket: string;
   /** Present only until the first accepted code: the secret to add to an authenticator app. */
   enrolment?: { secret: string; uri: string };
+  /** The password is temporary: the TOTP step must bring a new one (O-2). */
+  passwordChangeRequired: boolean;
 }
 
 const fail = (code: string) =>
@@ -50,20 +58,30 @@ export class AdminAuthService {
     );
     if (!admin) throw fail('invalid_credentials');
     const locked = admin.lockedUntil !== null && admin.lockedUntil.getTime() > Date.now();
-    if (!matches || locked || !admin.active) {
+    if (!matches || locked || !admin.active || temporaryExpired(admin)) {
       await this.refuse(admin, matches);
       throw fail('invalid_credentials');
     }
     await this.admins.resetFailures(admin.id);
-    return { mfaTicket: await this.openTicket(admin.id), ...(await this.enrolmentFor(admin)) };
+    return {
+      mfaTicket: await this.openTicket(admin.id),
+      ...(await this.enrolmentFor(admin)),
+      passwordChangeRequired: admin.mustChangePassword,
+    };
   }
 
-  /** The second factor; a code's time step works once (decision L-9). */
-  async checkCode(mfaTicket: string, code: string): Promise<IssuedTokens> {
+  /**
+   * The second factor; a code's time step works once (decision L-9). After a reset the new
+   * password comes with the code, and is checked before the code is spent (O-2).
+   */
+  async checkCode(mfaTicket: string, code: string, newPassword?: string): Promise<IssuedTokens> {
     const key = ticketKey(mfaTicket);
     const adminId = await this.redis.hget(key, 'adminId');
     const admin = adminId ? await this.admins.findById(adminId) : undefined;
-    if (!admin?.active || !admin.totpSecret) throw fail('mfa_expired');
+    if (!admin?.active || !admin.totpSecret || temporaryExpired(admin)) throw fail('mfa_expired');
+    const replacement = admin.mustChangePassword
+      ? await this.acceptableNewPassword(admin, newPassword)
+      : undefined;
     const step = matchTotp(
       await this.encryptor.decrypt(admin.totpSecret),
       code,
@@ -75,9 +93,40 @@ export class AdminAuthService {
       throw fail('mfa_incorrect');
     }
     await this.redis.del(key);
+    if (replacement) {
+      await this.admins.setPassword(admin.id, replacement, false);
+      await this.record('admin.password.changed', admin.id);
+    }
     if (!admin.totpEnrolled) await this.record('admin.mfa.enrolled', admin.id);
     await this.record('admin.sign_in', admin.id);
     return this.sessions.signIn(admin.id, admin.role);
+  }
+
+  /**
+   * An admin's own password change (O-2): the route needs a fresh TOTP, the current password
+   * must match, and every other device is signed out.
+   */
+  async changePassword(principal: Principal, current: string, next: string): Promise<void> {
+    const admin = await this.admins.findById(principal.userId);
+    if (!admin?.active || !(await verifyPassword(current, admin.passwordHash))) {
+      await this.record('admin.password.change_refused', principal.userId);
+      throw fail('invalid_credentials');
+    }
+    const hash = await this.acceptableNewPassword(admin, next);
+    await this.admins.setPassword(admin.id, hash, false);
+    await this.record('admin.password.changed', admin.id);
+    await this.sessions.signOutOtherDevices(principal);
+  }
+
+  /** The hash of an acceptable new password: long enough and not the current one. */
+  private async acceptableNewPassword(admin: AdminAccount, next: string | undefined) {
+    if (next === undefined) throw fail('password_change_required');
+    const problem = newPasswordProblem(next);
+    if (problem) throw reason(BadRequestException, problem);
+    if (await verifyPassword(next, admin.passwordHash)) {
+      throw reason(BadRequestException, 'password_reused');
+    }
+    return hashPassword(next);
   }
 
   /** A fresh TOTP code unlocks sensitive admin actions for five minutes (decision L-11). */
@@ -98,10 +147,10 @@ export class AdminAuthService {
     await this.record('admin.reverified', admin.id);
   }
 
-  async profile(principal: Principal): Promise<Pick<AdminAccount, 'email' | 'role'>> {
+  async profile(principal: Principal): Promise<Pick<AdminAccount, 'id' | 'email' | 'role'>> {
     const admin = await this.admins.findById(principal.userId);
     if (!admin) throw fail('invalid_credentials');
-    return { email: admin.email, role: admin.role };
+    return { id: admin.id, email: admin.email, role: admin.role };
   }
 
   private async refuse(admin: AdminAccount, passwordMatched: boolean): Promise<void> {
@@ -142,3 +191,10 @@ export class AdminAuthService {
 }
 
 const ticketKey = (ticket: string) => `admin-mfa:${hashToken(ticket)}`;
+
+function temporaryExpired(admin: AdminAccount): boolean {
+  return (
+    admin.mustChangePassword &&
+    (admin.passwordExpiresAt === null || admin.passwordExpiresAt.getTime() <= Date.now())
+  );
+}

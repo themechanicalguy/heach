@@ -5,6 +5,7 @@ import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { useSession } from '../session';
 import { usePending } from '../use-pending';
+import { NewPasswordFields } from './OwnPassword';
 
 /** Email and password, then always a TOTP code; the first time, TOTP enrolment (AD-01). */
 export function SignIn() {
@@ -80,13 +81,22 @@ function MfaStep({
 }: Readonly<{ ticket: AdminPasswordAccepted; onRestart: () => void }>) {
   const { signedIn } = useSession();
   const [code, setCode] = useState('');
+  const [next, setNext] = useState('');
+  const [repeat, setRepeat] = useState('');
   const { pending, error, run } = usePending();
+  const changing = ticket.passwordChangeRequired;
+  const ready = code.length === 6 && (!changing || (next !== '' && next === repeat));
   const submit = (event: { preventDefault: () => void }) => {
     event.preventDefault();
+    if (!ready) return;
     void run(async () => {
       const { accessToken } = await api<AccessToken>('/auth/mfa', {
         method: 'POST',
-        body: JSON.stringify({ mfaTicket: ticket.mfaTicket, code }),
+        body: JSON.stringify({
+          mfaTicket: ticket.mfaTicket,
+          code,
+          ...(changing ? { newPassword: next } : {}),
+        }),
       });
       await signedIn(accessToken);
     });
@@ -105,6 +115,13 @@ function MfaStep({
       ) : (
         <p>{t('signIn.mfaIntro')}</p>
       )}
+      {changing && (
+        <section aria-labelledby="new-password-title">
+          <h2 id="new-password-title">{t('password.temporaryTitle')}</h2>
+          <p>{t('password.temporaryIntro')}</p>
+          <NewPasswordFields next={next} repeat={repeat} onNext={setNext} onRepeat={setRepeat} />
+        </section>
+      )}
       <OtpField
         label={t('signIn.code')}
         value={code}
@@ -114,7 +131,7 @@ function MfaStep({
         }}
       />
       <div className="admin-actions">
-        <Button type="submit" disabled={pending || code.length !== 6} aria-busy={pending}>
+        <Button type="submit" disabled={pending || !ready} aria-busy={pending}>
           {t('signIn.verify')}
         </Button>
         <Button className="heach-button--ghost" onClick={onRestart}>

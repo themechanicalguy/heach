@@ -1,5 +1,5 @@
 import type { Me } from '@heach/types';
-import { destinationFor, inLocale, safeNext } from './routing';
+import { destinationFor, inLocale, isOrganisationOwner, safeNext } from './routing';
 
 const base: Me = {
   locale: 'or',
@@ -19,6 +19,9 @@ const base: Me = {
     },
   },
   consentsDue: [],
+  membership: null,
+  invitations: 0,
+  deletionRequestedAt: null,
 };
 
 describe('Safe redirects', () => {
@@ -77,5 +80,25 @@ describe('Routing after sign-in', () => {
     const nurse = { ...base, activeRole: 'nurse' as const };
     expect(destinationFor(nurse)).toBe('/or/provider');
     expect(destinationFor(base, '/or/provider')).toBe('/or');
+  });
+});
+
+describe('organisation pages (O-1)', () => {
+  it('only lab, dentist and dermatologist run an organisation', () => {
+    expect(['lab', 'dentist', 'dermatologist'].map(isOrganisationOwner)).toEqual([
+      true,
+      true,
+      true,
+    ]);
+    expect(['nurse', 'sample_collector', 'patient'].map(isOrganisationOwner)).toEqual([
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it('a care role may open People; only owners may open Team', () => {
+    expect(destinationFor(base, '/or/people')).toBe('/or/people');
+    expect(destinationFor(base, '/or/team')).toBe('/or');
   });
 });

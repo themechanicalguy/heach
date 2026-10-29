@@ -19,7 +19,7 @@ import { ErrorSummary } from './ErrorSummary';
 import { GENDERS, isProviderChoice } from './roles';
 import { StepActions } from './StepActions';
 
-const MESSAGES = {
+export const MESSAGES = {
   fullName: 'setup.details.fullNameInvalid',
   gender: 'setup.details.genderRequired',
   languages: 'setup.details.languagesRequired',
@@ -127,7 +127,7 @@ interface ProviderFieldsProps {
 }
 
 /** Languages spoken (every provider) and the lab's name (labs), PO-01. */
-function ProviderFields({ role, form, errorFor, update }: Readonly<ProviderFieldsProps>) {
+export function ProviderFields({ role, form, errorFor, update }: Readonly<ProviderFieldsProps>) {
   const { t } = useI18n();
   if (!isProviderChoice(role)) return null;
   return (

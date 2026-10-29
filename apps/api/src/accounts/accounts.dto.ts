@@ -16,12 +16,17 @@ import {
 } from 'class-validator';
 import { LOCALES, type Locale } from '@heach/i18n';
 import { GRANTED_USER_ROLES, USER_ROLES } from '../common/request-context.js';
+import { LinkedPatientDto } from '../linked-patients/linked-patients.dto.js';
+import { MembershipDto } from '../organisations/organisations.dto.js';
 import { CONSENT_PURPOSES, type ConsentPurpose } from './consent-versions.js';
 import {
   GENDERS,
   type Gender,
+  NAME_PATTERN,
   type RegistrableRole,
   SELF_REGISTRABLE_ROLES,
+  type SetupRole,
+  STAFF_ROLES,
 } from './setup-rules.js';
 
 const APPLICATION_STATUSES = [
@@ -34,8 +39,7 @@ const APPLICATION_STATUSES = [
   'suspended',
 ] as const;
 
-// Names in Odia, Devanagari or Latin script (I18N-04); no digits or markup.
-const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
+const ORGANISATION_NAME = /^[\p{L}\p{M}\p{N}][\p{L}\p{M}\p{N} .,&'()-]*$/u;
 
 export class OtpRequestDto {
   @ApiProperty({ description: 'Indian mobile number, with or without +91', example: '9000000001' })
@@ -143,6 +147,14 @@ export class SetupPatchDto {
   @IsOptional()
   @IsBoolean()
   adultDeclared?: boolean;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'An open staff invitation to accept instead of choosing a role (O-1)',
+  })
+  @IsOptional()
+  @IsUUID('4')
+  invitationId?: string;
 }
 
 export class ConsentDto {
@@ -201,8 +213,8 @@ export class RoleGrantDto {
 }
 
 export class SetupDraftDto {
-  @ApiProperty({ enum: SELF_REGISTRABLE_ROLES, nullable: true, type: String })
-  role!: RegistrableRole | null;
+  @ApiProperty({ enum: [...SELF_REGISTRABLE_ROLES, ...STAFF_ROLES], nullable: true, type: String })
+  role!: SetupRole | null;
 
   @ApiProperty({ nullable: true, type: String })
   fullName!: string | null;
@@ -249,4 +261,73 @@ export class MeDto {
 
   @ApiProperty({ type: [ConsentDto], description: 'Current consent versions not yet given' })
   consentsDue!: ConsentDto[];
+
+  @ApiProperty({ type: MembershipDto, nullable: true, description: 'Active staff membership' })
+  membership!: MembershipDto | null;
+
+  @ApiProperty({ description: 'Open staff invitations addressed to this number' })
+  invitations!: number;
+
+  @ApiProperty({ format: 'date-time', nullable: true, type: String })
+  deletionRequestedAt!: string | null;
+}
+
+/** Corrects basic details after setup (AC-06); absent fields keep their value. */
+export class ProfileCorrectionDto {
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  @Matches(NAME_PATTERN)
+  fullName?: string;
+
+  @ApiPropertyOptional({ enum: GENDERS })
+  @IsOptional()
+  @IsIn(GENDERS)
+  gender?: Gender;
+
+  @ApiPropertyOptional({ enum: LOCALES, isArray: true, description: 'Languages spoken' })
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(LOCALES.length)
+  @IsIn(LOCALES, { each: true })
+  languages?: Locale[];
+
+  @ApiPropertyOptional({ maxLength: 120, description: "The lab's name (labs only)" })
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  @Matches(ORGANISATION_NAME)
+  organisationName?: string;
+}
+
+/** The new number for the account (O-3); a code goes to it. */
+export class MobileChangeDto {
+  @ApiProperty({ description: 'Indian mobile number, with or without +91', example: '9000000003' })
+  @IsString()
+  @MaxLength(20)
+  mobile!: string;
+}
+
+export class ExportConsentDto {
+  @ApiProperty() purpose!: string;
+  @ApiProperty() version!: string;
+  @ApiProperty() locale!: string;
+  @ApiProperty({ format: 'date-time' }) givenAt!: string;
+  @ApiProperty({ format: 'date-time', nullable: true, type: String }) withdrawnAt!: string | null;
+}
+
+/** Everything the account holds about its owner, as a download (PR-04, default D-4). */
+export class AccountExportDto {
+  @ApiProperty({ format: 'date-time' }) exportedAt!: string;
+  @ApiProperty({ description: "The full number: this is the owner's own data" }) mobile!: string;
+  @ApiProperty({ enum: LOCALES }) locale!: Locale;
+  @ApiProperty({ type: SetupDraftDto }) profile!: SetupDraftDto;
+  @ApiProperty({ type: [RoleGrantDto] }) roles!: RoleGrantDto[];
+  @ApiProperty({ type: [ExportConsentDto] }) consents!: ExportConsentDto[];
+  @ApiProperty({ type: MembershipDto, nullable: true }) membership!: MembershipDto | null;
+  @ApiProperty({ type: [LinkedPatientDto] }) linkedPatients!: LinkedPatientDto[];
+  @ApiProperty({ format: 'date-time', nullable: true, type: String })
+  deletionRequestedAt!: string | null;
 }

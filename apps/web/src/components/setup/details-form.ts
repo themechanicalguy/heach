@@ -46,3 +46,13 @@ export function validPart(form: DetailsForm, role: string | null): Record<string
   part.adultDeclared = form.adultDeclared;
   return part;
 }
+
+/** What a correction after setup sends (AC-06): only the fields the account's role uses. */
+export function correctionFrom(form: DetailsForm, role: string | null): Record<string, unknown> {
+  return {
+    fullName: form.fullName.trim(),
+    gender: form.gender,
+    ...(isProviderChoice(role) ? { languages: form.languages } : {}),
+    ...(role === 'lab' ? { organisationName: form.organisationName.trim() } : {}),
+  };
+}

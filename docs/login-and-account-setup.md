@@ -10,7 +10,10 @@ state below.
   remote ref contains `d82d707`; the file exists only as an untracked file in the owner's working
   copy (6,956,601 bytes). It is used as found and is not committed by this branch. The owner
   should push the commit that adds it.
-- **Status:** feature complete for review on the branch (not pushed, not merged). See [Progress](#progress) and [Handoff](#handoff).
+- **Status:** merged in #94 on 29 October 2026 (corrected: this line said "not pushed, not
+  merged"). No written owner acceptance (FU-28). Continued in
+  [account flows for every role](account-flows-all-roles.md), which covers the remaining work listed
+  below.
 
 ## Instructions (as given by the owner, 29 October 2026)
 

@@ -16,6 +16,18 @@ const KNOWN = new Set([
   'side_taken',
   'details_missing',
   'no_mobile',
+  'mobile_unchanged',
+  'mobile_in_use',
+  'invitation_closed',
+  'already_invited',
+  'cannot_invite_self',
+  'invitation_limit',
+  'organisation_unnamed',
+  'membership_closed',
+  'linked_patient_limit',
+  'birth_year_invalid',
+  'field_not_for_role',
+  'no_deletion_request',
 ]);
 
 /**

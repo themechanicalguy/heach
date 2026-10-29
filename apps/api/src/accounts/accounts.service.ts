@@ -10,9 +10,11 @@ import {
 import { AuditService } from '../audit/audit.service.js';
 import type { IssuedTokens } from '../auth/session.service.js';
 import { SessionService } from '../auth/session.service.js';
+import { reason } from '../common/error-response.js';
 import type { GrantedUserRole, Principal } from '../common/request-context.js';
 import { FIELD_ENCRYPTOR } from '../crypto/crypto.tokens.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
+import { InvitationsService } from '../organisations/invitations.service.js';
 import { maskMobile } from '../otp/mobile-number.js';
 import {
   type IssuedChallenge,
@@ -30,19 +32,16 @@ import type { AddRoleDto, MeDto } from './accounts.dto.js';
 import { type ConsentGiven, consentsDue, coversCurrentVersions } from './consent-versions.js';
 import {
   initialRole,
+  isStaffRole,
   missingFields,
   NEW_PROVIDER_STATUS,
   nextSetupStep,
   type RegistrableRole,
+  type SetupRole,
   sideOf,
 } from './setup-rules.js';
 
 const ENTITY = 'account';
-
-/** A stable reason code the web app translates; never personal data (generic errors). */
-function reason(Exception: new (body: object) => Error, code: string): Error {
-  return new Exception({ error: Exception.name.replace('Exception', ''), message: code, code });
-}
 
 /**
  * Accounts of patients and providers: sign-in after a proven OTP, setup with save and resume,
@@ -56,6 +55,7 @@ export class AccountsService {
     private readonly sessions: SessionService,
     private readonly audit: AuditService,
     private readonly otp: OtpService,
+    private readonly invitations: InvitationsService,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
   ) {}
 
@@ -82,6 +82,10 @@ export class AccountsService {
   async view(principal: Principal): Promise<MeDto> {
     const account = await this.load(principal.userId);
     const complete = account.setupCompletedAt !== null;
+    const [membership, invitations] = await Promise.all([
+      this.invitations.membership(account.id),
+      this.invitations.list(principal),
+    ]);
     return {
       locale: account.locale,
       mobile: account.mobile ? maskMobile(await this.encryptor.decrypt(account.mobile)) : null,
@@ -93,11 +97,30 @@ export class AccountsService {
         draft: { ...account.draft, languages: [...account.draft.languages] },
       },
       consentsDue: consentsDue(account.consents),
+      membership,
+      invitations: invitations.length,
+      deletionRequestedAt: account.deletionRequestedAt?.toISOString() ?? null,
     };
   }
 
-  async saveSetup(principal: Principal, patch: SetupPatch): Promise<void> {
-    if (!(await this.accounts.saveDraft(principal.userId, patch))) {
+  /**
+   * Saves part of setup. An invitation chosen here must be open and addressed to this account's
+   * number; its role becomes the setup choice, granted only when setup completes (O-1).
+   */
+  async saveSetup(
+    principal: Principal,
+    patch: SetupPatch & { invitationId?: string },
+  ): Promise<void> {
+    const { invitationId, ...fields } = patch;
+    const invitation = invitationId
+      ? {
+          id: invitationId,
+          role: await this.accounts.transaction((client) =>
+            this.invitations.roleOf(client, principal.userId, invitationId),
+          ),
+        }
+      : undefined;
+    if (!(await this.accounts.saveDraft(principal.userId, fields, invitation))) {
       throw reason(ConflictException, 'setup_complete');
     }
   }
@@ -120,7 +143,7 @@ export class AccountsService {
       if (!requested || missingFields(account.draft).length > 0) {
         throw reason(BadRequestException, 'setup_incomplete');
       }
-      await this.grant(client, account.id, requested);
+      await this.grantSetupRole(client, account, requested);
       await this.accounts.recordConsents(client, account.id, consents, account.locale);
       await this.accounts.markSetupComplete(client, account.id);
       await this.audit.record(
@@ -206,6 +229,13 @@ export class AccountsService {
       locale: account.locale,
     };
     return this.otp.issue(target, origin);
+  }
+
+  /** A staff role only through its still-open invitation; any other role by the setup rules. */
+  private async grantSetupRole(client: TransactionClient, account: AccountRecord, role: SetupRole) {
+    if (!isStaffRole(role)) return this.grant(client, account.id, role);
+    if (!account.setupInvitationId) throw reason(BadRequestException, 'setup_incomplete');
+    await this.invitations.acceptLocked(client, account.id, account.setupInvitationId);
   }
 
   private async grant(client: TransactionClient, accountId: string, role: RegistrableRole) {

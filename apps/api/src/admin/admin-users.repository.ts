@@ -14,6 +14,7 @@ export interface UserSummaryRow {
   created_at: Date;
   last_sign_in_at: Date | null;
   setup_completed_at: Date | null;
+  deletion_requested_at: Date | null;
   roles: RoleGrant[];
 }
 
@@ -29,6 +30,8 @@ export interface UserQuery {
 const SUMMARY = `
   SELECT a.id, p.full_name, a.mobile, a.status, a.suspension_reason, a.created_at,
          a.last_sign_in_at, a.setup_completed_at,
+         (SELECT d.requested_at FROM app.deletion_request d
+           WHERE d.account_id = a.id AND d.status = 'pending') AS deletion_requested_at,
          coalesce((SELECT json_agg(json_build_object(
                      'role', r.role, 'side', r.side, 'applicationStatus', r.application_status,
                      'statusReason', r.status_reason) ORDER BY r.side)

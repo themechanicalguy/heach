@@ -7,7 +7,7 @@ import type { GrantedUserRole } from '../common/request-context.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { type TransactionClient, withTransaction } from '../data-stores/transaction.js';
 import type { ConsentGiven } from './consent-versions.js';
-import type { Gender, RegistrableRole, SetupDraft, Side } from './setup-rules.js';
+import type { Gender, SetupDraft, SetupRole, Side } from './setup-rules.js';
 
 export type AccountStatus = 'active' | 'suspended';
 export type ApplicationStatus =
@@ -35,8 +35,20 @@ export interface AccountRecord {
   setupCompletedAt: Date | null;
   lastActiveRole: string | null;
   draft: SetupDraft;
+  /** The invitation setup will accept, when the role came from one (O-1). */
+  setupInvitationId: string | null;
   roles: RoleGrant[];
   consents: ConsentGiven[];
+  /** When an open deletion request was made (AC-06, default D-3). */
+  deletionRequestedAt: Date | null;
+}
+
+/** Basic details a user corrects after setup (AC-06); undefined leaves a field as it is. */
+export interface ProfileCorrection {
+  fullName?: string;
+  gender?: Gender;
+  languages?: readonly string[];
+  organisationName?: string;
 }
 
 /** The fields setup may save; undefined leaves a field as it is. */
@@ -57,7 +69,9 @@ interface AccountRow {
   languages: string[];
   organisation_name: string | null;
   adult_declared_at: Date | null;
-  setup_role: RegistrableRole | null;
+  setup_role: SetupRole | null;
+  setup_invitation_id: string | null;
+  deletion_requested_at: Date | null;
 }
 
 /** Accounts of patients and providers, their setup draft, roles and consents (decisions L-1 to L-5). */
@@ -100,8 +114,10 @@ export class AccountRepository {
     const { rows } = await client.query<AccountRow>(
       `SELECT a.id, a.mobile, a.synthetic, a.preferred_locale, a.status, a.setup_completed_at,
               a.last_active_role, p.full_name, p.gender, p.languages, p.organisation_name,
-              p.adult_declared_at, p.setup_role
+              p.adult_declared_at, p.setup_role, p.setup_invitation_id,
+              d.requested_at AS deletion_requested_at
          FROM app.account a JOIN app.account_profile p ON p.account_id = a.id
+         LEFT JOIN app.deletion_request d ON d.account_id = a.id AND d.status = 'pending'
         WHERE a.id = $1`,
       [id],
     );
@@ -148,11 +164,23 @@ export class AccountRepository {
     ]);
   }
 
-  /** Saves setup fields; false once setup is complete (nothing changes then). */
-  async saveDraft(id: string, patch: SetupPatch): Promise<boolean> {
+  /**
+   * Saves setup fields; false once setup is complete (nothing changes then). Choosing a role
+   * clears any invitation chosen before, and choosing an invitation sets its role.
+   */
+  async saveDraft(
+    id: string,
+    patch: SetupPatch,
+    invitation?: { id: string; role: SetupRole },
+  ): Promise<boolean> {
+    const role = invitation ? invitation.role : patch.role;
+    // A role chosen directly drops an invitation chosen before; neither leaves it as it is.
+    let invitationId: string | null | undefined = patch.role ? null : undefined;
+    if (invitation) invitationId = invitation.id;
     const result = await this.pool.query(
       `UPDATE app.account_profile p
           SET setup_role = CASE WHEN $2 THEN $3 ELSE p.setup_role END,
+              setup_invitation_id = CASE WHEN $14 THEN $15::uuid ELSE p.setup_invitation_id END,
               full_name = CASE WHEN $4 THEN $5 ELSE p.full_name END,
               gender = CASE WHEN $6 THEN $7 ELSE p.gender END,
               languages = CASE WHEN $8 THEN $9::text[] ELSE p.languages END,
@@ -164,15 +192,86 @@ export class AccountRepository {
         WHERE p.account_id = $1 AND a.id = p.account_id AND a.setup_completed_at IS NULL`,
       [
         id,
-        ...field(patch.role),
+        ...field(role),
         ...field(patch.fullName),
         ...field(patch.gender),
         ...field(patch.languages ? [...patch.languages] : undefined),
         ...field(patch.organisationName),
         ...field(patch.adultDeclared),
+        ...field(invitationId),
       ],
     );
     return result.rowCount === 1;
+  }
+
+  /** Corrects basic details after setup, in the caller's transaction (AC-06). */
+  async correctProfile(
+    client: TransactionClient,
+    id: string,
+    change: ProfileCorrection,
+  ): Promise<void> {
+    await client.query(
+      `UPDATE app.account_profile
+          SET full_name = coalesce($2, full_name), gender = coalesce($3, gender),
+              languages = coalesce($4::text[], languages),
+              organisation_name = coalesce($5, organisation_name), updated_at = now()
+        WHERE account_id = $1`,
+      [
+        id,
+        change.fullName ?? null,
+        change.gender ?? null,
+        change.languages ? [...change.languages] : null,
+        change.organisationName ?? null,
+      ],
+    );
+  }
+
+  /** The new number (O-3); false when another account already has it (unique blind index). */
+  async changeMobile(
+    client: TransactionClient,
+    id: string,
+    mobile: { mobile: EncryptedField; mobileIndex: string },
+  ): Promise<boolean> {
+    const result = await client.query(
+      `UPDATE app.account SET mobile = $2, mobile_index = $3
+        WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM app.account WHERE mobile_index = $3)`,
+      [id, mobile.mobile, mobile.mobileIndex],
+    );
+    return result.rowCount === 1;
+  }
+
+  /** Opens a deletion request; an open one is kept as it is (one per account). */
+  async requestDeletion(client: TransactionClient, id: string): Promise<boolean> {
+    const result = await client.query(
+      `INSERT INTO app.deletion_request (id, account_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [randomUUID(), id],
+    );
+    return result.rowCount === 1;
+  }
+
+  async cancelDeletion(client: TransactionClient, id: string): Promise<boolean> {
+    const result = await client.query(
+      `UPDATE app.deletion_request SET status = 'cancelled', closed_at = now()
+        WHERE account_id = $1 AND status = 'pending'`,
+      [id],
+    );
+    return result.rowCount === 1;
+  }
+
+  /** Every consent record of the account, withdrawn ones too, for the data export (PR-04). */
+  async consentHistory(id: string) {
+    const { rows } = await this.pool.query<{
+      purpose: string;
+      version: string;
+      locale: string;
+      given_at: Date;
+      withdrawn_at: Date | null;
+    }>(
+      `SELECT purpose, version, locale, given_at, withdrawn_at FROM app.consent_record
+        WHERE account_id = $1 ORDER BY given_at`,
+      [id],
+    );
+    return rows;
   }
 
   /** Locks the account row until commit, so two setup completions cannot both grant a role. */
@@ -260,7 +359,9 @@ function toRecord(row: AccountRow, roles: RoleGrant[], consents: ConsentGiven[])
       organisationName: row.organisation_name,
       adultDeclared: row.adult_declared_at !== null,
     },
+    setupInvitationId: row.setup_invitation_id,
     roles,
     consents,
+    deletionRequestedAt: row.deletion_requested_at,
   };
 }

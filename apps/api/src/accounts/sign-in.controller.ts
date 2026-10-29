@@ -23,11 +23,12 @@ import { bearerToken, principalOf } from '../auth/auth.guard.js';
 import { ReverificationStore } from '../auth/reverification.js';
 import { Public, Roles } from '../auth/roles.decorator.js';
 import { USER_REALM } from '../auth/session-realm.js';
-import { deviceId, sendTokens } from '../auth/session-cookie.js';
+import { sendTokens } from '../auth/session-cookie.js';
 import { USER_ROLES } from '../common/request-context.js';
 import { requireFlag } from '../flags/flags.module.js';
 import { normaliseIndianMobile } from '../otp/mobile-number.js';
-import { type OtpOrigin, OtpService } from '../otp/otp.service.js';
+import { clientAddress as address, otpOrigin as origin } from '../otp/otp-origin.js';
+import { OtpService } from '../otp/otp.service.js';
 import {
   OtpChallengeDto,
   OtpRequestDto,
@@ -153,12 +154,4 @@ export class SignInController {
     );
     await this.reverifications.mark(principal.sessionId);
   }
-}
-
-function address(request: Request): string {
-  return request.ip ?? 'unknown';
-}
-
-function origin(request: Request, response: Response): OtpOrigin {
-  return { deviceId: deviceId(request, response), address: address(request) };
 }

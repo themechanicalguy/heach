@@ -8,3 +8,8 @@ export interface ErrorResponse {
   path: string;
   timestamp: string;
 }
+
+/** An HTTP error carrying a stable reason code the client translates; never personal data. */
+export function reason(Exception: new (body: object) => Error, code: string): Error {
+  return new Exception({ error: Exception.name.replace('Exception', ''), message: code, code });
+}

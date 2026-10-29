@@ -52,7 +52,10 @@ export class AdminUsersService {
     const row = await this.users.find(id);
     if (!row) throw new NotFoundException();
     await this.audit.record({ action: 'admin.user.view', entity: ENTITY, entityId: id });
-    return Object.assign(await this.summary(row), { fullName: row.full_name });
+    return Object.assign(await this.summary(row), {
+      fullName: row.full_name,
+      deletionRequestedAt: row.deletion_requested_at?.toISOString() ?? null,
+    });
   }
 
   async suspend(id: string, reason: SuspensionReason): Promise<void> {

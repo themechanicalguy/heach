@@ -49,7 +49,8 @@
   },
   "sms": {
     "otp_sign_in": "{code} is your HEACH sign-in code. It expires in {minutes} minutes. Never share it with anyone.",
-    "otp_reverify": "{code} is your HEACH code to confirm a change to your account. It expires in {minutes} minutes. Never share it with anyone."
+    "otp_reverify": "{code} is your HEACH code to confirm a change to your account. It expires in {minutes} minutes. Never share it with anyone.",
+    "otp_change_mobile": "{code} is your HEACH code to move your account to this number. It expires in {minutes} minutes. Never share it with anyone."
   },
   "welcome": {
     "title": "Choose your language",
@@ -91,6 +92,18 @@
     "side_taken": "Your account already has a role of that kind.",
     "details_missing": "Some details are missing.",
     "no_mobile": "This account has no mobile number to send a code to.",
+    "mobile_unchanged": "This is already your number.",
+    "mobile_in_use": "This number already has a HEACH account. Use another number or contact support.",
+    "invitation_closed": "This invitation is no longer open. Ask for a new one.",
+    "already_invited": "This number already has an open invitation.",
+    "cannot_invite_self": "You cannot invite your own number.",
+    "invitation_limit": "Too many open invitations. Wait for some to be answered, or revoke them.",
+    "organisation_unnamed": "Add your clinic’s name first.",
+    "membership_closed": "This invitation or membership has already ended.",
+    "linked_patient_limit": "You can add up to 10 people.",
+    "birth_year_invalid": "Enter a valid year of birth.",
+    "field_not_for_role": "This detail does not apply to your role.",
+    "no_deletion_request": "There is no open deletion request.",
     "network": "No connection. Check your internet and try again.",
     "generic": "Something went wrong. Please try again."
   },
@@ -259,7 +272,8 @@
     "signOut": "Sign out",
     "signOutAll": "Sign out of all devices",
     "signOutAllHint": "Use this if you lost a phone or used a shared device.",
-    "signedOut": "You are signed out."
+    "signedOut": "You are signed out.",
+    "linksLabel": "Account pages"
   },
   "reverify": {
     "title": "Confirm it is you",
@@ -274,5 +288,100 @@
     "wrongRole": "This page is for another role.",
     "switchHint": "Switch role from your account page.",
     "toAccount": "Go to your account"
+  },
+  "invitations": {
+    "setupGroup": "Invitations for you",
+    "choice": "{role} at {organisation}",
+    "title": "Invitations to join a team",
+    "expires": "Open until {date}",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "profile": {
+    "title": "Your details",
+    "edit": "Correct my details",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "mobileChange": {
+    "title": "Mobile number",
+    "intro": "Moved to a new number? We will send a code to your current number, then to the new one. Other devices will be signed out.",
+    "start": "Change my number",
+    "newNumber": "New mobile number",
+    "sendCode": "Send code to new number",
+    "codeSent": "We sent a code to your new number.",
+    "confirm": "Confirm new number",
+    "done": "Your number has changed. Use the new number to sign in."
+  },
+  "dataRights": {
+    "title": "Your data",
+    "exportIntro": "Download a copy of the details HEACH keeps about your account.",
+    "export": "Download my data",
+    "deleteIntro": "You can ask us to delete your account and its data. Our team will contact you before anything is deleted.",
+    "delete": "Ask to delete my account",
+    "requested": "You asked to delete your account on {date}. Our team will contact you.",
+    "cancel": "Withdraw my deletion request"
+  },
+  "people": {
+    "title": "People I book for",
+    "intro": "Add family members you book care for. They do not need their own account.",
+    "add": "Add a person",
+    "edit": "Edit",
+    "remove": "Remove",
+    "confirmRemove": "Yes, remove {name}",
+    "save": "Save person",
+    "empty": "You have not added anyone yet.",
+    "summary": "{relationship}, born {year}",
+    "fullName": "Their full name",
+    "birthYear": "Year of birth",
+    "birthYearHint": "For example 1958",
+    "birthYearInvalid": "Enter a 4-digit year of birth, not in the future.",
+    "relationship": "Who is this person to you?",
+    "relationshipRequired": "Choose an option.",
+    "relationships": {
+      "parent": "Parent",
+      "child": "Child",
+      "spouse": "Husband or wife",
+      "sibling": "Brother or sister",
+      "grandparent": "Grandparent",
+      "grandchild": "Grandchild",
+      "other_relative": "Other relative",
+      "other": "Someone else"
+    }
+  },
+  "team": {
+    "title": "Your team",
+    "approved": "Your team can start lab or clinic work when it opens on HEACH.",
+    "notApproved": "Staff can sign in now. Lab or clinic work opens for them after your application is approved.",
+    "renameClinic": "Change clinic name",
+    "clinicName": "Name of the clinic",
+    "clinicNameHint": "As on your registration certificate.",
+    "inviteTitle": "Invite a {role}",
+    "inviteIntro": "We will not send them an SMS. Tell them to sign in to HEACH with this number to see your invitation. It stays open for 7 days.",
+    "inviteMobile": "Their mobile number",
+    "invite": "Send invitation",
+    "invited": "Invitation ready. Ask them to sign in with that number.",
+    "empty": "No staff yet.",
+    "membersTitle": "Staff and invitations",
+    "active": "Member",
+    "pending": "Invited, open until {date}",
+    "memberLine": "{role} · {state}",
+    "remove": "Remove from team",
+    "revoke": "Cancel invitation",
+    "confirmRemove": "Yes, remove now",
+    "confirmRevoke": "Yes, cancel invitation"
+  },
+  "staff": {
+    "title": "Your workplace",
+    "organisation": {
+      "lab": "Lab",
+      "clinic": "Clinic"
+    },
+    "role": "Your role",
+    "approved": "This workplace is approved on HEACH.",
+    "notApproved": "This workplace is not approved yet. Your work on HEACH opens after it is.",
+    "workLater": "Daily work screens (appointments, sample collection) are not open yet. We will tell you when they are.",
+    "collectorVerification": "As a sample collector, you will also verify your own identity and qualification. These steps are not open yet.",
+    "noMembership": "You are not part of a team now. Ask the lab or clinic to invite you again."
   }
 }

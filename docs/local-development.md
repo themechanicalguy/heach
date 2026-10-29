@@ -154,7 +154,8 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 ## Sign-in, account setup and admin sign-in (Step 3, flag `accounts`)
 
 Everything here is behind the `accounts` flag (local, test and dev only); `.env.example` turns it
-on. The work record is [login and account setup](login-and-account-setup.md).
+on. The work records are [login and account setup](login-and-account-setup.md) and
+[account flows for every role](account-flows-all-roles.md).
 
 - **OTP sign-in.** Open http://localhost:3000 (first visit: choose a language), then sign in with
   any synthetic 10-digit number starting 6 to 9. With `SMS_PROVIDER=local` the API delivers each
@@ -168,11 +169,22 @@ on. The work record is [login and account setup](login-and-account-setup.md).
   argument): `printf '%s' "<synthetic password, 12+ chars>" | pnpm --filter @heach/api admin:create --email you@heach.invalid --role super_admin`
   (build the API first). Then open http://localhost:5173: the first sign-in shows a TOTP key
   to add to an authenticator app (manual entry). Roles: `super_admin`, `verifier`, `support`,
-  `finance`.
+  `finance`. The CLI is for the first super admin; after that a super admin adds admins in the
+  Admins section, which shows a temporary password once (it expires after 24 hours and is
+  replaced at the first sign-in).
+- **Staff (clinic front desk, sample collector).** Sign up a lab (or a dentist or dermatologist,
+  who names the clinic first), open Account, then Your team, and invite another synthetic number.
+  No SMS is sent for an invitation: sign in with the invited number and choose the invitation on
+  the role step.
+- **Linked patients, data and number change.** A patient or representative opens Account, then
+  People I book for. Export, the deletion request and number change ask for a fresh code; the
+  codes for a new number arrive in Mailpit like any other.
+- **Purge job.** `pnpm --filter @heach/api job:purge-expired` (after a build) deletes expired OTP
+  challenges, dead sessions and closed memberships, and logs counts only. Not scheduled anywhere.
 - **Browser tests with the API.** Build the web app with `FEATURE_FLAGS=accounts`
   and `API_ORIGIN`, start it with `next start`, start the API with the address caps raised (one
   test machine sends many codes), then
-  `E2E_API=1 E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL=http://localhost:<MAILPIT_UI_PORT> pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts`
+  `E2E_API=1 E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL=http://localhost:<MAILPIT_UI_PORT> pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts e2e/account-flows.spec.ts`
   and `E2E_API=1 pnpm --filter @heach/admin test:e2e` (admin preview proxies `/api` to `API_ORIGIN`).
 - **Test sign-in** still works for the four Step 2 synthetic accounts only; an account made by
   OTP can never be reached through it.
