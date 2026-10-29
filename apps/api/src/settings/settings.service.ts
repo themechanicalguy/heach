@@ -13,6 +13,7 @@ export const SETTING_KEYS = [
   'payout_hold_hours',
   'patient_no_show_fee_percent',
   'no_show_wait_minutes',
+  'vault_quota_mb',
 ] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 

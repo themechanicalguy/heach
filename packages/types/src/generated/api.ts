@@ -1604,6 +1604,294 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/vault': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/records': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VaultController_upload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/records/{id}/file': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_file'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/records/{id}/access': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_access'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/records/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['VaultController_remove'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/usage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_usage'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_history'];
+    put?: never;
+    post: operations['VaultController_addHistory'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/history/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['VaultController_removeHistory'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/shares': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_shares'];
+    put?: never;
+    post: operations['VaultController_share'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/shares/{id}/revoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VaultController_revokeShare'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/links': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_links'];
+    put?: never;
+    post: operations['VaultController_link'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/links/{id}/revoke': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VaultController_revokeLink'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VaultController_export'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/shared': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderVaultController_shared'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/shared/{recordId}/file': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderVaultController_sharedFile'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/records': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderVaultController_add'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/shared-records/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['SharedLinkController_open'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/vault/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminVaultController_stats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/bookings/{id}/code': {
     parameters: {
       query?: never;
@@ -3424,6 +3712,192 @@ export interface components {
        * @description Listing of the new provider
        */
       listingId: string;
+    };
+    VisitNotesViewDto: {
+      procedure: string;
+      observations: string;
+      advice: string;
+    };
+    RecordDto: {
+      /** Format: uuid */
+      id: string;
+      /** @description Linked patient; null for the account holder */
+      personId: string | null;
+      /**
+       * @description Added by the patient, or issued on the application (MV-04)
+       * @enum {string}
+       */
+      source: 'patient' | 'visit' | 'lab' | 'provider';
+      /** @enum {string} */
+      recordType:
+        | 'prescription'
+        | 'lab_report'
+        | 'scan'
+        | 'discharge_summary'
+        | 'vaccination'
+        | 'visit_note'
+        | 'other';
+      /** Format: date */
+      recordDate: string;
+      title: string;
+      facility: string | null;
+      tags: string[];
+      notes: string | null;
+      visitNotes: components['schemas']['VisitNotesViewDto'] | null;
+      /** @description Provider who issued it */
+      issuedBy: string | null;
+      hasFile: boolean;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    RecordInputDto: {
+      /**
+       * Format: uuid
+       * @description A linked patient; the account holder when absent
+       */
+      personId?: string;
+      /** @enum {string} */
+      recordType:
+        | 'prescription'
+        | 'lab_report'
+        | 'scan'
+        | 'discharge_summary'
+        | 'vaccination'
+        | 'visit_note'
+        | 'other';
+      /** Format: date */
+      recordDate: string;
+      title: string;
+      facility?: string;
+      tags?: string[];
+      notes?: string;
+      file?: components['schemas']['UploadDto'];
+    };
+    AccessDto: {
+      accessorRole: string;
+      accessorName: string | null;
+      /** @enum {string} */
+      via: 'booking_share' | 'external_link';
+      /** Format: date-time */
+      createdAt: string;
+    };
+    UsageDto: {
+      usedBytes: number;
+      quotaBytes: number;
+      /** @description Warn the user: above 80 % of the quota (MV-15) */
+      nearlyFull: boolean;
+    };
+    HistoryEntryDto: {
+      /** Format: uuid */
+      id: string;
+      personId: string | null;
+      /** @enum {string} */
+      kind:
+        | 'allergy'
+        | 'condition'
+        | 'medicine'
+        | 'surgery'
+        | 'blood_group'
+        | 'vaccination'
+        | 'family_history';
+      text: string;
+      /** @description Who added it (MV-05) */
+      addedByRole: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    HistoryInputDto: {
+      /** Format: uuid */
+      personId?: string;
+      /** @enum {string} */
+      kind:
+        | 'allergy'
+        | 'condition'
+        | 'medicine'
+        | 'surgery'
+        | 'blood_group'
+        | 'vaccination'
+        | 'family_history';
+      text: string;
+    };
+    ShareDto: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      bookingId: string;
+      recordIds: string[];
+      includeHistory: boolean;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      revokedAt: string | null;
+    };
+    ShareInputDto: {
+      /** Format: uuid */
+      bookingId: string;
+      recordIds: string[];
+      includeHistory: boolean;
+    };
+    LinkDto: {
+      /** Format: uuid */
+      id: string;
+      records: number;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      revokedAt: string | null;
+    };
+    LinkInputDto: {
+      recordIds: string[];
+      /** @description Hours until the link expires */
+      hours: number;
+    };
+    LinkCreatedDto: {
+      /** Format: uuid */
+      id: string;
+      /** @description Part of the link; shown once */
+      token: string;
+      /** @description The one-time code the doctor needs; shown once */
+      code: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    SharedFileDto: {
+      /** Format: uuid */
+      recordId: string;
+      contentType: string;
+      contentBase64: string;
+    };
+    SharedRecordsDto: {
+      records: components['schemas']['RecordDto'][];
+      history: components['schemas']['HistoryEntryDto'][];
+      /** @description Files, for an external link only */
+      files: components['schemas']['SharedFileDto'][];
+    };
+    ProviderRecordInputDto: {
+      /** @enum {string} */
+      recordType:
+        | 'prescription'
+        | 'lab_report'
+        | 'scan'
+        | 'discharge_summary'
+        | 'vaccination'
+        | 'visit_note'
+        | 'other';
+      title: string;
+      notes?: string;
+      file?: components['schemas']['UploadDto'];
+    };
+    LinkOpenDto: {
+      code: string;
+    };
+    VaultStatsDto: {
+      records: number;
+      storageBytes: number;
+      infectedUploads: number;
+      activeShares: number;
+      activeLinks: number;
+      openDeletionRequests: number;
     };
     VisitCodeDto: {
       /** @description Show this to the provider only when they are at the door */
@@ -6014,6 +6488,449 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  VaultController_list: {
+    parameters: {
+      query?: {
+        /** @description A linked patient ID, or `self` */
+        person?: string;
+        type?:
+          | 'prescription'
+          | 'lab_report'
+          | 'scan'
+          | 'discharge_summary'
+          | 'vaccination'
+          | 'visit_note'
+          | 'other';
+        from?: string;
+        to?: string;
+        /** @description Search titles, tags and provider names (MV-06) */
+        q?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RecordDto'][];
+        };
+      };
+    };
+  };
+  VaultController_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RecordInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RecordDto'];
+        };
+      };
+    };
+  };
+  VaultController_file: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  VaultController_access: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessDto'][];
+        };
+      };
+    };
+  };
+  VaultController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VaultController_usage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UsageDto'];
+        };
+      };
+    };
+  };
+  VaultController_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HistoryEntryDto'][];
+        };
+      };
+    };
+  };
+  VaultController_addHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['HistoryInputDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VaultController_removeHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VaultController_shares: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ShareDto'][];
+        };
+      };
+    };
+  };
+  VaultController_share: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ShareInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VaultController_revokeShare: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VaultController_links: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LinkDto'][];
+        };
+      };
+    };
+  };
+  VaultController_link: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LinkInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LinkCreatedDto'];
+        };
+      };
+    };
+  };
+  VaultController_revokeLink: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VaultController_export: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderVaultController_shared: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SharedRecordsDto'];
+        };
+      };
+    };
+  };
+  ProviderVaultController_sharedFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        recordId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  ProviderVaultController_add: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProviderRecordInputDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SharedLinkController_open: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        token: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LinkOpenDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SharedRecordsDto'];
+        };
+      };
+    };
+  };
+  AdminVaultController_stats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VaultStatsDto'];
+        };
       };
     };
   };

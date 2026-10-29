@@ -19,6 +19,7 @@ import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { PatientLabPanel } from '../lab/PatientLabPanel';
 import { PatientVisitPanel } from '../visit/PatientVisitPanel';
+import { ShareWithBooking } from '../vault/SharePanels';
 import { money } from './money';
 
 /** The patient's bookings (BK-07); the last list stays readable offline until sign-out. */
@@ -194,6 +195,9 @@ function BookingDetail({
           <PatientLabPanel bookingId={booking.id} />
         )}
         <PatientVisitPanel booking={booking} onChanged={onChanged} />
+        {['requested', 'confirmed', 'in_progress'].includes(booking.status) && booking.provider && (
+          <ShareWithBooking bookingId={booking.id} />
+        )}
         {booking.canCancel && <CancelBooking booking={booking} onChanged={onChanged} />}
       </div>
     </section>

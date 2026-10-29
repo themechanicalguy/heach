@@ -20,7 +20,8 @@
     "earnings": "Earnings",
     "notifications": "Alerts",
     "lab": "Lab orders",
-    "collections": "Collections"
+    "collections": "Collections",
+    "vault": "My records"
   },
   "offline": {
     "banner": "You are offline. Saved pages still work; changes need a connection."
@@ -178,7 +179,10 @@
     "sample_mismatch": "The sample ID does not match this booking.",
     "no_report_now": "The sample has not been received yet.",
     "correction_reason_required": "Give a reason for the correction.",
-    "lab_stage_refused": "This step is not possible now."
+    "lab_stage_refused": "This step is not possible now.",
+    "record_not_deletable": "Records issued by a provider cannot be deleted.",
+    "vault_quota": "Your storage is full. Delete some records first.",
+    "booking_not_shareable": "Records can be shared only for an active booking."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -860,5 +864,84 @@
       "insufficient_sample": "Not enough sample",
       "sample_lost": "Sample lost"
     }
+  },
+  "vault": {
+    "title": "My records",
+    "intro": "Your reports, prescriptions and visit notes, kept encrypted. Only people you share with can see them.",
+    "person": "Whose records",
+    "everyone": "Everyone",
+    "myself": "Myself",
+    "type": "Type",
+    "anyType": "Any type",
+    "search": "Search titles, tags and providers",
+    "empty": "No records yet.",
+    "addedByYou": "Added by you",
+    "issuedBy": "Issued by {name}",
+    "download": "Download",
+    "delete": "Delete",
+    "access": "Who viewed",
+    "accessEntry": "{who} via {via} on {time}",
+    "viaBooking": "booking share",
+    "viaLink": "shared link",
+    "noAccess": "Nobody else has viewed this.",
+    "uploadTitle": "Add a record",
+    "recordTitle": "Title",
+    "recordDate": "Date of the record",
+    "facility": "Doctor or facility (optional)",
+    "tags": "Tags, separated by commas (optional)",
+    "notes": "Notes (optional)",
+    "file": "File (PDF, JPG or PNG)",
+    "save": "Save record",
+    "saved": "Saved.",
+    "usage": "{used} of {quota} used",
+    "nearlyFull": "Your storage is nearly full.",
+    "historyTitle": "Medical history",
+    "historyKind": "Kind",
+    "historyText": "Details",
+    "addHistory": "Add",
+    "remove": "Remove",
+    "linkTitle": "Share with a doctor outside HEACH",
+    "linkHours": "Hours the link works",
+    "createLink": "Create link",
+    "linkCreated": "Send this link and code to the doctor. They are shown only now.",
+    "linkCode": "Code: {code}",
+    "revoke": "Revoke",
+    "shareTitle": "Share records with this provider",
+    "shareHistory": "Include my medical history",
+    "share": "Share selected",
+    "shared": "Shared until {time}.",
+    "exportAll": "Export everything",
+    "types": {
+      "prescription": "Prescription",
+      "lab_report": "Lab report",
+      "scan": "Scan",
+      "discharge_summary": "Discharge summary",
+      "vaccination": "Vaccination",
+      "visit_note": "Visit notes",
+      "other": "Other"
+    },
+    "kinds": {
+      "allergy": "Allergy",
+      "condition": "Long-term condition",
+      "medicine": "Current medicine",
+      "surgery": "Surgery or hospital stay",
+      "blood_group": "Blood group",
+      "vaccination": "Vaccination",
+      "family_history": "Family history"
+    }
+  },
+  "sharedPanel": {
+    "title": "Shared records",
+    "empty": "The patient has not shared any records for this booking.",
+    "history": "Medical history",
+    "add": "Add a record to the patient's file",
+    "added": "Added to the patient's records."
+  },
+  "sharedLink": {
+    "title": "Shared medical records",
+    "intro": "Enter the code you were given with this link.",
+    "code": "Code",
+    "open": "Open records",
+    "download": "Open file"
   }
 }

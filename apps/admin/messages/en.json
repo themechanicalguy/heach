@@ -16,7 +16,8 @@
     "catalogue": "Catalogue",
     "tickets": "Tickets",
     "reviews": "Reviews",
-    "labs": "Labs"
+    "labs": "Labs",
+    "vault": "Vault"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -377,5 +378,15 @@
     "late": "Late reports",
     "corrections": "Corrections",
     "empty": "No labs yet."
+  },
+  "vault": {
+    "title": "Medical record vault",
+    "intro": "Counts only: no record content is ever shown here (MV-11). Content needs break-glass on a ticket.",
+    "records": "Records",
+    "storage": "Storage used",
+    "infected": "Uploads refused as infected",
+    "shares": "Active booking shares",
+    "links": "Active external links",
+    "deletions": "Open deletion requests"
   }
 }

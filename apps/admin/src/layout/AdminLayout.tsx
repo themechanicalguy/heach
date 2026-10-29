@@ -12,6 +12,7 @@ export type Section =
   | 'tickets'
   | 'reviews'
   | 'labs'
+  | 'vault'
   | 'catalogue'
   | 'users'
   | 'admins'

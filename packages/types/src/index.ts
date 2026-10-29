@@ -85,6 +85,14 @@ export type LabOrder = components['schemas']['LabOrderDto'];
 export type Collector = components['schemas']['CollectorDto'];
 export type LabDashboard = components['schemas']['LabDashboardDto'];
 export type AdminLab = components['schemas']['AdminLabDto'];
+export type VaultRecord = components['schemas']['RecordDto'];
+export type HistoryEntry = components['schemas']['HistoryEntryDto'];
+export type RecordShare = components['schemas']['ShareDto'];
+export type LinkCreated = components['schemas']['LinkCreatedDto'];
+export type SharedRecords = components['schemas']['SharedRecordsDto'];
+export type RecordAccess = components['schemas']['AccessDto'];
+export type VaultUsage = components['schemas']['UsageDto'];
+export type VaultStats = components['schemas']['VaultStatsDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

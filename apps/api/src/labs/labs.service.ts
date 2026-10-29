@@ -27,6 +27,7 @@ import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
 import { LedgerService } from '../payouts/ledger.service.js';
 import { type StoredFile, UploadsService } from '../uploads/uploads.service.js';
+import { VaultFiling } from '../vault/vault-filing.js';
 import { VisitCodes } from '../visits/visit-codes.js';
 import type { CollectorDto, LabDashboardDto, LabOrderDto, ReportUploadDto } from './labs.dto.js';
 
@@ -56,6 +57,7 @@ export class LabsService {
     private readonly ledger: LedgerService,
     private readonly uploads: UploadsService,
     private readonly codes: VisitCodes,
+    private readonly filing: VaultFiling,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
   ) {}
 
@@ -135,6 +137,13 @@ export class LabsService {
     if (input.contentType !== 'application/pdf') throw reason(BadRequestException, 'upload_type');
     const prepared = await this.uploads.prepare(lab.userId, 'lab_report', input);
     if (prepared.verdict === 'infected') throw reason(BadRequestException, 'upload_infected');
+    const before = await this.bookings.find(bookingId);
+    if (before?.providerId !== lab.userId) throw new NotFoundException();
+    const tests = (await this.orders.items(bookingId, 'en')).map((item) => item.name);
+    const filing = await this.filing.prepare(before, {
+      tags: tests,
+      notes: input.correctionReason ? `Corrected: ${input.correctionReason}` : null,
+    });
     const effects = await this.bookings.transaction(async (client) => {
       const { booking, order } = await this.locked(client, bookingId);
       if (booking.providerId !== lab.userId) throw new NotFoundException();
@@ -151,6 +160,13 @@ export class LabsService {
         prepared.id,
         correcting ? (input.correctionReason ?? null) : null,
       );
+      // Filed into the patient's vault; a correction replaces the filed report (MV-02, LB-09).
+      await this.filing.file(client, booking, {
+        source: 'lab',
+        recordType: 'lab_report',
+        details: filing,
+        objectId: prepared.id,
+      });
       if (!correcting) {
         await this.orders.setStage(client, bookingId, { stage: 'report_ready' }, null, lab.role);
         await this.lifecycle.apply(client, booking, 'complete', actorOf(lab));

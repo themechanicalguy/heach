@@ -8,6 +8,7 @@ import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ShiftList } from './PatientVisitPanel';
+import { SharedRecordsPanel } from '../vault/SharePanels';
 import { SafetyForm } from './SafetyForm';
 
 type Refresh = () => Promise<void>;
@@ -41,6 +42,9 @@ export function ProviderVisitPanel({
       )}
       {booking.status === 'confirmed' && (
         <PatientAbsent bookingId={booking.id} onChanged={onChanged} />
+      )}
+      {['confirmed', 'in_progress', 'completed'].includes(booking.status) && (
+        <SharedRecordsPanel bookingId={booking.id} />
       )}
       {booking.status !== 'pending_payment' && <SafetyForm bookingId={booking.id} />}
     </>
