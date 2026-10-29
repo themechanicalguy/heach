@@ -104,14 +104,19 @@ export class TicketsService {
   async assign(admin: Principal, id: string): Promise<void> {
     await this.update(
       id,
-      `status = 'assigned', assignee_admin_id = $2`,
-      [admin.userId],
+      `UPDATE app.ticket SET status = 'assigned', assignee_admin_id = $2, updated_at = now() WHERE id = $1`,
+      admin.userId,
       'ticket.assigned',
     );
   }
 
   async resolve(id: string, resolution: string): Promise<void> {
-    await this.update(id, `status = 'resolved', resolution = $2`, [resolution], 'ticket.resolved');
+    await this.update(
+      id,
+      `UPDATE app.ticket SET status = 'resolved', resolution = $2, updated_at = now() WHERE id = $1`,
+      resolution,
+      'ticket.resolved',
+    );
   }
 
   async note(admin: Principal, id: string, note: string): Promise<void> {
@@ -206,11 +211,8 @@ export class TicketsService {
     return id;
   }
 
-  private async update(id: string, set: string, values: unknown[], action: string): Promise<void> {
-    const result = await this.pool.query(
-      `UPDATE app.ticket SET ${set}, updated_at = now() WHERE id = $1`,
-      [id, ...values],
-    );
+  private async update(id: string, sql: string, value: string, action: string): Promise<void> {
+    const result = await this.pool.query(sql, [id, value]);
     if (result.rowCount !== 1) throw new NotFoundException();
     await this.audit.record({ action, entity: 'ticket', entityId: id });
   }

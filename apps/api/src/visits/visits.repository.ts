@@ -92,10 +92,16 @@ export class VisitsRepository {
     id: string,
     status: 'checked_in' | 'checked_out',
   ): Promise<void> {
-    const column = status === 'checked_in' ? 'checked_in_at' : 'checked_out_at';
-    await client.query(`UPDATE app.shift SET status = $2, ${column} = now() WHERE id = $1`, [
-      id,
-      status,
-    ]);
+    if (status === 'checked_in') {
+      await client.query(
+        `UPDATE app.shift SET status = 'checked_in', checked_in_at = now() WHERE id = $1`,
+        [id],
+      );
+    } else {
+      await client.query(
+        `UPDATE app.shift SET status = 'checked_out', checked_out_at = now() WHERE id = $1`,
+        [id],
+      );
+    }
   }
 }
