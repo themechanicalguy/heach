@@ -35,6 +35,17 @@ const SUMMARY = `
                      FROM app.role_assignment r WHERE r.account_id = a.id), '[]') AS roles
     FROM app.account a JOIN app.account_profile p ON p.account_id = a.id`;
 
+// Each filter is off when its parameter is null; values never go into the text.
+const SEARCH_FILTER = `WHERE a.synthetic = false
+                         AND ($1::text IS NULL OR a.mobile_index = $1)
+                         AND ($2::text IS NULL OR p.full_name ILIKE $2)
+                         AND ($3::text IS NULL OR a.status = $3)`;
+const SEARCH_PAGE = `${SUMMARY} ${SEARCH_FILTER}
+  ORDER BY a.created_at DESC, a.id LIMIT $4 OFFSET $5`;
+const SEARCH_COUNT = `SELECT count(*) AS total FROM app.account a
+  JOIN app.account_profile p ON p.account_id = a.id ${SEARCH_FILTER}`;
+const FIND_ONE = `${SUMMARY} WHERE a.id = $1`;
+
 /** Patient and provider accounts as admins see them (AD-03); masking happens in the service. */
 @Injectable()
 export class AdminUsersRepository {
@@ -51,26 +62,15 @@ export class AdminUsersRepository {
       query.name ? `%${escapeLike(query.name)}%` : null,
       query.status ?? null,
     ];
-    const where = `WHERE a.synthetic = false
-                     AND ($1::text IS NULL OR a.mobile_index = $1)
-                     AND ($2::text IS NULL OR p.full_name ILIKE $2)
-                     AND ($3::text IS NULL OR a.status = $3)`;
     const [page, count] = await Promise.all([
-      this.pool.query<UserSummaryRow>(
-        `${SUMMARY} ${where} ORDER BY a.created_at DESC, a.id LIMIT $4 OFFSET $5`,
-        [...params, query.limit, query.offset],
-      ),
-      this.pool.query<{ total: string }>(
-        `SELECT count(*) AS total FROM app.account a
-           JOIN app.account_profile p ON p.account_id = a.id ${where}`,
-        params,
-      ),
+      this.pool.query<UserSummaryRow>(SEARCH_PAGE, [...params, query.limit, query.offset]),
+      this.pool.query<{ total: string }>(SEARCH_COUNT, params),
     ]);
     return { rows: page.rows, total: Number(count.rows[0]?.total ?? 0) };
   }
 
   async find(id: string): Promise<UserSummaryRow | undefined> {
-    const { rows } = await this.pool.query<UserSummaryRow>(`${SUMMARY} WHERE a.id = $1`, [id]);
+    const { rows } = await this.pool.query<UserSummaryRow>(FIND_ONE, [id]);
     return rows[0];
   }
 

@@ -31,7 +31,7 @@ export interface NewChallenge {
   resendAt: Date;
 }
 
-const PURGE_AFTER = "interval '24 hours'";
+const PURGE_AFTER = '24 hours';
 
 /** OTP challenges (decision L-6). A challenge is locked while it is checked or resent. */
 @Injectable()
@@ -96,7 +96,8 @@ export class OtpRepository {
   async purgeExpired(): Promise<void> {
     await this.pool.query(
       `DELETE FROM app.otp_challenge WHERE id IN (
-         SELECT id FROM app.otp_challenge WHERE expires_at < now() - ${PURGE_AFTER} LIMIT 500)`,
+         SELECT id FROM app.otp_challenge WHERE expires_at < now() - $1::interval LIMIT 500)`,
+      [PURGE_AFTER],
     );
   }
 }
