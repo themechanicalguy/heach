@@ -18,6 +18,7 @@ import {
   startSession,
 } from './api';
 import type { AccessToken } from '@heach/types';
+import { clearOfflineSummary } from './offline-summary';
 
 type Status = 'checking' | 'signed-in' | 'signed-out';
 
@@ -39,6 +40,8 @@ export function SessionProvider({ children }: Readonly<{ children: ReactNode }>)
   useEffect(
     () =>
       onSessionEnded(() => {
+        // The offline booking summary never outlives the session (BK-07).
+        clearOfflineSummary();
         setStatus('signed-out');
       }),
     [],

@@ -59,6 +59,18 @@ export type SearchResult = components['schemas']['SearchResultDto'];
 export type ProviderProfile = components['schemas']['ProviderProfileDto'];
 export type ProfileListing = components['schemas']['ProfileListingDto'];
 export type Slots = components['schemas']['SlotsDto'];
+export type Booking = components['schemas']['BookingDto'];
+export type BookingSummary = components['schemas']['BookingSummaryDto'];
+export type CreateBooking = components['schemas']['CreateBookingDto'];
+export type Checkout = components['schemas']['CheckoutDto'];
+export type ProviderRequest = components['schemas']['ProviderRequestDto'];
+export type ProviderBooking = components['schemas']['ProviderBookingDto'];
+export type AnySlots = components['schemas']['AnySlotsDto'];
+export type Earnings = components['schemas']['EarningsDto'];
+export type Finance = components['schemas']['FinanceDto'];
+export type PayoutRun = components['schemas']['PayoutRunDto'];
+export type AppNotification = components['schemas']['NotificationDto'];
+export type BookingPolicy = components['schemas']['BookingPolicyDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

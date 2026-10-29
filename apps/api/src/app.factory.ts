@@ -30,6 +30,8 @@ export async function createApp(
     AppModule.forEnv(validateEnv(process.env).APP_ENV),
     {
       logger: options.logger ?? new NestAppLogger(),
+      // Gateway webhooks are verified against the exact bytes received (PY-01).
+      rawBody: true,
     },
   );
   const env = app.get(EnvVars);

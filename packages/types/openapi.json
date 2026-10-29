@@ -1288,6 +1288,50 @@
         "tags": ["admin"]
       }
     },
+    "/v1/me/notifications": {
+      "get": {
+        "operationId": "NotificationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/notifications/read": {
+      "post": {
+        "operationId": "NotificationsController_read",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
     "/v1/provider/application": {
       "get": {
         "operationId": "OnboardingController_view",
@@ -2230,6 +2274,818 @@
           }
         },
         "tags": ["search"]
+      }
+    },
+    "/v1/provider/earnings": {
+      "get": {
+        "operationId": "EarningsController_view",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarningsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/admin/v1/finance": {
+      "get": {
+        "operationId": "FinanceController_view",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/finance/payout-runs": {
+      "post": {
+        "operationId": "FinanceController_run",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutRunDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/finance/export.csv": {
+      "get": {
+        "operationId": "FinanceController_export",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/v1/bookings": {
+      "post": {
+        "operationId": "BookingsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      },
+      "get": {
+        "operationId": "BookingsController_list",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BookingSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}": {
+      "get": {
+        "operationId": "BookingsController_view",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}/cancel": {
+      "post": {
+        "operationId": "BookingsController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}/balance": {
+      "post": {
+        "operationId": "BookingsController_balance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/search/any-slots": {
+      "get": {
+        "operationId": "AnySlotsController_anySlots",
+        "parameters": [
+          {
+            "name": "item",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pin",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gender",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["female", "male"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnySlotsDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
+    "/v1/booking-policy": {
+      "get": {
+        "operationId": "BookingPolicyController_policy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingPolicyDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/payments/webhook": {
+      "post": {
+        "operationId": "PaymentsController_webhook",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["payments"]
+      }
+    },
+    "/v1/payments/sandbox/{orderId}/pay": {
+      "post": {
+        "operationId": "PaymentsController_sandboxPay",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["payments"]
+      }
+    },
+    "/v1/provider/requests": {
+      "get": {
+        "operationId": "ProviderBookingsController_requests",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderRequestDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/requests/{id}/accept": {
+      "post": {
+        "operationId": "ProviderBookingsController_accept",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/requests/{id}/decline": {
+      "post": {
+        "operationId": "ProviderBookingsController_decline",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeclineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/requests/{id}/prescription": {
+      "get": {
+        "operationId": "ProviderBookingsController_prescription",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings": {
+      "get": {
+        "operationId": "ProviderBookingsController_list",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BookingSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}": {
+      "get": {
+        "operationId": "ProviderBookingsController_view",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderBookingDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/bookings/{id}/cancel": {
+      "post": {
+        "operationId": "ProviderBookingsController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/admin/v1/bookings": {
+      "get": {
+        "operationId": "AdminBookingsController_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending_payment",
+                "requested",
+                "confirmed",
+                "in_progress",
+                "completed",
+                "cancelled",
+                "no_show",
+                "refunded"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BookingSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/bookings/{id}": {
+      "get": {
+        "operationId": "AdminBookingsController_view",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/bookings/{id}/cancel": {
+      "post": {
+        "operationId": "AdminBookingsController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/bookings/{id}/refund": {
+      "post": {
+        "operationId": "AdminBookingsController_refund",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualRefundDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/bookings/{id}/reassign": {
+      "post": {
+        "operationId": "AdminBookingsController_reassign",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReassignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
       }
     },
     "/v1/organisation": {
@@ -3688,6 +4544,38 @@
         },
         "required": ["reason"]
       },
+      "NotificationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "template": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "bookingId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "readAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["id", "template", "params", "bookingId", "createdAt", "readAt"]
+      },
       "PayoutSummaryDto": {
         "type": "object",
         "properties": {
@@ -4690,6 +5578,834 @@
           }
         },
         "required": ["slots"]
+      },
+      "LedgerLineDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "nullable": true
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["earning", "reversal", "no_show_fee", "payout"]
+          },
+          "amountPaise": {
+            "type": "number"
+          },
+          "availableAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "paidOut": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["bookingId", "kind", "amountPaise", "availableAt", "paidOut", "createdAt"]
+      },
+      "EarningsDto": {
+        "type": "object",
+        "properties": {
+          "balancePaise": {
+            "type": "number",
+            "description": "Earned, not yet paid out"
+          },
+          "heldPaise": {
+            "type": "number",
+            "description": "Of the balance, still in the complaint hold"
+          },
+          "paidOutPaise": {
+            "type": "number"
+          },
+          "nextPayoutAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LedgerLineDto"
+            }
+          }
+        },
+        "required": ["balancePaise", "heldPaise", "paidOutPaise", "nextPayoutAt", "lines"]
+      },
+      "PayoutRunDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "providerCount": {
+            "type": "number"
+          },
+          "totalPaise": {
+            "type": "number"
+          }
+        },
+        "required": ["id", "runAt", "providerCount", "totalPaise"]
+      },
+      "FinanceDto": {
+        "type": "object",
+        "properties": {
+          "paidPaise": {
+            "type": "number"
+          },
+          "refundedPaise": {
+            "type": "number"
+          },
+          "commissionPaise": {
+            "type": "number"
+          },
+          "commissionBps": {
+            "type": "number"
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayoutRunDto"
+            }
+          }
+        },
+        "required": ["paidPaise", "refundedPaise", "commissionPaise", "commissionBps", "runs"]
+      },
+      "UploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string",
+            "description": "The file, base64 encoded; at most 5 MB decoded"
+          }
+        },
+        "required": ["contentType", "contentBase64"]
+      },
+      "CreateBookingDto": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The chosen provider listing"
+          },
+          "itemCode": {
+            "type": "string",
+            "description": "Any available provider for this catalogue item (A10)"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pin": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 300,
+            "description": "Home address; shown to the provider once confirmed"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "The patient's needs, for the provider"
+          },
+          "recipientId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A linked patient; the booker when absent"
+          },
+          "genderPreference": {
+            "type": "string",
+            "enum": ["female", "male"]
+          },
+          "shiftDays": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 30,
+            "description": "Attendant shifts: number of days"
+          },
+          "prescription": {
+            "description": "Required when the item needs a prescription (SL-06)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UploadDto"
+              }
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          }
+        },
+        "required": ["startsAt", "pin", "address"]
+      },
+      "PartyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "name"]
+      },
+      "FeesDto": {
+        "type": "object",
+        "properties": {
+          "feePaise": {
+            "type": "number"
+          },
+          "travelPaise": {
+            "type": "number"
+          },
+          "discountPaise": {
+            "type": "number"
+          },
+          "totalPaise": {
+            "type": "number"
+          },
+          "advancePaise": {
+            "type": "number",
+            "description": "Paid at booking"
+          },
+          "paidPaise": {
+            "type": "number"
+          },
+          "refundedPaise": {
+            "type": "number"
+          },
+          "balanceDuePaise": {
+            "type": "number",
+            "description": "Still to pay before the first shift"
+          }
+        },
+        "required": [
+          "feePaise",
+          "travelPaise",
+          "discountPaise",
+          "totalPaise",
+          "advancePaise",
+          "paidPaise",
+          "refundedPaise",
+          "balanceDuePaise"
+        ]
+      },
+      "BookingEventDto": {
+        "type": "object",
+        "properties": {
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorRole": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["fromStatus", "toStatus", "reason", "actorRole", "createdAt"]
+      },
+      "RefundDto": {
+        "type": "object",
+        "properties": {
+          "amountPaise": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processed", "failed"]
+          }
+        },
+        "required": ["amountPaise", "reason", "status"]
+      },
+      "CheckoutDto": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "amountPaise": {
+            "type": "number"
+          },
+          "sandbox": {
+            "type": "boolean",
+            "description": "The gateway is the sandbox double: pay with the sandbox route"
+          }
+        },
+        "required": ["orderId", "amountPaise", "sandbox"]
+      },
+      "BookingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "requested",
+              "confirmed",
+              "in_progress",
+              "completed",
+              "cancelled",
+              "no_show",
+              "refunded"
+            ]
+          },
+          "cancelledBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "noShowParty": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "service": {
+            "type": "string"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "matching": {
+            "type": "string",
+            "enum": ["chosen", "any"]
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "shiftDays": {
+            "type": "number"
+          },
+          "pin": {
+            "type": "string"
+          },
+          "provider": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PartyDto"
+              }
+            ]
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "Who the care is for"
+          },
+          "fees": {
+            "$ref": "#/components/schemas/FeesDto"
+          },
+          "acceptBy": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingEventDto"
+            }
+          },
+          "refunds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefundDto"
+            }
+          },
+          "canCancel": {
+            "type": "boolean",
+            "description": "The patient may cancel now"
+          },
+          "refundIfCancelledPaise": {
+            "type": "number",
+            "description": "What cancelling now would refund (BK-04)"
+          },
+          "checkout": {
+            "nullable": true,
+            "description": "An unpaid order to pay",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CheckoutDto"
+              }
+            ]
+          },
+          "hasPrescription": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "cancelledBy",
+          "noShowParty",
+          "statusReason",
+          "service",
+          "itemCode",
+          "itemName",
+          "kind",
+          "matching",
+          "startsAt",
+          "endsAt",
+          "shiftDays",
+          "pin",
+          "provider",
+          "recipientName",
+          "fees",
+          "acceptBy",
+          "address",
+          "notes",
+          "events",
+          "refunds",
+          "canCancel",
+          "refundIfCancelledPaise",
+          "checkout",
+          "hasPrescription"
+        ]
+      },
+      "BookingSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "requested",
+              "confirmed",
+              "in_progress",
+              "completed",
+              "cancelled",
+              "no_show",
+              "refunded"
+            ]
+          },
+          "cancelledBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "noShowParty": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "service": {
+            "type": "string"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "matching": {
+            "type": "string",
+            "enum": ["chosen", "any"]
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "shiftDays": {
+            "type": "number"
+          },
+          "pin": {
+            "type": "string"
+          },
+          "provider": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PartyDto"
+              }
+            ]
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "Who the care is for"
+          },
+          "fees": {
+            "$ref": "#/components/schemas/FeesDto"
+          },
+          "acceptBy": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "cancelledBy",
+          "noShowParty",
+          "statusReason",
+          "service",
+          "itemCode",
+          "itemName",
+          "kind",
+          "matching",
+          "startsAt",
+          "endsAt",
+          "shiftDays",
+          "pin",
+          "provider",
+          "recipientName",
+          "fees",
+          "acceptBy"
+        ]
+      },
+      "CancelDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "changed_plans",
+              "found_other_care",
+              "patient_unwell",
+              "other",
+              "provider_unavailable",
+              "admin_decision"
+            ]
+          }
+        },
+        "required": ["reason"]
+      },
+      "AnySlotsDto": {
+        "type": "object",
+        "properties": {
+          "slots": {
+            "type": "array",
+            "items": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          "quotePaise": {
+            "type": "number",
+            "description": "Highest price among the providers who may take it; any difference is refunded"
+          },
+          "providers": {
+            "type": "number"
+          }
+        },
+        "required": ["slots", "quotePaise", "providers"]
+      },
+      "BookingPolicyDto": {
+        "type": "object",
+        "properties": {
+          "freeCancellationHours": {
+            "type": "number"
+          },
+          "lateRefundPercent": {
+            "type": "number"
+          },
+          "attendantAdvancePercent": {
+            "type": "number"
+          },
+          "acceptanceWindowMinutes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "freeCancellationHours",
+          "lateRefundPercent",
+          "attendantAdvancePercent",
+          "acceptanceWindowMinutes"
+        ]
+      },
+      "ProviderRequestDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "shiftDays": {
+            "type": "number"
+          },
+          "pin": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasPrescription": {
+            "type": "boolean",
+            "description": "A prescription is attached to review (A14)"
+          },
+          "earningPaise": {
+            "type": "number",
+            "description": "What the provider would earn, in paise"
+          },
+          "acceptBy": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "bookingId",
+          "itemName",
+          "kind",
+          "startsAt",
+          "endsAt",
+          "shiftDays",
+          "pin",
+          "notes",
+          "hasPrescription",
+          "earningPaise",
+          "acceptBy"
+        ]
+      },
+      "DeclineDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": ["unavailable", "too_far", "prescription_invalid", "other"]
+          }
+        },
+        "required": ["reason"]
+      },
+      "ProviderBookingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "requested",
+              "confirmed",
+              "in_progress",
+              "completed",
+              "cancelled",
+              "no_show",
+              "refunded"
+            ]
+          },
+          "cancelledBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "noShowParty": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "service": {
+            "type": "string"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["visit", "shift", "lab_test"]
+          },
+          "matching": {
+            "type": "string",
+            "enum": ["chosen", "any"]
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "shiftDays": {
+            "type": "number"
+          },
+          "pin": {
+            "type": "string"
+          },
+          "provider": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PartyDto"
+              }
+            ]
+          },
+          "recipientName": {
+            "type": "string",
+            "description": "Who the care is for"
+          },
+          "fees": {
+            "$ref": "#/components/schemas/FeesDto"
+          },
+          "acceptBy": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true,
+            "description": "Only once confirmed"
+          },
+          "contactMobile": {
+            "type": "string",
+            "nullable": true,
+            "description": "The booker's number, once confirmed"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasPrescription": {
+            "type": "boolean"
+          },
+          "earningPaise": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "cancelledBy",
+          "noShowParty",
+          "statusReason",
+          "service",
+          "itemCode",
+          "itemName",
+          "kind",
+          "matching",
+          "startsAt",
+          "endsAt",
+          "shiftDays",
+          "pin",
+          "provider",
+          "recipientName",
+          "fees",
+          "acceptBy",
+          "address",
+          "contactMobile",
+          "notes",
+          "hasPrescription",
+          "earningPaise"
+        ]
+      },
+      "ManualRefundDto": {
+        "type": "object",
+        "properties": {
+          "amountPaise": {
+            "type": "number",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "enum": ["service_complaint", "goodwill", "duplicate_payment", "other"]
+          }
+        },
+        "required": ["amountPaise", "reason"]
+      },
+      "ReassignDto": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Listing of the new provider"
+          }
+        },
+        "required": ["listingId"]
       },
       "MemberDto": {
         "type": "object",

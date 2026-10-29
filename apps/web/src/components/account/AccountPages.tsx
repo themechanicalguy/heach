@@ -6,6 +6,12 @@ import { ConsentUpdate } from '../setup/ConsentUpdate';
 import { IdentityReturn } from '../onboarding/IdentityReturn';
 import { OnboardingView } from '../onboarding/OnboardingView';
 import { ProviderServicesView } from '../provider-services/ProviderServicesView';
+import { BookAny, BookChosen } from '../booking/BookPages';
+import { BookingDetailView, BookingsView } from '../booking/BookingsView';
+import { EarningsView } from '../work/EarningsView';
+import { NotificationsView } from '../work/NotificationsView';
+import { RequestsView } from '../work/RequestsView';
+import { WorkView } from '../work/WorkView';
 import { TeamView } from '../team/TeamView';
 import { AccountView } from './AccountView';
 import { RequireAccount } from './RequireAccount';
@@ -49,4 +55,38 @@ export function PeoplePage() {
 
 export function TeamPage() {
   return <RequireAccount page="owner">{() => <TeamView />}</RequireAccount>;
+}
+
+export function BookChosenPage({ listingId }: Readonly<{ listingId: string }>) {
+  return <RequireAccount page="care">{() => <BookChosen listingId={listingId} />}</RequireAccount>;
+}
+
+export function BookAnyPage({ itemCode }: Readonly<{ itemCode: string }>) {
+  return <RequireAccount page="care">{() => <BookAny itemCode={itemCode} />}</RequireAccount>;
+}
+
+export function BookingsPage() {
+  return <RequireAccount page="care">{() => <BookingsView />}</RequireAccount>;
+}
+
+export function BookingPage({ bookingId }: Readonly<{ bookingId: string }>) {
+  return (
+    <RequireAccount page="care">{() => <BookingDetailView bookingId={bookingId} />}</RequireAccount>
+  );
+}
+
+export function RequestsPage() {
+  return <RequireAccount page="provider">{() => <RequestsView />}</RequireAccount>;
+}
+
+export function WorkPage() {
+  return <RequireAccount page="provider">{() => <WorkView />}</RequireAccount>;
+}
+
+export function EarningsPage() {
+  return <RequireAccount page="provider">{() => <EarningsView />}</RequireAccount>;
+}
+
+export function NotificationsPage() {
+  return <RequireAccount page="any">{() => <NotificationsView />}</RequireAccount>;
 }

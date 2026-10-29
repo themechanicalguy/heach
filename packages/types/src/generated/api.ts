@@ -660,6 +660,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/me/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['NotificationsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/notifications/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['NotificationsController_read'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/provider/application': {
     parameters: {
       query?: never;
@@ -1054,6 +1086,390 @@ export interface paths {
     get: operations['SearchController_slots'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/earnings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['EarningsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/finance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['FinanceController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/finance/payout-runs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['FinanceController_run'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/finance/export.csv': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['FinanceController_export'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['BookingsController_list'];
+    put?: never;
+    post: operations['BookingsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['BookingsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['BookingsController_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/balance': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['BookingsController_balance'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/search/any-slots': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AnySlotsController_anySlots'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/booking-policy': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['BookingPolicyController_policy'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/payments/webhook': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PaymentsController_webhook'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/payments/sandbox/{orderId}/pay': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PaymentsController_sandboxPay'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/requests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderBookingsController_requests'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/requests/{id}/accept': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderBookingsController_accept'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/requests/{id}/decline': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderBookingsController_decline'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/requests/{id}/prescription': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderBookingsController_prescription'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderBookingsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderBookingsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderBookingsController_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/bookings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminBookingsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/bookings/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminBookingsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/bookings/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminBookingsController_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/bookings/{id}/refund': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminBookingsController_refund'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/bookings/{id}/reassign': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminBookingsController_reassign'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1702,6 +2118,19 @@ export interface components {
       /** @enum {string} */
       reason: 'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other';
     };
+    NotificationDto: {
+      /** Format: uuid */
+      id: string;
+      template: string;
+      params: {
+        [key: string]: string;
+      };
+      bookingId: string | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      readAt: string | null;
+    };
     PayoutSummaryDto: {
       /** @enum {string} */
       method: 'bank' | 'upi';
@@ -2033,6 +2462,298 @@ export interface components {
     };
     SlotsDto: {
       slots: string[];
+    };
+    LedgerLineDto: {
+      bookingId: string | null;
+      /** @enum {string} */
+      kind: 'earning' | 'reversal' | 'no_show_fee' | 'payout';
+      amountPaise: number;
+      /** Format: date-time */
+      availableAt: string;
+      paidOut: boolean;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    EarningsDto: {
+      /** @description Earned, not yet paid out */
+      balancePaise: number;
+      /** @description Of the balance, still in the complaint hold */
+      heldPaise: number;
+      paidOutPaise: number;
+      /** Format: date-time */
+      nextPayoutAt: string;
+      lines: components['schemas']['LedgerLineDto'][];
+    };
+    PayoutRunDto: {
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      runAt: string;
+      providerCount: number;
+      totalPaise: number;
+    };
+    FinanceDto: {
+      paidPaise: number;
+      refundedPaise: number;
+      commissionPaise: number;
+      commissionBps: number;
+      runs: components['schemas']['PayoutRunDto'][];
+    };
+    UploadDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+    };
+    CreateBookingDto: {
+      /**
+       * Format: uuid
+       * @description The chosen provider listing
+       */
+      listingId?: string;
+      /** @description Any available provider for this catalogue item (A10) */
+      itemCode?: string;
+      /** Format: date-time */
+      startsAt: string;
+      pin: string;
+      /** @description Home address; shown to the provider once confirmed */
+      address: string;
+      /** @description The patient's needs, for the provider */
+      notes?: string;
+      /**
+       * Format: uuid
+       * @description A linked patient; the booker when absent
+       */
+      recipientId?: string;
+      /** @enum {string} */
+      genderPreference?: 'female' | 'male';
+      /** @description Attendant shifts: number of days */
+      shiftDays?: number;
+      /** @description Required when the item needs a prescription (SL-06) */
+      prescription?: components['schemas']['UploadDto'];
+      /** @enum {string} */
+      locale?: 'or' | 'en' | 'hi';
+    };
+    PartyDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    FeesDto: {
+      feePaise: number;
+      travelPaise: number;
+      discountPaise: number;
+      totalPaise: number;
+      /** @description Paid at booking */
+      advancePaise: number;
+      paidPaise: number;
+      refundedPaise: number;
+      /** @description Still to pay before the first shift */
+      balanceDuePaise: number;
+    };
+    BookingEventDto: {
+      fromStatus: string;
+      toStatus: string;
+      reason: string | null;
+      actorRole: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    RefundDto: {
+      amountPaise: number;
+      reason: string;
+      /** @enum {string} */
+      status: 'pending' | 'processed' | 'failed';
+    };
+    CheckoutDto: {
+      orderId: string;
+      amountPaise: number;
+      /** @description The gateway is the sandbox double: pay with the sandbox route */
+      sandbox: boolean;
+    };
+    BookingDto: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      status:
+        | 'pending_payment'
+        | 'requested'
+        | 'confirmed'
+        | 'in_progress'
+        | 'completed'
+        | 'cancelled'
+        | 'no_show'
+        | 'refunded';
+      cancelledBy: string | null;
+      noShowParty: string | null;
+      statusReason: string | null;
+      service: string;
+      itemCode: string;
+      itemName: string;
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      /** @enum {string} */
+      matching: 'chosen' | 'any';
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      shiftDays: number;
+      pin: string;
+      provider: components['schemas']['PartyDto'] | null;
+      /** @description Who the care is for */
+      recipientName: string;
+      fees: components['schemas']['FeesDto'];
+      /** Format: date-time */
+      acceptBy: string | null;
+      address: string;
+      notes: string | null;
+      events: components['schemas']['BookingEventDto'][];
+      refunds: components['schemas']['RefundDto'][];
+      /** @description The patient may cancel now */
+      canCancel: boolean;
+      /** @description What cancelling now would refund (BK-04) */
+      refundIfCancelledPaise: number;
+      /** @description An unpaid order to pay */
+      checkout: components['schemas']['CheckoutDto'] | null;
+      hasPrescription: boolean;
+    };
+    BookingSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      status:
+        | 'pending_payment'
+        | 'requested'
+        | 'confirmed'
+        | 'in_progress'
+        | 'completed'
+        | 'cancelled'
+        | 'no_show'
+        | 'refunded';
+      cancelledBy: string | null;
+      noShowParty: string | null;
+      statusReason: string | null;
+      service: string;
+      itemCode: string;
+      itemName: string;
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      /** @enum {string} */
+      matching: 'chosen' | 'any';
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      shiftDays: number;
+      pin: string;
+      provider: components['schemas']['PartyDto'] | null;
+      /** @description Who the care is for */
+      recipientName: string;
+      fees: components['schemas']['FeesDto'];
+      /** Format: date-time */
+      acceptBy: string | null;
+    };
+    CancelDto: {
+      /** @enum {string} */
+      reason:
+        | 'changed_plans'
+        | 'found_other_care'
+        | 'patient_unwell'
+        | 'other'
+        | 'provider_unavailable'
+        | 'admin_decision';
+    };
+    AnySlotsDto: {
+      slots: string[];
+      /** @description Highest price among the providers who may take it; any difference is refunded */
+      quotePaise: number;
+      providers: number;
+    };
+    BookingPolicyDto: {
+      freeCancellationHours: number;
+      lateRefundPercent: number;
+      attendantAdvancePercent: number;
+      acceptanceWindowMinutes: number;
+    };
+    ProviderRequestDto: {
+      /** Format: uuid */
+      bookingId: string;
+      itemName: string;
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      shiftDays: number;
+      pin: string;
+      notes: string | null;
+      /** @description A prescription is attached to review (A14) */
+      hasPrescription: boolean;
+      /** @description What the provider would earn, in paise */
+      earningPaise: number;
+      /** Format: date-time */
+      acceptBy: string | null;
+    };
+    DeclineDto: {
+      /** @enum {string} */
+      reason: 'unavailable' | 'too_far' | 'prescription_invalid' | 'other';
+    };
+    ProviderBookingDto: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      status:
+        | 'pending_payment'
+        | 'requested'
+        | 'confirmed'
+        | 'in_progress'
+        | 'completed'
+        | 'cancelled'
+        | 'no_show'
+        | 'refunded';
+      cancelledBy: string | null;
+      noShowParty: string | null;
+      statusReason: string | null;
+      service: string;
+      itemCode: string;
+      itemName: string;
+      /** @enum {string} */
+      kind: 'visit' | 'shift' | 'lab_test';
+      /** @enum {string} */
+      matching: 'chosen' | 'any';
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      shiftDays: number;
+      pin: string;
+      provider: components['schemas']['PartyDto'] | null;
+      /** @description Who the care is for */
+      recipientName: string;
+      fees: components['schemas']['FeesDto'];
+      /** Format: date-time */
+      acceptBy: string | null;
+      /** @description Only once confirmed */
+      address: string | null;
+      /** @description The booker's number, once confirmed */
+      contactMobile: string | null;
+      notes: string | null;
+      hasPrescription: boolean;
+      earningPaise: number;
+    };
+    ManualRefundDto: {
+      amountPaise: number;
+      /** @enum {string} */
+      reason: 'service_complaint' | 'goodwill' | 'duplicate_payment' | 'other';
+    };
+    ReassignDto: {
+      /**
+       * Format: uuid
+       * @description Listing of the new provider
+       */
+      listingId: string;
     };
     MemberDto: {
       /** Format: uuid */
@@ -3123,6 +3844,42 @@ export interface operations {
       };
     };
   };
+  NotificationsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationDto'][];
+        };
+      };
+    };
+  };
+  NotificationsController_read: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   OnboardingController_view: {
     parameters: {
       query?: never;
@@ -3707,6 +4464,541 @@ export interface operations {
         content: {
           'application/json': components['schemas']['SlotsDto'];
         };
+      };
+    };
+  };
+  EarningsController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EarningsDto'];
+        };
+      };
+    };
+  };
+  FinanceController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FinanceDto'];
+        };
+      };
+    };
+  };
+  FinanceController_run: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PayoutRunDto'];
+        };
+      };
+    };
+  };
+  FinanceController_export: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+    };
+  };
+  BookingsController_list: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BookingSummaryDto'][];
+        };
+      };
+    };
+  };
+  BookingsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateBookingDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BookingDto'];
+        };
+      };
+    };
+  };
+  BookingsController_view: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BookingDto'];
+        };
+      };
+    };
+  };
+  BookingsController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CancelDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BookingDto'];
+        };
+      };
+    };
+  };
+  BookingsController_balance: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CheckoutDto'];
+        };
+      };
+    };
+  };
+  AnySlotsController_anySlots: {
+    parameters: {
+      query: {
+        item: string;
+        pin: string;
+        gender?: 'female' | 'male';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AnySlotsDto'];
+        };
+      };
+    };
+  };
+  BookingPolicyController_policy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BookingPolicyDto'];
+        };
+      };
+    };
+  };
+  PaymentsController_webhook: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PaymentsController_sandboxPay: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderBookingsController_requests: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderRequestDto'][];
+        };
+      };
+    };
+  };
+  ProviderBookingsController_accept: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderBookingsController_decline: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeclineDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderBookingsController_prescription: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  ProviderBookingsController_list: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BookingSummaryDto'][];
+        };
+      };
+    };
+  };
+  ProviderBookingsController_view: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderBookingDto'];
+        };
+      };
+    };
+  };
+  ProviderBookingsController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CancelDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminBookingsController_list: {
+    parameters: {
+      query?: {
+        status?:
+          | 'pending_payment'
+          | 'requested'
+          | 'confirmed'
+          | 'in_progress'
+          | 'completed'
+          | 'cancelled'
+          | 'no_show'
+          | 'refunded';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BookingSummaryDto'][];
+        };
+      };
+    };
+  };
+  AdminBookingsController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminBookingsController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CancelDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminBookingsController_refund: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ManualRefundDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminBookingsController_reassign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReassignDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

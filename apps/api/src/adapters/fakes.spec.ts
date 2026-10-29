@@ -40,6 +40,30 @@ describe('Third-party test doubles (TS-06.1)', () => {
     expect(port.verifyWebhook('{"x":2}', gateway.sign('{"x":1}'))).toBe(false);
   });
 
+  it('TS-06.1 the payment double captures, refunds, transfers and reports orders', async () => {
+    const gateway = new FakePaymentGateway();
+    const { orderId } = await gateway.createOrder({ amountPaise: 5000, receipt: 'r2' });
+    expect(await gateway.orderStatus(orderId)).toEqual({ paid: false, amountPaise: 5000 });
+    const { body, signature } = gateway.sandboxCapture(orderId, 'evt_1');
+    expect(gateway.verifyWebhook(body, signature)).toBe(true);
+    expect(gateway.parseEvent(body)).toMatchObject({
+      id: 'evt_1',
+      kind: 'payment.captured',
+      amountPaise: 5000,
+    });
+    expect(await gateway.orderStatus(orderId)).toEqual({ paid: true, amountPaise: 5000 });
+    expect(await gateway.orderStatus('order_unknown')).toBeUndefined();
+    expect(() => gateway.sandboxCapture('order_unknown')).toThrow();
+    expect((await gateway.refund({ paymentId: 'pay_1', amountPaise: 100 })).refundId).toMatch(
+      /^rfnd_/,
+    );
+    expect(
+      (await gateway.transfer({ providerId: 'p', amountPaise: 100, reference: 'r' })).transferId,
+    ).toMatch(/^trf_/);
+    gateway.failingRefunds = true;
+    await expect(gateway.refund({ paymentId: 'pay_1', amountPaise: 100 })).rejects.toThrow();
+  });
+
   it('TS-06.1 the video and identity doubles answer without a network', async () => {
     const video: VideoRooms = new FakeVideoRooms();
     const { roomId } = await video.createRoom('b1');

@@ -18,6 +18,11 @@ import { AvailabilityModule } from './availability/availability.module.js';
 import { CatalogueModule } from './catalogue/catalogue.module.js';
 import { ListingsModule } from './listings/listings.module.js';
 import { SearchModule } from './search/search.module.js';
+import { BookingsModule } from './bookings/bookings.module.js';
+import { JobsModule } from './jobs/runner/jobs.module.js';
+import { PaymentsModule } from './payments/payments.module.js';
+import { PayoutsModule } from './payouts/payouts.module.js';
+import { SettingsModule } from './settings/settings.service.js';
 import { ObservabilityModule } from './observability/observability.module.js';
 import { ReadinessService } from './health/readiness.service.js';
 import { SampleNotesModule } from './sample-notes/sample-notes.module.js';
@@ -51,6 +56,11 @@ export class AppModule {
         ListingsModule,
         AvailabilityModule,
         SearchModule,
+        SettingsModule,
+        JobsModule,
+        PaymentsModule,
+        PayoutsModule,
+        BookingsModule,
       ],
       controllers: [HealthController],
       providers: [

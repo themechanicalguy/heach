@@ -1,10 +1,10 @@
 'use client';
 
-import { BottomNav, Icon } from '@heach/ui';
+import { BottomNav, Icon, type IconName } from '@heach/ui';
 import { usePathname } from 'next/navigation';
 import { useAccount } from '../lib/account';
 import { useI18n } from '../lib/i18n-context';
-import { isProviderRole } from '../lib/routing';
+import { isCareRole, isProviderRole } from '../lib/routing';
 import { useSession } from '../lib/session';
 
 interface Props {
@@ -30,33 +30,32 @@ export function ShellNav({ accounts, sample }: Readonly<Props>) {
     account.me.roles.some(
       (grant) => grant.side === 'provider' && grant.applicationStatus === 'approved',
     );
+  const link = (path: string, label: string, icon: IconName) => ({
+    href: `/${locale}${path}`,
+    label,
+    icon: <Icon name={icon} />,
+  });
+  const care = account.state === 'ready' && isCareRole(account.me.activeRole);
   const items = [
-    { href: `/${locale}`, label: t('nav.home'), icon: <Icon name="home" /> },
-    ...(provider
+    ...(approved ? [] : [link('', t('nav.home'), 'home')]),
+    ...(provider && !approved ? [link('/provider', t('nav.application'), 'file')] : []),
+    ...(approved
       ? [
-          { href: `/${locale}/provider`, label: t('nav.application'), icon: <Icon name="file" /> },
-          ...(approved
-            ? [
-                {
-                  href: `/${locale}/provider/services`,
-                  label: t('nav.services'),
-                  icon: <Icon name="note" />,
-                },
-              ]
-            : []),
+          link('/provider/requests', t('nav.requests'), 'note'),
+          link('/provider/bookings', t('nav.bookings'), 'file'),
+          link('/provider/services', t('nav.services'), 'home'),
+          link('/provider/earnings', t('nav.earnings'), 'note'),
         ]
       : []),
-    ...(sample
-      ? [{ href: `/${locale}/notes`, label: t('nav.notes'), icon: <Icon name="note" /> }]
+    ...(care
+      ? [
+          link('/bookings', t('nav.bookings'), 'file'),
+          link('/notifications', t('nav.notifications'), 'note'),
+        ]
       : []),
+    ...(sample ? [link('/notes', t('nav.notes'), 'note')] : []),
     ...(status === 'signed-in'
-      ? [
-          {
-            href: `/${locale}/${accounts ? 'account' : 'sign-in'}`,
-            label: t('nav.account'),
-            icon: <Icon name="user" />,
-          },
-        ]
+      ? [link(`/${accounts ? 'account' : 'sign-in'}`, t('nav.account'), 'user')]
       : []),
   ].map((item) => ({ ...item, current: pathname === item.href }));
   return <BottomNav label={t('nav.label')} items={items} />;

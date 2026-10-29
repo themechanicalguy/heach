@@ -52,7 +52,11 @@
     "password_too_short": "Use at least 12 characters.",
     "password_too_long": "Use at most 200 characters.",
     "password_reused": "Choose a password different from the current one.",
-    "application_not_in_review": "This application is not in review any more. Reload the list."
+    "application_not_in_review": "This application is not in review any more. Reload the list.",
+    "booking_transition_refused": "This booking cannot be changed in its current status.",
+    "refund_exceeds_paid": "The refund is more than what is left to refund.",
+    "provider_busy": "That provider is busy at this time.",
+    "listing_not_eligible": "That listing cannot take this booking."
   },
   "users": {
     "title": "Users",
@@ -238,5 +242,67 @@
     "notServiceable": "Not served",
     "stop": "Stop serving",
     "start": "Serve"
+  },
+  "bookings": {
+    "title": "Bookings",
+    "intro": "Every booking, newest first. Names are masked; addresses and notes are never shown here.",
+    "caption": "Bookings",
+    "filter": "Status",
+    "all": "All",
+    "service": "Service",
+    "starts": "Starts",
+    "provider": "Provider",
+    "patient": "For",
+    "status": "Status",
+    "total": "Total",
+    "paid": "Paid",
+    "open": "Open",
+    "detailTitle": "Booking",
+    "timeline": "Timeline",
+    "refunds": "Refunds",
+    "payments": "Payments",
+    "cancel": "Cancel with full refund",
+    "cancelled": "Cancelled.",
+    "refund": "Manual refund (₹)",
+    "refundReason": "Refund reason",
+    "issueRefund": "Issue refund",
+    "refunded": "Refund issued.",
+    "reassign": "New provider's listing ID",
+    "doReassign": "Reassign",
+    "reassigned": "Reassigned.",
+    "close": "Close",
+    "none": "No bookings.",
+    "statuses": {
+      "pending_payment": "Pending payment",
+      "requested": "Requested",
+      "confirmed": "Confirmed",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No-show",
+      "refunded": "Refunded"
+    },
+    "reasons": {
+      "goodwill": "Goodwill",
+      "service_complaint": "Service complaint",
+      "duplicate_payment": "Duplicate payment",
+      "other": "Other"
+    }
+  },
+  "finance": {
+    "title": "Finance",
+    "intro": "Money in and out. Payouts settle each provider's available earnings once a week.",
+    "paid": "Paid by patients",
+    "refunded": "Refunded",
+    "commission": "Commission earned",
+    "rate": "Commission rate: {percent}%",
+    "runs": "Payout runs",
+    "runCaption": "Payout runs",
+    "runAt": "Run at",
+    "providers": "Providers",
+    "amount": "Amount",
+    "runNow": "Run payouts now",
+    "ran": "Payout run finished: {count} providers.",
+    "export": "Download CSV"
   }
 }

@@ -158,7 +158,7 @@ describe('ProviderProfileView (PO-05, AV-02)', () => {
     expect(screen.getByText('Preparation: Keep the area dry.')).toBeTruthy();
     const book = await screen.findByRole('link', { name: /^Book/ });
     expect(book.getAttribute('href')).toBe(
-      `/en/book/${result.listingId}?start=${encodeURIComponent('2026-10-30T04:30:00.000Z')}`,
+      `/en/book/${result.listingId}?provider=${profile.id}&start=${encodeURIComponent('2026-10-30T04:30:00.000Z')}`,
     );
     await waitFor(() => {
       expect(screen.getByText('No free time in the next 7 days.')).toBeTruthy();

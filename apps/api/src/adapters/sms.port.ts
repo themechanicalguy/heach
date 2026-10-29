@@ -7,7 +7,15 @@ export type SmsTemplate =
   | 'otp_change_mobile'
   | 'application_approved'
   | 'application_rejected'
-  | 'application_changes_requested';
+  | 'application_changes_requested'
+  | 'booking_request'
+  | 'booking_confirmed'
+  | 'booking_cancelled'
+  | 'booking_reminder'
+  | 'booking_balance_due'
+  | 'visit_started'
+  | 'visit_completed'
+  | 'lab_report_ready';
 
 export interface SmsMessage {
   to: string;

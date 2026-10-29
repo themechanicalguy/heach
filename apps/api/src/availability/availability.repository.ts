@@ -80,11 +80,15 @@ export class AvailabilityRepository {
     return result.rowCount === 1;
   }
 
-  /** Times the provider cannot take new work: leave, and bookings once they exist (Step 5). */
+  /** Times the provider cannot take new work: leave and live bookings. */
   async busy(accountId: string, from: Date, to: Date): Promise<Interval[]> {
     const { rows } = await this.pool.query<Interval>(
       `SELECT starts_at AS start, ends_at AS "end" FROM app.availability_block
-        WHERE account_id = $1 AND ends_at > $2 AND starts_at < $3`,
+        WHERE account_id = $1 AND ends_at > $2 AND starts_at < $3
+       UNION ALL
+       SELECT starts_at, ends_at FROM app.booking
+        WHERE provider_account_id = $1 AND ends_at > $2 AND starts_at < $3
+          AND status IN ('requested', 'confirmed', 'in_progress')`,
       [accountId, from, to],
     );
     return rows;
