@@ -21,6 +21,7 @@ import { PaymentsController } from './payments.controller.js';
 import { ProviderBookingsController } from './provider-bookings.controller.js';
 import { StrikesService } from './strikes.service.js';
 import { LabOrdersRepository } from './lab-orders.repository.js';
+import { DiscountsService } from './discounts.service.js';
 
 /** Booking, checkout, acceptance and the booking timers (Step 5: J3 and J4 to confirmation). */
 @Module({
@@ -46,8 +47,10 @@ import { LabOrdersRepository } from './lab-orders.repository.js';
     BookingViews,
     StrikesService,
     LabOrdersRepository,
+    DiscountsService,
   ],
   exports: [
+    PaymentEventsService,
     LabOrdersRepository,
     StrikesService,
     CheckoutService,

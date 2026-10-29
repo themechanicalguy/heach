@@ -2276,6 +2276,310 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PlansController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/plans/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PlansController_one'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/plans/{id}/purchase': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PlansController_purchase'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PlansController_mine'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/plans/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PlansController_cancel'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/plans/{id}/auto-renew': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PlansController_autoRenew'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderPlansController_mine'];
+    put?: never;
+    post: operations['ProviderPlansController_define'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/plans': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminPlansController_list'];
+    put?: never;
+    post: operations['AdminPlansController_define'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/plans/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminPlansController_approve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/plans/{id}/retire': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminPlansController_retire'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/referral': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ReferralsController_mine'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/referral/join': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ReferralsController_join'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/referrals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminReferralsController_queue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/referrals/{id}/release': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminReferralsController_release'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/referrals/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminReferralsController_reject'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/coupons/{id}/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminReferralsController_cancelCoupon'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/settings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ConsoleController_list'];
+    put: operations['ConsoleController_set'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/dashboard': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ConsoleController_dashboard'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/security': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ConsoleController_security'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/bookings/{id}/review': {
     parameters: {
       query?: never;
@@ -3483,6 +3787,16 @@ export interface components {
        * @enum {string}
        */
       collection?: 'home' | 'walk_in';
+      /**
+       * Format: uuid
+       * @description A plan purchase whose entitlement pays (BK-08, PK-04)
+       */
+      purchaseId?: string;
+      /**
+       * Format: uuid
+       * @description One coupon per booking (RR-08)
+       */
+      couponId?: string;
     };
     PartyDto: {
       /** Format: uuid */
@@ -4020,6 +4334,212 @@ export interface components {
       name: string;
       orders: number;
       corrections: number;
+    };
+    PlanDto: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      kind: 'package' | 'subscription';
+      providerId: string | null;
+      providerName: string | null;
+      itemCode: string | null;
+      service: string | null;
+      units: number;
+      discountPercent: number;
+      period: string | null;
+      familyMembers: number;
+      validityDays: number;
+      pricePaise: number;
+      /** @enum {string} */
+      status: 'pending_approval' | 'active' | 'retired';
+      name: string;
+      inclusions: string;
+      exclusions: string;
+    };
+    PurchaseCheckoutDto: {
+      /** Format: uuid */
+      purchaseId: string;
+      orderId: string;
+      amountPaise: number;
+      sandbox: boolean;
+    };
+    EntitlementDto: {
+      /** Format: uuid */
+      id: string;
+      itemCode: string | null;
+      service: string | null;
+      unitsTotal: number;
+      unitsUsed: number;
+    };
+    PurchaseDto: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      planId: string;
+      name: string;
+      /** @enum {string} */
+      status: 'pending_payment' | 'active' | 'expired' | 'cancelled';
+      autoRenew: boolean;
+      pricePaise: number;
+      paidPaise: number;
+      refundedPaise: number;
+      /** Format: date-time */
+      endsAt: string | null;
+      entitlements: components['schemas']['EntitlementDto'][];
+      /** @description What cancelling now would refund, pro-rata (PK-07) */
+      refundIfCancelledPaise: number;
+    };
+    AutoRenewDto: {
+      enabled: boolean;
+    };
+    PlanTextDto: {
+      name: string;
+      inclusions: string;
+      exclusions: string;
+    };
+    PlanTextsDto: {
+      or: components['schemas']['PlanTextDto'];
+      en: components['schemas']['PlanTextDto'];
+      hi: components['schemas']['PlanTextDto'];
+    };
+    PlanInputDto: {
+      /** @enum {string} */
+      kind: 'package' | 'subscription';
+      /** @description Packages: the catalogue item covered */
+      itemCode?: string;
+      /**
+       * @description Subscriptions: the service covered
+       * @enum {string}
+       */
+      service?: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+      /** @description Sessions, visits or days included */
+      units: number;
+      /** @description Discount once the included units are used */
+      discountPercent: number;
+      /** @enum {string} */
+      period?: 'monthly' | 'quarterly' | 'yearly';
+      familyMembers: number;
+      validityDays: number;
+      pricePaise: number;
+      texts: components['schemas']['PlanTextsDto'];
+    };
+    InviteeDto: {
+      /**
+       * @description No health or booking detail (RR-07)
+       * @enum {string}
+       */
+      status: 'joined' | 'rewarded' | 'flagged' | 'rejected';
+      /** Format: date-time */
+      joinedAt: string;
+    };
+    CouponDto: {
+      /** Format: uuid */
+      id: string;
+      valuePaise: number;
+      /** Format: date-time */
+      expiresAt: string;
+      /** @enum {string} */
+      status: 'active' | 'used' | 'cancelled';
+    };
+    ReferralDto: {
+      code: string;
+      invitees: components['schemas']['InviteeDto'][];
+      coupons: components['schemas']['CouponDto'][];
+      /** @description This account joined with someone’s code */
+      invited: boolean;
+    };
+    JoinDto: {
+      code: string;
+    };
+    AdminReferralDto: {
+      /** Format: uuid */
+      id: string;
+      status: string;
+      flagReason: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    SettingDto: {
+      /** @enum {string} */
+      key:
+        | 'acceptance_window_minutes'
+        | 'commission_bps'
+        | 'attendant_advance_percent'
+        | 'free_cancellation_hours'
+        | 'late_cancellation_refund_percent'
+        | 'dispatch_wave_size'
+        | 'dispatch_wave_minutes'
+        | 'payout_hold_hours'
+        | 'patient_no_show_fee_percent'
+        | 'no_show_wait_minutes'
+        | 'vault_quota_mb'
+        | 'referral_reward_paise'
+        | 'referral_invitee_reward_paise'
+        | 'coupon_validity_days'
+        | 'referral_monthly_cap'
+        | 'referral_join_window_days'
+        | 'plan_expiry_reminder_days';
+      value: number;
+    };
+    SettingInputDto: {
+      /** @enum {string} */
+      key:
+        | 'acceptance_window_minutes'
+        | 'commission_bps'
+        | 'attendant_advance_percent'
+        | 'free_cancellation_hours'
+        | 'late_cancellation_refund_percent'
+        | 'dispatch_wave_size'
+        | 'dispatch_wave_minutes'
+        | 'payout_hold_hours'
+        | 'patient_no_show_fee_percent'
+        | 'no_show_wait_minutes'
+        | 'vault_quota_mb'
+        | 'referral_reward_paise'
+        | 'referral_invitee_reward_paise'
+        | 'coupon_validity_days'
+        | 'referral_monthly_cap'
+        | 'referral_join_window_days'
+        | 'plan_expiry_reminder_days';
+      value: number;
+    };
+    CountDto: {
+      label: string;
+      count: number;
+    };
+    DashboardDto: {
+      signUps: number;
+      /** @description Verified providers by role */
+      providersByRole: components['schemas']['CountDto'][];
+      /** @description Verified providers by district served */
+      providersByDistrict: components['schemas']['CountDto'][];
+      /** @description Bookings by service */
+      bookingsByService: components['schemas']['CountDto'][];
+      /** @description Bookings by status */
+      bookingsByStatus: components['schemas']['CountDto'][];
+      completionRate: number;
+      cancellationRate: number;
+      /** @description Commission on completed bookings and plan sales, in paise */
+      revenuePaise: number;
+    };
+    BreakGlassEntryDto: {
+      adminRole: string;
+      reason: string;
+      /** Format: date-time */
+      grantedAt: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    SecurityDto: {
+      breakGlass: components['schemas']['BreakGlassEntryDto'][];
+      /** @description Provider strike reviews still open (A12) */
+      openStrikeReviews: number;
+      /** @description Referrals held for review (RR-06) */
+      flaggedReferrals: number;
+      /** @description Uploads quarantined by the scanner */
+      infectedUploads: number;
+      /** @description Records read through shares in the last 24 hours (unusual-read watch) */
+      recordReads24h: number;
     };
     ReviewInputDto: {
       stars: number;
@@ -7465,6 +7985,451 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['AdminLabDto'][];
+        };
+      };
+    };
+  };
+  PlansController_list: {
+    parameters: {
+      query?: {
+        service?: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanDto'][];
+        };
+      };
+    };
+  };
+  PlansController_one: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanDto'];
+        };
+      };
+    };
+  };
+  PlansController_purchase: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PurchaseCheckoutDto'];
+        };
+      };
+    };
+  };
+  PlansController_mine: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PurchaseDto'][];
+        };
+      };
+    };
+  };
+  PlansController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PlansController_autoRenew: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AutoRenewDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderPlansController_mine: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanDto'][];
+        };
+      };
+    };
+  };
+  ProviderPlansController_define: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PlanInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminPlansController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanDto'][];
+        };
+      };
+    };
+  };
+  AdminPlansController_define: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PlanInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminPlansController_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminPlansController_retire: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ReferralsController_mine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReferralDto'];
+        };
+      };
+    };
+  };
+  ReferralsController_join: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['JoinDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminReferralsController_queue: {
+    parameters: {
+      query?: {
+        status?: 'joined' | 'rewarded' | 'flagged' | 'rejected';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminReferralDto'][];
+        };
+      };
+    };
+  };
+  AdminReferralsController_release: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminReferralsController_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminReferralsController_cancelCoupon: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ConsoleController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SettingDto'][];
+        };
+      };
+    };
+  };
+  ConsoleController_set: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SettingInputDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ConsoleController_dashboard: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DashboardDto'];
+        };
+      };
+    };
+  };
+  ConsoleController_security: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SecurityDto'];
         };
       };
     };

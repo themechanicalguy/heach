@@ -13,7 +13,11 @@ export type Section =
   | 'reviews'
   | 'labs'
   | 'vault'
+  | 'plans'
+  | 'referrals'
   | 'catalogue'
+  | 'settings'
+  | 'security'
   | 'users'
   | 'admins'
   | 'password';

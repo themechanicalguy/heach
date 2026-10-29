@@ -22,6 +22,7 @@ import { Settings } from '../settings/settings.service.js';
 import { type PreparedUpload, UploadsService } from '../uploads/uploads.service.js';
 import { BookingRepository } from './booking.repository.js';
 import { LabOrdersRepository } from './lab-orders.repository.js';
+import { type Discount, DiscountsService } from './discounts.service.js';
 import type { AnySlotsDto, CheckoutDto, CreateBookingDto } from './bookings.dto.js';
 import { DispatchRepository, type EligibleListing } from './dispatch.repository.js';
 import { type FeeBreakdown, feeBreakdown } from './fees.js';
@@ -72,12 +73,13 @@ export class CheckoutService {
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
     private readonly labOrders: LabOrdersRepository,
+    private readonly discounts: DiscountsService,
   ) {}
 
   async create(
     principal: Principal,
     input: CreateBookingDto,
-  ): Promise<{ bookingId: string; checkout: CheckoutDto }> {
+  ): Promise<{ bookingId: string; checkout: CheckoutDto | null }> {
     const candidates = await this.candidates(principal.userId, input);
     const free = await this.firstFree(candidates, input);
     await this.checkRecipient(principal.userId, input.recipientId);
@@ -86,7 +88,13 @@ export class CheckoutService {
     if (listing.prescriptionRequired && !input.prescription)
       throw reason(BadRequestException, 'prescription_required');
     const days = listing.kind === 'shift' ? (input.shiftDays ?? 1) : 1;
-    const fees = await this.quote(candidates, listing, days, input.listingId ? 'chosen' : 'any');
+    const quoted = await this.quote(candidates, listing, days, input.listingId ? 'chosen' : 'any');
+    const discount = await this.discounts.quote(principal.userId, input, listing, quoted, days);
+    const fees = this.discounts.apply(
+      quoted,
+      discount,
+      Math.round((quoted.advancePaise / Math.max(quoted.totalPaise, 1)) * 100),
+    );
     const matching = input.listingId ? 'chosen' : 'any';
     if (
       matching === 'chosen' &&
@@ -103,10 +111,12 @@ export class CheckoutService {
     ]);
     if (prescription?.verdict === 'infected') throw reason(BadRequestException, 'upload_infected');
     const bookingId = randomUUID();
-    const { orderId } = await this.gateway.createOrder({
-      amountPaise: fees.advancePaise,
-      receipt: bookingId,
-    });
+    // Fully covered by a plan or coupon: no payment to take (BK-08).
+    const order =
+      fees.advancePaise > 0
+        ? await this.gateway.createOrder({ amountPaise: fees.advancePaise, receipt: bookingId })
+        : undefined;
+    const orderId = order?.orderId ?? null;
     await this.save(principal.userId, bookingId, {
       input,
       listing,
@@ -118,14 +128,12 @@ export class CheckoutService {
       prescription,
       orderId,
       cart,
+      discount,
     });
+    const sandbox = 'sandboxCapture' in this.gateway;
     return {
       bookingId,
-      checkout: {
-        orderId,
-        amountPaise: fees.advancePaise,
-        sandbox: 'sandboxCapture' in this.gateway,
-      },
+      checkout: orderId ? { orderId, amountPaise: fees.advancePaise, sandbox } : null,
     };
   }
 
@@ -295,8 +303,9 @@ export class CheckoutService {
       address: Awaited<ReturnType<FieldEncryptor['encrypt']>>;
       notes: Awaited<ReturnType<FieldEncryptor['encrypt']>> | null;
       prescription: PreparedUpload | undefined;
-      orderId: string;
+      orderId: string | null;
       cart: LabCart | undefined;
+      discount: Discount;
     },
   ): Promise<void> {
     const { input, listing, matching } = draft;
@@ -320,12 +329,15 @@ export class CheckoutService {
         prescriptionObjectId: draft.prescription?.id ?? null,
       });
       if (draft.cart) await this.labOrders.create(client, { bookingId, ...draft.cart.order });
-      await this.payments.create(client, {
-        bookingId,
-        purpose: 'booking',
-        orderId: draft.orderId,
-        amountPaise: draft.fees.advancePaise,
-      });
+      await this.discounts.draw(client, bookingId, draft.discount);
+      if (draft.orderId) {
+        await this.payments.create(client, {
+          bookingId,
+          purpose: 'booking',
+          orderId: draft.orderId,
+          amountPaise: draft.fees.advancePaise,
+        });
+      }
       await this.jobs.enqueue(client, {
         kind: PAYMENT_EXPIRY_JOB,
         payload: { bookingId },

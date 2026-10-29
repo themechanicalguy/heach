@@ -24,6 +24,9 @@ import { TicketsModule } from './tickets/tickets.module.js';
 import { VisitsModule } from './visits/visits.module.js';
 import { LabsModule } from './labs/labs.module.js';
 import { VaultModule } from './vault/vault.module.js';
+import { PlansModule } from './plans/plans.module.js';
+import { ReferralsModule } from './referrals/referrals.module.js';
+import { ConsoleModule } from './console/console.module.js';
 import { JobsModule } from './jobs/runner/jobs.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { PayoutsModule } from './payouts/payouts.module.js';
@@ -70,6 +73,9 @@ export class AppModule {
         VaultModule,
         VisitsModule,
         LabsModule,
+        PlansModule,
+        ReferralsModule,
+        ConsoleModule,
         ReviewsModule,
       ],
       controllers: [HealthController],

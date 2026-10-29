@@ -103,6 +103,19 @@ export class CreateBookingDto {
   @IsOptional()
   @IsIn(['home', 'walk_in'])
   collection?: 'home' | 'walk_in';
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'A plan purchase whose entitlement pays (BK-08, PK-04)',
+  })
+  @IsOptional()
+  @IsUUID('4')
+  purchaseId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'One coupon per booking (RR-08)' })
+  @IsOptional()
+  @IsUUID('4')
+  couponId?: string;
 }
 
 export class CheckoutDto {

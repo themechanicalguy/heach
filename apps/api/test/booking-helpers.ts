@@ -16,6 +16,7 @@ export interface Booking {
   fees: {
     feePaise: number;
     travelPaise: number;
+    discountPaise: number;
     totalPaise: number;
     advancePaise: number;
     paidPaise: number;

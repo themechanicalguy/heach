@@ -36,6 +36,7 @@ import {
 } from './bookings.dto.js';
 import { CancellationService } from './cancellation.service.js';
 import { CheckoutService } from './checkout.service.js';
+import { PaymentEventsService } from './payment-events.service.js';
 import { Settings } from '../settings/settings.service.js';
 
 const uuid = new ParseUUIDPipe({ version: '4' });
@@ -52,6 +53,7 @@ export class BookingsController {
     private readonly bookings: BookingRepository,
     private readonly cancellation: CancellationService,
     private readonly effects: BookingEffects,
+    private readonly paymentEvents: PaymentEventsService,
   ) {}
 
   /** JSON, or the upload content type when a prescription is attached (EN-07). */
@@ -62,7 +64,8 @@ export class BookingsController {
   @ApiOkResponse({ type: BookingDto })
   async create(@Body() body: CreateBookingDto, @Req() request: Request): Promise<BookingDto> {
     const principal = principalOf(request);
-    const { bookingId } = await this.checkout.create(principal, body);
+    const { bookingId, checkout } = await this.checkout.create(principal, body);
+    if (!checkout) await this.paymentEvents.coveredWithoutPayment(bookingId);
     return this.views.forBooker(principal.userId, bookingId, body.locale ?? 'or');
   }
 

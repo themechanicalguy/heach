@@ -14,6 +14,12 @@ export const SETTING_KEYS = [
   'patient_no_show_fee_percent',
   'no_show_wait_minutes',
   'vault_quota_mb',
+  'referral_reward_paise',
+  'referral_invitee_reward_paise',
+  'coupon_validity_days',
+  'referral_monthly_cap',
+  'referral_join_window_days',
+  'plan_expiry_reminder_days',
 ] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 

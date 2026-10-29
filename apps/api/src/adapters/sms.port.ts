@@ -18,7 +18,9 @@ export type SmsTemplate =
   | 'lab_report_ready'
   | 'lab_collector_assigned'
   | 'lab_sample_collected'
-  | 'lab_sample_received';
+  | 'lab_sample_received'
+  | 'plan_expiring'
+  | 'coupon_issued';
 
 export interface SmsMessage {
   to: string;

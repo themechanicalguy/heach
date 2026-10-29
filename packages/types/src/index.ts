@@ -93,6 +93,16 @@ export type SharedRecords = components['schemas']['SharedRecordsDto'];
 export type RecordAccess = components['schemas']['AccessDto'];
 export type VaultUsage = components['schemas']['UsageDto'];
 export type VaultStats = components['schemas']['VaultStatsDto'];
+export type Plan = components['schemas']['PlanDto'];
+export type PlanInput = components['schemas']['PlanInputDto'];
+export type Purchase = components['schemas']['PurchaseDto'];
+export type PurchaseCheckout = components['schemas']['PurchaseCheckoutDto'];
+export type Referral = components['schemas']['ReferralDto'];
+export type Coupon = components['schemas']['CouponDto'];
+export type AdminReferral = components['schemas']['AdminReferralDto'];
+export type Setting = components['schemas']['SettingDto'];
+export type AdminDashboard = components['schemas']['DashboardDto'];
+export type SecurityConsole = components['schemas']['SecurityDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

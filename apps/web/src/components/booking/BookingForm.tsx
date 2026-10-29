@@ -11,6 +11,7 @@ import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { BookingReview } from './BookingReview';
 import { money } from './money';
+import { PaymentOptions } from './PaymentOptions';
 
 export type BookingTarget =
   { kind: 'chosen'; listingId: string } | { kind: 'any'; itemCode: string; pin: string };
@@ -41,6 +42,8 @@ export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly
     days: '1',
     gender: '',
     collection: 'home',
+    purchaseId: '',
+    couponId: '',
   });
   const [file, setFile] = useState<File | undefined>();
   const [extras, setExtras] = useState<string[]>([]);
@@ -53,25 +56,7 @@ export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly
   };
   const submit = () =>
     run(async () => {
-      const body = {
-        ...(target.kind === 'chosen'
-          ? { listingId: target.listingId }
-          : { itemCode: target.itemCode }),
-        startsAt,
-        pin: form.pin,
-        address: form.address,
-        locale,
-        ...(form.notes ? { notes: form.notes } : {}),
-        ...(form.recipient ? { recipientId: form.recipient } : {}),
-        ...(form.gender ? { genderPreference: form.gender } : {}),
-        ...(facts.kind === 'shift' ? { shiftDays: Number(form.days) } : {}),
-        ...(facts.kind === 'lab_test'
-          ? { collection: form.collection, extraListingIds: extras }
-          : {}),
-        ...(file
-          ? { prescription: { contentType: file.type, contentBase64: await readAsBase64(file) } }
-          : {}),
-      };
+      const body = await bookingBody({ target, facts, startsAt, locale, form, extras, file });
       setBooking(
         await api<Booking>('/bookings', {
           method: 'POST',
@@ -115,6 +100,12 @@ export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly
             onExtras={setExtras}
           />
         )}
+        <PaymentOptions
+          purchaseId={form.purchaseId}
+          couponId={form.couponId}
+          onPurchase={set('purchaseId')}
+          onCoupon={set('couponId')}
+        />
         {error && (
           <Notice tone="danger" live>
             {t(error)}
@@ -128,8 +119,47 @@ export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly
   );
 }
 
+interface BodyInput {
+  target: BookingTarget;
+  facts: ItemFacts;
+  startsAt: string;
+  locale: string;
+  form: FormState;
+  extras: readonly string[];
+  file: File | undefined;
+}
+
+/** The booking request: only the fields that apply to this service and were filled in. */
+async function bookingBody({ target, facts, startsAt, locale, form, extras, file }: BodyInput) {
+  return {
+    ...(target.kind === 'chosen' ? { listingId: target.listingId } : { itemCode: target.itemCode }),
+    startsAt,
+    pin: form.pin,
+    address: form.address,
+    locale,
+    ...(form.notes ? { notes: form.notes } : {}),
+    ...(form.recipient ? { recipientId: form.recipient } : {}),
+    ...(form.gender ? { genderPreference: form.gender } : {}),
+    ...(form.purchaseId ? { purchaseId: form.purchaseId } : {}),
+    ...(form.couponId ? { couponId: form.couponId } : {}),
+    ...(facts.kind === 'shift' ? { shiftDays: Number(form.days) } : {}),
+    ...(facts.kind === 'lab_test' ? { collection: form.collection, extraListingIds: extras } : {}),
+    ...(file
+      ? { prescription: { contentType: file.type, contentBase64: await readAsBase64(file) } }
+      : {}),
+  };
+}
+
 type FormState = Record<
-  'recipient' | 'address' | 'pin' | 'notes' | 'days' | 'gender' | 'collection',
+  | 'recipient'
+  | 'address'
+  | 'pin'
+  | 'notes'
+  | 'days'
+  | 'gender'
+  | 'collection'
+  | 'purchaseId'
+  | 'couponId',
   string
 >;
 

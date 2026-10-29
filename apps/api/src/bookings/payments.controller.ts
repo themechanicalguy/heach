@@ -20,6 +20,8 @@ import { Public, Roles } from '../auth/roles.decorator.js';
 import { reason } from '../common/error-response.js';
 import { CARE_ROLES } from '../common/request-context.js';
 import { EnvVars } from '../config/env.schema.js';
+import { PG_POOL } from '../data-stores/data-stores.tokens.js';
+import type pg from 'pg';
 import { requireFlag } from '../flags/flags.module.js';
 import { PaymentsRepository } from '../payments/payments.repository.js';
 import { BookingRepository } from './booking.repository.js';
@@ -39,6 +41,7 @@ export class PaymentsController {
     private readonly bookings: BookingRepository,
     private readonly env: EnvVars,
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
+    @Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>,
   ) {}
 
   @Post('webhook')
@@ -67,9 +70,25 @@ export class PaymentsController {
     if (!this.gateway.sandboxCapture || !SANDBOX_ENVS.has(this.env.APP_ENV))
       throw new NotFoundException();
     const payment = await this.payments.byOrder(orderId);
-    const booking = payment && (await this.bookings.find(payment.bookingId));
-    if (booking?.bookerId !== principalOf(request).userId) throw new NotFoundException();
+    if (!payment || !(await this.paysOwn(principalOf(request).userId, payment)))
+      throw new NotFoundException();
     const { body, signature } = this.gateway.sandboxCapture(orderId);
     return { outcome: await this.events.handle(body, signature) };
+  }
+
+  /** The order is the caller's own: their booking, or their plan purchase. */
+  private async paysOwn(
+    accountId: string,
+    payment: { bookingId: string | null; purchaseId: string | null },
+  ): Promise<boolean> {
+    if (payment.purchaseId) {
+      const { rows } = await this.pool.query(
+        'SELECT 1 FROM app.plan_purchase WHERE id = $1 AND buyer_account_id = $2',
+        [payment.purchaseId, accountId],
+      );
+      return rows.length === 1;
+    }
+    const booking = payment.bookingId ? await this.bookings.find(payment.bookingId) : undefined;
+    return booking?.bookerId === accountId;
   }
 }

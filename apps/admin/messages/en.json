@@ -17,11 +17,25 @@
     "tickets": "Tickets",
     "reviews": "Reviews",
     "labs": "Labs",
-    "vault": "Vault"
+    "vault": "Vault",
+    "plans": "Plans",
+    "referrals": "Referrals",
+    "settings": "Settings",
+    "security": "Security"
   },
   "dashboard": {
     "title": "Dashboard",
-    "placeholder": "Admin features arrive in later steps.",
+    "intro": "Totals since launch. Personal data never appears here.",
+    "signUps": "Sign-ups",
+    "completion": "Completion rate",
+    "cancellation": "Cancellation rate",
+    "revenue": "Revenue (paid, less refunds)",
+    "byRole": "Approved providers by role",
+    "byDistrict": "Providers by district",
+    "byService": "Bookings by service",
+    "byStatus": "Bookings by status",
+    "label": "Group",
+    "count": "Count",
     "refresh": "Refresh"
   },
   "signIn": {
@@ -61,7 +75,9 @@
     "refund_exceeds_paid": "The refund is more than what is left to refund.",
     "provider_busy": "That provider is busy at this time.",
     "listing_not_eligible": "That listing cannot take this booking.",
-    "break_glass_required": "Open the private details first (break-glass)."
+    "break_glass_required": "Open the private details first (break-glass).",
+    "plan_invalid": "Those plan details do not fit together. Check the kind, item and period.",
+    "plan_item_required": "Choose the catalogue item or service the plan covers."
   },
   "users": {
     "title": "Users",
@@ -388,5 +404,105 @@
     "shares": "Active booking shares",
     "links": "Active external links",
     "deletions": "Open deletion requests"
+  },
+  "plans": {
+    "title": "Plans",
+    "intro": "Packages and subscriptions (PK-01, PK-02). Provider plans wait here for approval; retired plans stay valid for people who bought them.",
+    "caption": "Plans",
+    "name": "Name",
+    "by": "Offered by",
+    "platform": "HEACH",
+    "covers": "Covers",
+    "units": "Units included",
+    "price": "Price",
+    "status": "Status",
+    "approve": "Approve",
+    "retire": "Retire",
+    "empty": "No plans yet.",
+    "create": "New platform plan",
+    "kind": "Kind",
+    "kinds": {
+      "package": "Package",
+      "subscription": "Subscription"
+    },
+    "itemCode": "Catalogue item code (packages)",
+    "service": "Service (subscriptions)",
+    "period": "Period",
+    "periods": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly"
+    },
+    "discount": "Discount after the included units (%)",
+    "family": "Family members covered",
+    "validity": "Valid for (days)",
+    "rupees": "Price (₹)",
+    "textsFor": "Text in {language}",
+    "planName": "Plan name",
+    "inclusions": "Includes",
+    "exclusions": "Does not include",
+    "save": "Create plan",
+    "created": "Plan created and live.",
+    "statuses": {
+      "pending_approval": "Waiting for approval",
+      "active": "Live",
+      "retired": "Retired"
+    },
+    "languages": {
+      "or": "Odia",
+      "en": "English",
+      "hi": "Hindi"
+    },
+    "services": {
+      "physiotherapy": "Physiotherapy",
+      "nursing": "Nursing",
+      "attendant": "Attendant",
+      "lab": "Lab tests"
+    },
+    "unitsHeader": "Units"
+  },
+  "referrals": {
+    "title": "Referrals",
+    "intro": "Flagged referrals wait here (RR-06): release the reward or reject it. Cancel a coupon that was issued by mistake.",
+    "caption": "Referrals",
+    "status": "Status",
+    "reason": "Why flagged",
+    "created": "Joined",
+    "release": "Release",
+    "reject": "Reject",
+    "empty": "Nothing waiting.",
+    "filter": "Show",
+    "statuses": {
+      "flagged": "Flagged",
+      "joined": "Joined",
+      "rewarded": "Rewarded",
+      "rejected": "Rejected"
+    },
+    "coupon": "Coupon ID to cancel",
+    "cancelCoupon": "Cancel coupon",
+    "cancelled": "Coupon cancelled."
+  },
+  "settings": {
+    "title": "Settings",
+    "intro": "Operations policy (AD-08). Changes apply at once without a deploy, need a fresh code and are audited.",
+    "caption": "Settings",
+    "key": "Setting",
+    "value": "Value",
+    "save": "Save",
+    "saved": "Saved.",
+    "readOnly": "Only a super admin can change settings."
+  },
+  "security": {
+    "title": "Security",
+    "intro": "Security console (AD-17): break-glass grants, strike reviews, flagged referrals and infected uploads.",
+    "strikes": "Strike reviews open",
+    "referrals": "Referrals flagged",
+    "infected": "Infected uploads",
+    "breakGlass": "Break-glass grants",
+    "role": "Admin role",
+    "reason": "Reason",
+    "granted": "Granted",
+    "expires": "Expires",
+    "none": "No break-glass grants."
   }
 }
