@@ -55,8 +55,8 @@ export function OwnPassword() {
         <Button type="submit" disabled={pending || mismatch || next === ''} aria-busy={pending}>
           {t('password.change')}
         </Button>
-        {sheet}
       </form>
+      {sheet}
     </section>
   );
 }

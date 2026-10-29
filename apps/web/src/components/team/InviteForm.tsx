@@ -34,32 +34,34 @@ export function InviteForm({
   };
 
   return (
-    <form className="flow__form" onSubmit={submit} noValidate aria-labelledby="invite-title">
-      <h2 id="invite-title" className="flow__subtitle">
-        {t('team.inviteTitle', { role })}
-      </h2>
-      <p>{t('team.inviteIntro')}</p>
-      <TextField
-        label={t('team.inviteMobile')}
-        hint={t('signIn.mobileHint')}
-        error={error && t(error)}
-        type="tel"
-        inputMode="numeric"
-        maxLength={14}
-        value={mobile}
-        onChange={(event) => {
-          setMobile(event.target.value);
-        }}
-      />
-      {sent && (
-        <Notice tone="success" live>
-          {t('team.invited')}
-        </Notice>
-      )}
-      <Button type="submit" disabled={pending || mobile.trim() === ''} aria-busy={pending}>
-        {t('team.invite')}
-      </Button>
+    <>
+      <form className="flow__form" onSubmit={submit} noValidate aria-labelledby="invite-title">
+        <h2 id="invite-title" className="flow__subtitle">
+          {t('team.inviteTitle', { role })}
+        </h2>
+        <p>{t('team.inviteIntro')}</p>
+        <TextField
+          label={t('team.inviteMobile')}
+          hint={t('signIn.mobileHint')}
+          error={error && t(error)}
+          type="tel"
+          inputMode="numeric"
+          maxLength={14}
+          value={mobile}
+          onChange={(event) => {
+            setMobile(event.target.value);
+          }}
+        />
+        {sent && (
+          <Notice tone="success" live>
+            {t('team.invited')}
+          </Notice>
+        )}
+        <Button type="submit" disabled={pending || mobile.trim() === ''} aria-busy={pending}>
+          {t('team.invite')}
+        </Button>
+      </form>
       {sheet}
-    </form>
+    </>
   );
 }

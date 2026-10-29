@@ -4,6 +4,7 @@ import { ChoiceGroup } from '@heach/ui';
 import type { Invitation } from '@heach/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useAccount } from '../../lib/account';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
@@ -20,6 +21,7 @@ const INVITED = 'invitation:';
 export function RoleStep({ saved }: Readonly<{ saved: string | null }>) {
   const { locale, t } = useI18n();
   const router = useRouter();
+  const { reload } = useAccount();
   const { resource } = useResource<Invitation[]>('/me/invitations');
   const invitations = resource.state === 'ready' ? resource.data : [];
   const savedInvitation = isStaffRole(saved)
@@ -51,6 +53,8 @@ export function RoleStep({ saved }: Readonly<{ saved: string | null }>) {
         ? { invitationId: role.slice(INVITED.length) }
         : { role };
       await api('/me/setup', { method: 'PUT', body: JSON.stringify(body) });
+      // The details step shows the fields of the role just saved, so it needs the fresh draft.
+      await reload();
       router.push(`/${locale}/setup/details`);
     });
   };

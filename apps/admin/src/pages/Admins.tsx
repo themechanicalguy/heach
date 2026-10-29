@@ -87,42 +87,44 @@ function CreateAdmin({ onCreated }: Readonly<{ onCreated: () => Promise<void> }>
     });
   };
   return (
-    <form className="admin-form" onSubmit={submit} aria-labelledby="create-admin-title">
-      <h2 id="create-admin-title">{t('admins.createTitle')}</h2>
-      <TextField
-        label={t('admins.email')}
-        type="email"
-        required
-        value={email}
-        onChange={(event) => {
-          setEmail(event.target.value);
-        }}
-      />
-      <label className="admin-select">
-        <span>{t('admins.role')}</span>
-        <select
-          value={role}
+    <>
+      <form className="admin-form" onSubmit={submit} aria-labelledby="create-admin-title">
+        <h2 id="create-admin-title">{t('admins.createTitle')}</h2>
+        <TextField
+          label={t('admins.email')}
+          type="email"
+          required
+          value={email}
           onChange={(event) => {
-            setRole(event.target.value);
+            setEmail(event.target.value);
           }}
-        >
-          {ADMIN_ROLES.map((each) => (
-            <option key={each} value={each}>
-              {t(`adminRoles.${each}`)}
-            </option>
-          ))}
-        </select>
-      </label>
-      {error !== undefined && (
-        <Notice tone="danger" live>
-          {errorText(error)}
-        </Notice>
-      )}
-      {created && <TemporaryPassword value={created} />}
-      <Button type="submit" disabled={pending || email.trim() === ''} aria-busy={pending}>
-        {t('admins.create')}
-      </Button>
+        />
+        <label className="admin-select">
+          <span>{t('admins.role')}</span>
+          <select
+            value={role}
+            onChange={(event) => {
+              setRole(event.target.value);
+            }}
+          >
+            {ADMIN_ROLES.map((each) => (
+              <option key={each} value={each}>
+                {t(`adminRoles.${each}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {error !== undefined && (
+          <Notice tone="danger" live>
+            {errorText(error)}
+          </Notice>
+        )}
+        {created && <TemporaryPassword value={created} />}
+        <Button type="submit" disabled={pending || email.trim() === ''} aria-busy={pending}>
+          {t('admins.create')}
+        </Button>
+      </form>
       {sheet}
-    </form>
+    </>
   );
 }
