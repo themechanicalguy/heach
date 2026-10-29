@@ -21,11 +21,21 @@ import { PaymentsRepository } from '../payments/payments.repository.js';
 import { Settings } from '../settings/settings.service.js';
 import { type PreparedUpload, UploadsService } from '../uploads/uploads.service.js';
 import { BookingRepository } from './booking.repository.js';
+import { LabOrdersRepository } from './lab-orders.repository.js';
 import type { AnySlotsDto, CheckoutDto, CreateBookingDto } from './bookings.dto.js';
 import { DispatchRepository, type EligibleListing } from './dispatch.repository.js';
 import { type FeeBreakdown, feeBreakdown } from './fees.js';
 
 export const PAYMENT_EXPIRY_JOB = 'payment_expiry';
+
+interface LabCart {
+  listing: EligibleListing;
+  order: {
+    collection: 'home' | 'walk_in';
+    reportHours: number;
+    items: { itemId: string; listingId: string; feePaise: number }[];
+  };
+}
 const PAYMENT_MINUTES = 15;
 const MINUTE = 60_000;
 
@@ -61,6 +71,7 @@ export class CheckoutService {
     private readonly audit: AuditService,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
+    private readonly labOrders: LabOrdersRepository,
   ) {}
 
   async create(
@@ -68,8 +79,10 @@ export class CheckoutService {
     input: CreateBookingDto,
   ): Promise<{ bookingId: string; checkout: CheckoutDto }> {
     const candidates = await this.candidates(principal.userId, input);
-    const listing = await this.firstFree(candidates, input);
+    const free = await this.firstFree(candidates, input);
     await this.checkRecipient(principal.userId, input.recipientId);
+    const cart = free.kind === 'lab_test' ? await this.labCart(free, input) : undefined;
+    const listing = cart?.listing ?? free;
     if (listing.prescriptionRequired && !input.prescription)
       throw reason(BadRequestException, 'prescription_required');
     const days = listing.kind === 'shift' ? (input.shiftDays ?? 1) : 1;
@@ -104,6 +117,7 @@ export class CheckoutService {
       notes,
       prescription,
       orderId,
+      cart,
     });
     return {
       bookingId,
@@ -224,6 +238,42 @@ export class CheckoutService {
     };
   }
 
+  /**
+   * A lab cart (LB-02, LB-03): the chosen test plus more tests from the same lab, priced
+   * together, with the home collection charge only for home collection.
+   */
+  private async labCart(first: EligibleListing, input: CreateBookingDto): Promise<LabCart> {
+    const tests = [first];
+    for (const listingId of new Set(input.extraListingIds ?? [])) {
+      const [extra] = await this.dispatch.eligible({ listingId, pin: input.pin });
+      if (extra?.providerId !== first.providerId || extra.kind !== 'lab_test')
+        throw reason(BadRequestException, 'lab_cart_invalid');
+      if (!tests.some((test) => test.itemId === extra.itemId)) tests.push(extra);
+    }
+    const collection = input.collection ?? 'home';
+    const { rows } = await this.pool.query<{ hours: number }>(
+      'SELECT coalesce(max(report_hours), 24)::int AS hours FROM app.catalogue_item WHERE id = ANY($1)',
+      [tests.map((test) => test.itemId)],
+    );
+    return {
+      listing: {
+        ...first,
+        feePaise: tests.reduce((sum, test) => sum + test.feePaise, 0),
+        travelPaise: collection === 'home' ? first.travelPaise : 0,
+        prescriptionRequired: tests.some((test) => test.prescriptionRequired),
+      },
+      order: {
+        collection,
+        reportHours: rows[0]?.hours ?? 24,
+        items: tests.map((test) => ({
+          itemId: test.itemId,
+          listingId: test.listingId,
+          feePaise: test.feePaise,
+        })),
+      },
+    };
+  }
+
   private async checkRecipient(bookerId: string, recipientId: string | undefined): Promise<void> {
     if (!recipientId) return;
     const { rows } = await this.pool.query(
@@ -246,6 +296,7 @@ export class CheckoutService {
       notes: Awaited<ReturnType<FieldEncryptor['encrypt']>> | null;
       prescription: PreparedUpload | undefined;
       orderId: string;
+      cart: LabCart | undefined;
     },
   ): Promise<void> {
     const { input, listing, matching } = draft;
@@ -268,6 +319,7 @@ export class CheckoutService {
         fees: draft.fees,
         prescriptionObjectId: draft.prescription?.id ?? null,
       });
+      if (draft.cart) await this.labOrders.create(client, { bookingId, ...draft.cart.order });
       await this.payments.create(client, {
         bookingId,
         purpose: 'booking',

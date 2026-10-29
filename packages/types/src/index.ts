@@ -81,6 +81,10 @@ export type TicketRestricted = components['schemas']['TicketRestrictedDto'];
 export type AccessEntry = components['schemas']['AccessEntryDto'];
 export type Review = components['schemas']['ReviewDto'];
 export type AdminReview = components['schemas']['AdminReviewDto'];
+export type LabOrder = components['schemas']['LabOrderDto'];
+export type Collector = components['schemas']['CollectorDto'];
+export type LabDashboard = components['schemas']['LabDashboardDto'];
+export type AdminLab = components['schemas']['AdminLabDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

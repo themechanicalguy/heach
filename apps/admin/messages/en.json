@@ -15,7 +15,8 @@
     "password": "My password",
     "catalogue": "Catalogue",
     "tickets": "Tickets",
-    "reviews": "Reviews"
+    "reviews": "Reviews",
+    "labs": "Labs"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -363,5 +364,18 @@
       "not_about_service": "Not about the service",
       "fake": "Fake"
     }
+  },
+  "labs": {
+    "title": "Labs",
+    "intro": "Approve labs and their collectors in Verification. Here: orders, turnaround against the promised time, and corrections.",
+    "caption": "Labs",
+    "name": "Lab",
+    "orders": "Orders",
+    "today": "Today",
+    "pending": "Reports pending",
+    "turnaround": "Average turnaround (h)",
+    "late": "Late reports",
+    "corrections": "Corrections",
+    "empty": "No labs yet."
   }
 }

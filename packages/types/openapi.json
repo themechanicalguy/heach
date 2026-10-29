@@ -3739,6 +3739,503 @@
         "tags": ["provider"]
       }
     },
+    "/v1/bookings/{id}/lab": {
+      "get": {
+        "operationId": "PatientLabController_view",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabOrderDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}/lab/code": {
+      "get": {
+        "operationId": "PatientLabController_code",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisitCodeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/bookings/{id}/lab/report": {
+      "get": {
+        "operationId": "PatientLabController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["bookings"]
+      }
+    },
+    "/v1/provider/lab/orders": {
+      "get": {
+        "operationId": "LabController_orders",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LabOrderDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/lab/collectors": {
+      "get": {
+        "operationId": "LabController_collectors",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CollectorDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/lab/dashboard": {
+      "get": {
+        "operationId": "LabController_dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabDashboardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/lab/orders/{id}/collector": {
+      "post": {
+        "operationId": "LabController_assign",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignCollectorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/lab/orders/{id}/collect": {
+      "post": {
+        "operationId": "LabController_collect",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SampleCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/lab/orders/{id}/received": {
+      "post": {
+        "operationId": "LabController_received",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/lab/orders/{id}/recollect": {
+      "post": {
+        "operationId": "LabController_recollect",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecollectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/lab/orders/{id}/report": {
+      "post": {
+        "operationId": "LabController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      },
+      "get": {
+        "operationId": "LabController_reportFile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/collections": {
+      "get": {
+        "operationId": "CollectionsController_list",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LabOrderDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/collections/{id}/collect": {
+      "post": {
+        "operationId": "CollectionsController_collect",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SampleCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/admin/v1/labs": {
+      "get": {
+        "operationId": "AdminLabsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminLabDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/v1/bookings/{id}/review": {
       "post": {
         "operationId": "ReviewsController_rate",
@@ -6722,6 +7219,18 @@
           "locale": {
             "type": "string",
             "enum": ["or", "en", "hi"]
+          },
+          "extraListingIds": {
+            "description": "Lab cart: more tests from the same lab (LB-03)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "collection": {
+            "type": "string",
+            "enum": ["home", "walk_in"],
+            "description": "Lab tests: where the sample is taken (LB-02)"
           }
         },
         "required": ["startsAt", "pin", "address"]
@@ -7498,6 +8007,276 @@
           }
         },
         "required": ["procedure", "observations", "advice"]
+      },
+      "LabItemDto": {
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "feePaise": {
+            "type": "number"
+          },
+          "sampleType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["itemCode", "name", "feePaise", "sampleType"]
+      },
+      "CollectorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "verified": {
+            "type": "boolean",
+            "description": "Verified identity badge (LB-05)"
+          }
+        },
+        "required": ["id", "name", "verified"]
+      },
+      "LabEventDto": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorRole": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["stage", "reason", "actorRole", "createdAt"]
+      },
+      "LabReportVersionDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number"
+          },
+          "correctionReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["version", "correctionReason", "createdAt"]
+      },
+      "LabOrderDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "collection": {
+            "type": "string",
+            "enum": ["home", "walk_in"]
+          },
+          "stage": {
+            "type": "string",
+            "enum": ["booked", "collector_assigned", "sample_collected", "received", "report_ready"]
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabItemDto"
+            }
+          },
+          "collector": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CollectorDto"
+              }
+            ]
+          },
+          "sampleId": {
+            "type": "string",
+            "nullable": true
+          },
+          "reportHours": {
+            "type": "number",
+            "description": "Report promised within this many hours of collection"
+          },
+          "reportDueAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabEventDto"
+            }
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabReportVersionDto"
+            }
+          },
+          "address": {
+            "type": "string",
+            "nullable": true,
+            "description": "For the collector of a home collection"
+          }
+        },
+        "required": [
+          "bookingId",
+          "status",
+          "collection",
+          "stage",
+          "startsAt",
+          "items",
+          "collector",
+          "sampleId",
+          "reportHours",
+          "reportDueAt",
+          "events",
+          "reports",
+          "address"
+        ]
+      },
+      "LabDashboardDto": {
+        "type": "object",
+        "properties": {
+          "todayCollections": {
+            "type": "number"
+          },
+          "pendingReports": {
+            "type": "number"
+          },
+          "averageTurnaroundHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "lateReports": {
+            "type": "number",
+            "description": "Reports ready later than promised"
+          }
+        },
+        "required": ["todayCollections", "pendingReports", "averageTurnaroundHours", "lateReports"]
+      },
+      "AssignCollectorDto": {
+        "type": "object",
+        "properties": {
+          "collectorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["collectorId"]
+      },
+      "SampleCodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": ["code"]
+      },
+      "RecollectDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": ["sample_haemolysed", "insufficient_sample", "sample_lost", "other"]
+          }
+        },
+        "required": ["reason"]
+      },
+      "ReportUploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string",
+            "description": "The file, base64 encoded; at most 5 MB decoded"
+          },
+          "sampleId": {
+            "type": "string",
+            "description": "The sample's identifier, checked against the booking (edge case 14)"
+          },
+          "correctionReason": {
+            "type": "string",
+            "enum": ["wrong_value", "wrong_patient_detail", "missing_test", "other"]
+          }
+        },
+        "required": ["contentType", "contentBase64", "sampleId"]
+      },
+      "AdminLabDto": {
+        "type": "object",
+        "properties": {
+          "todayCollections": {
+            "type": "number"
+          },
+          "pendingReports": {
+            "type": "number"
+          },
+          "averageTurnaroundHours": {
+            "type": "number",
+            "nullable": true
+          },
+          "lateReports": {
+            "type": "number",
+            "description": "Reports ready later than promised"
+          },
+          "labId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "orders": {
+            "type": "number"
+          },
+          "corrections": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "todayCollections",
+          "pendingReports",
+          "averageTurnaroundHours",
+          "lateReports",
+          "labId",
+          "name",
+          "orders",
+          "corrections"
+        ]
       },
       "ReviewInputDto": {
         "type": "object",

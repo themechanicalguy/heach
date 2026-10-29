@@ -14,6 +14,8 @@ export interface Booking {
   statusReason: string | null;
   provider: { id: string; name: string } | null;
   fees: {
+    feePaise: number;
+    travelPaise: number;
     totalPaise: number;
     advancePaise: number;
     paidPaise: number;
