@@ -1,7 +1,7 @@
 'use client';
 
-import { ChoiceGroup } from '@heach/ui';
-import type { Invitation } from '@heach/types';
+import { ChoiceGroup, Notice } from '@heach/ui';
+import type { Invitation, Me } from '@heach/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAccount } from '../../lib/account';
@@ -9,19 +9,24 @@ import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
-import { CARE_CHOICES, isStaffRole, PROVIDER_CHOICES, type RoleChoice } from './roles';
+import { CARE_CHOICES, isStaffRole, offered, PROVIDER_CHOICES, type RoleChoice } from './roles';
 import { StepActions } from './StepActions';
 
 const INVITED = 'invitation:';
 
 /**
  * Which role to ask for, or a staff invitation sent to this number (O-1). The server grants the
- * role at the end of setup, never from this choice alone.
+ * role at the end of setup, never from this choice alone. A role saved earlier that is no longer
+ * offered (deferred beyond the MVP, ADR 0015) is not preselected; a notice asks for another.
  */
-export function RoleStep({ saved }: Readonly<{ saved: string | null }>) {
+export function RoleStep({ me }: Readonly<{ me: Me }>) {
   const { locale, t } = useI18n();
   const router = useRouter();
   const { reload } = useAccount();
+  const draftRole = me.setup.draft.role;
+  const offeredRoles: readonly string[] = me.offeredRoles;
+  const stale = draftRole !== null && !isStaffRole(draftRole) && !offeredRoles.includes(draftRole);
+  const saved = stale ? null : draftRole;
   const { resource } = useResource<Invitation[]>('/me/invitations');
   const invitations = resource.state === 'ready' ? resource.data : [];
   const savedInvitation = isStaffRole(saved)
@@ -62,6 +67,7 @@ export function RoleStep({ saved }: Readonly<{ saved: string | null }>) {
   return (
     <form className="flow__form" onSubmit={submit} noValidate>
       <p>{t('setup.role.intro')}</p>
+      {stale && <Notice tone="warning">{t('setup.role.unavailable')}</Notice>}
       {invitations.length > 0 && (
         <ChoiceGroup
           legend={t('invitations.setupGroup')}
@@ -81,14 +87,14 @@ export function RoleStep({ saved }: Readonly<{ saved: string | null }>) {
       <ChoiceGroup
         legend={t('setup.role.careGroup')}
         name="role"
-        choices={choices(CARE_CHOICES)}
+        choices={choices(offered(CARE_CHOICES, me))}
         value={role}
         onChange={choose}
       />
       <ChoiceGroup
         legend={t('setup.role.providerGroup')}
         name="role"
-        choices={choices(PROVIDER_CHOICES)}
+        choices={choices(offered(PROVIDER_CHOICES, me))}
         value={role}
         onChange={choose}
         error={missing ? t('setup.role.required') : error && t(error)}

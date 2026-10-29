@@ -2,6 +2,7 @@ import { type DynamicModule, Module } from '@nestjs/common';
 import type pg from 'pg';
 import type { AppEnv } from '../config/env.schema.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
+import { RoleAvailability } from '../flags/role-availability.js';
 import { AccessTokenStore } from './access-token.store.js';
 import { AuthController } from './auth.controller.js';
 import { ReverificationStore } from './reverification.js';
@@ -20,11 +21,14 @@ const sessionsFor = (realm: SessionRealm) => ({
     new SessionService(new SessionRepository(pool, realm), tokens, realm),
 });
 
-/** The user realm's repository is a provider of its own, so tests can inject faults into it. */
+/**
+ * The user realm's repository is a provider of its own, so tests can inject faults into it. Its
+ * sessions in a role that is no longer offered end at refresh (ADR 0015).
+ */
 const userSessions = {
-  inject: [SessionRepository, AccessTokenStore],
-  useFactory: (repository: SessionRepository, tokens: AccessTokenStore) =>
-    new SessionService(repository, tokens, USER_REALM),
+  inject: [SessionRepository, AccessTokenStore, RoleAvailability],
+  useFactory: (repository: SessionRepository, tokens: AccessTokenStore, roles: RoleAvailability) =>
+    new SessionService(repository, tokens, USER_REALM, (role) => roles.isOffered(role)),
 };
 
 /**

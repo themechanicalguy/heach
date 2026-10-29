@@ -3,6 +3,7 @@
 - **Applies to:** MVP (Minimum Viable Product) Version 1 requirements (`mvp-v1-requirements.md`)
 - **Date:** 3 October 2026
 - **Status:** Draft. Step lengths are estimates and need re-estimating by the team that builds it.
+- **Scope change:** online doctor consultation and in-clinic dental and skin appointments are out of scope for the MVP and deferred beyond it, with no release promised (29 October 2026, [ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md)). Steps 6 and 7 no longer include them and their lengths need re-estimating. Their former build items are kept, for reference only, under [Deferred beyond the MVP](#deferred-beyond-the-mvp-online-consultation-and-in-clinic-appointments); no MVP exit gate depends on them.
 
 The application is built in 10 steps: two that lay the secure foundation, seven that add features in dependency order with staged pilots, and one that hardens and launches. This guideline follows the MVP Version 1 requirements; module codes such as `BK` and `MV` refer to that document.
 
@@ -14,15 +15,16 @@ The application is built in 10 steps: two that lay the secure foundation, seven 
 4. [Step 3: Accounts, identity verification and provider onboarding](#step-3-accounts-identity-verification-and-provider-onboarding)
 5. [Step 4: Listings, availability and search](#step-4-listings-availability-and-search)
 6. [Step 5: Booking, payments and notifications](#step-5-booking-payments-and-notifications)
-7. [Step 6: Online consultation, home services and the Stage A pilot](#step-6-online-consultation-home-services-and-the-stage-a-pilot)
-8. [Step 7: In-clinic appointments and lab tests](#step-7-in-clinic-appointments-and-lab-tests)
+7. [Step 6: Home services and the Stage A pilot](#step-6-home-services-and-the-stage-a-pilot)
+8. [Step 7: Lab tests](#step-7-lab-tests)
 9. [Step 8: E-medical report vault and the Stage B launch](#step-8-e-medical-report-vault-and-the-stage-b-launch)
 10. [Step 9: Plans, referrals and admin completion](#step-9-plans-referrals-and-admin-completion)
 11. [Step 10: Hardening, launch readiness and go-live](#step-10-hardening-launch-readiness-and-go-live)
+12. [Deferred beyond the MVP: online consultation and in-clinic appointments](#deferred-beyond-the-mvp-online-consultation-and-in-clinic-appointments)
 
 ## At a glance
 
-The 10 steps run in order and total roughly 38 to 43 weeks for a team of eight to ten; the lengths are estimates and need re-estimating by the team that builds it.
+The 10 steps run in order and total roughly 38 to 43 weeks for a team of eight to ten as first estimated; the deferral of 29 October 2026 (ADR 0015) shortens Steps 6 and 7; the lengths are estimates and need re-estimating by the team that builds it.
 
 | Step | What it delivers | Modules | Indicative length | Exit gate |
 | --- | --- | --- | --- | --- |
@@ -31,8 +33,8 @@ The 10 steps run in order and total roughly 38 to 43 weeks for a team of eight t
 | 3. Accounts, identity and onboarding | OTP login, Aadhaar and DigiLocker verification, provider onboarding, admin verification | AC, KY, PO, AD-01 to AD-03, AD-11 | 5 weeks | Every provider type can onboard and be approved |
 | 4. Listings, availability and search | Service catalogue, listings, schedules, discovery | SL, AV, SD, AD-04 | 3 weeks | A patient can find a verified provider with open slots |
 | 5. Booking, payments and notifications | Booking engine, gateway payments, refunds, payouts, SMS | BK, PY, NT, AD-05, AD-07 | 4 weeks | A patient can book and pay; refund and payout work in sandbox |
-| 6. Consultation, home services and Stage A pilot | Video consult, prescriptions, home visits, attendant shifts, ratings | OC, HS, RF, AD-06 | 7 to 8 weeks | Stage A live in pilot districts |
-| 7. In-clinic appointments and lab tests | Dental and skin clinic booking, lab test booking and reports | IC, LB, AD-13 | 5 to 6 weeks | Journeys J6 and J7 work with pilot clinics and labs |
+| 6. Home services and Stage A pilot | Home visits, attendant shifts, ratings | HS, RF, AD-06 | 7 to 8 weeks before the deferral; to re-estimate | Stage A live in pilot districts |
+| 7. Lab tests | Lab test booking and reports | LB, AD-13 (labs) | 5 to 6 weeks before the deferral; to re-estimate | Journey J7 works with pilot labs |
 | 8. E-medical report vault and Stage B | Record storage, medical history, consent-based sharing | MV, AD-15 | 3 to 4 weeks | Stage B live; vault sharing passes its penetration test |
 | 9. Plans, referrals and admin completion | Care packages, subscriptions, coupons, remaining admin screens | PK, RR, AD-08 to AD-10, AD-14, AD-16, AD-17 | 4 to 5 weeks | Journey J8 works; entitlements reconcile daily |
 | 10. Hardening and go-live | Security and load testing, legal, support, launch and hypercare | All | 3 weeks plus 4 weeks of hypercare | Stage C live: full MVP Version 1 |
@@ -41,7 +43,7 @@ Four rules apply to every step:
 
 - **Threat model and testable acceptance first.** Each step's work states its acceptance checks and a threat model (SO-01) before it is built; design decisions with trade-offs go in an ADR.
 - **The definition of done is the gate.** No feature merges without encryption of sensitive fields, authorisation tests, translations in three languages, unit and E2E tests, accessibility and performance checks, and logging.
-- **Third-party onboarding starts early.** Payment gateway, SMS (DLT registration), Aadhaar and DigiLocker partner, and video provider approvals can take weeks, so applications go in during steps 1 and 2.
+- **Third-party onboarding starts early.** Payment gateway, SMS (DLT registration), and Aadhaar and DigiLocker partner approvals can take weeks, so applications go in during steps 1 and 2.
 - **Each step ends with a demo on a real mid-range Android phone**, in Odia, over a throttled network.
 
 ## Step 1: Repository and app initialization
@@ -63,7 +65,7 @@ Goal: a working monorepo where three empty apps build, test and deploy through o
 
 ### Start in parallel
 
-- Apply for the payment gateway account, SMS provider and DLT sender registration, Aadhaar and DigiLocker verification partner, and video provider trial.
+- Apply for the payment gateway account, SMS provider and DLT sender registration, Aadhaar and DigiLocker verification partner, and video provider trial. The video provider is no longer an MVP gate (ADR 0015).
 - Engage the healthcare lawyer on the regulatory points and consent wording.
 - Begin design: user research with each role, information architecture, wireframes for onboarding and booking.
 
@@ -111,12 +113,12 @@ Goal: every user type can sign in, and every provider type can prove identity, o
 ### Build
 
 1. Mobile OTP sign-up and login with rate limiting and bot protection; language choice on first launch (AC-01, AC-02, SE-08).
-2. Roles and permissions for patient, representative, each provider type, clinic front desk, lab, sample collector and admin sub-roles (AC-04).
+2. Roles and permissions for patient, representative, each provider type, lab, sample collector and admin sub-roles (AC-04). The doctor, dentist, dermatologist and clinic front desk roles are deferred beyond the MVP: kept behind the `doctor-and-clinic` flag, never on in staging or production, and refused by the server while it is off (ADR 0015).
 3. Linked patients: add, edit and remove family members (AC-03).
 4. Consent capture and storage, with versioned consent text per language (PR-01).
 5. Aadhaar and DigiLocker verification through the partner adapter: consent, verification, profile pre-fill, name and photo match, masked reference only, manual fallback (KY-01 to KY-09).
 6. Onboarding framework with role-specific steps and document checklists, save and resume, encrypted and virus-scanned uploads (PO-01 to PO-04).
-7. Onboarding flows for doctor, dentist or dermatologist with clinic, physiotherapist, nurse, attendant (with voice prompts and assisted mode), lab and sample collector (PO-07).
+7. Onboarding flows for physiotherapist, nurse, attendant (with voice prompts and assisted mode), lab and sample collector (PO-07). Doctor, dentist and dermatologist onboarding is deferred beyond the MVP.
 8. Payout details with OTP re-verification (PO-06).
 9. Admin panel shell: login with MFA, sub-roles, masked lists, audit log viewer (AD-01, AD-11).
 10. Admin verification queue with identity result, document viewer, approve, reject and request changes; user management (AD-02, AD-03, AD-12).
@@ -143,8 +145,8 @@ Goal: verified providers can publish what they offer and when, and a patient can
 
 ### Build
 
-1. Service catalogue in admin with translations in three languages: specialities, nursing procedures, physiotherapy services, attendant tasks, dental and skin treatments, lab tests (AD-04). Build the catalogue model for all six services now, even though clinic and lab booking come in step 7.
-2. Listing creation per provider type: consultation, physiotherapy visit, nursing procedure, attendant shift (SL-01 to SL-04, SL-06, SL-07).
+1. Service catalogue in admin with translations in three languages: nursing procedures, physiotherapy services, attendant tasks, lab tests (AD-04). Build the catalogue model for the four services now, even though lab booking comes in step 7; if the deferred services are ever scheduled, they add consultation specialities and dental and skin treatments to it.
+2. Listing creation per provider type: physiotherapy visit, nursing procedure, attendant shift (SL-02 to SL-04, SL-06, SL-07).
 3. Service area by district and PIN code, with the Odisha PIN code dataset loaded (SL-05).
 4. Availability: weekly rules, date overrides, leave, buffer time (AV-01, AV-03, AV-04).
 5. Slot generation service with slot locking in Redis (AV-02).
@@ -160,7 +162,7 @@ Goal: verified providers can publish what they offer and when, and a patient can
 
 ### Exit criteria
 
-- [ ] A patient in a pilot PIN code finds a verified doctor, physiotherapist, nurse and attendant with open slots
+- [ ] A patient in a pilot PIN code finds a verified physiotherapist, nurse and attendant with open slots
 - [ ] Two users cannot hold the same slot
 - [ ] Search and profile pages meet the Core Web Vitals targets on a throttled mid-range phone
 
@@ -173,7 +175,7 @@ Goal: one booking engine that every service uses, with money moving correctly in
 1. Booking model and state machine: pending payment, requested, confirmed, in progress, completed, cancelled, no-show, refunded, with an event history per booking (BK-01, BK-02).
 2. Checkout: choose patient, slot or shift, address, attachments, fee breakdown, cancellation policy shown before payment (BK-04, BK-05).
 3. Payment gateway integration through the adapter: UPI, cards, net banking, hosted fields so card data never reaches the servers, signed webhooks, idempotent handling (PY-01, PY-07).
-4. Confirmation rules: instant for consultations, provider acceptance window with auto-cancel and refund for home services (BK-03, HS-01).
+4. Confirmation rules: provider acceptance window with auto-cancel and refund for home services (BK-03, HS-01); instant confirmation for consultations is deferred beyond the MVP.
 5. Cancel, reschedule and automatic refunds under the policy; manual refunds in admin (PY-02).
 6. Receipts and invoices (PY-03).
 7. Provider earnings ledger, commission calculation, payout runs through split settlement (PY-04, PY-05).
@@ -191,31 +193,27 @@ Goal: one booking engine that every service uses, with money moving correctly in
 
 ### Exit criteria
 
-- [ ] A patient books and pays for each of the four service types in the gateway sandbox
+- [ ] A patient books and pays for each of the three home service types in the gateway sandbox
 - [ ] Cancellation produces the correct refund; a completed booking produces the correct payout entry
 - [ ] Reconciliation shows zero mismatches over a week of test traffic
 - [ ] SMS templates are approved and delivered in all three languages
 
-## Step 6: Online consultation, home services and the Stage A pilot
+## Step 6: Home services and the Stage A pilot
 
-Goal: the four original services work end to end and go live with real providers and patients in one or two districts. This is the first time real patient data enters production.
+Goal: the three home services (physiotherapy, nursing, attendant care) work end to end and go live with real providers and patients in one or two districts. This is the first time real patient data enters production.
 
-### Build (4 to 5 weeks)
+### Build
 
-1. Video consultation through the provider adapter: pre-call device and network check, waiting room, in-browser call, audio fallback, in-call chat, no recording (OC-01, OC-02, OC-06, OC-07, EN-08).
-2. Teleconsultation consent stored with the booking (OC-03).
-3. Doctor's consultation workspace: patient details, reason, attachments, notes (OC-04).
-4. Prescription builder and PDF with the doctor's name, qualification and registration number, stored as Restricted data (OC-05).
-5. Home-visit workflow: accept or decline, address and map link, start code, visit notes, complete (HS-01 to HS-04).
-6. Attendant shifts: check-in and check-out per shift, extend, end early, replacement request (HS-05).
-7. "Report a safety concern" for both parties, and the complaints queue in admin (HS-06, RF-03, AD-06).
-8. Ratings and reviews with reporting and moderation (RF-01, RF-02).
-9. Patient-facing access history for their records (SE-06).
+1. Home-visit workflow: accept or decline, address and map link, start code, visit notes, complete (HS-01 to HS-04).
+2. Attendant shifts: check-in and check-out per shift, extend, end early, replacement request (HS-05).
+3. "Report a safety concern" for both parties, and the complaints queue in admin (HS-06, RF-03, AD-06).
+4. Ratings and reviews with reporting and moderation (RF-01, RF-02).
+5. Patient-facing access history for their records (SE-06).
 
 ### Pilot readiness (3 weeks)
 
 1. Independent penetration test; fix all high and medium findings.
-2. Load test at the agreed launch volume; video trial on real rural networks.
+2. Load test at the agreed launch volume.
 3. Usability tests with five users per role; manual screen-reader pass.
 4. Translation review by a native Odia speaker with clinical vocabulary.
 5. Legal pages, consent texts, grievance officer details, provider agreement, all in three languages.
@@ -224,24 +222,15 @@ Goal: the four original services work end to end and go live with real providers
 
 ### Exit criteria
 
-- [ ] Journeys J2, J3 and J4 pass E2E tests on mobile, tablet and desktop in two languages
+- [ ] Journeys J3 and J4 pass E2E tests on mobile, tablet and desktop in two languages
 - [ ] No open high-severity security finding
 - [ ] Enough verified providers in the pilot districts for each service (number to be agreed)
 - [ ] Stage A is live in the pilot districts behind an invite or district gate
-- [ ] Two weeks of pilot data reviewed: connect rate, payment success, completion rate, complaints
+- [ ] Two weeks of pilot data reviewed: acceptance rate, payment success, completion rate, complaints
 
-## Step 7: In-clinic appointments and lab tests
+## Step 7: Lab tests
 
-Goal: add the two facility-based services on top of the booking engine already running in production. Work continues behind feature flags while the Stage A pilot runs.
-
-### Build: in-clinic appointments, dental and skin
-
-1. Clinic profile and listing: address, map pin, timings, photos, doctors, treatments and fees (SL-08, IC-01, IC-02).
-2. Clinic account with several doctors and a front-desk role that cannot see clinical notes (IC-10).
-3. Search by treatment, clinic or doctor with distance (IC-03).
-4. Slot booking with instant or manual confirmation, and payment options per clinic: booking fee, full amount or pay at clinic (IC-04, IC-05).
-5. Check-in by code or QR, visit statuses, walk-in and phone bookings entered by front desk (IC-06, IC-07).
-6. Visit summary, prescription and follow-up date; linked multi-sitting treatments (IC-08, IC-09).
+Goal: add lab test booking on top of the booking engine already running in production. Work continues behind feature flags while the Stage A pilot runs.
 
 ### Build: lab test booking
 
@@ -251,21 +240,20 @@ Goal: add the two facility-based services on top of the booking engine already r
 4. Status tracking with notifications at each step (LB-07).
 5. Report upload by the lab with a confirmation step against the booking, encrypted storage, patient access (LB-08).
 6. Re-collection and report correction flows (LB-10).
-7. Lab dashboard and admin clinic and lab management (LB-11, AD-13).
+7. Lab dashboard and admin lab management (LB-11, AD-13).
 
 ### Checks specific to this step
 
 - Threat model for lab reports, with a test that a report can only attach to its own booking and patient.
-- Authorisation tests for front-desk, lab and collector roles.
-- Tablet and desktop layouts for clinic front desk and lab dashboard, which are used at a counter.
-- E2E tests for journeys J6 and J7.
+- Authorisation tests for lab and collector roles.
+- Tablet and desktop layouts for the lab dashboard, which is used at a counter.
+- E2E tests for journey J7.
 
 ### Exit criteria
 
-- [ ] A patient books, attends and rates a dental and a skin appointment with a pilot clinic
 - [ ] A patient books a lab test, has a sample collected at home, and downloads the report
-- [ ] A front-desk user cannot read clinical notes; a lab cannot see another lab's orders
-- [ ] Both features run in production behind flags for pilot clinics and labs only
+- [ ] A lab cannot see another lab's orders
+- [ ] Lab booking runs in production behind a flag for pilot labs only
 
 ## Step 8: E-medical report vault and the Stage B launch
 
@@ -274,7 +262,7 @@ Goal: every patient has one encrypted place for prescriptions, reports and medic
 ### Build
 
 1. Vault data model: records, medical history entries, shares and access events, all classed Restricted (MV-01, MV-11).
-2. Automatic filing of prescriptions, visit notes, clinic summaries and lab reports already produced in steps 6 and 7, including a back-fill for pilot users (MV-02).
+2. Automatic filing of home-visit notes and lab reports already produced in steps 6 and 7, including a back-fill for pilot users (MV-02).
 3. Patient uploads by camera or file, with compression, resumable upload, virus scan, type, date and provider details (MV-03, MV-04, MV-16).
 4. Medical history profile: allergies, conditions, medicines, surgeries, blood group, vaccinations, family history, with attribution (MV-05).
 5. Timeline with filters and metadata search; "My records" in the main navigation (MV-06).
@@ -298,7 +286,7 @@ Goal: every patient has one encrypted place for prescriptions, reports and medic
 - [ ] A patient uploads a record, shares it for a booking, and sees the provider's view in the access history
 - [ ] Access ends automatically after the booking window and on revoke
 - [ ] Vault penetration test passes with no high or medium finding open
-- [ ] Stage B is live: in-clinic appointments, lab tests and the vault are open to all users in the launch districts
+- [ ] Stage B is live: lab tests and the vault are open to all users in the launch districts
 
 ## Step 9: Plans, referrals and admin completion
 
@@ -349,7 +337,7 @@ Goal: prove the whole application is secure, fast and supportable at full scope,
 
 ### Prepare the launch
 
-1. Final legal sign-off: terms, privacy notice, consent texts, provider, clinic and lab agreements, tax treatment.
+1. Final legal sign-off: terms, privacy notice, consent texts, provider and lab agreements, tax treatment.
 2. Support readiness: trained staff, help content in three languages, escalation paths, safety-incident procedure.
 3. Operations runbooks: deployment, rollback, incident response, breach response, on-call rota.
 4. Monitoring review: dashboards, alert thresholds, uptime checks from India, public status page.
@@ -360,7 +348,7 @@ Goal: prove the whole application is secure, fast and supportable at full scope,
 
 1. Go or no-go meeting against the checklist below.
 2. Release Stage C behind flags; enable district by district, starting with the pilot districts.
-3. Hypercare for four weeks: daily review of errors, payment and OTP success, video connect rate, complaints and security alerts; fixes shipped daily.
+3. Hypercare for four weeks: daily review of errors, payment and OTP success, complaints and security alerts; fixes shipped daily.
 4. Review the success metrics after four weeks and plan the fast-follow items.
 
 ### Go-live checklist
@@ -374,3 +362,31 @@ Goal: prove the whole application is secure, fast and supportable at full scope,
 - [ ] On-call rota and incident channels in place; status page live
 - [ ] Minimum verified providers reached in each launch district
 - [ ] Operator and product owner give the go decision
+
+## Deferred beyond the MVP: online consultation and in-clinic appointments
+
+Out of scope for the MVP since 29 October 2026 ([ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md)); no release or date is promised. The items below are the former Step 6 and Step 7 build items, kept for reference so their requirement IDs stay traceable. They are not MVP work, and no MVP step or exit gate depends on them. If the owner schedules either service, its requirements (OC, IC, J2, J6) are reviewed first and a new ADR replaces this section. The doctor, dentist, dermatologist and clinic front desk roles and clinic staff management already exist in code behind the `doctor-and-clinic` flag, which staging and production never turn on.
+
+### Build: online consultation
+
+1. Video consultation through the provider adapter: pre-call device and network check, waiting room, in-browser call, audio fallback, in-call chat, no recording (OC-01, OC-02, OC-06, OC-07, EN-08).
+2. Teleconsultation consent stored with the booking (OC-03).
+3. Doctor's consultation workspace: patient details, reason, attachments, notes (OC-04).
+4. Prescription builder and PDF with the doctor's name, qualification and registration number, stored as Restricted data (OC-05).
+5. Doctor, dentist and dermatologist onboarding checklists and listings (PO-01, SL-01, SL-08); instant confirmation of consultation bookings (BK-03).
+
+### Build: in-clinic appointments, dental and skin
+
+1. Clinic profile and listing: address, map pin, timings, photos, doctors, treatments and fees (SL-08, IC-01, IC-02).
+2. Clinic account with several doctors and a front-desk role that cannot see clinical notes (IC-10).
+3. Search by treatment, clinic or doctor with distance (IC-03).
+4. Slot booking with instant or manual confirmation, and payment options per clinic: booking fee, full amount or pay at clinic (IC-04, IC-05).
+5. Check-in by code or QR, visit statuses, walk-in and phone bookings entered by front desk (IC-06, IC-07).
+6. Visit summary, prescription and follow-up date; linked multi-sitting treatments (IC-08, IC-09).
+
+### Checks, if ever scheduled
+
+- Legal review of the Telemedicine Practice Guidelines and the consultation consent before the OC build.
+- Video trial on real rural networks; video connect rate and fallback metrics and alerts (LM-06, LM-07).
+- Authorisation tests for the front-desk role; a front-desk user cannot read clinical notes.
+- E2E tests for journeys J2 and J6.

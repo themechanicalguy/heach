@@ -5,7 +5,10 @@ const base: Me = {
   locale: 'or',
   mobile: '••••••0001',
   activeRole: 'patient',
-  roles: [{ role: 'patient', side: 'care', applicationStatus: null, statusReason: null }],
+  roles: [
+    { role: 'patient', side: 'care', applicationStatus: null, statusReason: null, available: true },
+  ],
+  offeredRoles: ['patient', 'representative', 'physiotherapist', 'nurse', 'attendant', 'lab'],
   setup: {
     complete: true,
     nextStep: null,
@@ -80,6 +83,24 @@ describe('Routing after sign-in', () => {
     const nurse = { ...base, activeRole: 'nurse' as const };
     expect(destinationFor(nurse)).toBe('/or/provider');
     expect(destinationFor(base, '/or/provider')).toBe('/or');
+  });
+
+  it('AC-04 an account whose only roles are deferred (ADR 0015) goes to its account page', () => {
+    const dentist = {
+      ...base,
+      activeRole: 'new_account' as const,
+      roles: [
+        {
+          role: 'dentist' as const,
+          side: 'provider' as const,
+          applicationStatus: 'draft' as const,
+          statusReason: null,
+          available: false,
+        },
+      ],
+    };
+    expect(destinationFor(dentist)).toBe('/or/account');
+    expect(destinationFor(dentist, '/or/provider')).toBe('/or/account');
   });
 });
 

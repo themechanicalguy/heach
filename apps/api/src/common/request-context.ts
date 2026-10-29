@@ -14,6 +14,17 @@ export const PROVIDER_ROLES = [
   'sample_collector',
   'clinic_front_desk',
 ] as const;
+/**
+ * Provider roles deferred beyond the MVP (ADR 0015): online consultation (doctor), in-clinic
+ * appointments (dentist, dermatologist) and the clinic front desk that staffs their clinics. The
+ * values stay so grants and drafts are kept; they act only where `doctor-and-clinic` is on.
+ */
+export const DEFERRED_ROLES = [
+  'doctor',
+  'dentist',
+  'dermatologist',
+  'clinic_front_desk',
+] as const satisfies readonly (typeof PROVIDER_ROLES)[number][];
 /** Admin sub-roles (AD-01); admins are a separate realm with their own sign-in. */
 export const ADMIN_ROLES = ['super_admin', 'verifier', 'support', 'finance'] as const;
 

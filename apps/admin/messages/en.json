@@ -89,6 +89,7 @@
     "suspended": "Account suspended and signed out of every device.",
     "reinstated": "Account reinstated.",
     "noRole": "None yet",
+    "roleDeferred": "deferred beyond the MVP, inactive",
     "close": "Close"
   },
   "reverify": {

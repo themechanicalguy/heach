@@ -16,6 +16,14 @@ numbers stay because those specs cite them.
 | 7 | Step 3: accounts, consent, provider onboarding, identity verification, admin approval | AC-01 to AC-06, SE-08, PR-01, PR-04, KY-01 to KY-09, PO-01 to PO-07, AD-01 to AD-03, AD-11, AD-12; [guideline Step 3](mvp-v1-implementation-guideline.md#step-3-accounts-identity-verification-and-provider-onboarding) | Needs a Step 3 charter first, then one feature spec per slice |
 | 8 | Shared rate-limit counters in Redis (custom `ThrottlerStorage` over the existing `ioredis`, no new dependency) | SO-08; review P-1; [spec 002 research D-1](archive/specs/002-rate-limit-bypass/research.md) | Needed before a second API process or host. Re-checked 24 October: `deploy/dev/compose.yml` runs one `api` service, `node dist/main.js` with no cluster, on one host (`aws_instance.host`), so in-memory counters are exact; not started |
 
+## Deferred beyond the MVP (not backlog)
+
+Online doctor consultation (OC, SL-01, EN-08, A11Y-06, J2) and in-clinic dental and skin
+appointments (IC, SL-08, J6) are out of scope for the MVP, with no release promised
+([ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md)). They are not ordered
+here and are not unfinished MVP work. Their roles stay in code behind the `doctor-and-clinic` flag;
+keep that code compiling and tested, but do not extend it without the owner scheduling the work.
+
 ## Decisions waiting for the owner
 
 - **Refresh-token grace window** (accept the previous token briefly after rotation). Not adopted:

@@ -1,6 +1,7 @@
 import { type CanActivate, Global, Injectable, Module, NotFoundException } from '@nestjs/common';
 import { EnvVars } from '../config/env.schema.js';
 import { FeatureFlags, type FlagName } from '@heach/flags';
+import { RoleAvailability } from './role-availability.js';
 
 @Global()
 @Module({
@@ -10,8 +11,9 @@ import { FeatureFlags, type FlagName } from '@heach/flags';
       inject: [EnvVars],
       useFactory: (env: EnvVars) => new FeatureFlags(env.APP_ENV, env.FEATURE_FLAGS),
     },
+    RoleAvailability,
   ],
-  exports: [FeatureFlags],
+  exports: [FeatureFlags, RoleAvailability],
 })
 export class FlagsModule {}
 

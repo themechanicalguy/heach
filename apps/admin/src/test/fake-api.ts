@@ -13,7 +13,23 @@ function syntheticUser(): UserDetail {
     mobile: '••••••0001',
     status: 'active',
     suspensionReason: null,
-    roles: [{ role: 'nurse', side: 'provider', applicationStatus: 'draft', statusReason: null }],
+    // A kept grant of a role deferred beyond the MVP (ADR 0015) beside an active care role.
+    roles: [
+      {
+        role: 'patient',
+        side: 'care',
+        applicationStatus: null,
+        statusReason: null,
+        available: true,
+      },
+      {
+        role: 'doctor',
+        side: 'provider',
+        applicationStatus: 'draft',
+        statusReason: null,
+        available: false,
+      },
+    ],
     setupComplete: true,
     createdAt: '2026-10-29T00:00:00.000Z',
     lastSignInAt: null,

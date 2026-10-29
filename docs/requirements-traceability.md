@@ -8,6 +8,12 @@
   DC-01 from the Step 2 spec) and for journeys J1 to J9: the slice that builds it, the step, what it
   depends on, and how it is proved. Status today is copied from
   [implementation status](implementation-status.md) on 28 October 2026; that page stays the record.
+- **Deferred beyond the MVP (29 October 2026):** journeys J2 and J6, modules OC and IC, and
+  SL-01, SL-08, EN-08 and A11Y-06 are out of scope for the MVP, with no release promised
+  ([ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md); [requirements](mvp-v1-requirements.md#deferred-beyond-the-mvp)). Their rows stay,
+  marked **deferred beyond the MVP**; no MVP exit gate needs them, and they are not counted as
+  unfinished MVP work. Shared requirements (AC-04, PO-05, BK-03, PR-01, LB-09, MV-02, PK-01,
+  PK-02, AD-04, AD-13, LM-06, LM-07) keep their MVP part.
 - **Not here:** criterion IDs. The proof column says what kind of test each requirement needs.
 
 Slice keys (`3.1`, `5.4`) are the [web roadmap](web-roadmap.md)'s labels; a feature spec number is
@@ -31,11 +37,11 @@ languages; Step 10 runs all three languages.
 | Journey | Steps that complete it | Slices | E2E proof (proposed file) | Third parties (double in CI, sandbox nightly) | Exit gate that needs it |
 | --- | --- | --- | --- | --- | --- |
 | J1 Provider self-onboarding | 3 | 3.1, 3.3, 3.4, 3.5, 3.6, 3.7, 3.10 (outcome SMS) | `apps/web/e2e/j1-provider-onboarding.spec.ts`, one run per provider type | SMS, identity | Step 3: every provider type onboards and is approved |
-| J2 Online doctor consultation | 4 (find), 5 (book and pay), 6 (consult, prescription, rating) | 4.6, 5.2 to 5.4, 5.8, 6.1 to 6.3, 6.7 | `j2-online-consultation.spec.ts` | Payment, SMS, video | Step 6: Stage A |
+| J2 Online doctor consultation (**deferred beyond the MVP**) | 4 (find), 5 (book and pay), 6 (consult, prescription, rating) | 4.6, 5.2 to 5.4, 5.8, 6.1 to 6.3, 6.7 | `j2-online-consultation.spec.ts` | Payment, SMS, video | Deferred beyond the MVP |
 | J3 Home visit (physiotherapist or nurse) | 4, 5, 6 | 4.3, 4.6, 5.2 to 5.4, 6.4, 6.7 | `j3-home-visit.spec.ts` | Payment, SMS | Step 6 |
 | J4 Bedside attendant | 4, 5, 6 | 4.2, 4.6, 5.2 to 5.4, 6.5 | `j4-attendant-shifts.spec.ts` | Payment, SMS | Step 6 |
 | J5 Admin verifies a provider | 3 | 3.9, 3.10 | `apps/admin/e2e/j5-verification.spec.ts` (desktop and tablet) | Identity | Step 3 |
-| J6 In-clinic appointment | 7 | 7.1 to 7.5, 6.7 | `j6-clinic-appointment.spec.ts` (patient phone, front desk tablet) | Payment, SMS | Step 7 |
+| J6 In-clinic appointment (**deferred beyond the MVP**) | 7 | 7.1 to 7.5, 6.7 | `j6-clinic-appointment.spec.ts` (patient phone, front desk tablet) | Payment, SMS | Deferred beyond the MVP |
 | J7 Lab test | 7 | 7.6 to 7.10 | `j7-lab-test.spec.ts` (patient, collector phone, lab desktop) | Payment, SMS | Step 7 |
 | J8 Plans and referral reward | 9 | 9.1 to 9.3, 9.6 | `j8-plans-referrals.spec.ts` | Payment with mandates, SMS | Step 9 |
 | J9 Vault records and sharing | 8 | 8.1 to 8.7 | `j9-vault.spec.ts` | None | Step 8: Stage B |
@@ -59,7 +65,7 @@ languages; Step 10 runs all three languages.
 | EN-05 | 🟡 | 10.6 rotation drill; schedule FU-26 | Production keys | M: drill record |
 | EN-06 | 🟡 | 6.9 production keys per domain | Production ADR | U and M (as Step 2) |
 | EN-07 | 🟡 | 3.4 secure upload pipeline (reused by 5.2, 7.7, 7.10, 8.2) | D-SCAN | I: per-object key, scan before availability, signed URL after access check |
-| EN-08 | ⬜ | 6.1 | Video provider (#22) | M: provider contract and DTLS-SRTP check; I: no recording endpoint |
+| EN-08 | ⬜ | 6.1 (**deferred beyond the MVP**) | Video provider (#22) | M: provider contract and DTLS-SRTP check; I: no recording endpoint |
 | EN-09 | ✅ | 3.1 mobile lookup by blind index | Step 2 blind index | X: no plaintext mobile column |
 | EN-10 | 🟡 | Step 2 (FU-01 to FU-05); 10.6 | Spec 006 runs | M: four weekly records; DR drill |
 | EN-11 | 🟡 | 5.9 offline summary and wipe; 8.x vault never cached | Service worker | E: storage inspected after sign-out |
@@ -84,7 +90,7 @@ languages; Step 10 runs all three languages.
 
 | ID | Today | Slice (step) | Depends on | Proof |
 | --- | --- | --- | --- | --- |
-| PR-01 | ⬜ | 3.3 (sign-up), 3.6 (identity), 6.2 (teleconsult), 8.5 (sharing) | Lawyer wording (FU-06) | I: consent stored before the gated action; withdrawal |
+| PR-01 | ⬜ | 3.3 (sign-up), 3.6 (identity), 6.2 (teleconsult, deferred beyond the MVP), 8.5 (sharing) | Lawyer wording (FU-06) | I: consent stored before the gated action; withdrawal |
 | PR-02 | ⬜ | 3.3 data-model review; DoD | Charter decision | M: spec review rejects unused personal fields |
 | PR-03 | ⬜ | 3.6 | Identity adapter | X: no Aadhaar number in database, logs, responses |
 | PR-04 | ⬜ | 3.12 | 3.1, 3.8 | I and E |
@@ -150,14 +156,14 @@ languages; Step 10 runs all three languages.
 
 | ID | Today | Slice (step) | Depends on | Proof |
 | --- | --- | --- | --- | --- |
-| SL-01 | ⬜ | 4.2 | 4.1 | I |
+| SL-01 | ⬜ | **Deferred beyond the MVP** (was 4.2) | 4.1 | I |
 | SL-02 | ⬜ | 4.2 | 4.1 | I |
 | SL-03 | ⬜ | 4.2 | 4.1 | I |
 | SL-04 | ⬜ | 4.2 | 4.1 | I: no clinical tasks for attendants |
 | SL-05 | ⬜ | 4.3 | D-PIN | I |
 | SL-06 | ⬜ | 4.1 | None | I |
 | SL-07 | ⬜ | 4.2 | None | I |
-| SL-08 | ⬜ | 7.1 | 4.1, 3.7 | I |
+| SL-08 | ⬜ | 7.1 (**deferred beyond the MVP**) | 4.1, 3.7 | I |
 | SL-09 | ⬜ | 7.6 | 4.1, 3.7 | I |
 
 ### Availability and scheduling (AV)
@@ -195,6 +201,8 @@ languages; Step 10 runs all three languages.
 
 ### Online consultation (OC)
 
+**Deferred beyond the MVP** (ADR 0015): every OC row below.
+
 | ID | Today | Slice (step) | Depends on | Proof |
 | --- | --- | --- | --- | --- |
 | OC-01 | ⬜ | 6.1 | #22 | E with double; S; M rural trial |
@@ -217,6 +225,8 @@ languages; Step 10 runs all three languages.
 | HS-06 | ⬜ | 6.6 | 3.9 | I |
 
 ### In-clinic appointments (IC)
+
+**Deferred beyond the MVP** (ADR 0015): every IC row below.
 
 | ID | Today | Slice (step) | Depends on | Proof |
 | --- | --- | --- | --- | --- |
@@ -338,7 +348,7 @@ languages; Step 10 runs all three languages.
 | AD-10 | ⬜ | 9.8 | LM-06 metrics | E |
 | AD-11 | ⬜ | 3.9 | SE-05 | I |
 | AD-12 | ⬜ | 3.10 | 3.1 OTP consent | I |
-| AD-13 | ⬜ | 7.11 | 7.1, 7.6 | E |
+| AD-13 | ⬜ | 7.11 (labs; clinics deferred beyond the MVP) | 7.6 | E |
 | AD-14 | ⬜ | 9.1 | None | E |
 | AD-15 | ⬜ | 8.9 | 8.2 | Z: no record content |
 | AD-16 | ⬜ | 9.7 | 9.6 | I |
@@ -370,7 +380,7 @@ slice through the definition of done, audited in Step 10.
 | A11Y-03 | ⬜ | DoD (tokens already give 48 px targets); 3.7 attendants | `packages/ui` | C; M 200% zoom |
 | A11Y-04 | ⬜ | DoD from 3.1 forms | `Field`, `TextField` | C |
 | A11Y-05 | ⬜ | Locale layout (Step 2); verify in 3.1 | i18n routing | E `lang` per locale |
-| A11Y-06 | ⬜ | 6.1 | Video SDK | E keyboard; M screen reader |
+| A11Y-06 | ⬜ | 6.1 (**deferred beyond the MVP**) | Video SDK | E keyboard; M screen reader |
 | A11Y-07 | ⬜ | DoD (axe exists); manual pass per release | None | CI; M |
 
 ### Multi-language (I18N)

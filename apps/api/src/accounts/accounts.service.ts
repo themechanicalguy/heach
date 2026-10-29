@@ -12,6 +12,7 @@ import type { IssuedTokens } from '../auth/session.service.js';
 import { SessionService } from '../auth/session.service.js';
 import { reason } from '../common/error-response.js';
 import type { GrantedUserRole, Principal } from '../common/request-context.js';
+import { RoleAvailability } from '../flags/role-availability.js';
 import { FIELD_ENCRYPTOR } from '../crypto/crypto.tokens.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
 import { InvitationsService } from '../organisations/invitations.service.js';
@@ -37,6 +38,7 @@ import {
   NEW_PROVIDER_STATUS,
   nextSetupStep,
   type RegistrableRole,
+  SELF_REGISTRABLE_ROLES,
   type SetupRole,
   sideOf,
 } from './setup-rules.js';
@@ -56,6 +58,7 @@ export class AccountsService {
     private readonly audit: AuditService,
     private readonly otp: OtpService,
     private readonly invitations: InvitationsService,
+    private readonly availability: RoleAvailability,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
   ) {}
 
@@ -69,14 +72,14 @@ export class AccountsService {
     }
     await this.accounts.recordSignIn(id);
     await this.record(created ? 'account.created' : 'account.sign_in', id);
-    return this.sessions.signIn(id, initialRole(account.roles, account.lastActiveRole));
+    return this.sessions.signIn(id, this.startingRole(account));
   }
 
   /** Test sign-in (dev and test only): synthetic accounts, never one created by OTP (L-1). */
   async signInSynthetic(id: string): Promise<IssuedTokens | undefined> {
     const account = await this.accounts.find(id);
     if (!account?.synthetic || account.status !== 'active') return undefined;
-    return this.sessions.signIn(id, initialRole(account.roles, account.lastActiveRole));
+    return this.sessions.signIn(id, this.startingRole(account));
   }
 
   async view(principal: Principal): Promise<MeDto> {
@@ -90,10 +93,11 @@ export class AccountsService {
       locale: account.locale,
       mobile: account.mobile ? maskMobile(await this.encryptor.decrypt(account.mobile)) : null,
       activeRole: principal.role,
-      roles: account.roles,
+      roles: this.availability.held(account.roles),
+      offeredRoles: SELF_REGISTRABLE_ROLES.filter((role) => this.availability.isOffered(role)),
       setup: {
         complete,
-        nextStep: complete ? null : nextSetupStep(account.draft),
+        nextStep: complete ? null : this.resumeStep(account),
         draft: { ...account.draft, languages: [...account.draft.languages] },
       },
       consentsDue: consentsDue(account.consents),
@@ -112,6 +116,7 @@ export class AccountsService {
     patch: SetupPatch & { invitationId?: string },
   ): Promise<void> {
     const { invitationId, ...fields } = patch;
+    if (fields.role) this.assertOffered(fields.role);
     const invitation = invitationId
       ? {
           id: invitationId,
@@ -120,6 +125,7 @@ export class AccountsService {
           ),
         }
       : undefined;
+    if (invitation) this.assertOffered(invitation.role);
     if (!(await this.accounts.saveDraft(principal.userId, fields, invitation))) {
       throw reason(ConflictException, 'setup_complete');
     }
@@ -143,6 +149,8 @@ export class AccountsService {
       if (!requested || missingFields(account.draft).length > 0) {
         throw reason(BadRequestException, 'setup_incomplete');
       }
+      // A draft saved while a deferred role was offered is not granted once it is not.
+      this.assertOffered(requested);
       await this.grantSetupRole(client, account, requested);
       await this.accounts.recordConsents(client, account.id, consents, account.locale);
       await this.accounts.markSetupComplete(client, account.id);
@@ -172,16 +180,22 @@ export class AccountsService {
     await this.accounts.setLocale(principal.userId, locale);
   }
 
-  /** Only to a role the account holds now, checked on the server (decision L-3). */
+  /**
+   * Only to a role the account holds now and that is offered, checked on the server (decision
+   * L-3, ADR 0015).
+   */
   async switchRole(
     principal: Principal,
     accessToken: string,
     role: GrantedUserRole,
   ): Promise<string> {
     const roles = await this.accounts.roles(principal.userId);
-    if (!roles.some((grant) => grant.role === role)) {
+    const denial = !roles.some((grant) => grant.role === role)
+      ? 'role_not_granted'
+      : !this.availability.isOffered(role) && 'role_unavailable';
+    if (denial) {
       await this.record('account.role.switch.denied', principal.userId);
-      throw reason(ForbiddenException, 'role_not_granted');
+      throw reason(ForbiddenException, denial);
     }
     const token = await this.sessions.switchRole(principal, accessToken, role);
     await this.accounts.setLastActiveRole(principal.userId, role);
@@ -194,6 +208,7 @@ export class AccountsService {
    * OTP; the role is checked against the same rules as setup.
    */
   async addRole(principal: Principal, request: AddRoleDto): Promise<void> {
+    this.assertOffered(request.role);
     await this.accounts.transaction(async (client) => {
       const account = await this.accounts.lockForSetup(client, principal.userId);
       if (!account?.setupCompletedAt) throw reason(ConflictException, 'setup_incomplete');
@@ -229,6 +244,26 @@ export class AccountsService {
       locale: account.locale,
     };
     return this.otp.issue(target, origin);
+  }
+
+  /** A role deferred beyond the MVP is refused while it is not offered (ADR 0015). */
+  private assertOffered(role: string): void {
+    if (!this.availability.isOffered(role)) throw reason(BadRequestException, 'role_unavailable');
+  }
+
+  /**
+   * The role a sign-in starts in, from the grants that are offered now. An account whose only
+   * grants are deferred starts with no role (`new_account`): it keeps its data and may add a role.
+   */
+  private startingRole(account: AccountRecord) {
+    const usable = account.roles.filter((grant) => this.availability.isOffered(grant.role));
+    return initialRole(usable, account.lastActiveRole);
+  }
+
+  /** A draft whose role is no longer offered resumes at the role step, to choose another. */
+  private resumeStep(account: AccountRecord) {
+    const role = account.draft.role;
+    return role && !this.availability.isOffered(role) ? 'role' : nextSetupStep(account.draft);
   }
 
   /** A staff role only through its still-open invitation; any other role by the setup rules. */

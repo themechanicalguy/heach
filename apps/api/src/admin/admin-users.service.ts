@@ -3,6 +3,7 @@ import { ConflictException, Inject, Injectable, NotFoundException } from '@nestj
 import { AuditService } from '../audit/audit.service.js';
 import { SessionService } from '../auth/session.service.js';
 import { BLIND_INDEXER, FIELD_ENCRYPTOR } from '../crypto/crypto.tokens.js';
+import { RoleAvailability } from '../flags/role-availability.js';
 import { maskMobile, normaliseIndianMobile } from '../otp/mobile-number.js';
 import type { SuspensionReason, UserDetailDto, UserPageDto, UserSummaryDto } from './admin.dto.js';
 import { AdminUsersRepository, type UserSummaryRow } from './admin-users.repository.js';
@@ -21,6 +22,7 @@ export class AdminUsersService {
     private readonly users: AdminUsersRepository,
     private readonly userSessions: SessionService,
     private readonly audit: AuditService,
+    private readonly availability: RoleAvailability,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
     @Inject(BLIND_INDEXER) private readonly indexer: BlindIndexer,
   ) {}
@@ -95,7 +97,7 @@ export class AdminUsersService {
       mobile: row.mobile ? maskMobile(await this.encryptor.decrypt(row.mobile)) : null,
       status: row.status,
       suspensionReason: row.suspension_reason,
-      roles: row.roles,
+      roles: this.availability.held(row.roles),
       setupComplete: row.setup_completed_at !== null,
       createdAt: row.created_at.toISOString(),
       lastSignInAt: row.last_sign_in_at?.toISOString() ?? null,

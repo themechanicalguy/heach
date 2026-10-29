@@ -8,7 +8,7 @@ import { api } from '../../lib/api';
 import { useAccount } from '../../lib/account';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
-import { CARE_CHOICES, PROVIDER_CHOICES, type RoleChoice } from '../setup/roles';
+import { CARE_CHOICES, offered, PROVIDER_CHOICES, type RoleChoice } from '../setup/roles';
 import { useReverified } from './use-reverified';
 
 /** Adds the side the account lacks; the API asks for a fresh OTP first (decision L-3). */
@@ -16,7 +16,7 @@ export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void 
   const { t } = useI18n();
   const { reload } = useAccount();
   const hasCare = me.roles.some((grant) => grant.side === 'care');
-  const options: readonly RoleChoice[] = hasCare ? PROVIDER_CHOICES : CARE_CHOICES;
+  const options: readonly RoleChoice[] = offered(hasCare ? PROVIDER_CHOICES : CARE_CHOICES, me);
   const [role, setRole] = useState<string>('');
   const [languages, setLanguages] = useState<string[]>([...me.setup.draft.languages]);
   const [organisationName, setOrganisationName] = useState(me.setup.draft.organisationName ?? '');

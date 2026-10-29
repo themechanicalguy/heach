@@ -27,4 +27,13 @@ describe('FeatureFlags', () => {
     expect(new FeatureFlags('staging', 'accounts').isOn('accounts')).toBe(false);
     expect(new FeatureFlags('production', 'accounts').isOn('accounts')).toBe(false);
   });
+
+  it('AC-04 keeps the deferred doctor and clinic roles off unless listed, and never in staging or production (ADR 0015)', () => {
+    expect(new FeatureFlags('dev', 'accounts').isOn('doctor-and-clinic')).toBe(false);
+    expect(new FeatureFlags('dev', 'doctor-and-clinic').isOn('doctor-and-clinic')).toBe(true);
+    expect(new FeatureFlags('staging', 'doctor-and-clinic').isOn('doctor-and-clinic')).toBe(false);
+    expect(new FeatureFlags('production', 'doctor-and-clinic').isOn('doctor-and-clinic')).toBe(
+      false,
+    );
+  });
 });

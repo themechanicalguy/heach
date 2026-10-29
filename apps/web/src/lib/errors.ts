@@ -15,6 +15,7 @@ const KNOWN = new Set([
   'reverification_required',
   'side_taken',
   'details_missing',
+  'role_unavailable',
   'no_mobile',
   'mobile_unchanged',
   'mobile_in_use',

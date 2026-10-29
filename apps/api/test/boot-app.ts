@@ -3,6 +3,10 @@ import type { App } from 'supertest/types.js';
 import { createApp } from '../src/app.factory.js';
 
 /** Boots the real app (same setup as main.ts) without listening on a port. */
+export const WITH_DEFERRED_ROLES = {
+  FEATURE_FLAGS: 'sample-patient-note,accounts,doctor-and-clinic',
+};
+
 export async function bootApp(
   nodeEnv = 'test',
   overrides: Record<string, string> = {},
@@ -10,6 +14,7 @@ export async function bootApp(
   process.env.NODE_ENV = nodeEnv;
   process.env.API_PORT ??= '3001';
   process.env.APP_ENV = 'test';
+  // The MVP set: roles deferred beyond the MVP (ADR 0015) are off unless a suite turns them on.
   process.env.FEATURE_FLAGS = 'sample-patient-note,accounts';
   process.env.RATE_LIMIT_PER_MINUTE = '10000';
   process.env.RATE_LIMIT_PER_ADDRESS_PER_MINUTE = '10000';

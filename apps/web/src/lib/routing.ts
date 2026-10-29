@@ -48,12 +48,15 @@ export function inLocale(path: string, locale: Locale): string {
 /**
  * Where a signed-in user belongs (new-user, returning-user and incomplete-profile routing):
  * unfinished setup first, then any consent text that is due, then the page they asked for, else
- * the home of their active role. Always in the account's own language.
+ * the home of their active role. A finished account with no role it may use (its roles are
+ * deferred beyond the MVP, ADR 0015) goes to its account page, which explains and offers a role.
+ * Always in the account's own language.
  */
 export function destinationFor(me: Me, next?: string): string {
   const locale = me.locale;
   if (!me.setup.complete) return `/${locale}/setup/${me.setup.nextStep ?? 'role'}`;
   if (me.consentsDue.length > 0) return `/${locale}/consent`;
+  if (me.activeRole === 'new_account') return `/${locale}/account`;
   const asked = safeNext(next);
   if (asked && allowedFor(me.activeRole, asked)) return inLocale(asked, locale);
   return isProviderRole(me.activeRole) ? `/${locale}/provider` : `/${locale}`;

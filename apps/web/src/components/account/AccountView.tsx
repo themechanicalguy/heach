@@ -16,7 +16,10 @@ import { Invitations } from './Invitations';
 import { MobileChange } from './MobileChange';
 import { ProfileSection } from './ProfileSection';
 
-/** Account details, roles and role switching, and sign-out of one or every device (AC-05, SE-07). */
+/**
+ * Account details, roles and role switching, and sign-out of one or every device (AC-05, SE-07).
+ * A role deferred beyond the MVP (ADR 0015) is listed as kept but not offered, with no switch.
+ */
 export function AccountView({ me }: Readonly<{ me: Me }>) {
   const { t } = useI18n();
   const router = useRouter();
@@ -46,21 +49,19 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
           <dd lang={me.locale}>{t(`locale.${me.locale}`)}</dd>
         </dl>
         <h2 className="flow__subtitle">{t('account.rolesTitle')}</h2>
+        {me.activeRole === 'new_account' && (
+          <Notice tone="warning">{t('account.noUsableRole')}</Notice>
+        )}
         <ul className="role-list">
           {me.roles.map((grant) => (
             <li key={grant.role}>
               <Card title={t(`roles.${grant.role}.label`)}>
-                {grant.role === me.activeRole ? (
-                  <p className="role-list__active">{t('account.using')}</p>
-                ) : (
-                  <Button
-                    className="heach-button--secondary"
-                    disabled={pending}
-                    onClick={() => void chooseRole(grant.role)}
-                  >
-                    {t('account.switchTo', { role: roleName(grant.role) })}
-                  </Button>
-                )}
+                <RoleAction
+                  grant={grant}
+                  active={grant.role === me.activeRole}
+                  disabled={pending}
+                  onSwitch={() => void chooseRole(grant.role)}
+                />
               </Card>
             </li>
           ))}
@@ -96,6 +97,28 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
       <DataRights me={me} />
       <SignOutCard />
     </section>
+  );
+}
+
+/** What a role's card offers: the role in use, a switch to it, or why it cannot be used. */
+function RoleAction({
+  grant,
+  active,
+  disabled,
+  onSwitch,
+}: Readonly<{
+  grant: Me['roles'][number];
+  active: boolean;
+  disabled: boolean;
+  onSwitch: () => void;
+}>) {
+  const { t } = useI18n();
+  if (active) return <p className="role-list__active">{t('account.using')}</p>;
+  if (!grant.available) return <p className="flow__muted">{t('account.roleUnavailable')}</p>;
+  return (
+    <Button className="heach-button--secondary" disabled={disabled} onClick={onSwitch}>
+      {t('account.switchTo', { role: t(`roles.${grant.role}.name`) })}
+    </Button>
   );
 }
 

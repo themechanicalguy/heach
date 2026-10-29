@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { AuditService } from '../audit/audit.service.js';
 import { currentContext, type Principal, type Role } from '../common/request-context.js';
+import { RoleAvailability } from '../flags/role-availability.js';
 import { AuthzFailureMonitor } from '../security/authz-failure.monitor.js';
 import { AccessTokenStore } from './access-token.store.js';
 import { PUBLIC_KEY, ROLES_KEY } from './roles.decorator.js';
@@ -29,7 +30,9 @@ export function principalOf(request: Request): Principal {
 
 /**
  * Global guard: every route must declare @Roles or @Public, or it is refused (SE-02.1). Signed-in
- * roles come from the access token; a wrong role is 403, audited and counted (SO-08.3).
+ * roles come from the access token; a wrong role is 403, audited and counted (SO-08.3). A token
+ * issued in a role that is no longer offered (ADR 0015) is revoked and answers 401, so the device
+ * refreshes, finds its session ended and signs in again in a role that is.
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -38,6 +41,7 @@ export class AuthGuard implements CanActivate {
     private readonly tokens: AccessTokenStore,
     private readonly audit: AuditService,
     private readonly failures: AuthzFailureMonitor,
+    private readonly availability: RoleAvailability,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -52,7 +56,11 @@ export class AuthGuard implements CanActivate {
     }
     const token = bearerToken(request);
     const principal = token ? await this.tokens.resolve(token) : undefined;
-    if (!principal) {
+    if (!principal || !token) {
+      throw new UnauthorizedException();
+    }
+    if (principal.realm === 'user' && !this.availability.isOffered(principal.role)) {
+      await this.tokens.revoke(token);
       throw new UnauthorizedException();
     }
     request.principal = principal;

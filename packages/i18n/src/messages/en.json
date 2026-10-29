@@ -91,6 +91,7 @@
     "reverification_required": "Please confirm it is you with a new code.",
     "side_taken": "Your account already has a role of that kind.",
     "details_missing": "Some details are missing.",
+    "role_unavailable": "This role is not offered at present. Choose another one.",
     "no_mobile": "This account has no mobile number to send a code to.",
     "mobile_unchanged": "This is already your number.",
     "mobile_in_use": "This number already has a HEACH account. Use another number or contact support.",
@@ -119,7 +120,8 @@
       "intro": "Choose one. You can add another role later from your account.",
       "careGroup": "Get care",
       "providerGroup": "Give care",
-      "required": "Choose how you will use HEACH."
+      "required": "Choose how you will use HEACH.",
+      "unavailable": "The role you chose before is not offered at present. Your other details are kept. Choose another role."
     },
     "details": {
       "title": "About you",
@@ -155,7 +157,7 @@
   "roles": {
     "patient": {
       "label": "Get care for myself",
-      "hint": "Book doctors, nurses, home visits and lab tests",
+      "hint": "Book nurses, home visits and lab tests",
       "name": "patient"
     },
     "representative": {
@@ -262,6 +264,8 @@
     "language": "Language",
     "rolesTitle": "Your roles",
     "using": "Using now",
+    "noUsableRole": "None of your roles is offered at present. Your details are kept. You can add a role below or sign out.",
+    "roleUnavailable": "Not offered at present. Your details for this role are kept.",
     "switchTo": "Use as {role}",
     "switched": "You are now using HEACH as {role}.",
     "addTitle": "Add a role",

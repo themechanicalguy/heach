@@ -1,9 +1,15 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { StaffRole } from '../accounts/setup-rules.js';
 import { AuditService } from '../audit/audit.service.js';
 import { reason } from '../common/error-response.js';
 import type { Principal } from '../common/request-context.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
+import { RoleAvailability } from '../flags/role-availability.js';
 import { MembershipRepository, type MembershipRow } from './membership.repository.js';
 import type { InvitationDto, MembershipDto } from './organisations.dto.js';
 
@@ -12,20 +18,24 @@ const ENTITY = 'membership';
 /**
  * The invited person's side (owner decision O-1): see invitations sent to their own number,
  * accept one (which grants its staff role) or decline it. An invitation is found by its ID and
- * then must be addressed to the caller's number; anything else answers 404 (SE-02).
+ * then must be addressed to the caller's number; anything else answers 404 (SE-02). An
+ * invitation to a role deferred beyond the MVP (a clinic's front desk, ADR 0015) is kept but not
+ * listed or accepted while that role is not offered.
  */
 @Injectable()
 export class InvitationsService {
   constructor(
     private readonly memberships: MembershipRepository,
     private readonly audit: AuditService,
+    private readonly availability: RoleAvailability,
   ) {}
 
   async list(principal: Principal): Promise<InvitationDto[]> {
     const index = await this.memberships.mobileIndexOf(principal.userId);
     if (!index) return [];
     const rows = await this.memberships.invitationsFor(index);
-    return rows.map((row) => ({
+    const offered = rows.filter((row) => this.availability.isOffered(row.role));
+    return offered.map((row) => ({
       id: row.id,
       role: row.role,
       organisationKind: row.kind,
@@ -70,6 +80,8 @@ export class InvitationsService {
     invitationId: string,
   ): Promise<StaffRole> {
     const row = await this.openFor(client, accountId, invitationId);
+    if (!this.availability.isOffered(row.role))
+      throw reason(BadRequestException, 'role_unavailable');
     await this.memberships.activate(client, row, accountId);
     await this.audit.record(
       { action: 'membership.accepted', entity: ENTITY, entityId: row.id },

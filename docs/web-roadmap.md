@@ -7,6 +7,11 @@
   plan: the guideline stays the only plan, and where this page proposes a change to it, the change
   is listed under [Proposed guideline amendments](#proposed-guideline-amendments) and applies only
   once the owner merges it into the guideline.
+- **Scope change (29 October 2026):** online doctor consultation and in-clinic dental and skin
+  appointments are out of scope for the MVP and deferred beyond it, with no release promised
+  ([ADR 0015](adr/0015-defer-online-consultation-and-clinic-appointments.md); [requirements](mvp-v1-requirements.md#deferred-beyond-the-mvp)). Their slices (6.1 to
+  6.3, 7.1 to 7.5) stay listed for traceability, marked **deferred beyond the MVP**, and are not
+  part of any MVP step exit.
 - **Companion:** [requirements traceability](requirements-traceability.md) maps every requirement
   ID and journeys J1 to J9 to a slice, a step, its dependencies and its acceptance proof.
 - **Baseline:** `main` at `1ca6493` (28 October 2026): Step 2 built, its exit open
@@ -36,7 +41,7 @@ a supported browser (UX-08), with the PWA install as an enhancement, never a req
 
 | Surface | App | Users | Designed for |
 | --- | --- | --- | --- |
-| Patient and provider web app, installable PWA | `apps/web` (Next.js, server rendered, `/or`, `/en`, `/hi`) | Patient, representative, doctor, dentist and dermatologist, physiotherapist, nurse, attendant, sample collector; clinic front desk and lab staff on tablet or desktop | 360 px up (UX-02) |
+| Patient and provider web app, installable PWA | `apps/web` (Next.js, server rendered, `/or`, `/en`, `/hi`) | Patient, representative, physiotherapist, nurse, attendant, sample collector, lab staff (doctor, dentist, dermatologist and clinic front desk deferred beyond the MVP); on tablet or desktop | 360 px up (UX-02) |
 | Admin website | `apps/admin` (React SPA, English keys) | Super admin, verifier, support, finance | 1280 px down to tablet |
 | API and background workers | `apps/api` (NestJS, OpenAPI, typed client in `packages/types`) | All three front ends; payment, SMS and identity callbacks | p95 ≤ 500 ms (PF-04) |
 
@@ -48,19 +53,19 @@ spec and tests both.
 
 | Capability | Used by | Where it is missing or limited | Fallback that every browser gets |
 | --- | --- | --- | --- |
-| WebRTC camera and microphone | Video consultation (OC-01, OC-02) | In-app browsers (WhatsApp, Facebook) often block media; weak networks | Pre-call check detects it and asks to open the link in the browser; audio-only; in-call text chat (A11Y-06) |
+| WebRTC camera and microphone | Video consultation (OC-01, OC-02; deferred beyond the MVP) | In-app browsers (WhatsApp, Facebook) often block media; weak networks | Pre-call check detects it and asks to open the link in the browser; audio-only; in-call text chat (A11Y-06) |
 | SMS code autofill | OTP sign-in (AC-01, UX-05) | WebOTP is Chromium on Android only and binds to a host name; the dev and pilot hosts have no domain yet (ADR 0009) | `autocomplete="one-time-code"` and manual entry in the existing `OtpField` |
 | Web push | Notifications (NT-02) | iOS only for a PWA added to the Home Screen (16.4 and later); not on iOS 15 | In-app notification centre and SMS are the guaranteed channels; push is additive |
 | Camera capture for documents | Onboarding (PO-02), vault (MV-03), lab prescriptions (LB-04) | Behaviour varies; some browsers open the file picker | `<input type="file" accept capture>`; file upload always offered |
 | Client-side image compression | PO-02, MV-16 | Large images on low-memory phones | Canvas resize in a worker; server enforces limits regardless |
 | Resumable upload | MV-16 | None (plain HTTPS) | Multipart upload to object storage through short-lived signed part URLs, retried per part |
 | Background sync | Queued actions (PF-07) | Chromium only | Retry on the `online` event and on next open; only non-sensitive actions are queued |
-| Geolocation | Clinic distance (IC-03) | Permission denied; desktop accuracy | PIN code entry, distance from the PIN centroid |
-| QR scanning | Clinic check-in (IC-06) | `BarcodeDetector` absent in Safari and Firefox | Numeric check-in code typed by the front desk (IC-06 allows code or QR) |
+| Geolocation | Clinic distance (IC-03; deferred beyond the MVP) | Permission denied; desktop accuracy | PIN code entry, distance from the PIN centroid |
+| QR scanning | Clinic check-in (IC-06; deferred beyond the MVP) | `BarcodeDetector` absent in Safari and Firefox | Numeric check-in code typed by the front desk (IC-06 allows code or QR) |
 | Speech synthesis in Odia | Attendant voice prompts (PO-07) | Few browsers ship an Odia voice | Recorded Odia audio clips per onboarding step |
 | Web Locks, BroadcastChannel | Session refresh across tabs (spec 001) | iOS before 15.4 | Already accepted in spec 001: a race between two tabs is possible there |
 | PWA install | Offline shell (PF-07) | iOS has no install prompt | Works in the browser tab; "Add to Home Screen" help text |
-| PDF download | Prescriptions (OC-05), receipts (PY-03), lab reports (LB-08) | iOS opens PDFs in a viewer | Served with `Content-Disposition`, behind an access check and a short-lived URL (EN-07) |
+| PDF download | Prescriptions (OC-05; deferred beyond the MVP), receipts (PY-03), lab reports (LB-08) | iOS opens PDFs in a viewer | Served with `Content-Disposition`, behind an access check and a short-lived URL (EN-07) |
 | UPI payment | Checkout (PY-01) | Desktop has no UPI app | Gateway's hosted checkout: UPI intent on phones, QR or collect request on desktop |
 
 ## Step 2 blockers, first
@@ -99,9 +104,9 @@ flowchart LR
     S3["Step 3<br/>accounts, identity, onboarding, admin shell"] --> S4
     S4["Step 4<br/>catalogue, listings, availability, search"] --> S5
     S5["Step 5<br/>booking engine, payments, jobs, notifications"] --> S6
-    S6["Step 6<br/>consult, home visits, attendants, ratings<br/>Stage A pilot"] --> S7
+    S6["Step 6<br/>home visits, attendants, ratings<br/>Stage A pilot"] --> S7
     S5 --> S7
-    S7["Step 7<br/>clinics and labs"] --> S8
+    S7["Step 7<br/>labs"] --> S8
     S6 --> S8
     S8["Step 8<br/>vault and sharing<br/>Stage B"] --> S9
     S5 --> S9
@@ -118,15 +123,15 @@ exist yet:
 | Every upload (onboarding, booking attachments, prescriptions, lab reports, vault) | 3.4 secure upload pipeline | EN-07, PO-02, MV-11 |
 | Every provider-facing slice | 3.5 onboarding framework and 3.10 verification | Only Approved providers list services (scope: admin verification before any listing) |
 | Every role check after Step 3 | 3.2 roles and linked patients | AC-04, SE-01 |
-| Every consent prompt (sign-up, identity, teleconsult, sharing) | 3.3 consent records | PR-01 |
+| Every consent prompt (sign-up, identity, sharing; teleconsult deferred beyond the MVP) | 3.3 consent records | PR-01 |
 | Sensitive actions (payout details, deletion, mandate changes) | 3.8 OTP re-verification | AC-05, SE-07 |
-| Catalogue for all six services | 4.1 | Step 7 reuses it (guideline Step 4 item 1) |
-| Slots and locking for clinics and labs | 4.5 | IC-04, LB-02 |
+| Catalogue for the four MVP services, extensible to the deferred services | 4.1 | Step 7 reuses it (guideline Step 4 item 1) |
+| Slots and locking for labs (clinics deferred beyond the MVP) | 4.5 | LB-02, IC-04 |
 | Background jobs and the outbox | 5.1 | BK-03 auto-cancel, BK-06 reminders, PY-05 payouts, PR-05 retention |
 | Payments, refunds and the ledger | 5.3 to 5.7 | Steps 6, 7 and 9 |
 | Notification templates and delivery | 5.8 | Every later status change |
 | PDF rendering in Odia script | 5.6 (decision D-PDF) | OC-05, PY-03, IC-08, LB-08 |
-| Records produced by consults, visits, clinics, labs | Steps 6 and 7 | MV-02 files them into the vault (Step 8) |
+| Records produced by visits and labs (consults and clinics deferred beyond the MVP) | Steps 6 and 7 | MV-02 files them into the vault (Step 8) |
 | Break-glass | 6.8 | AD-06 complaints, AD-15, MV-11 |
 | Entitlements and coupons at checkout | 5.2 designed with hooks (BK-08) | Step 9 attaches without a rewrite |
 
@@ -144,7 +149,7 @@ onboard on a phone and be approved in the admin website. Journeys: **J1**, **J5*
 | 3.4 Secure upload pipeline | EN-07, PO-02, DC-01 | 3.1; scanner decision D-SCAN | Integration: per-object key, private bucket, scan verdict before availability, signed URL after access check and expiry; infected file quarantined |
 | 3.5 Onboarding framework | PO-01, PO-03, PO-04 | 3.2, 3.4 | Integration: status machine Draft to Suspended; save and resume; checklists from configuration |
 | 3.6 Identity verification | KY-01 to KY-09, PR-03, PR-01 (identity consent) | 3.3, 3.5; partner (FU-09 #21); lawyer (FU-06) | Integration with the identity fake and partner sandbox: no Aadhaar number in database, logs or responses; mismatch to manual review; fallback path |
-| 3.7 Role flows: doctor, dentist and dermatologist with clinic, physiotherapist, nurse, attendant (voice prompts), lab, sample collector | PO-01 (role checklists), PO-07, Clinic and Lab entities (identity and documents only) | 3.5, 3.6 | E2E J1 for each provider type; attendant flow with audio prompts and minimal typing |
+| 3.7 Role flows: physiotherapist, nurse, attendant (voice prompts), lab, sample collector (doctor, dentist, dermatologist and clinic deferred beyond the MVP, kept behind the `doctor-and-clinic` flag) | PO-01 (role checklists), PO-07, Clinic and Lab entities (identity and documents only) | 3.5, 3.6 | E2E J1 for each provider type; attendant flow with audio prompts and minimal typing |
 | 3.8 Payout details with OTP re-verification | PO-06, AC-05 (re-verify), SE-07 | 3.1, 3.5 | Integration: change refused without a fresh OTP; payout fields Restricted and ciphertext |
 | 3.9 Admin shell | AD-01, AD-11, SE-04, LM-09 (admin actions) | FU-18; 3.2 | Integration: password plus TOTP; short sessions; masked lists; every admin action in the audit log; audit viewer search and export for super admin |
 | 3.10 Verification queue, user management, assisted onboarding | AD-02, AD-03, AD-12, NT-01 (outcome SMS) | 3.6, 3.7, 3.9 | E2E J5; opening documents writes an audit entry; assisted mode needs the provider's OTP consent |
@@ -153,13 +158,13 @@ onboard on a phone and be approved in the admin website. Journeys: **J1**, **J5*
 
 ## Step 4: Listings, availability and search
 
-Exit: a patient in a pilot PIN code finds a verified doctor, physiotherapist, nurse and attendant
-with open slots. No journey completes yet; J2 to J4 steps 1 and 2 are testable.
+Exit: a patient in a pilot PIN code finds a verified physiotherapist, nurse and attendant
+with open slots. No journey completes yet; J3 and J4 steps 1 and 2 are testable.
 
 | Slice | Requirements | Depends on | Acceptance proof (summary) |
 | --- | --- | --- | --- |
-| 4.1 Service catalogue for all six services | AD-04 (six catalogue types, amendment A2), I18N-05, SL-06, IC-01 and LB-01 (catalogue data only) | 3.9 | Integration: items with three translations; prescription-required flag; admin edits audited |
-| 4.2 Listings for consult, physiotherapy, nursing, attendant | SL-01 to SL-04, SL-07 | 4.1, 3.10 | Integration: only Approved providers publish; pause and resume; attendants cannot list clinical procedures (regulatory point) |
+| 4.1 Service catalogue for the four MVP services | AD-04 (catalogue types, amendment A2), I18N-05, SL-06, LB-01 (catalogue data only); IC-01 deferred beyond the MVP | 3.9 | Integration: items with three translations; prescription-required flag; admin edits audited |
+| 4.2 Listings for physiotherapy, nursing, attendant | SL-02 to SL-04, SL-07 (SL-01 deferred beyond the MVP) | 4.1, 3.10 | Integration: only Approved providers publish; pause and resume; attendants cannot list clinical procedures (regulatory point) |
 | 4.3 Service area and Odisha PIN codes | SL-05, SD-04 | 4.2; dataset decision D-PIN | Integration: home-visit results limited to the patient's PIN |
 | 4.4 Availability rules | AV-01, AV-03, AV-04 | 4.2 | Unit: weekly rules, overrides, leave, buffers, IST only |
 | 4.5 Slot generation and locking | AV-02 | 4.4 | Integration and load: two users cannot hold one slot; lock expires after the configured time |
@@ -169,14 +174,14 @@ with open slots. No journey completes yet; J2 to J4 steps 1 and 2 are testable.
 ## Step 5: Booking, payments and notifications
 
 Exit: a patient books and pays for each of the four Stage A service types in the gateway sandbox;
-refund and payout entries are correct. J2 to J4 complete up to payment and confirmation.
+refund and payout entries are correct. J3 and J4 complete up to payment and confirmation.
 
 | Slice | Requirements | Depends on | Acceptance proof (summary) |
 | --- | --- | --- | --- |
 | 5.1 Booking model, state machine, outbox and job runner | BK-01, BK-02, LM-01 (job correlation) | 4.5; queue decision D-QUEUE | Unit: every allowed and refused transition; integration: event history; job retries and dead letters |
 | 5.2 Checkout | BK-04 (policy shown before payment), BK-05 (device attachments), BK-08 (hooks for entitlements and coupons), UX-06 | 5.1, 3.4 | E2E: booking in five steps or fewer; fee breakdown |
 | 5.3 Payments adapter and webhooks | PY-01, PY-07 | 5.2; gateway (FU-09 #19) | Integration: signed webhooks, duplicates idempotent, payment success with a failed booking write; card data never reaches the API |
-| 5.4 Confirmation rules and acceptance window | BK-03, HS-01 | 5.3 | Integration: consult confirms on payment; home services auto-cancel and refund after the window |
+| 5.4 Confirmation rules and acceptance window | BK-03, HS-01 | 5.3 | Integration: home services auto-cancel and refund after the window |
 | 5.5 Cancel, reschedule, refunds | BK-04, PY-02 | 5.4 | Integration: refund per policy; refund never exceeds amount paid (TS-09) |
 | 5.6 Receipts and invoices; PDF engine | PY-03 | 5.3; decision D-PDF | Integration: PDF with correct Odia shaping, behind access check |
 | 5.7 Earnings ledger, commission, payouts | PY-04, PY-05 | 5.5 | Integration: completed booking makes one payout entry; refund after payout handled |
@@ -185,40 +190,40 @@ refund and payout entries are correct. J2 to J4 complete up to payment and confi
 | 5.10 Admin bookings console and finance | AD-05, AD-07 | 5.5, 5.7, 3.9 | E2E admin: search, cancel, reassign, refund; CSV export without Restricted data |
 | 5.11 Reconciliation and business metrics | LM-06, LM-07 (payment and OTP alerts) | 5.3, 5.7 | Integration: daily reconciliation with a mismatch alert; zero mismatches over a week of test traffic |
 
-## Step 6: Online consultation, home services and the Stage A pilot
+## Step 6: Home services and the Stage A pilot
 
-Exit: J2, J3 and J4 pass E2E on three viewports in two languages; Stage A live in pilot districts.
+Exit: J3 and J4 pass E2E on three viewports in two languages; Stage A live in pilot districts.
 **First real patient data**; see [Environments and the first real data](#environments-and-the-first-real-data).
 
 | Slice | Requirements | Depends on | Acceptance proof (summary) |
 | --- | --- | --- | --- |
-| 6.1 Video consultation | OC-01, OC-02, OC-06, OC-07, EN-08, A11Y-06 | 5.4; video provider (FU-09 #22) | E2E with the video fake; sandbox trial on rural networks (manual); connect and fallback metrics (LM-06) |
-| 6.2 Teleconsult consent and doctor workspace | OC-03, OC-04, PR-01 (teleconsult) | 6.1, 3.3 | Integration: no call without stored consent; doctor sees only own bookings (SE-01) |
-| 6.3 Prescription builder and PDF | OC-05 | 6.2, 5.6 | Integration: PDF carries name, qualification, registration number; Restricted and ciphertext |
+| 6.1 **Deferred beyond the MVP.** Video consultation | OC-01, OC-02, OC-06, OC-07, EN-08, A11Y-06 | 5.4; video provider (FU-09 #22) | E2E with the video fake; sandbox trial on rural networks (manual); connect and fallback metrics (LM-06) |
+| 6.2 **Deferred beyond the MVP.** Teleconsult consent and doctor workspace | OC-03, OC-04, PR-01 (teleconsult) | 6.1, 3.3 | Integration: no call without stored consent; doctor sees only own bookings (SE-01) |
+| 6.3 **Deferred beyond the MVP.** Prescription builder and PDF | OC-05 | 6.2, 5.6 | Integration: PDF carries name, qualification, registration number; Restricted and ciphertext |
 | 6.4 Home-visit workflow | HS-02, HS-03, HS-04 | 5.4 | E2E J3: address only after confirmation; start code; visit notes Restricted |
 | 6.5 Attendant shifts | HS-05 (check-in and out per shift; extend, end early, replacement through support) | 5.4 | E2E J4 |
 | 6.6 Safety concerns and complaints | HS-06, RF-03, AD-06 | 5.1, 3.9 | Integration: high-priority ticket; admin queue with assignment and notes |
 | 6.7 Ratings and reviews | RF-01, RF-02 | 5.4 | Integration: only after Completed; hide with reason |
-| 6.8 Break-glass and patient access history | SE-03, SE-06 | 3.9, 6.2 | Integration: Restricted read needs ticket, reason, expiry; patient sees who read what |
+| 6.8 Break-glass and patient access history | SE-03, SE-06 | 3.9, 6.4 | Integration: Restricted read needs ticket, reason, expiry; patient sees who read what |
 | 6.9 Pilot readiness | SO-04, SO-06, SO-09, TS-08, LM-08, PR-05, PR-06, A11Y-07 (manual pass), UX-07, legal pages in three languages | All of Step 6; amendments A4 to A6 | Pen test with no high open; load test at agreed volume; breach runbook rehearsed; retention job live; DPAs signed |
 
-## Step 7: In-clinic appointments and lab tests
+## Step 7: Lab tests
 
-Exit: J6 and J7 work with pilot clinics and labs, behind flags.
+Exit: J7 works with pilot labs, behind a flag.
 
 | Slice | Requirements | Depends on | Acceptance proof (summary) |
 | --- | --- | --- | --- |
-| 7.1 Clinic profile, listings, clinic accounts | SL-08, IC-01, IC-02, IC-10 | 4.1, 3.7 | Authz: front desk cannot read clinical notes |
-| 7.2 Clinic search with distance | IC-03 | 7.1, 4.6 | Integration: distance from location or PIN centroid |
-| 7.3 Clinic booking and payment options | IC-04, IC-05 | 7.1, 4.5, 5.3 | E2E: booking fee, full amount, pay at clinic; remaining amount shown |
-| 7.4 Front desk: check-in, statuses, walk-ins | IC-06, IC-07 | 7.3 | E2E tablet: code check-in; walk-in keeps the schedule correct |
-| 7.5 Visit summary, follow-up, multi-sitting | IC-08, IC-09 | 7.4, 6.3 | E2E J6 including one-step follow-up (BK-09) |
+| 7.1 **Deferred beyond the MVP.** Clinic profile, listings, clinic accounts | SL-08, IC-01, IC-02, IC-10 | 4.1, 3.7 | Authz: front desk cannot read clinical notes |
+| 7.2 **Deferred beyond the MVP.** Clinic search with distance | IC-03 | 7.1, 4.6 | Integration: distance from location or PIN centroid |
+| 7.3 **Deferred beyond the MVP.** Clinic booking and payment options | IC-04, IC-05 | 7.1, 4.5, 5.3 | E2E: booking fee, full amount, pay at clinic; remaining amount shown |
+| 7.4 **Deferred beyond the MVP.** Front desk: check-in, statuses, walk-ins | IC-06, IC-07 | 7.3 | E2E tablet: code check-in; walk-in keeps the schedule correct |
+| 7.5 **Deferred beyond the MVP.** Visit summary, follow-up, multi-sitting | IC-08, IC-09 | 7.4, 6.3 | E2E J6 including one-step follow-up (BK-09) |
 | 7.6 Lab listings | SL-09, LB-01 | 4.1, 3.7 | Integration: tests and packages with three-language names |
 | 7.7 Lab cart, booking, prescription rejection | LB-02, LB-03, LB-04 | 7.6, 5.3, 3.4 | Integration: rejection refunds |
 | 7.8 Sample collection | LB-05, LB-06 | 7.7 | Integration: collection code; booking-linked sample identifier |
 | 7.9 Status tracking | LB-07 | 7.8, 5.8 | Integration: notification at each step, no health detail |
 | 7.10 Report upload and correction | LB-08, LB-10 | 7.8, 3.4 | Integration: report attaches only to its own booking and patient; correction with reason |
-| 7.11 Lab dashboard and admin clinic and lab management | LB-11, AD-13 | 7.10, 3.9 | E2E desktop and tablet; a lab cannot see another lab's orders |
+| 7.11 Lab dashboard and admin lab management (clinics deferred beyond the MVP) | LB-11, AD-13 | 7.10, 3.9 | E2E desktop and tablet; a lab cannot see another lab's orders |
 
 ## Step 8: E-medical report vault and the Stage B launch
 
@@ -298,7 +303,7 @@ timers on the host calling a job entry point under a run ID (re-encryption, rest
 | Payment reconciliation | 5.11 | Daily | Alert on mismatch |
 | Payout runs | 5.7 | Weekly | Split settlement through the gateway |
 | Notification delivery with retry | 5.8 | Outbox | Dead-letter queue and backlog alert (LM-07) |
-| Waiting-room no-show alerts | 6.1 | 5 minutes after slot start | OC-06 |
+| Waiting-room no-show alerts (deferred beyond the MVP) | 6.1 | 5 minutes after slot start | OC-06 |
 | Retention and anonymisation | 6.9 | Daily | PR-05; must exist before real data |
 | Share expiry | 8.5 | Per share | Access check is the real guard; job only tidies |
 | Mandate pre-debit notice, renewal, retry, pause | 9.3 | Per mandate | e-mandate rules |
@@ -351,7 +356,7 @@ the step charter or feature spec named; until then that spec stays Draft.
 | Q-OPERATOR | Who operates the application | Step 3 consent and terms; Step 6 legal | Owner |
 | Q-AADHAAR | Aadhaar and DigiLocker route: direct or licensed partner | 3.6 | Lawyer and owner (FU-06, #21) |
 | Q-AGENCY | Attendants as freelancers only, or agencies too | 3.7 | Freelancers only for the first release; agencies later |
-| Q-OUTSTATE | Doctors registered outside Odisha | 3.7, 3.10 | Lawyer |
+| Q-OUTSTATE | Doctors registered outside Odisha (deferred beyond the MVP) | 3.7, 3.10 | Lawyer |
 | Q-POLICE | Background or police verification for home-visit providers and attendants | 3.7, 3.10 | Owner and lawyer; make it a checklist item so it can be added without code |
 | Q-PATIENT-KYC | Identity verification mandatory for patients in any case (for example attendant bookings) | 3.6, 5.2 | Owner |
 | Q-HINDI | Hindi at launch | Every step's translation work | Keep three languages (requirements and CLAUDE.md) unless the owner changes both |
@@ -366,8 +371,8 @@ the step charter or feature spec named; until then that spec stays Draft.
 | Q-CASH | Cash or UPI at the time of home service | 5.3 | Online only for the first release |
 | Q-COMMISSION | Commission and cancellation policy per service | 5.5, 5.7 | Owner; configurable, so not a code blocker |
 | Q-LOAD | Expected launch load | 4.5 load test, TS-08 | Owner |
-| Q-AUDIO-ONLY | Audio-only and chat-only consults as separate services | 6.1 | Owner |
-| Q-CLINIC-PAY | Clinics collect the balance themselves | 7.3 | Owner |
+| Q-AUDIO-ONLY | Audio-only and chat-only consults as separate services (deferred beyond the MVP) | 6.1 | Owner |
+| Q-CLINIC-PAY | Clinics collect the balance themselves (deferred beyond the MVP) | 7.3 | Owner |
 | Q-LABS | NABL only; who collects samples | 7.6, 7.8 | Owner |
 | Q-VAULT | Retention, quota, paid storage; may providers download shared records | 8.2, 8.5 | Lawyer and owner |
 | Q-PLANS | First plans, prices, who funds entitlements; coupon values and caps | 9.1, 9.6 | Owner |
