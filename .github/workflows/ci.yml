@@ -121,7 +121,7 @@ jobs:
       CI: true
       E2E_API: 1
       API_ORIGIN: http://localhost:3001
-      FEATURE_FLAGS: sample-patient-note,accounts
+      FEATURE_FLAGS: accounts
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
