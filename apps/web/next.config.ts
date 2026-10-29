@@ -14,6 +14,8 @@ const sourceMaps = process.env.SOURCE_MAPS === 'upload';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // No Next.js dev-tools badge over the pages in `next dev`; production builds never show it.
+  devIndicators: false,
   poweredByHeader: false,
   productionBrowserSourceMaps: sourceMaps,
   // Modern formats only (PF-05.1).
