@@ -11,6 +11,7 @@ import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { money } from '../booking/money';
+import { ProviderVisitPanel } from '../visit/ProviderVisitPanel';
 
 /** A provider's bookings (BK-07); opening one shows the address and contact once confirmed (HS-02). */
 export function WorkView() {
@@ -97,6 +98,13 @@ function WorkDetail({
             <dd>{money(booking.earningPaise)}</dd>
           </dl>
           {booking.notes && <p>{t('requests.notes', { notes: booking.notes })}</p>}
+          <ProviderVisitPanel
+            booking={booking}
+            onChanged={async () => {
+              await reload();
+              await onChanged();
+            }}
+          />
           {error && (
             <Notice tone="danger" live>
               {t(error)}

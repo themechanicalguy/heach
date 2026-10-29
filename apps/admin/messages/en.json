@@ -13,7 +13,9 @@
     "signOut": "Sign out",
     "admins": "Admins",
     "password": "My password",
-    "catalogue": "Catalogue"
+    "catalogue": "Catalogue",
+    "tickets": "Tickets",
+    "reviews": "Reviews"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -56,7 +58,8 @@
     "booking_transition_refused": "This booking cannot be changed in its current status.",
     "refund_exceeds_paid": "The refund is more than what is left to refund.",
     "provider_busy": "That provider is busy at this time.",
-    "listing_not_eligible": "That listing cannot take this booking."
+    "listing_not_eligible": "That listing cannot take this booking.",
+    "break_glass_required": "Open the private details first (break-glass)."
   },
   "users": {
     "title": "Users",
@@ -304,5 +307,61 @@
     "runNow": "Run payouts now",
     "ran": "Payout run finished: {count} providers.",
     "export": "Download CSV"
+  },
+  "tickets": {
+    "title": "Complaints and safety",
+    "intro": "Safety concerns (P0) come first. Private text opens only with break-glass: a reason, 30 minutes, and the patient sees it.",
+    "caption": "Tickets",
+    "kind": "Kind",
+    "priority": "Priority",
+    "topic": "Topic",
+    "status": "Status",
+    "raised": "Raised",
+    "open": "Open",
+    "empty": "No open tickets.",
+    "assign": "Assign to me",
+    "breakGlass": "Open private details",
+    "reason": "Reason",
+    "restricted": "Private details (until {time})",
+    "description": "Description",
+    "notes": "Internal notes",
+    "addNote": "Add note",
+    "note": "Note",
+    "resolve": "Resolve",
+    "resolution": "Resolution",
+    "close": "Close",
+    "done": "Saved.",
+    "reasons": {
+      "safety_investigation": "Safety investigation",
+      "complaint_investigation": "Complaint investigation",
+      "legal_request": "Legal request"
+    },
+    "resolutions": {
+      "resolved_with_patient": "Resolved with the patient",
+      "resolved_with_provider": "Resolved with the provider",
+      "refund_issued": "Refund issued",
+      "provider_suspended": "Provider suspended",
+      "no_action_needed": "No action needed",
+      "duplicate": "Duplicate"
+    }
+  },
+  "reviews": {
+    "title": "Reported reviews",
+    "intro": "Hide a review only with a reason; it stays recorded.",
+    "caption": "Reported reviews",
+    "stars": "Stars",
+    "comment": "Comment",
+    "hidden": "Hidden",
+    "empty": "No reported reviews.",
+    "hide": "Hide",
+    "reason": "Reason",
+    "yes": "Yes",
+    "no": "No",
+    "reasons": {
+      "abusive": "Abusive",
+      "personal_data": "Personal data",
+      "not_about_service": "Not about the service",
+      "fake": "Fake"
+    }
   }
 }

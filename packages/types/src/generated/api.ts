@@ -1156,6 +1156,134 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/tickets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['TicketsController_mine'];
+    put?: never;
+    post: operations['TicketsController_raise'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/access-history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['TicketsController_history'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/tickets': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminTicketsController_queue'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/tickets/{id}/assign': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminTicketsController_assign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/tickets/{id}/notes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminTicketsController_note'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/tickets/{id}/resolve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminTicketsController_resolve'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/tickets/{id}/break-glass': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminTicketsController_breakGlass'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/tickets/{id}/restricted': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminTicketsController_restricted'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/bookings': {
     parameters: {
       query?: never;
@@ -1470,6 +1598,246 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['AdminBookingsController_reassign'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/code': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PatientVisitsController_code'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/shifts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PatientVisitsController_shifts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/visit-notes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PatientVisitsController_notes'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/provider-no-show': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['PatientVisitsController_providerAbsent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderVisitsController_start'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/complete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderVisitsController_complete'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/no-show': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderVisitsController_patientAbsent'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/shifts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProviderVisitsController_shifts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/shifts/{day}/check-in': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderVisitsController_checkIn'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/bookings/{id}/shifts/{day}/check-out': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ProviderVisitsController_checkOut'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/bookings/{id}/review': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ReviewsController_rate'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/providers/{id}/reviews': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ReviewsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/reviews/{id}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['ReviewsController_report'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/reviews': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminReviewsController_reported'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/reviews/{id}/hide': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminReviewsController_hide'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2499,6 +2867,69 @@ export interface components {
       commissionBps: number;
       runs: components['schemas']['PayoutRunDto'][];
     };
+    TicketInputDto: {
+      /** Format: uuid */
+      bookingId?: string;
+      /** @enum {string} */
+      kind: 'safety' | 'complaint' | 'help';
+      /** @enum {string} */
+      topic:
+        | 'safety_threat'
+        | 'harassment'
+        | 'clinical_emergency'
+        | 'service_quality'
+        | 'billing'
+        | 'no_show'
+        | 'other';
+      description?: string;
+    };
+    TicketDto: {
+      /** Format: uuid */
+      id: string;
+      bookingId: string | null;
+      kind: string;
+      priority: string;
+      topic: string;
+      /** @enum {string} */
+      status: 'open' | 'assigned' | 'resolved';
+      resolution: string | null;
+      raisedByRole: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    AccessEntryDto: {
+      adminRole: string;
+      reason: string;
+      /** Format: date-time */
+      grantedAt: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    NoteInputDto: {
+      note: string;
+    };
+    ResolveDto: {
+      /** @enum {string} */
+      resolution:
+        | 'resolved_with_patient'
+        | 'resolved_with_provider'
+        | 'refund_issued'
+        | 'provider_suspended'
+        | 'no_action_needed'
+        | 'duplicate';
+    };
+    BreakGlassDto: {
+      /** @enum {string} */
+      reason: 'safety_investigation' | 'complaint_investigation' | 'legal_request';
+    };
+    TicketRestrictedDto: {
+      description: string | null;
+      notes: string[];
+      /** Format: date-time */
+      grantExpiresAt: string;
+    };
     UploadDto: {
       /** @enum {string} */
       contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
@@ -2594,6 +3025,8 @@ export interface components {
       kind: 'visit' | 'shift' | 'lab_test';
       /** @enum {string} */
       matching: 'chosen' | 'any';
+      /** @description To book the same again in one step (BK-09) */
+      listingId: string | null;
       /** Format: date-time */
       startsAt: string;
       /** Format: date-time */
@@ -2641,6 +3074,8 @@ export interface components {
       kind: 'visit' | 'shift' | 'lab_test';
       /** @enum {string} */
       matching: 'chosen' | 'any';
+      /** @description To book the same again in one step (BK-09) */
+      listingId: string | null;
       /** Format: date-time */
       startsAt: string;
       /** Format: date-time */
@@ -2675,6 +3110,8 @@ export interface components {
       lateRefundPercent: number;
       attendantAdvancePercent: number;
       acceptanceWindowMinutes: number;
+      /** @description How long a provider waits before marking a patient absent (A15) */
+      noShowWaitMinutes: number;
     };
     ProviderRequestDto: {
       /** Format: uuid */
@@ -2723,6 +3160,8 @@ export interface components {
       kind: 'visit' | 'shift' | 'lab_test';
       /** @enum {string} */
       matching: 'chosen' | 'any';
+      /** @description To book the same again in one step (BK-09) */
+      listingId: string | null;
       /** Format: date-time */
       startsAt: string;
       /** Format: date-time */
@@ -2754,6 +3193,70 @@ export interface components {
        * @description Listing of the new provider
        */
       listingId: string;
+    };
+    VisitCodeDto: {
+      /** @description Show this to the provider only when they are at the door */
+      code: string;
+      /** @description `visit`, or the shift and whether it checks in or out */
+      moment: string;
+    };
+    ShiftDto: {
+      dayIndex: number;
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      /** @enum {string} */
+      status: 'scheduled' | 'checked_in' | 'checked_out' | 'missed' | 'replaced';
+      /** Format: date-time */
+      checkedInAt: string | null;
+      /** Format: date-time */
+      checkedOutAt: string | null;
+    };
+    VisitRecordDto: {
+      procedure: string;
+      observations: string;
+      advice: string;
+      /** Format: date-time */
+      completedAt: string;
+    };
+    CodeDto: {
+      code: string;
+    };
+    VisitNotesDto: {
+      procedure: string;
+      observations: string;
+      advice: string;
+    };
+    ReviewInputDto: {
+      stars: number;
+      /** @description Shown publicly on the provider profile */
+      comment?: string;
+    };
+    ReviewDto: {
+      /** Format: uuid */
+      id: string;
+      stars: number;
+      comment: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    AdminReviewDto: {
+      /** Format: uuid */
+      id: string;
+      stars: number;
+      comment: string | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: uuid */
+      providerId: string;
+      reported: boolean;
+      hidden: boolean;
+      hiddenReason: string | null;
+    };
+    HideDto: {
+      /** @enum {string} */
+      reason: 'abusive' | 'personal_data' | 'not_about_service' | 'fake';
     };
     MemberDto: {
       /** Format: uuid */
@@ -4403,6 +4906,8 @@ export interface operations {
         maxFeePaise?: number;
         /** @description Language of the result text */
         locale?: 'or' | 'en' | 'hi';
+        /** @description Lowest average rating (SD-03) */
+        minRating?: number;
       };
       header?: never;
       path?: never;
@@ -4539,6 +5044,197 @@ export interface operations {
         };
         content: {
           'application/json': string;
+        };
+      };
+    };
+  };
+  TicketsController_mine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TicketDto'][];
+        };
+      };
+    };
+  };
+  TicketsController_raise: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TicketInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TicketDto'];
+        };
+      };
+    };
+  };
+  TicketsController_history: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessEntryDto'][];
+        };
+      };
+    };
+  };
+  AdminTicketsController_queue: {
+    parameters: {
+      query?: {
+        status?: 'open' | 'assigned' | 'resolved';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TicketDto'][];
+        };
+      };
+    };
+  };
+  AdminTicketsController_assign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminTicketsController_note: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['NoteInputDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminTicketsController_resolve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ResolveDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminTicketsController_breakGlass: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['BreakGlassDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminTicketsController_restricted: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TicketRestrictedDto'];
         };
       };
     };
@@ -4991,6 +5687,329 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['ReassignDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PatientVisitsController_code: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VisitCodeDto'];
+        };
+      };
+    };
+  };
+  PatientVisitsController_shifts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ShiftDto'][];
+        };
+      };
+    };
+  };
+  PatientVisitsController_notes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['VisitRecordDto'];
+        };
+      };
+    };
+  };
+  PatientVisitsController_providerAbsent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderVisitsController_start: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CodeDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderVisitsController_complete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VisitNotesDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderVisitsController_patientAbsent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderVisitsController_shifts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ShiftDto'][];
+        };
+      };
+    };
+  };
+  ProviderVisitsController_checkIn: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        day: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CodeDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProviderVisitsController_checkOut: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        day: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CodeDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ReviewsController_rate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReviewInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReviewDto'];
+        };
+      };
+    };
+  };
+  ReviewsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReviewDto'][];
+        };
+      };
+    };
+  };
+  ReviewsController_report: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminReviewsController_reported: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminReviewDto'][];
+        };
+      };
+    };
+  };
+  AdminReviewsController_hide: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['HideDto'];
       };
     };
     responses: {

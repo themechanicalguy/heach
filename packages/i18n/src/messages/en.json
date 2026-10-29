@@ -158,7 +158,16 @@
     "booking_transition_refused": "This booking cannot be changed now.",
     "refund_exceeds_paid": "A refund cannot be more than what was paid.",
     "webhook_signature": "Payment could not be confirmed.",
-    "listing_not_eligible": "That provider cannot take this booking."
+    "listing_not_eligible": "That provider cannot take this booking.",
+    "no_code_now": "There is no visit to start right now.",
+    "code_incorrect": "That code is not right. Ask the patient again.",
+    "code_locked": "Too many wrong codes. Contact support.",
+    "use_shift_check_in": "Use the shift check-in.",
+    "balance_due": "The patient must pay the balance first.",
+    "no_show_too_early": "It is too early to report this.",
+    "review_not_allowed": "You can rate after the visit is complete.",
+    "review_exists": "You have already rated this visit.",
+    "break_glass_required": "Open the ticket's private details first."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -721,5 +730,75 @@
     "title": "Alerts",
     "empty": "No alerts yet.",
     "markRead": "Mark all as read"
+  },
+  "visit": {
+    "showCode": "Show start code",
+    "code": "Your code: {code}",
+    "codeHint": "Share it only when the provider is at your door.",
+    "shifts": "Shifts",
+    "shift": "Day {day}: {status}",
+    "shiftStatus": {
+      "scheduled": "Scheduled",
+      "checked_in": "Checked in",
+      "checked_out": "Done",
+      "missed": "Missed",
+      "replaced": "Replaced"
+    },
+    "notesTitle": "Visit notes",
+    "procedure": "What was done",
+    "observations": "What was seen",
+    "advice": "Advice and next visit",
+    "providerAbsent": "The provider has not arrived",
+    "providerAbsentDone": "Reported. You will get a full refund.",
+    "rateTitle": "Rate this visit",
+    "stars": "Stars (1 to 5)",
+    "comment": "Comment (optional, shown publicly)",
+    "rate": "Send rating",
+    "rated": "Thank you for your rating.",
+    "bookAgain": "Book again",
+    "enterCode": "Patient's code",
+    "start": "Start visit",
+    "complete": "Complete visit",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "patientAbsent": "Patient not here",
+    "patientAbsentHint": "Wait {minutes} minutes and try to call first.",
+    "map": "Open in maps",
+    "started": "Visit started.",
+    "completed": "Visit completed."
+  },
+  "safety": {
+    "report": "Report a safety concern",
+    "title": "Safety concern",
+    "sop": "In a medical emergency call 108 now, then tell the family. We respond to safety concerns first.",
+    "topic": "What happened?",
+    "description": "Tell us more (optional)",
+    "send": "Send",
+    "sent": "Sent. Our team will contact you as soon as possible.",
+    "topics": {
+      "safety_threat": "I feel unsafe",
+      "harassment": "Harassment",
+      "clinical_emergency": "Medical emergency",
+      "service_quality": "Service quality",
+      "billing": "Payment or refund",
+      "no_show": "Someone did not come",
+      "other": "Something else"
+    }
+  },
+  "tickets": {
+    "title": "Help and complaints",
+    "empty": "No requests.",
+    "complain": "Complaint or help",
+    "status": {
+      "open": "Open",
+      "assigned": "Being handled",
+      "resolved": "Resolved"
+    }
+  },
+  "access": {
+    "title": "Who looked at my records",
+    "intro": "Support staff can open your private details only for an open ticket, for a limited time, and every time is listed here.",
+    "empty": "Nobody has.",
+    "entry": "{role} on {time}: {reason}"
   }
 }

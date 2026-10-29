@@ -22,6 +22,7 @@ import { DispatchRepository } from './dispatch.repository.js';
 export const DISPATCH_JOB = 'dispatch_wave';
 export const ACCEPTANCE_JOB = 'acceptance_timeout';
 export const REMINDER_JOB = 'booking_reminder';
+export const PROVIDER_NO_SHOW_JOB = 'provider_no_show_check';
 const MINUTE = 60_000;
 
 /**
@@ -168,6 +169,8 @@ export class DispatchService implements OnModuleInit {
           ? await this.assign(client, booking, offer.listingId, principal.userId)
           : noEffects();
       await this.lifecycle.apply(client, booking, 'accept', actorOf(principal));
+      if (booking.kind === 'shift')
+        await this.bookings.createShifts(client, booking, principal.userId);
       await this.remind(client, booking);
       result.messages.push({
         to: booking.bookerId,
@@ -254,6 +257,13 @@ export class DispatchService implements OnModuleInit {
   }
 
   private async remind(client: TransactionClient, booking: BookingRow): Promise<void> {
+    // An hour after the start with no visit begun, the provider is treated as absent (A12).
+    await this.jobs.enqueue(client, {
+      kind: PROVIDER_NO_SHOW_JOB,
+      payload: { bookingId: booking.id },
+      runAt: new Date(booking.startsAt.getTime() + 60 * MINUTE),
+      dedupeKey: `provider-no-show:${booking.id}`,
+    });
     for (const [label, minutes] of [
       ['24h', 1440],
       ['15m', 15],

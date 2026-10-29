@@ -152,6 +152,7 @@ export class BookingPolicyController {
       lateRefundPercent: await this.settings.get('late_cancellation_refund_percent'),
       attendantAdvancePercent: await this.settings.get('attendant_advance_percent'),
       acceptanceWindowMinutes: await this.settings.get('acceptance_window_minutes'),
+      noShowWaitMinutes: await this.settings.get('no_show_wait_minutes'),
     };
   }
 }
