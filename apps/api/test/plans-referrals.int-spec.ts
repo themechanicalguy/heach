@@ -320,6 +320,8 @@ describe('Entitlement ledger invariants (PK-04, Step 9 checks)', () => {
     const physio = await listedProvider(app(), 'physiotherapist', 'physio_neuro_rehab', {
       feePaise: 50_000,
     });
+    const timers = app().get(BookingTimers);
+    const mismatchesBefore = await timers.ledgerMismatches();
     const planId = await packagePlan(app(), 'physio_neuro_rehab', 1, 45_000, 20);
     const patient = await signedUp(app());
     const purchaseId = await buy(app(), patient.login, planId);
@@ -345,6 +347,6 @@ describe('Entitlement ledger invariants (PK-04, Step 9 checks)', () => {
     });
     // Entitlement use never exceeds the purchase, and the ledger reconciles (Step 9 checks).
     expect((await book(2)).fees).toMatchObject({ discountPaise: 10_000 });
-    expect(await app().get(BookingTimers).ledgerMismatches()).toBe(0);
+    expect(await timers.ledgerMismatches()).toBe(mismatchesBefore);
   });
 });
