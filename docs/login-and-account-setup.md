@@ -134,7 +134,7 @@ are applied where they fit; deviations are stated.
 | T12 | Admin web: sign-in with MFA, users, suspend and reinstate | Done |
 | T13 | Tests: unit, integration, E2E (locales, viewports) | Done: API unit and integration (215), web unit and E2E (27 with API, plus smoke), admin unit (9) and E2E (4) |
 | T14 | Docs: status page, threat model, local development | Done: status page, ADR 0014, local development, this record, follow-up register |
-| T15 | `pnpm check`, integration, classification, types, coverage | Done locally: `pnpm check` 37/37, integration 215/215, classification, types check, changed-line coverage 92.5 %; CI not run (no push) |
+| T15 | `pnpm check`, integration, classification, types, coverage | Done locally: `pnpm check` 37/37, integration 215/215, classification, types check, changed-line coverage 92.5 %; CI green on #94; the API-backed E2E run in CI since FU-29 (`API-backed E2E` job) |
 
 ## Progress
 
@@ -178,7 +178,6 @@ web screens; then web E2E and fixes. State on 29 October 2026:
 | Admin entry through port forwarding (FU-18) and `/api` on the admin site | Admin sign-in on the dev host | Owner approves the Caddyfile change in this branch and its deploy |
 | Commit `d82d707` | Design provenance | Owner pushes it |
 | Owner review | ADR 0014 (Proposed), decisions L-1 to L-14, OTP values (charter Q3-8) | Owner comments on the pull request |
-| Push, PR and CI | CI has not run on this branch | Owner authorises the push and the PR |
 | Deploy of `deploy/dev/Caddyfile` admin `/api` route | Admin sign-in on the dev host | Owner approves the merge (merging deploys to dev) |
 
 ## Next commands
@@ -196,8 +195,6 @@ E2E_API=1 E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL=http://localhost:80
 
 ## Remaining work (not done in this branch)
 
-- Wire the API-backed web and admin E2E into CI (the deploy-bundle job needs Mailpit, the
-  `accounts` flag and `SMS_PROVIDER=local` or a test-only SMS sink).
 - Linked patients for representatives (AC-03), account data rights (AC-06, PR-04).
 - Provider verification beyond setup: uploads (EN-07, PO-02), identity (KY), checklists (PO-01),
   payout with OTP (PO-06), verification queue (AD-02), assisted onboarding (AD-12), audit viewer
