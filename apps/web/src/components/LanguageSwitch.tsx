@@ -73,7 +73,9 @@ export function LanguageSwitch() {
         }}
       >
         <Icon name="globe" size={18} />
-        <span lang={locale}>{t(`locale.${locale}`)}</span>
+        <span lang={locale} className="language-switch__name">
+          {t(`locale.${locale}`)}
+        </span>
         <Icon name="chevron-down" size={16} />
       </button>
       <ul id={listId} className="language-switch__list" hidden={!open}>
