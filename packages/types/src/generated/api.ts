@@ -308,6 +308,86 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/me/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AccountDataController_correctProfile'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AccountDataController_exportData'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/deletion-request': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AccountDataController_requestDeletion'];
+    delete: operations['AccountDataController_cancelDeletion'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/mobile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AccountDataController_startMobileChange'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/mobile/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AccountDataController_verifyMobileChange'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/auth/test-login': {
     parameters: {
       query?: never;
@@ -404,6 +484,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/v1/auth/password/change': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminAuthController_changePassword'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/admin/v1/me': {
     parameters: {
       query?: never;
@@ -414,6 +510,86 @@ export interface paths {
     get: operations['AdminAuthController_me'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/admins': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminManagementController_list'];
+    put?: never;
+    post: operations['AdminManagementController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/admins/{id}/role': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AdminManagementController_changeRole'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/admins/{id}/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AdminManagementController_setStatus'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/admins/{id}/password-reset': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminManagementController_resetPassword'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/admins/{id}/mfa-reset': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AdminManagementController_resetMfa'];
     delete?: never;
     options?: never;
     head?: never;
@@ -479,6 +655,150 @@ export interface paths {
     put?: never;
     post: operations['AdminUsersController_reinstate'];
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/organisation': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OrganisationsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/organisation/name': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OrganisationsController_name'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/organisation/invitations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['OrganisationsController_invite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/organisation/members/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['OrganisationsController_end'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/invitations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['InvitationsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/invitations/{id}/accept': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['InvitationsController_accept'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/invitations/{id}/decline': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['InvitationsController_decline'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/linked-patients': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['LinkedPatientsController_list'];
+    put?: never;
+    post: operations['LinkedPatientsController_add'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/linked-patients/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['LinkedPatientsController_edit'];
+    post?: never;
+    delete: operations['LinkedPatientsController_remove'];
     options?: never;
     head?: never;
     patch?: never;
@@ -628,6 +948,7 @@ export interface components {
         | 'nurse'
         | 'attendant'
         | 'lab'
+        | 'clinic_front_desk'
         | 'sample_collector'
         | null;
       fullName: string | null;
@@ -648,6 +969,15 @@ export interface components {
       purpose: 'terms' | 'privacy';
       /** @example 2026-10-draft.1 */
       version: string;
+    };
+    MembershipDto: {
+      /** @enum {string} */
+      role: 'clinic_front_desk' | 'sample_collector';
+      /** @enum {string} */
+      organisationKind: 'lab' | 'clinic';
+      organisationName: string;
+      /** @description Lab or clinic work opens only when this is true (O-1) */
+      organisationApproved: boolean;
     };
     MeDto: {
       /** @enum {string} */
@@ -675,6 +1005,12 @@ export interface components {
       setup: components['schemas']['SetupStateDto'];
       /** @description Current consent versions not yet given */
       consentsDue: components['schemas']['ConsentDto'][];
+      /** @description Active staff membership */
+      membership: components['schemas']['MembershipDto'] | null;
+      /** @description Open staff invitations addressed to this number */
+      invitations: number;
+      /** Format: date-time */
+      deletionRequestedAt: string | null;
     };
     SetupPatchDto: {
       /** @enum {string} */
@@ -687,8 +1023,7 @@ export interface components {
         | 'physiotherapist'
         | 'nurse'
         | 'attendant'
-        | 'lab'
-        | 'sample_collector';
+        | 'lab';
       fullName?: string;
       /** @enum {string} */
       gender?: 'female' | 'male' | 'other' | 'undisclosed';
@@ -698,6 +1033,11 @@ export interface components {
       organisationName?: string;
       /** @description The person confirms they are 18 or older */
       adultDeclared?: boolean;
+      /**
+       * Format: uuid
+       * @description An open staff invitation to accept instead of choosing a role (O-1)
+       */
+      invitationId?: string;
     };
     ConsentsDto: {
       consents: components['schemas']['ConsentDto'][];
@@ -717,10 +1057,71 @@ export interface components {
         | 'physiotherapist'
         | 'nurse'
         | 'attendant'
-        | 'lab'
-        | 'sample_collector';
+        | 'lab';
       languages?: ('or' | 'en' | 'hi')[];
       organisationName?: string;
+    };
+    ProfileCorrectionDto: {
+      fullName?: string;
+      /** @enum {string} */
+      gender?: 'female' | 'male' | 'other' | 'undisclosed';
+      /** @description Languages spoken */
+      languages?: ('or' | 'en' | 'hi')[];
+      /** @description The lab's name (labs only) */
+      organisationName?: string;
+    };
+    ExportConsentDto: {
+      purpose: string;
+      version: string;
+      locale: string;
+      /** Format: date-time */
+      givenAt: string;
+      /** Format: date-time */
+      withdrawnAt: string | null;
+    };
+    LinkedPatientDto: {
+      fullName: string;
+      /** @description Year of birth: the age without a full date (D-2) */
+      birthYear: number;
+      /** @enum {string} */
+      gender: 'female' | 'male' | 'other' | 'undisclosed';
+      /**
+       * @description Who this person is to the account holder
+       * @enum {string}
+       */
+      relationship:
+        | 'parent'
+        | 'child'
+        | 'spouse'
+        | 'sibling'
+        | 'grandparent'
+        | 'grandchild'
+        | 'other_relative'
+        | 'other';
+      /** Format: uuid */
+      id: string;
+    };
+    AccountExportDto: {
+      /** Format: date-time */
+      exportedAt: string;
+      /** @description The full number: this is the owner's own data */
+      mobile: string;
+      /** @enum {string} */
+      locale: 'or' | 'en' | 'hi';
+      profile: components['schemas']['SetupDraftDto'];
+      roles: components['schemas']['RoleGrantDto'][];
+      consents: components['schemas']['ExportConsentDto'][];
+      membership: components['schemas']['MembershipDto'] | null;
+      linkedPatients: components['schemas']['LinkedPatientDto'][];
+      /** Format: date-time */
+      deletionRequestedAt: string | null;
+    };
+    MobileChangeDto: {
+      /**
+       * @description Indian mobile number, with or without +91
+       * @example 9000000003
+       */
+      mobile: string;
     };
     TestLoginDto: {
       /** Format: uuid */
@@ -741,20 +1142,68 @@ export interface components {
       /** @description Single-use ticket for the TOTP step, valid 5 minutes */
       mfaTicket: string;
       enrolment?: components['schemas']['AdminEnrolmentDto'];
+      /** @description A temporary password: send a new one with the TOTP code (O-2) */
+      passwordChangeRequired: boolean;
     };
     AdminMfaDto: {
       mfaTicket: string;
       /** @example 123456 */
       code: string;
+      /** @description Required when the password is temporary (O-2) */
+      newPassword?: string;
     };
     AdminCodeDto: {
       /** @example 123456 */
       code: string;
     };
+    AdminPasswordChangeDto: {
+      currentPassword: string;
+      newPassword: string;
+    };
     AdminMeDto: {
       email: string;
       /** @enum {string} */
       role: 'super_admin' | 'verifier' | 'support' | 'finance';
+    };
+    AdminSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      /** @enum {string} */
+      role: 'super_admin' | 'verifier' | 'support' | 'finance';
+      /** @enum {string} */
+      status: 'active' | 'disabled';
+      mfaEnrolled: boolean;
+      mustChangePassword: boolean;
+      locked: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      lastSignInAt: string | null;
+    };
+    NewAdminDto: {
+      /** @example support@heach.invalid */
+      email: string;
+      /** @enum {string} */
+      role: 'super_admin' | 'verifier' | 'support' | 'finance';
+    };
+    CreatedAdminDto: {
+      /** @description Shown once; expires in 24 hours; changed at the next sign-in */
+      temporaryPassword: string;
+      /** Format: uuid */
+      id: string;
+    };
+    AdminRoleDto: {
+      /** @enum {string} */
+      role: 'super_admin' | 'verifier' | 'support' | 'finance';
+    };
+    AdminStatusDto: {
+      /** @enum {string} */
+      status: 'active' | 'disabled';
+    };
+    TemporaryPasswordDto: {
+      /** @description Shown once; expires in 24 hours; changed at the next sign-in */
+      temporaryPassword: string;
     };
     UserSummaryDto: {
       /** Format: uuid */
@@ -801,10 +1250,84 @@ export interface components {
       lastSignInAt: string | null;
       /** @description Full name; this read is audited */
       fullName: string | null;
+      /** Format: date-time */
+      deletionRequestedAt: string | null;
     };
     SuspendDto: {
       /** @enum {string} */
       reason: 'safety_concern' | 'fraud' | 'policy_breach' | 'user_request' | 'other';
+    };
+    MemberDto: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      role: 'clinic_front_desk' | 'sample_collector';
+      /** @enum {string} */
+      status: 'invited' | 'active';
+      /** @description Last four digits only */
+      mobile: string;
+      /** Format: date-time */
+      invitedAt: string;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      acceptedAt: string | null;
+    };
+    OrganisationDto: {
+      /** @enum {string} */
+      kind: 'lab' | 'clinic';
+      /** @description Null until a clinic is named */
+      name: string | null;
+      /** @description The owner's application is approved; staff work opens then */
+      approved: boolean;
+      /**
+       * @description The role an invitation from here carries
+       * @enum {string}
+       */
+      staffRole: 'clinic_front_desk' | 'sample_collector';
+      members: components['schemas']['MemberDto'][];
+    };
+    OrganisationNameDto: {
+      /** @description The clinic's or lab's name */
+      name: string;
+    };
+    InviteDto: {
+      /**
+       * @description Indian mobile number of the person invited
+       * @example 9000000002
+       */
+      mobile: string;
+    };
+    InvitationDto: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      role: 'clinic_front_desk' | 'sample_collector';
+      /** @enum {string} */
+      organisationKind: 'lab' | 'clinic';
+      organisationName: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    LinkedPatientInputDto: {
+      fullName: string;
+      /** @description Year of birth: the age without a full date (D-2) */
+      birthYear: number;
+      /** @enum {string} */
+      gender: 'female' | 'male' | 'other' | 'undisclosed';
+      /**
+       * @description Who this person is to the account holder
+       * @enum {string}
+       */
+      relationship:
+        | 'parent'
+        | 'child'
+        | 'spouse'
+        | 'sibling'
+        | 'grandparent'
+        | 'grandchild'
+        | 'other_relative'
+        | 'other';
     };
   };
   responses: never;
@@ -1269,6 +1792,151 @@ export interface operations {
       };
     };
   };
+  AccountDataController_correctProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProfileCorrectionDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AccountDataController_exportData: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccountExportDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AccountDataController_requestDeletion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AccountDataController_cancelDeletion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AccountDataController_startMobileChange: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MobileChangeDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OtpChallengeDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AccountDataController_verifyMobileChange: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReverifyDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   TestLoginController_testLogin: {
     parameters: {
       query?: never;
@@ -1402,6 +2070,27 @@ export interface operations {
       };
     };
   };
+  AdminAuthController_changePassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdminPasswordChangeDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AdminAuthController_me: {
     parameters: {
       query?: never;
@@ -1418,6 +2107,141 @@ export interface operations {
         content: {
           'application/json': components['schemas']['AdminMeDto'];
         };
+      };
+    };
+  };
+  AdminManagementController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AdminSummaryDto'][];
+        };
+      };
+    };
+  };
+  AdminManagementController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['NewAdminDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CreatedAdminDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminManagementController_changeRole: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdminRoleDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminManagementController_setStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdminStatusDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminManagementController_resetPassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TemporaryPasswordDto'];
+        };
+      };
+    };
+  };
+  AdminManagementController_resetMfa: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -1515,6 +2339,241 @@ export interface operations {
       };
       /** @description reverification_required */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganisationsController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrganisationDto'];
+        };
+      };
+    };
+  };
+  OrganisationsController_name: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OrganisationNameDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganisationsController_invite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InviteDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrganisationsController_end: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  InvitationsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InvitationDto'][];
+        };
+      };
+    };
+  };
+  InvitationsController_accept: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  InvitationsController_decline: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LinkedPatientsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LinkedPatientDto'][];
+        };
+      };
+    };
+  };
+  LinkedPatientsController_add: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LinkedPatientInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LinkedPatientDto'];
+        };
+      };
+    };
+  };
+  LinkedPatientsController_edit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LinkedPatientInputDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LinkedPatientsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
         headers: {
           [name: string]: unknown;
         };

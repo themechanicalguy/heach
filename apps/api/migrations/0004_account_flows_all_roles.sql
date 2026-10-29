@@ -77,7 +77,9 @@ CREATE TABLE app.membership (
   expires_at timestamptz NOT NULL,
   accepted_at timestamptz,
   ended_at timestamptz,
-  CHECK ((status = 'active') = (account_id IS NOT NULL AND accepted_at IS NOT NULL)),
+  -- An accepted membership stays bound to its account after it ends (audit trail).
+  CHECK (status <> 'active' OR (account_id IS NOT NULL AND accepted_at IS NOT NULL)),
+  CHECK ((account_id IS NULL) = (accepted_at IS NULL)),
   CHECK ((status IN ('invited', 'active')) = (ended_at IS NULL))
 );
 -- One open invitation or membership per organisation and number; one active membership per

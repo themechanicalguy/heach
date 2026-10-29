@@ -1,6 +1,7 @@
 import {
   initialRole,
   isRegistrableRole,
+  isStaffRole,
   missingFields,
   nextSetupStep,
   type SetupDraft,
@@ -61,5 +62,15 @@ describe('Account setup rules (L-2, L-5)', () => {
     expect(initialRole([provider, care], 'nurse')).toBe('nurse');
     expect(initialRole([care], 'nurse')).toBe('patient');
     expect(initialRole([provider], 'patient')).toBe('nurse');
+  });
+
+  it('O-1 staff roles are never self-registrable and need no spoken languages', () => {
+    const base = { ...empty, fullName: 'Synthetic', gender: 'male' as const, adultDeclared: true };
+    for (const role of ['sample_collector', 'clinic_front_desk'] as const) {
+      expect(isRegistrableRole(role)).toBe(false);
+      expect(isStaffRole(role)).toBe(true);
+      expect(missingFields({ ...base, role })).toEqual([]);
+    }
+    expect(isStaffRole('lab')).toBe(false);
   });
 });

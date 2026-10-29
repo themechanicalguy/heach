@@ -559,6 +559,162 @@
         "tags": ["account"]
       }
     },
+    "/v1/me/profile": {
+      "put": {
+        "operationId": "AccountDataController_correctProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileCorrectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/export": {
+      "get": {
+        "operationId": "AccountDataController_exportData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountExportDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/deletion-request": {
+      "post": {
+        "operationId": "AccountDataController_requestDeletion",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      },
+      "delete": {
+        "operationId": "AccountDataController_cancelDeletion",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/mobile": {
+      "post": {
+        "operationId": "AccountDataController_startMobileChange",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MobileChangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtpChallengeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "reverification_required"
+          },
+          "429": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/mobile/verify": {
+      "post": {
+        "operationId": "AccountDataController_verifyMobileChange",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverifyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
     "/v1/auth/test-login": {
       "post": {
         "operationId": "TestLoginController_testLogin",
@@ -734,6 +890,33 @@
         "tags": ["admin"]
       }
     },
+    "/admin/v1/auth/password/change": {
+      "post": {
+        "operationId": "AdminAuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPasswordChangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/admin/v1/me": {
       "get": {
         "operationId": "AdminAuthController_me",
@@ -748,6 +931,199 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/admins": {
+      "get": {
+        "operationId": "AdminManagementController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      },
+      "post": {
+        "operationId": "AdminManagementController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewAdminDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedAdminDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/admins/{id}/role": {
+      "put": {
+        "operationId": "AdminManagementController_changeRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/admins/{id}/status": {
+      "put": {
+        "operationId": "AdminManagementController_setStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/admins/{id}/password-reset": {
+      "post": {
+        "operationId": "AdminManagementController_resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemporaryPasswordDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/admins/{id}/mfa-reset": {
+      "post": {
+        "operationId": "AdminManagementController_resetMfa",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
           }
         },
         "security": [
@@ -910,6 +1286,314 @@
           }
         ],
         "tags": ["admin"]
+      }
+    },
+    "/v1/organisation": {
+      "get": {
+        "operationId": "OrganisationsController_view",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganisationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["organisation"]
+      }
+    },
+    "/v1/organisation/name": {
+      "put": {
+        "operationId": "OrganisationsController_name",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganisationNameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["organisation"]
+      }
+    },
+    "/v1/organisation/invitations": {
+      "post": {
+        "operationId": "OrganisationsController_invite",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["organisation"]
+      }
+    },
+    "/v1/organisation/members/{id}": {
+      "delete": {
+        "operationId": "OrganisationsController_end",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["organisation"]
+      }
+    },
+    "/v1/me/invitations": {
+      "get": {
+        "operationId": "InvitationsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvitationDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/invitations/{id}/accept": {
+      "post": {
+        "operationId": "InvitationsController_accept",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/invitations/{id}/decline": {
+      "post": {
+        "operationId": "InvitationsController_decline",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/linked-patients": {
+      "get": {
+        "operationId": "LinkedPatientsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LinkedPatientDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      },
+      "post": {
+        "operationId": "LinkedPatientsController_add",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkedPatientInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkedPatientDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/linked-patients/{id}": {
+      "put": {
+        "operationId": "LinkedPatientsController_edit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkedPatientInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      },
+      "delete": {
+        "operationId": "LinkedPatientsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
       }
     }
   },
@@ -1194,6 +1878,7 @@
               "nurse",
               "attendant",
               "lab",
+              "clinic_front_desk",
               "sample_collector"
             ],
             "nullable": true
@@ -1255,6 +1940,27 @@
         },
         "required": ["purpose", "version"]
       },
+      "MembershipDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["clinic_front_desk", "sample_collector"]
+          },
+          "organisationKind": {
+            "type": "string",
+            "enum": ["lab", "clinic"]
+          },
+          "organisationName": {
+            "type": "string"
+          },
+          "organisationApproved": {
+            "type": "boolean",
+            "description": "Lab or clinic work opens only when this is true (O-1)"
+          }
+        },
+        "required": ["role", "organisationKind", "organisationName", "organisationApproved"]
+      },
       "MeDto": {
         "type": "object",
         "properties": {
@@ -1300,9 +2006,38 @@
             "items": {
               "$ref": "#/components/schemas/ConsentDto"
             }
+          },
+          "membership": {
+            "nullable": true,
+            "description": "Active staff membership",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MembershipDto"
+              }
+            ]
+          },
+          "invitations": {
+            "type": "number",
+            "description": "Open staff invitations addressed to this number"
+          },
+          "deletionRequestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
-        "required": ["locale", "mobile", "activeRole", "roles", "setup", "consentsDue"]
+        "required": [
+          "locale",
+          "mobile",
+          "activeRole",
+          "roles",
+          "setup",
+          "consentsDue",
+          "membership",
+          "invitations",
+          "deletionRequestedAt"
+        ]
       },
       "SetupPatchDto": {
         "type": "object",
@@ -1318,8 +2053,7 @@
               "physiotherapist",
               "nurse",
               "attendant",
-              "lab",
-              "sample_collector"
+              "lab"
             ]
           },
           "fullName": {
@@ -1346,6 +2080,11 @@
           "adultDeclared": {
             "type": "boolean",
             "description": "The person confirms they are 18 or older"
+          },
+          "invitationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "An open staff invitation to accept instead of choosing a role (O-1)"
           }
         }
       },
@@ -1385,8 +2124,7 @@
               "physiotherapist",
               "nurse",
               "attendant",
-              "lab",
-              "sample_collector"
+              "lab"
             ]
           },
           "languages": {
@@ -1402,6 +2140,167 @@
           }
         },
         "required": ["role"]
+      },
+      "ProfileCorrectionDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male", "other", "undisclosed"]
+          },
+          "languages": {
+            "type": "array",
+            "description": "Languages spoken",
+            "items": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          },
+          "organisationName": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "The lab's name (labs only)"
+          }
+        }
+      },
+      "ExportConsentDto": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "givenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "withdrawnAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": ["purpose", "version", "locale", "givenAt", "withdrawnAt"]
+      },
+      "LinkedPatientDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "birthYear": {
+            "type": "number",
+            "minimum": 1900,
+            "description": "Year of birth: the age without a full date (D-2)"
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male", "other", "undisclosed"]
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "parent",
+              "child",
+              "spouse",
+              "sibling",
+              "grandparent",
+              "grandchild",
+              "other_relative",
+              "other"
+            ],
+            "description": "Who this person is to the account holder"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["fullName", "birthYear", "gender", "relationship", "id"]
+      },
+      "AccountExportDto": {
+        "type": "object",
+        "properties": {
+          "exportedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mobile": {
+            "type": "string",
+            "description": "The full number: this is the owner's own data"
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          },
+          "profile": {
+            "$ref": "#/components/schemas/SetupDraftDto"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleGrantDto"
+            }
+          },
+          "consents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportConsentDto"
+            }
+          },
+          "membership": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MembershipDto"
+              }
+            ]
+          },
+          "linkedPatients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkedPatientDto"
+            }
+          },
+          "deletionRequestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "exportedAt",
+          "mobile",
+          "locale",
+          "profile",
+          "roles",
+          "consents",
+          "membership",
+          "linkedPatients",
+          "deletionRequestedAt"
+        ]
+      },
+      "MobileChangeDto": {
+        "type": "object",
+        "properties": {
+          "mobile": {
+            "type": "string",
+            "description": "Indian mobile number, with or without +91",
+            "example": "9000000003"
+          }
+        },
+        "required": ["mobile"]
       },
       "TestLoginDto": {
         "type": "object",
@@ -1449,9 +2348,13 @@
           },
           "enrolment": {
             "$ref": "#/components/schemas/AdminEnrolmentDto"
+          },
+          "passwordChangeRequired": {
+            "type": "boolean",
+            "description": "A temporary password: send a new one with the TOTP code (O-2)"
           }
         },
-        "required": ["mfaTicket"]
+        "required": ["mfaTicket", "passwordChangeRequired"]
       },
       "AdminMfaDto": {
         "type": "object",
@@ -1462,6 +2365,10 @@
           "code": {
             "type": "string",
             "example": "123456"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Required when the password is temporary (O-2)"
           }
         },
         "required": ["mfaTicket", "code"]
@@ -1476,6 +2383,19 @@
         },
         "required": ["code"]
       },
+      "AdminPasswordChangeDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 12
+          }
+        },
+        "required": ["currentPassword", "newPassword"]
+      },
       "AdminMeDto": {
         "type": "object",
         "properties": {
@@ -1488,6 +2408,113 @@
           }
         },
         "required": ["email", "role"]
+      },
+      "AdminSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["super_admin", "verifier", "support", "finance"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "disabled"]
+          },
+          "mfaEnrolled": {
+            "type": "boolean"
+          },
+          "mustChangePassword": {
+            "type": "boolean"
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSignInAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "status",
+          "mfaEnrolled",
+          "mustChangePassword",
+          "locked",
+          "createdAt",
+          "lastSignInAt"
+        ]
+      },
+      "NewAdminDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "support@heach.invalid"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["super_admin", "verifier", "support", "finance"]
+          }
+        },
+        "required": ["email", "role"]
+      },
+      "CreatedAdminDto": {
+        "type": "object",
+        "properties": {
+          "temporaryPassword": {
+            "type": "string",
+            "description": "Shown once; expires in 24 hours; changed at the next sign-in"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["temporaryPassword", "id"]
+      },
+      "AdminRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["super_admin", "verifier", "support", "finance"]
+          }
+        },
+        "required": ["role"]
+      },
+      "AdminStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["active", "disabled"]
+          }
+        },
+        "required": ["status"]
+      },
+      "TemporaryPasswordDto": {
+        "type": "object",
+        "properties": {
+          "temporaryPassword": {
+            "type": "string",
+            "description": "Shown once; expires in 24 hours; changed at the next sign-in"
+          }
+        },
+        "required": ["temporaryPassword"]
       },
       "UserSummaryDto": {
         "type": "object",
@@ -1615,6 +2642,11 @@
             "type": "string",
             "nullable": true,
             "description": "Full name; this read is audited"
+          },
+          "deletionRequestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "required": [
@@ -1627,7 +2659,8 @@
           "setupComplete",
           "createdAt",
           "lastSignInAt",
-          "fullName"
+          "fullName",
+          "deletionRequestedAt"
         ]
       },
       "SuspendDto": {
@@ -1639,6 +2672,151 @@
           }
         },
         "required": ["reason"]
+      },
+      "MemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["clinic_front_desk", "sample_collector"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["invited", "active"]
+          },
+          "mobile": {
+            "type": "string",
+            "description": "Last four digits only"
+          },
+          "invitedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": ["id", "role", "status", "mobile", "invitedAt", "expiresAt", "acceptedAt"]
+      },
+      "OrganisationDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["lab", "clinic"]
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null until a clinic is named"
+          },
+          "approved": {
+            "type": "boolean",
+            "description": "The owner's application is approved; staff work opens then"
+          },
+          "staffRole": {
+            "type": "string",
+            "enum": ["clinic_front_desk", "sample_collector"],
+            "description": "The role an invitation from here carries"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberDto"
+            }
+          }
+        },
+        "required": ["kind", "name", "approved", "staffRole", "members"]
+      },
+      "OrganisationNameDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "The clinic's or lab's name"
+          }
+        },
+        "required": ["name"]
+      },
+      "InviteDto": {
+        "type": "object",
+        "properties": {
+          "mobile": {
+            "type": "string",
+            "description": "Indian mobile number of the person invited",
+            "example": "9000000002"
+          }
+        },
+        "required": ["mobile"]
+      },
+      "InvitationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["clinic_front_desk", "sample_collector"]
+          },
+          "organisationKind": {
+            "type": "string",
+            "enum": ["lab", "clinic"]
+          },
+          "organisationName": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "role", "organisationKind", "organisationName", "expiresAt"]
+      },
+      "LinkedPatientInputDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "birthYear": {
+            "type": "number",
+            "minimum": 1900,
+            "description": "Year of birth: the age without a full date (D-2)"
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male", "other", "undisclosed"]
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "parent",
+              "child",
+              "spouse",
+              "sibling",
+              "grandparent",
+              "grandchild",
+              "other_relative",
+              "other"
+            ],
+            "description": "Who this person is to the account holder"
+          }
+        },
+        "required": ["fullName", "birthYear", "gender", "relationship"]
       }
     }
   }

@@ -19,6 +19,9 @@ const base: Me = {
     },
   },
   consentsDue: [],
+  membership: null,
+  invitations: 0,
+  deletionRequestedAt: null,
 };
 
 describe('Safe redirects', () => {

@@ -17,6 +17,7 @@ function syntheticUser(): UserDetail {
     setupComplete: true,
     createdAt: '2026-10-29T00:00:00.000Z',
     lastSignInAt: null,
+    deletionRequestedAt: null,
   };
 }
 
