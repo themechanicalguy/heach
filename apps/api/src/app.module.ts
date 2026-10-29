@@ -14,6 +14,10 @@ import { FlagsModule } from './flags/flags.module.js';
 import { HealthController } from './health/health.controller.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { OnboardingModule } from './onboarding/onboarding.module.js';
+import { AvailabilityModule } from './availability/availability.module.js';
+import { CatalogueModule } from './catalogue/catalogue.module.js';
+import { ListingsModule } from './listings/listings.module.js';
+import { SearchModule } from './search/search.module.js';
 import { ObservabilityModule } from './observability/observability.module.js';
 import { ReadinessService } from './health/readiness.service.js';
 import { SampleNotesModule } from './sample-notes/sample-notes.module.js';
@@ -43,6 +47,10 @@ export class AppModule {
         UploadsModule,
         NotificationsModule,
         OnboardingModule,
+        CatalogueModule,
+        ListingsModule,
+        AvailabilityModule,
+        SearchModule,
       ],
       controllers: [HealthController],
       providers: [

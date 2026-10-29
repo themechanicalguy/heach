@@ -5,6 +5,7 @@ import { isStaffRole } from '../setup/roles';
 import { ConsentUpdate } from '../setup/ConsentUpdate';
 import { IdentityReturn } from '../onboarding/IdentityReturn';
 import { OnboardingView } from '../onboarding/OnboardingView';
+import { ProviderServicesView } from '../provider-services/ProviderServicesView';
 import { TeamView } from '../team/TeamView';
 import { AccountView } from './AccountView';
 import { RequireAccount } from './RequireAccount';
@@ -35,6 +36,11 @@ export function ProviderPage() {
 /** The identity partner's return page (KY-01). */
 export function IdentityReturnPage() {
   return <RequireAccount page="provider">{() => <IdentityReturn />}</RequireAccount>;
+}
+
+/** An Approved provider's services, area and hours (Step 4). */
+export function ProviderServicesPage() {
+  return <RequireAccount page="provider">{() => <ProviderServicesView />}</RequireAccount>;
 }
 
 export function PeoplePage() {

@@ -16,3 +16,20 @@ export function formatDate(date: Date, locale: Locale): string {
     timeZone: 'Asia/Kolkata',
   }).format(date);
 }
+
+/** A date and time in the user's language, in India time (AV-04). */
+export function formatDateTime(date: Date, locale: Locale): string {
+  return new Intl.DateTimeFormat(`${locale}-IN`, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'Asia/Kolkata',
+  }).format(date);
+}
+
+/** Paise from the API as rupees text (I18N-03). */
+export function formatPaise(paise: number): string {
+  return formatCurrency(paise / 100);
+}

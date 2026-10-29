@@ -25,10 +25,26 @@ export function ShellNav({ accounts, sample }: Readonly<Props>) {
   const { account } = useAccount();
   const { status } = useSession();
   const provider = account.state === 'ready' && isProviderRole(account.me.activeRole);
+  const approved =
+    account.state === 'ready' &&
+    account.me.roles.some(
+      (grant) => grant.side === 'provider' && grant.applicationStatus === 'approved',
+    );
   const items = [
     { href: `/${locale}`, label: t('nav.home'), icon: <Icon name="home" /> },
     ...(provider
-      ? [{ href: `/${locale}/provider`, label: t('nav.application'), icon: <Icon name="file" /> }]
+      ? [
+          { href: `/${locale}/provider`, label: t('nav.application'), icon: <Icon name="file" /> },
+          ...(approved
+            ? [
+                {
+                  href: `/${locale}/provider/services`,
+                  label: t('nav.services'),
+                  icon: <Icon name="note" />,
+                },
+              ]
+            : []),
+        ]
       : []),
     ...(sample
       ? [{ href: `/${locale}/notes`, label: t('nav.notes'), icon: <Icon name="note" /> }]

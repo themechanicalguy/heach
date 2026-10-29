@@ -12,7 +12,8 @@
     "users": "Users",
     "signOut": "Sign out",
     "admins": "Admins",
-    "password": "My password"
+    "password": "My password",
+    "catalogue": "Catalogue"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -214,5 +215,28 @@
       "police_verification_failed": "Police verification not cleared",
       "other": "Other (support will explain)"
     }
+  },
+  "catalogue": {
+    "title": "Service catalogue",
+    "intro": "Items patients can book, in the four MVP services. A paused item disappears from search at once.",
+    "caption": "Catalogue items",
+    "name": "Name",
+    "service": "Service",
+    "prescription": "Prescription needed",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Offered",
+    "paused": "Paused",
+    "pause": "Pause",
+    "resume": "Resume",
+    "pins": "Serviceable PIN codes",
+    "pinsIntro": "Providers can only serve, and patients only search in, these PIN codes.",
+    "pinCaption": "PIN codes",
+    "pin": "PIN code",
+    "district": "District",
+    "serviceable": "Serviceable",
+    "notServiceable": "Not served",
+    "stop": "Stop serving",
+    "start": "Serve"
   }
 }
