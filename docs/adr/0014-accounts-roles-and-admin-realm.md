@@ -1,8 +1,8 @@
 # 0014. Keep patient and provider accounts and admins in separate sign-in realms
 
-- **Status:** Proposed. Implemented and merged in #94 on 29 October 2026 by the shared account,
-  with no review or comment, so the owner has not accepted it in writing (FU-28, FU-14). Extended
-  by the owner decisions O-1 to O-3 of 29 October 2026 (below).
+- **Status:** Accepted by the owner on 29 October 2026, with the amendments below (stated in chat
+  and recorded by Claude Code: "I confirm O-1 to O-4 and accept ADR 0014"; FU-14). Implemented in
+  #94 and #99.
 - **Date:** 2026-10-29
 - **Requirements:** AC-01 to AC-05, AD-01, AD-03, SE-04, SE-07, SE-08, PR-01, PO-04
 

@@ -29,6 +29,7 @@ the state below, so any session can resume without repeating finished work.
 ## Owner decisions (relayed in chat, 29 October 2026)
 
 Recorded by Claude Code from the owner's answers in the session (FU-14: same GitHub account).
+**Confirmed by the owner on 29 October 2026:** "I confirm O-1 to O-4 and accept ADR 0014".
 
 | # | Question | Decision |
 | --- | --- | --- |
@@ -110,8 +111,9 @@ been sent for any role (FU-30).
 
 ## Next actions
 
-1. Owner: review the pull request; accept or change ADR 0014, L-1 to L-14 and O-1 to O-4 in
-   writing (FU-28).
+1. Done 29 October 2026: owner confirmed O-1 to O-4 and accepted ADR 0014. Still open in
+   FU-28: explicit confirmation of decisions L-1 to L-14 and the OTP values (charter Q3-8), which
+   the ADR refers to but does not restate. Owner: review and merge PR #99.
 2. Owner: DLT and SMS provider (#20, FU-30); then Claude Code builds the real adapter.
 3. Owner with the lawyer: deletion deadline and retention windows (FU-31), lost-number recovery
    (FU-33), consent texts (FU-06).
