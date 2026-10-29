@@ -23,6 +23,20 @@ test('UX-03.1 the bottom navigation sits in the thumb zone at 360 px', async ({
   await expect(nav).toHaveScreenshot('bottom-nav-360.png');
 });
 
+test('the navigation sits in the one top header and stays there while the page scrolls', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile', 'Phones keep it in the thumb zone (UX-03.1)');
+  await page.goto('/en');
+  const header = page.getByRole('banner');
+  await expect(header.getByRole('navigation', { name: CATALOGUES.en.nav.label })).toBeVisible();
+  await page.evaluate(() => {
+    document.body.style.minHeight = '300vh';
+    window.scrollTo(0, 1000);
+  });
+  expect((await header.boundingBox())?.y).toBe(0);
+});
+
 test('I18N-06.1 Odia and Devanagari fonts are bundled and text 40 percent longer does not overflow', async ({
   page,
 }) => {

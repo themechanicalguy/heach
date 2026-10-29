@@ -32,7 +32,11 @@ body {
   padding-bottom: calc(var(--heach-bottom-nav-height) + env(safe-area-inset-bottom));
 }
 
+/* One header for the whole app, kept at the top while the page scrolls. */
 .shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -91,6 +95,10 @@ body {
 @media (min-width: 600px) {
   body {
     padding-bottom: 0;
+  }
+
+  .shell-header .heach-bottom-nav {
+    flex: 1;
   }
 }
 
