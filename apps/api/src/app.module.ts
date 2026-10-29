@@ -12,11 +12,14 @@ import { CryptoModule } from './crypto/crypto.module.js';
 import { DataStoresModule } from './data-stores/data-stores.module.js';
 import { FlagsModule } from './flags/flags.module.js';
 import { HealthController } from './health/health.controller.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
+import { OnboardingModule } from './onboarding/onboarding.module.js';
 import { ObservabilityModule } from './observability/observability.module.js';
 import { ReadinessService } from './health/readiness.service.js';
 import { SampleNotesModule } from './sample-notes/sample-notes.module.js';
 import { SecurityModule } from './security/security.module.js';
 import { UserThrottlerGuard } from './security/user-throttler.guard.js';
+import { UploadsModule } from './uploads/uploads.module.js';
 
 /** Guards run in this order: rate limit first, then authentication and roles (SE-02.1). */
 @Module({})
@@ -37,6 +40,9 @@ export class AppModule {
         SampleNotesModule,
         AccountsModule,
         AdminModule,
+        UploadsModule,
+        NotificationsModule,
+        OnboardingModule,
       ],
       controllers: [HealthController],
       providers: [

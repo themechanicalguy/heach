@@ -19,6 +19,9 @@ import { EnvVars, NodeEnv } from './config/env.schema.js';
 import { validateEnv } from './config/env.validate.js';
 import { buildOpenApiDocument } from './openapi.js';
 
+/** Content type of base64 file uploads (EN-07); every other JSON body keeps the 100 kB default. */
+export const UPLOAD_CONTENT_TYPE = 'application/vnd.heach.upload+json';
+
 /** Builds the app with all global setup, shared by main.ts and integration tests. */
 export async function createApp(
   options: { logger?: LoggerService | LogLevel[] | false } = {},
@@ -42,6 +45,10 @@ export async function createApp(
     }),
   );
   app.use(securityHeaders());
+  // Uploads are base64 JSON under their own content type, so only they get the larger limit.
+  // Registering a JSON parser replaces Nest's default one, so the default is declared too.
+  app.useBodyParser('json', { type: UPLOAD_CONTENT_TYPE, limit: '7mb' });
+  app.useBodyParser('json', { limit: '100kb' });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

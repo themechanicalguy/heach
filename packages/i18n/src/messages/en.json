@@ -1,5 +1,7 @@
 {
-  "app": { "name": "HEACH" },
+  "app": {
+    "name": "HEACH"
+  },
   "home": {
     "title": "Care at home, verified and close to you",
     "findCare": "Find care"
@@ -13,14 +15,21 @@
     "signIn": "Sign in / Sign up",
     "signOut": "Sign out"
   },
-  "offline": { "banner": "You are offline. Saved pages still work; changes need a connection." },
+  "offline": {
+    "banner": "You are offline. Saved pages still work; changes need a connection."
+  },
   "state": {
     "loading": "Loading",
     "empty": "No notes yet",
     "error": "Something went wrong. Please try again.",
     "retry": "Try again"
   },
-  "locale": { "label": "Language", "or": "ଓଡ଼ିଆ", "en": "English", "hi": "हिन्दी" },
+  "locale": {
+    "label": "Language",
+    "or": "ଓଡ଼ିଆ",
+    "en": "English",
+    "hi": "हिन्दी"
+  },
   "auth": {
     "test": {
       "title": "Test sign-in",
@@ -46,12 +55,18 @@
   },
   "ui": {
     "close": "Close",
-    "otp": { "label": "One-time password", "digit": "Digit {index} of {total}" }
+    "otp": {
+      "label": "One-time password",
+      "digit": "Digit {index} of {total}"
+    }
   },
   "sms": {
     "otp_sign_in": "{code} is your HEACH sign-in code. It expires in {minutes} minutes. Never share it with anyone.",
     "otp_reverify": "{code} is your HEACH code to confirm a change to your account. It expires in {minutes} minutes. Never share it with anyone.",
-    "otp_change_mobile": "{code} is your HEACH code to move your account to this number. It expires in {minutes} minutes. Never share it with anyone."
+    "otp_change_mobile": "{code} is your HEACH code to move your account to this number. It expires in {minutes} minutes. Never share it with anyone.",
+    "application_approved": "Your HEACH provider application is approved. Open the app to set up your services.",
+    "application_rejected": "Your HEACH provider application was not approved. Open the app to see the reason.",
+    "application_changes_requested": "Your HEACH provider application needs changes. Open the app to see what to update."
   },
   "welcome": {
     "title": "Choose your language",
@@ -107,7 +122,16 @@
     "field_not_for_role": "This detail does not apply to your role.",
     "no_deletion_request": "There is no open deletion request.",
     "network": "No connection. Check your internet and try again.",
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "reference_required": "Enter the registration or certificate number.",
+    "expiry_required": "Enter the date the document is valid until.",
+    "upload_type": "Choose a PDF, JPG or PNG file.",
+    "upload_size": "The file must be smaller than 5 MB.",
+    "upload_mismatch": "This file does not look like a PDF, JPG or PNG. Choose another one.",
+    "upload_infected": "This file may contain a virus and was refused.",
+    "application_incomplete": "Some steps are not done yet.",
+    "application_not_editable": "Your application cannot be changed while it is being reviewed.",
+    "identity_not_pending": "This identity check has ended. Start it again."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -236,12 +260,12 @@
       "suspended": "Suspended"
     },
     "statusText": {
-      "draft": "Your account is ready. To be listed for patients, you will verify your identity and qualifications. These steps are not open yet; we will tell you by SMS when they are.",
+      "draft": "Complete the steps below, then submit your application for review.",
       "submitted": "We have your application. We will tell you the result by SMS.",
       "under_review": "Our team is checking your application. We will tell you the result by SMS.",
-      "changes_requested": "Our team needs a change to your application. Please contact support to see what is needed.",
-      "approved": "You are verified. Patients will be able to book you once your services are listed.",
-      "rejected": "Your application was not approved. Please contact support to know why and what you can do.",
+      "changes_requested": "Our team needs a change. Fix the items marked below and submit again.",
+      "approved": "You are verified. Set up your services so patients can book you.",
+      "rejected": "Your application was not approved. Please contact support to know what you can do.",
       "suspended": "Your provider profile is suspended. Patients cannot book you. Please contact support."
     },
     "stepsTitle": "Steps to be listed",
@@ -257,7 +281,68 @@
     "stepDone": "Done",
     "stepNotOpen": "Not open yet",
     "progress": "{done} of {total} done",
-    "reviewTime": "After you submit, our team reviews your application within a few working days."
+    "reviewTime": "After you submit, our team reviews your application within a few working days.",
+    "identityState": {
+      "not_started": "Not started",
+      "pending": "Waiting for the result",
+      "verified": "Verified",
+      "failed": "Not verified. Please try again."
+    },
+    "verifyIdentity": "Verify with Aadhaar or DigiLocker",
+    "identityReturning": "Finishing your identity check…",
+    "items": {
+      "nursing_registration": "Nursing council registration",
+      "qualification_certificate": "Qualification certificate",
+      "police_verification": "Police verification certificate",
+      "council_registration": "Council or association registration",
+      "address_proof": "Address proof",
+      "reference_letter": "Reference letter",
+      "training_certificate": "Training certificate",
+      "establishment_registration": "Clinical establishment registration",
+      "nabl_certificate": "NABL accreditation"
+    },
+    "optional": "Optional",
+    "documentState": {
+      "missing": "Not uploaded",
+      "pending": "Checking the file",
+      "clean": "Uploaded",
+      "infected": "File refused: it may contain a virus. Upload another one."
+    },
+    "reviewState": {
+      "accepted": "Accepted by our team",
+      "rejected": "Upload a new file: {reason}"
+    },
+    "chooseFile": "Choose a file (PDF, JPG or PNG, up to 5 MB)",
+    "reference": "Registration or certificate number",
+    "expiresOn": "Valid until",
+    "upload": "Upload",
+    "replace": "Replace file",
+    "payoutTitle": "Payout account",
+    "payoutIntro": "Where we send your earnings. Changing it needs a new code.",
+    "payoutMethod": {
+      "bank": "Bank account",
+      "upi": "UPI"
+    },
+    "holderName": "Account holder name",
+    "accountNumber": "Account number",
+    "ifsc": "IFSC",
+    "upiId": "UPI ID",
+    "savePayout": "Save payout account",
+    "payoutOnFile": "{method} ending {hint}, in the name of {name}",
+    "missingTitle": "Still needed before you can submit",
+    "missing": {
+      "identity": "Identity check",
+      "payout": "Payout account"
+    },
+    "submit": "Submit for review",
+    "reasons": {
+      "documents_unclear": "the document is not clear",
+      "documents_expired": "the document has expired",
+      "identity_mismatch": "the name does not match your identity",
+      "qualification_not_recognised": "the qualification is not recognised",
+      "police_verification_failed": "police verification was not cleared",
+      "other": "please contact support"
+    }
   },
   "account": {
     "title": "Your account",

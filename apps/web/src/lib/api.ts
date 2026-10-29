@@ -96,7 +96,7 @@ async function send(path: string, init: RequestInit): Promise<Response> {
   // One ID per request, carried through the API, its queries and its logs (LM-01.1).
   headers.set('x-correlation-id', crypto.randomUUID());
   if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
-  if (init.body) headers.set('content-type', 'application/json');
+  if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json');
   return fetch(`/api/v1${path}`, {
     ...init,
     headers,
@@ -149,6 +149,9 @@ async function retryAfter401(path: string, init: RequestInit, sentWith?: string)
   if (result.outcome === 'rejected' || epoch !== started) throw new ApiError(401);
   return send(path, init);
 }
+
+/** Content type of base64 file uploads; the API allows these bodies a larger size (EN-07). */
+export const UPLOAD_CONTENT_TYPE = 'application/vnd.heach.upload+json';
 
 /** Calls the API; on 401 it refreshes at most once and retries once. */
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {

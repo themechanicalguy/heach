@@ -1,6 +1,8 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import type { IdentityVerifier } from './identity.port.js';
+import type { ObjectStore } from './object-store.port.js';
 import type { PaymentGateway } from './payments.port.js';
+import type { VirusScanner } from './scanner.port.js';
 import type { SmsMessage, SmsSender } from './sms.port.js';
 import type { VideoRooms } from './video.port.js';
 
@@ -62,15 +64,47 @@ export class FakeVideoRooms implements VideoRooms {
 }
 
 export class FakeIdentityVerifier implements IdentityVerifier {
-  startConsent(reference: string): Promise<{ redirectUrl: string }> {
-    return Promise.resolve({
-      redirectUrl: `https://identity.invalid/consent?ref=${encodeURIComponent(reference)}`,
-    });
+  /** Sends the person straight back as if they had consented; the code `approved` verifies. */
+  startConsent(reference: string, returnUrl: string): Promise<{ redirectUrl: string }> {
+    const url = new URL(returnUrl);
+    url.searchParams.set('code', 'approved');
+    url.searchParams.set('ref', reference);
+    return Promise.resolve({ redirectUrl: url.toString() });
   }
 
   completeConsent(
     code: string,
   ): Promise<{ verified: boolean; documentType: 'aadhaar' | 'digilocker' }> {
     return Promise.resolve({ verified: code === 'approved', documentType: 'digilocker' });
+  }
+}
+
+/** Objects in this process's memory: lost on restart, so local and test only until D-SCAN and S3. */
+export class InMemoryObjectStore implements ObjectStore {
+  readonly objects = new Map<string, string>();
+
+  put(key: string, body: string): Promise<void> {
+    this.objects.set(key, body);
+    return Promise.resolve();
+  }
+
+  get(key: string): Promise<string | undefined> {
+    return Promise.resolve(this.objects.get(key));
+  }
+
+  delete(key: string): Promise<void> {
+    this.objects.delete(key);
+    return Promise.resolve();
+  }
+}
+
+/** The industry test signature, so tests can prove infected files are quarantined. */
+export const EICAR_MARKER = 'EICAR-STANDARD-ANTIVIRUS-TEST-FILE';
+
+export class FakeVirusScanner implements VirusScanner {
+  scan(content: Buffer): Promise<'clean' | 'infected'> {
+    return Promise.resolve(
+      content.toString('latin1').includes(EICAR_MARKER) ? 'infected' : 'clean',
+    );
   }
 }

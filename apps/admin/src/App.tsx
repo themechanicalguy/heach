@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { t } from './i18n';
 import { AdminLayout, type Section } from './layout/AdminLayout';
 import { Admins } from './pages/Admins';
+import { Applications } from './pages/Applications';
 import { Dashboard } from './pages/Dashboard';
 import { OwnPassword } from './pages/OwnPassword';
 import { SignIn } from './pages/SignIn';
@@ -12,6 +13,7 @@ import { SessionProvider, useSession } from './session';
 /** Sub-roles that may see users, and that may change them (the API enforces the same, AD-03). */
 const USER_READERS = new Set(['super_admin', 'support', 'verifier']);
 const USER_CHANGERS = new Set(['super_admin', 'support']);
+const VERIFIERS = new Set(['super_admin', 'verifier']);
 
 function Shell() {
   const { state } = useSession();
@@ -31,6 +33,7 @@ function Shell() {
 /** The sections a sub-role sees; the API enforces the same on every request (AD-01). */
 function sectionsFor(role: string): Section[] {
   const sections: Section[] = ['dashboard'];
+  if (VERIFIERS.has(role)) sections.push('verification');
   if (USER_READERS.has(role)) sections.push('users');
   if (role === 'super_admin') sections.push('admins');
   sections.push('password');
@@ -42,6 +45,7 @@ function Page({
   role,
   selfId,
 }: Readonly<{ section: Section; role: string; selfId: string | undefined }>) {
+  if (section === 'verification') return <Applications />;
   if (section === 'users') return <Users canChange={USER_CHANGERS.has(role)} />;
   if (section === 'admins') return <Admins selfId={selfId} />;
   if (section === 'password') return <OwnPassword />;

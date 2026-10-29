@@ -3,6 +3,9 @@ import {
   FakePaymentGateway,
   FakeSmsSender,
   FakeVideoRooms,
+  FakeVirusScanner,
+  EICAR_MARKER,
+  InMemoryObjectStore,
 } from './fakes.js';
 import type { IdentityVerifier } from './identity.port.js';
 import type { PaymentGateway } from './payments.port.js';
@@ -42,8 +45,20 @@ describe('Third-party test doubles (TS-06.1)', () => {
     const { roomId } = await video.createRoom('b1');
     expect(await video.joinToken(roomId, 'p1')).toContain(roomId);
     const identity: IdentityVerifier = new FakeIdentityVerifier();
-    expect((await identity.startConsent('u1')).redirectUrl).toMatch(/^https:\/\/identity\.invalid/);
+    const back = await identity.startConsent('u1-reference', 'https://web.invalid/en/return');
+    expect(back.redirectUrl).toBe('https://web.invalid/en/return?code=approved&ref=u1-reference');
     expect((await identity.completeConsent('approved')).verified).toBe(true);
     expect((await identity.completeConsent('denied')).verified).toBe(false);
+  });
+
+  it('TS-06.1 the storage and scanner doubles keep objects and flag the test signature', async () => {
+    const store = new InMemoryObjectStore();
+    await store.put('k', 'v');
+    expect(await store.get('k')).toBe('v');
+    await store.delete('k');
+    expect(await store.get('k')).toBeUndefined();
+    const scanner = new FakeVirusScanner();
+    expect(await scanner.scan(Buffer.from('plain'))).toBe('clean');
+    expect(await scanner.scan(Buffer.from(`x${EICAR_MARKER}x`))).toBe('infected');
   });
 });
