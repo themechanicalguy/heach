@@ -135,9 +135,12 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 
 - Pages live under `/or`, `/en` and `/hi`; `/` redirects by browser language, Odia by default
   (with `accounts` on: to the language choice on a first visit, then to the language last used).
-- With `pnpm dev:up` running, open http://localhost:3000/or/sign-in, choose a synthetic patient,
-  and write a note at `/or/notes`. The note is encrypted before it reaches PostgreSQL and every
-  read is in `audit.entry`. The pages exist only while `sample-patient-note` is on (FF-01).
+- The sample note and test sign-in are off by default: they prove the Step 2 exit criteria and
+  are not part of the product. To reach them, add `sample-patient-note` to `FEATURE_FLAGS` in
+  `.env` (a `.env` made before 29 October 2026 still has it on; remove it there to hide
+  `/notes`). Then open http://localhost:3000/or/sign-in, choose a synthetic patient, and write a
+  note at `/or/notes`. The note is encrypted before it reaches PostgreSQL and every read is in
+  `audit.entry`. CI, the dev host and the restore check keep the flag on for their own checks.
 - `pnpm --filter @heach/web test:e2e` runs the browser suites on mobile, tablet and desktop.
   Add `E2E_API=1` to include the full sample-note flow (needs the API running).
 - Visual baselines (`apps/web/e2e/__screenshots__`) are Linux renders. To update them after an
@@ -166,7 +169,7 @@ on. The work record is [login and account setup](login-and-account-setup.md).
   (build the API first). Then open http://localhost:5173: the first sign-in shows a TOTP key
   to add to an authenticator app (manual entry). Roles: `super_admin`, `verifier`, `support`,
   `finance`.
-- **Browser tests with the API.** Build the web app with `FEATURE_FLAGS=sample-patient-note,accounts`
+- **Browser tests with the API.** Build the web app with `FEATURE_FLAGS=accounts`
   and `API_ORIGIN`, start it with `next start`, start the API with the address caps raised (one
   test machine sends many codes), then
   `E2E_API=1 E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL=http://localhost:<MAILPIT_UI_PORT> pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts`
