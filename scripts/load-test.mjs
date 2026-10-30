@@ -4,6 +4,7 @@
 // latency percentiles and the error rate. Plain Node, no dependency. Synthetic traffic only.
 //
 //   node scripts/load-test.mjs --base http://localhost:3001 --concurrency 20 --seconds 60
+//   node scripts/load-test.mjs --base https://host --paths /en,/or,/hi,/api/healthz
 //
 // Against a shared environment it needs the owner's approval first (CLAUDE.md: infrastructure).
 import { randomInt } from 'node:crypto';
@@ -80,12 +81,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       base: { type: 'string', default: 'http://localhost:3001' },
       concurrency: { type: 'string', default: '10' },
       seconds: { type: 'string', default: '30' },
+      /** Comma-separated paths of equal weight, instead of the default browsing mix. */
+      paths: { type: 'string' },
     },
   });
+  const mix = values.paths ? values.paths.split(',').map((path) => ({ weight: 1, path })) : MIX;
   const result = await run({
     base: values.base,
     concurrency: Number(values.concurrency),
     seconds: Number(values.seconds),
+    mix,
   });
   process.stdout.write(`${JSON.stringify(result)}\n`);
 }

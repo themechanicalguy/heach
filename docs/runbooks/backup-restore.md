@@ -127,6 +127,7 @@ One row per scheduled run, copied from the journal (counts only).
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-10-25 03:44:57 to 03:45:03 | By hand (T017), `systemctl start`, deployed `a2cbf6f843db` | `pg/2026-10-24T2100Z.dump` | Passed: freshness, restore, audit chain, decrypt; copy dropped (none left); live database gained only its `backup.restore_check` entry (audit 34 to 35, chain intact, notes 2 before and after) | tables `app.data_key` 1, `app.patient_note` 2, `app.session` 33, `app.user_test` 4, `audit.entry` 34; decrypted 2, failed 0 | `restorecheck-54de7a36-566a-4340-905c-38fbb80a9315` | Claude Code |
 | 2026-10-25 03:48 | By hand, synthetic failure (empty dump folder) to prove the host alert path | none | Failed at freshness as intended; one alert `[HEACH] Restore check failed: freshness` published with the API role's credentials; SNS delivered 1, failed 0 (03:48 UTC); **received** in the owner's inbox (owner confirmed 25 October) | none | `restorecheck-5c18fff6-967c-4b99-b8e8-e6908cc82e0f` | Claude Code |
+| 2026-10-30 12:31:42 to 12:31:48 | By hand (Step 10 drill, owner approved), `systemctl start` through SSM Run Command | `pg/2026-10-29T2100Z.dump` | Passed: freshness, restore, audit chain, decrypt; service exit 0 | tables `app.account` 3, `app.patient_note` 2, `app.role_assignment` 3, `audit.entry` 35; decrypted 2, failed 0 | `restorecheck-1ba56d6c-8c64-4277-90eb-8d98e7110f3f` | Claude Code |
 
 ## Restore (EN-10.4)
 
