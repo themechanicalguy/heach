@@ -9,6 +9,7 @@ import {
 import type pg from 'pg';
 import { PAYMENT_GATEWAY, type PaymentGateway } from '../adapters/payments.port.js';
 import { AuditService } from '../audit/audit.service.js';
+import { PLAN_UNITS_LOW_JOB } from '../bookings/discounts.service.js';
 import { PaymentEventsService } from '../bookings/payment-events.service.js';
 import { RenewalsService } from './renewals.service.js';
 import { reason } from '../common/error-response.js';
@@ -20,7 +21,13 @@ import { JobRunner } from '../jobs/runner/job-runner.js';
 import { Notifier } from '../notifications/notifier.service.js';
 import { PaymentsRepository } from '../payments/payments.repository.js';
 import { Settings } from '../settings/settings.service.js';
-import type { PlanDto, PlanInputDto, PurchaseCheckoutDto, PurchaseDto } from './plans.dto.js';
+import type {
+  AdminPurchaseDto,
+  PlanDto,
+  PlanInputDto,
+  PurchaseCheckoutDto,
+  PurchaseDto,
+} from './plans.dto.js';
 
 export const PLAN_REMINDER_JOB = 'plan_reminder';
 const DAY_MS = 86_400_000;
@@ -61,6 +68,9 @@ export class PlansService implements OnModuleInit {
     this.events.onPurchasePaid((client, purchaseId, paid) =>
       this.activate(client, purchaseId, paid),
     );
+    this.jobs.register(PLAN_UNITS_LOW_JOB, async (payload) => {
+      await this.notifier.notify(payload.buyer ?? '', 'plan_units_low');
+    });
     this.jobs.register(PLAN_REMINDER_JOB, async (payload) => {
       const { rows } = await this.pool.query<{ buyer: string; ends_at: Date }>(
         `SELECT buyer_account_id AS buyer, ends_at FROM app.plan_purchase WHERE id = $1 AND status = 'active'`,
@@ -148,6 +158,19 @@ export class PlansService implements OnModuleInit {
     ]);
     if (result.rowCount !== 1) throw new NotFoundException();
     await this.audit.record({ action: `plan.${status}`, entity: 'plan', entityId: id });
+  }
+
+  /** The latest purchases for admins (AD-14): no buyer, no health detail. */
+  async purchases(): Promise<Plain<AdminPurchaseDto>[]> {
+    const { rows } = await this.pool.query<Plain<AdminPurchaseDto>>(
+      `SELECT pp.id, t.name AS "planName", p.kind, pp.status, pp.renewed_from_id IS NOT NULL AS renewal,
+              pp.auto_renew AS "autoRenew", pp.renewal_paused AS "renewalPaused", pp.paid_paise AS "paidPaise",
+              pp.refunded_paise AS "refundedPaise", pp.created_at AS "createdAt", pp.ends_at AS "endsAt"
+         FROM app.plan_purchase pp JOIN app.plan p ON p.id = pp.plan_id
+         JOIN app.plan_text t ON t.plan_id = pp.plan_id AND t.locale = 'en'
+        ORDER BY pp.created_at DESC LIMIT 200`,
+    );
+    return rows;
   }
 
   async purchase(buyer: Principal, planId: string): Promise<Plain<PurchaseCheckoutDto>> {

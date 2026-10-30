@@ -462,7 +462,25 @@
       "attendant": "Attendant",
       "lab": "Lab tests"
     },
-    "unitsHeader": "Units"
+    "unitsHeader": "Units",
+    "purchases": "Purchases, renewals and cancellations",
+    "purchasesCaption": "Purchases",
+    "purchasesEmpty": "No purchases yet.",
+    "renewal": "Renewal",
+    "renews": "Renews",
+    "paused": "Paused",
+    "paid": "Paid",
+    "refunded": "Refunded",
+    "bought": "Bought",
+    "ends": "Ends",
+    "purchaseStatuses": {
+      "pending_payment": "Waiting for payment",
+      "active": "Active",
+      "expired": "Ended",
+      "cancelled": "Cancelled"
+    },
+    "yes": "Yes",
+    "no": "No"
   },
   "referrals": {
     "title": "Referrals",

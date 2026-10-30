@@ -248,3 +248,39 @@ export class AutoRenewDto {
   @IsBoolean()
   enabled!: boolean;
 }
+
+/** A purchase for admins (AD-14): plan, money and renewal state; never who bought it. */
+export class AdminPurchaseDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty()
+  planName!: string;
+
+  @ApiProperty({ enum: ['package', 'subscription'] })
+  kind!: string;
+
+  @ApiProperty({ enum: ['pending_payment', 'active', 'expired', 'cancelled'] })
+  status!: string;
+
+  @ApiProperty({ description: 'This purchase renews an earlier one (PK-05)' })
+  renewal!: boolean;
+
+  @ApiProperty()
+  autoRenew!: boolean;
+
+  @ApiProperty()
+  renewalPaused!: boolean;
+
+  @ApiProperty()
+  paidPaise!: number;
+
+  @ApiProperty()
+  refundedPaise!: number;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty({ type: Date, nullable: true })
+  endsAt!: Date | null;
+}

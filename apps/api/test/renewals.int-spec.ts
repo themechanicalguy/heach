@@ -6,9 +6,10 @@ import { SMS_SENDER } from '../src/adapters/sms.port.js';
 import { PaymentEventsService } from '../src/bookings/payment-events.service.js';
 import { PG_POOL } from '../src/data-stores/data-stores.tokens.js';
 import { RenewalsService } from '../src/plans/renewals.service.js';
-import { signedUp, useApp } from './account-helpers.js';
+import { adminSignIn, signedUp, useApp } from './account-helpers.js';
 import { bearer } from './auth-helpers.js';
-import { gateway } from './booking-helpers.js';
+import { createBooking, firstSlot, gateway, runJobs } from './booking-helpers.js';
+import { listedProvider } from './provider-helpers.js';
 import { buy, packagePlan, plansOf, subscriptionPlan } from './plan-helpers.js';
 
 /** The gateway's webhook for the last order it created, paid or failed. */
@@ -111,5 +112,36 @@ describe('Subscription renewal (PK-05, PK-06)', () => {
       .send({ enabled: true })
       .expect(409);
     expect(refused.body).toMatchObject({ code: 'plan_not_renewable' });
+  });
+});
+
+describe('Low balance reminder and the admin purchases view (PK-08, AD-14)', () => {
+  const { app, server } = useApp();
+
+  it('PK-08 the buyer hears when one unit is left; AD-14 admins see purchases without the buyer', async () => {
+    const nurse = await listedProvider(app(), 'nurse', 'nursing_vitals_check', {
+      feePaise: 30_000,
+    });
+    const planId = await packagePlan(app(), 'nursing_vitals_check', 2, 50_000);
+    const patient = await signedUp(app());
+    const purchaseId = await buy(app(), patient.login, planId);
+    const lowSent = () =>
+      sentTemplates(app()).filter((template) => template === 'plan_units_low').length;
+    const before = lowSent();
+    await createBooking(app(), patient.login, {
+      listingId: nurse.listingId,
+      startsAt: await firstSlot(app(), nurse.accountId, nurse.listingId),
+      purchaseId,
+    }).expect(201);
+    await runJobs(app());
+    expect(lowSent()).toBe(before + 1);
+
+    const support = await adminSignIn(app(), 'support');
+    const purchases = (
+      await server().get('/admin/v1/plans/purchases').set(bearer(support)).expect(200)
+    ).body as Record<string, unknown>[];
+    const row = purchases.find((purchase) => purchase.id === purchaseId);
+    expect(row).toMatchObject({ kind: 'package', status: 'active', renewal: false });
+    expect(Object.keys(row ?? {})).not.toContain('buyerAccountId');
   });
 });

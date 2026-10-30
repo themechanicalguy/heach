@@ -170,6 +170,33 @@ describe('Plans and referrals (PK-01, PK-02, RR-06, AD-14, AD-16)', () => {
     });
   });
 
+  it('AD-14 lists purchases with renewal state and money, never the buyer', async () => {
+    serve({
+      'GET /plans': () => [200, []],
+      'GET /plans/purchases': () => [
+        200,
+        [
+          {
+            id: 'pp1',
+            planName: 'Monthly nursing',
+            kind: 'subscription',
+            status: 'active',
+            renewal: true,
+            autoRenew: false,
+            renewalPaused: true,
+            paidPaise: 200_000,
+            refundedPaise: 0,
+            createdAt: '2026-10-01T00:00:00Z',
+            endsAt: '2026-11-01T00:00:00Z',
+          },
+        ],
+      ],
+    });
+    render(<Plans canChange={false} />);
+    expect(await screen.findByText('Monthly nursing')).toBeTruthy();
+    expect(screen.getByText(en.plans.paused)).toBeTruthy();
+  });
+
   it('RR-06 releases a flagged referral and cancels a coupon', async () => {
     const calls = serve({
       'GET /referrals': () => [

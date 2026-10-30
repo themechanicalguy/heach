@@ -8,6 +8,7 @@ import { useLoad } from '../use-load';
 import { usePending } from '../use-pending';
 import { label } from './labels';
 import { PlanForm } from './PlanForm';
+import { PlanPurchases } from './PlanPurchases';
 
 /** Plans (PK-01, PK-02, AD-14): approve provider plans, retire old ones, create platform plans. */
 export function Plans({ canChange }: Readonly<{ canChange: boolean }>) {
@@ -92,6 +93,7 @@ export function Plans({ canChange }: Readonly<{ canChange: boolean }>) {
           ]}
         />
       )}
+      <PlanPurchases />
       {canChange && <PlanForm onCreated={reload} />}
     </>
   );

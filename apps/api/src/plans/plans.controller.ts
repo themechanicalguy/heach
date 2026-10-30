@@ -22,6 +22,7 @@ import { ONBOARDING_ROLES } from '../onboarding/checklists.js';
 import { ProviderAccess } from '../onboarding/provider-access.js';
 import { ProfileQueryDto } from '../search/search.dto.js';
 import {
+  AdminPurchaseDto,
   AutoRenewDto,
   PlanDto,
   PlanInputDto,
@@ -155,6 +156,15 @@ export class AdminPlansController {
   @ApiOkResponse({ type: [PlanDto] })
   async list(): Promise<PlanDto[]> {
     return this.plans.list({}, 'en');
+  }
+
+  /** Purchases, renewals and cancellations (AD-14), without who bought them. */
+  @Get('purchases')
+  @Header('Cache-Control', 'no-store')
+  @Roles('super_admin', 'support', 'finance')
+  @ApiOkResponse({ type: [AdminPurchaseDto] })
+  async purchases(): Promise<AdminPurchaseDto[]> {
+    return this.plans.purchases();
   }
 
   @Post()
