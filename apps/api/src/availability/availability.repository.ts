@@ -93,4 +93,44 @@ export class AvailabilityRepository {
     );
     return rows;
   }
+
+  /**
+   * Rules, buffers and busy times for many providers in three queries, for search results
+   * (SD-03): one query per result would take the connection pool under load (Step 10 load test).
+   */
+  async inputsFor(accountIds: readonly string[], from: Date, to: Date) {
+    const ids = [...new Set(accountIds)];
+    const [rules, buffers, busy] = await Promise.all([
+      this.pool.query<WeeklyRule & { accountId: string }>(
+        `SELECT account_id AS "accountId", weekday, start_minute AS "startMinute", end_minute AS "endMinute"
+           FROM app.availability_rule WHERE account_id = ANY($1) ORDER BY weekday, start_minute`,
+        [ids],
+      ),
+      this.pool.query<{ accountId: string; bufferMinutes: number }>(
+        `SELECT account_id AS "accountId", buffer_minutes AS "bufferMinutes"
+           FROM app.provider_schedule WHERE account_id = ANY($1)`,
+        [ids],
+      ),
+      this.pool.query<Interval & { accountId: string }>(
+        `SELECT account_id AS "accountId", starts_at AS start, ends_at AS "end" FROM app.availability_block
+          WHERE account_id = ANY($1) AND ends_at > $2 AND starts_at < $3
+         UNION ALL
+         SELECT provider_account_id, starts_at, ends_at FROM app.booking
+          WHERE provider_account_id = ANY($1) AND ends_at > $2 AND starts_at < $3
+            AND status IN ('requested', 'confirmed', 'in_progress')`,
+        [ids, from, to],
+      ),
+    ]);
+    const group = <T extends { accountId: string }>(rows: readonly T[]) => {
+      const byAccount = new Map<string, Omit<T, 'accountId'>[]>();
+      for (const { accountId, ...rest } of rows)
+        byAccount.set(accountId, [...(byAccount.get(accountId) ?? []), rest]);
+      return byAccount;
+    };
+    return {
+      rules: group(rules.rows) as Map<string, WeeklyRule[]>,
+      busy: group(busy.rows) as Map<string, Interval[]>,
+      buffers: new Map(buffers.rows.map((row) => [row.accountId, row.bufferMinutes])),
+    };
+  }
 }

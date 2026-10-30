@@ -204,8 +204,10 @@ body {
     padding-bottom: 0;
   }
 
+  /* Never narrower than its links: with many links the actions wrap to the next row instead of
+     covering them (WCAG 2.2 target size, 2.5.8). */
   .shell-header .heach-bottom-nav {
-    flex: 1;
+    flex: 1 0 auto;
   }
 }
 

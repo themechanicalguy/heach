@@ -1,5 +1,6 @@
 import { CATALOGUES, formatIcu, LOCALES, type Locale, type MessageValues } from '@heach/i18n';
 import { expect, type Page, test } from '@playwright/test';
+import { expectAccessible } from './accessibility';
 import { completePatientSetup, signInByOtp, syntheticMobile } from './otp-helpers';
 import {
   acceptNewest,
@@ -79,8 +80,15 @@ async function startBooking(lang: InLanguage, provider: Provider, service: strin
   const query = new URLSearchParams({ pin: PILOT_PIN, item, q: provider.name });
   await lang.goto(`/services/${service}?${query.toString()}`);
   const card = page.getByRole('listitem').filter({ hasText: provider.name });
+  await expect(card).toBeVisible();
+  await expectAccessible(page, 'search results');
   await card.getByRole('link', { name: t.search.view }).click();
-  await page.locator(`a[href*="/${lang.locale}/book/${provider.listingId}"]`).first().click();
+  const slot = page.locator(`a[href*="/${lang.locale}/book/${provider.listingId}"]`).first();
+  await expect(slot).toBeVisible();
+  await expectAccessible(page, 'provider profile');
+  await slot.click();
+  await expect(page.getByLabel(t.book.address)).toBeVisible();
+  await expectAccessible(page, 'booking form');
   await page.getByLabel(t.book.address).fill('12 Synthetic Lane, Bhubaneswar');
   await page.getByLabel(t.book.pin).fill(PILOT_PIN);
 }
@@ -89,6 +97,7 @@ async function pay(lang: InLanguage): Promise<void> {
   const { page, t } = lang;
   await page.getByRole('button', { name: t.book.continue }).click();
   await expect(page.getByRole('heading', { name: t.book.reviewTitle })).toBeVisible();
+  await expectAccessible(page, 'check and pay');
   await page.getByRole('button', { name: lang.like(t.book.pay) }).click();
   await expect(page.getByText(t.book.paid)).toBeVisible();
 }
@@ -100,6 +109,8 @@ async function visitDone(lang: InLanguage, nurse: Provider): Promise<string> {
   const bookingId = await acceptNewest(nurse);
   startSoon(bookingId);
   await lang.goto(`/bookings/${bookingId}`);
+  await expect(lang.page.getByRole('button', { name: lang.t.visit.showCode })).toBeVisible();
+  await expectAccessible(lang.page, 'booking detail');
   await startAndComplete(nurse, bookingId, await lang.shownCode(lang.t.visit.showCode));
   return bookingId;
 }
@@ -167,6 +178,7 @@ async function j8(lang: InLanguage): Promise<void> {
   await expect(
     plan.getByText(lang.say(t.plans.includes, { text: 'Synthetic home visits' })),
   ).toBeVisible();
+  await expectAccessible(page, 'plans');
   await plan.getByRole('button', { name: lang.like(t.plans.buy) }).click();
   await expect(page.getByText(lang.say(t.plans.left, { left: 3, total: 3 }))).toBeVisible();
 
@@ -187,6 +199,7 @@ async function j9(lang: InLanguage): Promise<void> {
   await visitDone(lang, nurse);
   await lang.goto('/vault');
   await expect(page.getByText(lang.say(t.vault.issuedBy, { name: nurse.name }))).toBeVisible();
+  await expectAccessible(page, 'records vault');
 
   const upload = lang.card(t.vault.uploadTitle);
   await upload.getByLabel(t.vault.type).selectOption('prescription');

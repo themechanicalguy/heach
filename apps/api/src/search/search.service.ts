@@ -15,17 +15,15 @@ export class SearchService {
 
   async find(query: SearchQueryDto): Promise<SearchResultDto[]> {
     const rows = await this.search.search(query);
-    const results = await Promise.all(
-      rows.map(async (row) => {
-        const [earliest] = await this.slots.slots({
-          providerId: row.providerId,
-          itemCode: row.itemCode,
-          durationMinutes: row.durationMinutes,
-          days: SEARCH_DAYS,
-        });
-        return { ...row, earliestSlot: earliest ?? null };
-      }),
+    const earliest = await this.slots.earliestFor(
+      rows.map((row) => ({
+        providerId: row.providerId,
+        itemCode: row.itemCode,
+        durationMinutes: row.durationMinutes,
+        days: SEARCH_DAYS,
+      })),
     );
+    const results = rows.map((row, index) => ({ ...row, earliestSlot: earliest[index] ?? null }));
     return results.sort(
       (a, b) => (a.earliestSlot?.getTime() ?? Infinity) - (b.earliestSlot?.getTime() ?? Infinity),
     );

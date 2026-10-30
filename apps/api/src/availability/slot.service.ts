@@ -14,6 +14,9 @@ export interface SlotRequest {
   viewer?: string | undefined;
 }
 
+/** A provider who never set a buffer gets the default, as `AvailabilityRepository.bufferMinutes`. */
+const DEFAULT_BUFFER_MINUTES = 15;
+
 /** Bookable times of one listing: rules, leave, bookings, buffers and checkout holds (AV-02). */
 @Injectable()
 export class SlotService {
@@ -27,6 +30,34 @@ export class SlotService {
     const slots = generateSlots(input);
     const held = await this.locks.heldByOthers(request.providerId, slots, request.viewer);
     return slots.filter((slot) => !held.has(slot.getTime()));
+  }
+
+  /**
+   * The earliest free slot of each request, loading every provider's schedule at once (SD-03).
+   * Same rules as `slots`: holds by others hide a slot.
+   */
+  async earliestFor(requests: readonly SlotRequest[], now = new Date()): Promise<(Date | null)[]> {
+    const days = Math.min(Math.max(...requests.map((request) => request.days), 1), MAX_DAYS);
+    const loaded = await this.availability.inputsFor(
+      requests.map((request) => request.providerId),
+      istDayStart(now),
+      istDayStart(now, days + 2),
+    );
+    return Promise.all(
+      requests.map(async (request) => {
+        const slots = generateSlots({
+          rules: loaded.rules.get(request.providerId) ?? [],
+          busy: loaded.busy.get(request.providerId) ?? [],
+          bufferMinutes: loaded.buffers.get(request.providerId) ?? DEFAULT_BUFFER_MINUTES,
+          now,
+          days: Math.min(request.days, MAX_DAYS),
+          durationMinutes: request.durationMinutes,
+          fixedStartMinute: SHIFT_START_MINUTE[request.itemCode],
+        });
+        const held = await this.locks.heldByOthers(request.providerId, slots, request.viewer);
+        return slots.find((slot) => !held.has(slot.getTime())) ?? null;
+      }),
+    );
   }
 
   /** Whether `start` is still offered, ignoring holds (the caller takes the hold itself). */
