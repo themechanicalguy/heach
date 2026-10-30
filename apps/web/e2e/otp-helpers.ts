@@ -73,3 +73,36 @@ export async function completePatientSetup(
   await page.getByRole('checkbox', { name: t.setup.consent.privacy }).check();
   await page.getByRole('button', { name: t.setup.consent.finish, exact: true }).click();
 }
+
+/** Answers the fresh-code sheet with the code sent to the account's own number (AC-05). */
+export async function confirmItIsMe(page: Page, locale: Locale, mobile: string): Promise<void> {
+  const t = CATALOGUES[locale];
+  const before = await inboxOf(mobile);
+  await page.getByRole('button', { name: t.reverify.send, exact: true }).click();
+  await page
+    .getByRole('dialog')
+    .getByLabel(t.signIn.codeLabel)
+    .fill(await codeFor(mobile, before));
+  await page.getByRole('button', { name: t.reverify.confirm, exact: true }).click();
+}
+
+/** Setup through the forms for a role with spoken languages and, for a lab, its name. */
+export async function completeProviderSetup(
+  page: Page,
+  role: 'lab' | 'nurse',
+  name: string,
+  locale: Locale = 'en',
+) {
+  const t = CATALOGUES[locale];
+  await page.getByRole('radio', { name: t.roles[role].label }).check();
+  await page.getByRole('button', { name: t.setup.continue, exact: true }).click();
+  await page.getByLabel(t.setup.details.fullName).fill(name);
+  await page.getByRole('radio', { name: t.genders.male, exact: true }).check();
+  await page.getByRole('checkbox', { name: t.locale.or }).check();
+  if (role === 'lab') await page.getByLabel(t.setup.details.organisation).fill('Synthetic E2E Lab');
+  await page.getByRole('checkbox', { name: t.setup.details.adult }).check();
+  await page.getByRole('button', { name: t.setup.continue, exact: true }).click();
+  await page.getByRole('checkbox', { name: t.setup.consent.terms }).check();
+  await page.getByRole('checkbox', { name: t.setup.consent.privacy }).check();
+  await page.getByRole('button', { name: t.setup.consent.finish, exact: true }).click();
+}
