@@ -20,7 +20,12 @@ export type SmsTemplate =
   | 'lab_sample_collected'
   | 'lab_sample_received'
   | 'plan_expiring'
-  | 'coupon_issued';
+  | 'coupon_issued'
+  | 'plan_renewal_notice'
+  | 'plan_renewed'
+  | 'plan_renewal_failed'
+  | 'plan_renewal_paused'
+  | 'commission_credit_issued';
 
 export interface SmsMessage {
   to: string;
@@ -28,6 +33,8 @@ export interface SmsMessage {
   locale: Locale;
   templateId: SmsTemplate;
   params: Readonly<Record<string, string>>;
+  /** An admin-edited wording of the template in this language (AD-09), used instead of the catalogue. */
+  text?: string;
 }
 
 /** Sends transactional SMS (OTP, reminders). Text never contains Restricted data (EN, NT). */

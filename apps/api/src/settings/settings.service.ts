@@ -20,6 +20,12 @@ export const SETTING_KEYS = [
   'referral_monthly_cap',
   'referral_join_window_days',
   'plan_expiry_reminder_days',
+  'renewal_notice_hours',
+  'renewal_retry_hours',
+  'renewal_max_attempts',
+  'provider_referral_bookings',
+  'provider_referral_rebate_percent',
+  'provider_referral_rebate_bookings',
 ] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 

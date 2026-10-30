@@ -198,11 +198,17 @@ export class PurchaseDto {
   @ApiProperty()
   name!: string;
 
+  @ApiProperty({ enum: ['package', 'subscription'] })
+  kind!: string;
+
   @ApiProperty({ enum: ['pending_payment', 'active', 'expired', 'cancelled'] })
   status!: string;
 
   @ApiProperty()
   autoRenew!: boolean;
+
+  @ApiProperty({ description: 'Renewal stopped after failed debits until turned on again (PK-05)' })
+  renewalPaused!: boolean;
 
   @ApiProperty()
   pricePaise!: number;

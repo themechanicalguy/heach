@@ -1,11 +1,12 @@
 import { Skeleton } from '@heach/ui';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { t } from './i18n';
 import { AdminLayout, type Section } from './layout/AdminLayout';
 import { Admins } from './pages/Admins';
 import { Applications } from './pages/Applications';
 import { Bookings } from './pages/Bookings';
 import { Catalogue } from './pages/Catalogue';
+import { Content } from './pages/Content';
 import { Finance } from './pages/Finance';
 import { Labs } from './pages/Labs';
 import { Plans } from './pages/Plans';
@@ -52,6 +53,7 @@ function sectionsFor(role: string): Section[] {
   if (['super_admin', 'support', 'finance'].includes(role)) sections.push('plans');
   if (role === 'super_admin' || role === 'support') sections.push('referrals', 'catalogue');
   if (['super_admin', 'support', 'finance'].includes(role)) sections.push('settings');
+  if (role === 'super_admin' || role === 'support') sections.push('content');
   if (role === 'super_admin') sections.push('security');
   if (USER_READERS.has(role)) sections.push('users');
   if (role === 'super_admin') sections.push('admins');
@@ -59,27 +61,34 @@ function sectionsFor(role: string): Section[] {
   return sections;
 }
 
-function Page({
-  section,
-  role,
-  selfId,
-}: Readonly<{ section: Section; role: string; selfId: string | undefined }>) {
-  if (section === 'verification') return <Applications />;
-  if (section === 'bookings') return <Bookings role={role} />;
-  if (section === 'finance') return <Finance />;
-  if (section === 'tickets') return <Tickets />;
-  if (section === 'reviews') return <Reviews />;
-  if (section === 'labs') return <Labs />;
-  if (section === 'vault') return <Vault />;
-  if (section === 'plans') return <Plans canChange={role === 'super_admin'} />;
-  if (section === 'referrals') return <Referrals />;
-  if (section === 'settings') return <Settings canChange={role === 'super_admin'} />;
-  if (section === 'security') return <Security />;
-  if (section === 'catalogue') return <Catalogue canChange={role === 'super_admin'} />;
-  if (section === 'users') return <Users canChange={USER_CHANGERS.has(role)} />;
-  if (section === 'admins') return <Admins selfId={selfId} />;
-  if (section === 'password') return <OwnPassword />;
-  return <Dashboard />;
+interface PageProps {
+  role: string;
+  selfId: string | undefined;
+}
+
+/** Each section's page; the API checks the sub-role again on every request (AD-01). */
+const PAGES: Record<Section, (props: PageProps) => ReactNode> = {
+  dashboard: () => <Dashboard />,
+  verification: () => <Applications />,
+  bookings: ({ role }) => <Bookings role={role} />,
+  finance: () => <Finance />,
+  tickets: () => <Tickets />,
+  reviews: () => <Reviews />,
+  labs: () => <Labs />,
+  vault: () => <Vault />,
+  plans: ({ role }) => <Plans canChange={role === 'super_admin'} />,
+  referrals: () => <Referrals />,
+  settings: ({ role }) => <Settings canChange={role === 'super_admin'} />,
+  security: () => <Security />,
+  content: ({ role }) => <Content canChange={role === 'super_admin'} />,
+  catalogue: ({ role }) => <Catalogue canChange={role === 'super_admin'} />,
+  users: ({ role }) => <Users canChange={USER_CHANGERS.has(role)} />,
+  admins: ({ selfId }) => <Admins selfId={selfId} />,
+  password: () => <OwnPassword />,
+};
+
+function Page({ section, role, selfId }: Readonly<PageProps & { section: Section }>) {
+  return <>{PAGES[section]({ role, selfId })}</>;
 }
 
 export function App() {

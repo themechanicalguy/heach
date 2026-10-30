@@ -33,6 +33,7 @@ export class FakePaymentGateway implements PaymentGateway {
   readonly orders = new Map<string, { amountPaise: number; receipt: string; paid: boolean }>();
   readonly refunds: { paymentId: string; amountPaise: number }[] = [];
   readonly transfers: { providerId: string; amountPaise: number; reference: string }[] = [];
+  readonly mandates = new Map<string, { maxAmountPaise: number; active: boolean }>();
   /** Set by a test to make refunds fail, as a gateway outage would. */
   failingRefunds = false;
 
@@ -74,6 +75,47 @@ export class FakePaymentGateway implements PaymentGateway {
     };
     const body = JSON.stringify(event);
     return { body, signature: this.sign(body) };
+  }
+
+  sandboxFail(orderId: string): { body: string; signature: string } {
+    const order = this.orders.get(orderId);
+    if (!order) throw new Error('Unknown order');
+    const event: GatewayEvent = {
+      id: `evt_${randomUUID()}`,
+      kind: 'payment.failed',
+      orderId,
+      paymentId: `pay_${orderId.slice(6, 20)}`,
+      amountPaise: order.amountPaise,
+    };
+    const body = JSON.stringify(event);
+    return { body, signature: this.sign(body) };
+  }
+
+  createMandate(mandate: {
+    reference: string;
+    maxAmountPaise: number;
+  }): Promise<{ mandateId: string }> {
+    const mandateId = `mdt_${randomUUID().slice(0, 14)}`;
+    this.mandates.set(mandateId, { maxAmountPaise: mandate.maxAmountPaise, active: true });
+    return Promise.resolve({ mandateId });
+  }
+
+  /** Refuses a debit above the cap or on a revoked mandate, as a gateway would. */
+  chargeMandate(charge: {
+    mandateId: string;
+    amountPaise: number;
+    receipt: string;
+  }): Promise<{ orderId: string }> {
+    const mandate = this.mandates.get(charge.mandateId);
+    if (!mandate?.active || charge.amountPaise > mandate.maxAmountPaise)
+      return Promise.reject(new Error('Mandate cannot be charged'));
+    return this.createOrder({ amountPaise: charge.amountPaise, receipt: charge.receipt });
+  }
+
+  cancelMandate(mandateId: string): Promise<void> {
+    const mandate = this.mandates.get(mandateId);
+    if (mandate) mandate.active = false;
+    return Promise.resolve();
   }
 
   refund(payment: { paymentId: string; amountPaise: number }): Promise<{ refundId: string }> {

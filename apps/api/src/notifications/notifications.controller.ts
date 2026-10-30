@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Inject,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ import { Roles } from '../auth/roles.decorator.js';
 import { GRANTED_USER_ROLES } from '../common/request-context.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { requireFlag } from '../flags/flags.module.js';
-import { NotificationDto } from '../bookings/bookings.dto.js';
+import { NotificationDto, NotificationQueryDto } from '../bookings/bookings.dto.js';
 
 /** The in-app notification centre (NT-02): the account's own messages, newest first. */
 @ApiTags('account')
@@ -31,11 +32,17 @@ export class NotificationsController {
   @Header('Cache-Control', 'no-store')
   @Roles(...GRANTED_USER_ROLES)
   @ApiOkResponse({ type: [NotificationDto] })
-  async list(@Req() request: Request): Promise<NotificationDto[]> {
+  async list(
+    @Req() request: Request,
+    @Query() query: NotificationQueryDto,
+  ): Promise<NotificationDto[]> {
     const { rows } = await this.pool.query<NotificationDto>(
-      `SELECT id, template, params, booking_id AS "bookingId", created_at AS "createdAt", read_at AS "readAt"
-         FROM app.notification WHERE account_id = $1 ORDER BY created_at DESC LIMIT 50`,
-      [principalOf(request).userId],
+      `SELECT n.id, n.template, n.params, n.booking_id AS "bookingId", n.created_at AS "createdAt",
+              n.read_at AS "readAt", o.text AS override
+         FROM app.notification n
+         LEFT JOIN app.message_override o ON o.template = n.template AND o.locale = $2
+        WHERE n.account_id = $1 ORDER BY n.created_at DESC LIMIT 50`,
+      [principalOf(request).userId, query.locale ?? 'or'],
     );
     return rows;
   }

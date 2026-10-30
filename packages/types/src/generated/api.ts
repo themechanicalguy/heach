@@ -2580,6 +2580,86 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/pages/{slug}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['PagesController_page'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/content/templates': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminContentController_templates'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/content/templates/{template}/{locale}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AdminContentController_setTemplate'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/content/pages': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminContentController_pages'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/content/pages/{slug}/{locale}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AdminContentController_setPage'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/bookings/{id}/review': {
     parameters: {
       query?: never;
@@ -3314,6 +3394,8 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       readAt: string | null;
+      /** @description Edited wording of the template in the requested language (AD-09) */
+      override: string | null;
     };
     PayoutSummaryDto: {
       /** @enum {string} */
@@ -4378,8 +4460,12 @@ export interface components {
       planId: string;
       name: string;
       /** @enum {string} */
+      kind: 'package' | 'subscription';
+      /** @enum {string} */
       status: 'pending_payment' | 'active' | 'expired' | 'cancelled';
       autoRenew: boolean;
+      /** @description Renewal stopped after failed debits until turned on again (PK-05) */
+      renewalPaused: boolean;
       pricePaise: number;
       paidPaise: number;
       refundedPaise: number;
@@ -4447,6 +4533,8 @@ export interface components {
       coupons: components['schemas']['CouponDto'][];
       /** @description This account joined with someone’s code */
       invited: boolean;
+      /** @description Providers: later completed bookings that still earn commission back (RR-04) */
+      commissionCreditBookings: number;
     };
     JoinDto: {
       code: string;
@@ -4478,7 +4566,13 @@ export interface components {
         | 'coupon_validity_days'
         | 'referral_monthly_cap'
         | 'referral_join_window_days'
-        | 'plan_expiry_reminder_days';
+        | 'plan_expiry_reminder_days'
+        | 'renewal_notice_hours'
+        | 'renewal_retry_hours'
+        | 'renewal_max_attempts'
+        | 'provider_referral_bookings'
+        | 'provider_referral_rebate_percent'
+        | 'provider_referral_rebate_bookings';
       value: number;
     };
     SettingInputDto: {
@@ -4500,7 +4594,13 @@ export interface components {
         | 'coupon_validity_days'
         | 'referral_monthly_cap'
         | 'referral_join_window_days'
-        | 'plan_expiry_reminder_days';
+        | 'plan_expiry_reminder_days'
+        | 'renewal_notice_hours'
+        | 'renewal_retry_hours'
+        | 'renewal_max_attempts'
+        | 'provider_referral_bookings'
+        | 'provider_referral_rebate_percent'
+        | 'provider_referral_rebate_bookings';
       value: number;
     };
     CountDto: {
@@ -4540,6 +4640,36 @@ export interface components {
       infectedUploads: number;
       /** @description Records read through shares in the last 24 hours (unusual-read watch) */
       recordReads24h: number;
+    };
+    PageDto: {
+      /** @enum {string} */
+      slug: 'terms' | 'privacy' | 'faq' | 'refunds';
+      /** @enum {string} */
+      locale: 'or' | 'en' | 'hi';
+      title: string;
+      /** @description Plain text; blank lines separate paragraphs */
+      body: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    TemplateDto: {
+      template: string;
+      /** @enum {string} */
+      locale: 'or' | 'en' | 'hi';
+      /** @description The catalogue text shipped with the release */
+      defaultText: string;
+      /** @description The edited text in use instead */
+      override: string | null;
+      /** @description Placeholders an edited text must keep */
+      placeholders: string[];
+    };
+    TemplateInputDto: {
+      /** @description null restores the default */
+      text?: string | null;
+    };
+    PageInputDto: {
+      title: string;
+      body: string;
     };
     ReviewInputDto: {
       stars: number;
@@ -5662,7 +5792,9 @@ export interface operations {
   };
   NotificationsController_list: {
     parameters: {
-      query?: never;
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -8431,6 +8563,115 @@ export interface operations {
         content: {
           'application/json': components['schemas']['SecurityDto'];
         };
+      };
+    };
+  };
+  PagesController_page: {
+    parameters: {
+      query?: {
+        locale?: 'or' | 'en' | 'hi';
+      };
+      header?: never;
+      path: {
+        slug: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PageDto'];
+        };
+      };
+    };
+  };
+  AdminContentController_templates: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TemplateDto'][];
+        };
+      };
+    };
+  };
+  AdminContentController_setTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        template: string;
+        locale: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TemplateInputDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminContentController_pages: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PageDto'][];
+        };
+      };
+    };
+  };
+  AdminContentController_setPage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        slug: string;
+        locale: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PageInputDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

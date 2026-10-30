@@ -1291,7 +1291,17 @@
     "/v1/me/notifications": {
       "get": {
         "operationId": "NotificationsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -5542,6 +5552,185 @@
         "tags": ["admin"]
       }
     },
+    "/v1/pages/{slug}": {
+      "get": {
+        "operationId": "PagesController_page",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["content"]
+      }
+    },
+    "/admin/v1/content/templates": {
+      "get": {
+        "operationId": "AdminContentController_templates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TemplateDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/content/templates/{template}/{locale}": {
+      "put": {
+        "operationId": "AdminContentController_setTemplate",
+        "parameters": [
+          {
+            "name": "template",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/content/pages": {
+      "get": {
+        "operationId": "AdminContentController_pages",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PageDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/content/pages/{slug}/{locale}": {
+      "put": {
+        "operationId": "AdminContentController_setPage",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/v1/bookings/{id}/review": {
       "post": {
         "operationId": "ReviewsController_rate",
@@ -7189,9 +7378,14 @@
             "format": "date-time",
             "type": "string",
             "nullable": true
+          },
+          "override": {
+            "type": "string",
+            "nullable": true,
+            "description": "Edited wording of the template in the requested language (AD-09)"
           }
         },
-        "required": ["id", "template", "params", "bookingId", "createdAt", "readAt"]
+        "required": ["id", "template", "params", "bookingId", "createdAt", "readAt", "override"]
       },
       "PayoutSummaryDto": {
         "type": "object",
@@ -10204,12 +10398,20 @@
           "name": {
             "type": "string"
           },
+          "kind": {
+            "type": "string",
+            "enum": ["package", "subscription"]
+          },
           "status": {
             "type": "string",
             "enum": ["pending_payment", "active", "expired", "cancelled"]
           },
           "autoRenew": {
             "type": "boolean"
+          },
+          "renewalPaused": {
+            "type": "boolean",
+            "description": "Renewal stopped after failed debits until turned on again (PK-05)"
           },
           "pricePaise": {
             "type": "number"
@@ -10240,8 +10442,10 @@
           "id",
           "planId",
           "name",
+          "kind",
           "status",
           "autoRenew",
+          "renewalPaused",
           "pricePaise",
           "paidPaise",
           "refundedPaise",
@@ -10409,9 +10613,13 @@
           "invited": {
             "type": "boolean",
             "description": "This account joined with someone’s code"
+          },
+          "commissionCreditBookings": {
+            "type": "number",
+            "description": "Providers: later completed bookings that still earn commission back (RR-04)"
           }
         },
-        "required": ["code", "invitees", "coupons", "invited"]
+        "required": ["code", "invitees", "coupons", "invited", "commissionCreditBookings"]
       },
       "JoinDto": {
         "type": "object",
@@ -10465,7 +10673,13 @@
               "coupon_validity_days",
               "referral_monthly_cap",
               "referral_join_window_days",
-              "plan_expiry_reminder_days"
+              "plan_expiry_reminder_days",
+              "renewal_notice_hours",
+              "renewal_retry_hours",
+              "renewal_max_attempts",
+              "provider_referral_bookings",
+              "provider_referral_rebate_percent",
+              "provider_referral_rebate_bookings"
             ]
           },
           "value": {
@@ -10496,7 +10710,13 @@
               "coupon_validity_days",
               "referral_monthly_cap",
               "referral_join_window_days",
-              "plan_expiry_reminder_days"
+              "plan_expiry_reminder_days",
+              "renewal_notice_hours",
+              "renewal_retry_hours",
+              "renewal_max_attempts",
+              "provider_referral_bookings",
+              "provider_referral_rebate_percent",
+              "provider_referral_rebate_bookings"
             ]
           },
           "value": {
@@ -10628,6 +10848,86 @@
           "infectedUploads",
           "recordReads24h"
         ]
+      },
+      "PageDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "enum": ["terms", "privacy", "faq", "refunds"]
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string",
+            "description": "Plain text; blank lines separate paragraphs"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["slug", "locale", "title", "body", "updatedAt"]
+      },
+      "TemplateDto": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"]
+          },
+          "defaultText": {
+            "type": "string",
+            "description": "The catalogue text shipped with the release"
+          },
+          "override": {
+            "type": "string",
+            "nullable": true,
+            "description": "The edited text in use instead"
+          },
+          "placeholders": {
+            "description": "Placeholders an edited text must keep",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["template", "locale", "defaultText", "override", "placeholders"]
+      },
+      "TemplateInputDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "nullable": true,
+            "description": "null restores the default"
+          }
+        }
+      },
+      "PageInputDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50000
+          }
+        },
+        "required": ["title", "body"]
       },
       "ReviewInputDto": {
         "type": "object",

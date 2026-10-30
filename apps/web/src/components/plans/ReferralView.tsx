@@ -11,8 +11,11 @@ import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 
-/** The referral code and share links (RR-01), invitees' status (RR-07) and coupons (RR-08). */
-export function ReferralView() {
+/**
+ * The referral code and share links (RR-01), invitees' status (RR-07) and coupons (RR-08). For a
+ * provider, other providers are invited and the reward is a commission discount (RR-04).
+ */
+export function ReferralView({ provider = false }: Readonly<{ provider?: boolean }>) {
   const { locale, t } = useI18n();
   const { resource, reload } = useResource<Referral>('/me/referral');
   const [copied, setCopied] = useState(false);
@@ -22,7 +25,7 @@ export function ReferralView() {
         <h1 id="referral-title" className="flow__title">
           {t('referral.title')}
         </h1>
-        <p>{t('referral.intro')}</p>
+        <p>{t(provider ? 'referral.providerIntro' : 'referral.intro')}</p>
         <ResourceView resource={resource} reload={reload}>
           {(referral) => {
             const link = `${window.location.origin}/${locale}?ref=${referral.code}`;
@@ -72,22 +75,10 @@ export function ReferralView() {
                     </li>
                   ))}
                 </ul>
-                <h2 className="flow__subtitle">{t('referral.coupons')}</h2>
-                {referral.coupons.length === 0 ? (
-                  <p className="flow__muted">{t('referral.noCoupons')}</p>
-                ) : (
-                  <ul>
-                    {referral.coupons.map((coupon) => (
-                      <li key={coupon.id}>
-                        {t('referral.coupon', {
-                          value: formatPaise(coupon.valuePaise),
-                          time: formatDateTime(new Date(coupon.expiresAt), locale),
-                        })}{' '}
-                        · {t(keyFor('referral.couponStatus', coupon.status, 'referral.coupons'))}
-                      </li>
-                    ))}
-                  </ul>
+                {provider && (
+                  <p>{t('referral.creditsLeft', { count: referral.commissionCreditBookings })}</p>
                 )}
+                {!provider && <Coupons coupons={referral.coupons} />}
               </>
             );
           }}
@@ -136,5 +127,29 @@ function JoinForm({ onJoined }: Readonly<{ onJoined: () => Promise<void> }>) {
         {t('referral.join')}
       </Button>
     </Card>
+  );
+}
+
+function Coupons({ coupons }: Readonly<{ coupons: Referral['coupons'] }>) {
+  const { locale, t } = useI18n();
+  return (
+    <>
+      <h2 className="flow__subtitle">{t('referral.coupons')}</h2>
+      {coupons.length === 0 ? (
+        <p className="flow__muted">{t('referral.noCoupons')}</p>
+      ) : (
+        <ul>
+          {coupons.map((coupon) => (
+            <li key={coupon.id}>
+              {t('referral.coupon', {
+                value: formatPaise(coupon.valuePaise),
+                time: formatDateTime(new Date(coupon.expiresAt), locale),
+              })}{' '}
+              · {t(keyFor('referral.couponStatus', coupon.status, 'referral.coupons'))}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
   );
 }

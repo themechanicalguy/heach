@@ -59,16 +59,27 @@ export class Notifier {
     if (!account?.mobile) return false;
     try {
       const to = await this.encryptor.decrypt(account.mobile);
+      const text = await this.editedText(templateId, account.locale);
       await this.sms.send({
         to,
         locale: account.locale,
         templateId,
         params: localise(params, account.locale),
+        ...(text ? { text } : {}),
       });
       return true;
     } catch {
       appLogger.warn({ templateId }, 'SMS not sent');
       return false;
     }
+  }
+
+  /** The admin-edited wording of a template, if any (AD-09). */
+  private async editedText(templateId: SmsTemplate, locale: Locale): Promise<string | undefined> {
+    const { rows } = await this.pool.query<{ text: string }>(
+      'SELECT text FROM app.message_override WHERE template = $1 AND locale = $2',
+      [templateId, locale],
+    );
+    return rows[0]?.text;
   }
 }

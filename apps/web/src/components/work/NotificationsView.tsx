@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime } from '@heach/i18n';
+import { formatDateTime, formatIcu } from '@heach/i18n';
 import { Button, EmptyState } from '@heach/ui';
 import type { AppNotification } from '@heach/types';
 import { api } from '../../lib/api';
@@ -13,7 +13,7 @@ import { AccessSection, TicketsSection } from './SupportSections';
 /** The in-app notification centre (NT-02): the same words as the SMS, in the reader's language. */
 export function NotificationsView() {
   const { locale, t } = useI18n();
-  const { resource, reload } = useResource<AppNotification[]>('/me/notifications');
+  const { resource, reload } = useResource<AppNotification[]>(`/me/notifications?locale=${locale}`);
   const text = (note: AppNotification) => {
     const params = Object.fromEntries(
       Object.entries(note.params).map(([key, value]) => [
@@ -21,6 +21,8 @@ export function NotificationsView() {
         key === 'time' ? formatDateTime(new Date(value), locale) : value,
       ]),
     );
+    // An admin-edited wording of the template wins over the catalogue (AD-09).
+    if (note.override) return formatIcu(note.override, params, locale);
     return t(keyFor('sms', note.template, 'notifications.title'), params);
   };
   return (

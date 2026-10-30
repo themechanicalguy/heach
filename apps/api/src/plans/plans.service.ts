@@ -10,6 +10,7 @@ import type pg from 'pg';
 import { PAYMENT_GATEWAY, type PaymentGateway } from '../adapters/payments.port.js';
 import { AuditService } from '../audit/audit.service.js';
 import { PaymentEventsService } from '../bookings/payment-events.service.js';
+import { RenewalsService } from './renewals.service.js';
 import { reason } from '../common/error-response.js';
 import type { Plain } from '../common/plain.js';
 import type { Principal } from '../common/request-context.js';
@@ -53,6 +54,7 @@ export class PlansService implements OnModuleInit {
     private readonly notifier: Notifier,
     private readonly audit: AuditService,
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
+    private readonly renewals: RenewalsService,
   ) {}
 
   onModuleInit(): void {
@@ -183,10 +185,13 @@ export class PlansService implements OnModuleInit {
     const { rows } = await this.pool.query<
       Omit<Plain<PurchaseDto>, 'entitlements' | 'refundIfCancelledPaise'>
     >(
-      `SELECT pp.id, pp.plan_id AS "planId", t.name, pp.status, pp.auto_renew AS "autoRenew", pp.price_paise AS "pricePaise",
+      `SELECT pp.id, pp.plan_id AS "planId", t.name, p.kind, pp.status, pp.auto_renew AS "autoRenew",
+              pp.renewal_paused AS "renewalPaused", pp.price_paise AS "pricePaise",
               pp.paid_paise AS "paidPaise", pp.refunded_paise AS "refundedPaise", pp.ends_at AS "endsAt"
-         FROM app.plan_purchase pp JOIN app.plan_text t ON t.plan_id = pp.plan_id AND t.locale = $2
-        WHERE pp.buyer_account_id = $1 ORDER BY pp.created_at DESC LIMIT 50`,
+         FROM app.plan_purchase pp JOIN app.plan p ON p.id = pp.plan_id
+         JOIN app.plan_text t ON t.plan_id = pp.plan_id AND t.locale = $2
+        WHERE pp.buyer_account_id = $1 AND (pp.renewed_from_id IS NULL OR pp.status IN ('active', 'expired'))
+        ORDER BY pp.created_at DESC LIMIT 50`,
       [buyerId, locale],
     );
     return Promise.all(
@@ -203,19 +208,17 @@ export class PlansService implements OnModuleInit {
     );
   }
 
-  async setAutoRenew(buyerId: string, purchaseId: string, enabled: boolean): Promise<void> {
-    const result = await this.pool.query(
-      `UPDATE app.plan_purchase SET auto_renew = $3 WHERE id = $1 AND buyer_account_id = $2 AND status = 'active'`,
-      [purchaseId, buyerId, enabled],
-    );
-    if (result.rowCount !== 1) throw new NotFoundException();
-  }
-
   /** Cancels a purchase and refunds the unused share to the original method (PK-07, PY-02). */
   async cancel(buyer: Principal, purchaseId: string): Promise<void> {
     const refund = await withTransaction(this.pool, async (client) => {
-      const { rows } = await client.query<{ status: string; paid: number; refunded: number }>(
-        `SELECT status, paid_paise AS paid, refunded_paise AS refunded FROM app.plan_purchase WHERE id = $1 AND buyer_account_id = $2 FOR UPDATE`,
+      const { rows } = await client.query<{
+        status: string;
+        paid: number;
+        refunded: number;
+        mandateId: string | null;
+      }>(
+        `SELECT status, paid_paise AS paid, refunded_paise AS refunded, mandate_id AS "mandateId"
+           FROM app.plan_purchase WHERE id = $1 AND buyer_account_id = $2 FOR UPDATE`,
         [purchaseId, buyer.userId],
       );
       const purchase = rows[0];
@@ -250,15 +253,21 @@ export class PlansService implements OnModuleInit {
           { action: 'plan_purchase.cancelled', entity: 'plan_purchase', entityId: purchaseId },
           client,
         );
-        return { refundId, amount, gatewayPaymentId: payment.gatewayPaymentId };
+        return {
+          refundId,
+          amount,
+          gatewayPaymentId: payment.gatewayPaymentId,
+          mandateId: purchase.mandateId,
+        };
       }
       await this.audit.record(
         { action: 'plan_purchase.cancelled', entity: 'plan_purchase', entityId: purchaseId },
         client,
       );
-      return undefined;
+      return { mandateId: purchase.mandateId };
     });
-    if (refund?.gatewayPaymentId)
+    await this.renewals.revoke(purchaseId, refund.mandateId);
+    if ('gatewayPaymentId' in refund && refund.gatewayPaymentId)
       await this.sendRefund(purchaseId, refund.refundId, refund.gatewayPaymentId, refund.amount);
   }
 
@@ -293,8 +302,10 @@ export class PlansService implements OnModuleInit {
       discount_percent: number;
       validity_days: number;
     }>(
-      `UPDATE app.plan_purchase pp SET status = 'active', paid_paise = paid_paise + $2, starts_at = now(),
-              ends_at = now() + make_interval(days => p.validity_days)
+      `UPDATE app.plan_purchase pp SET status = 'active', paid_paise = paid_paise + $2,
+              starts_at = greatest(now(), coalesce((SELECT prev.ends_at FROM app.plan_purchase prev WHERE prev.id = pp.renewed_from_id), now())),
+              ends_at = greatest(now(), coalesce((SELECT prev.ends_at FROM app.plan_purchase prev WHERE prev.id = pp.renewed_from_id), now()))
+                        + make_interval(days => p.validity_days)
          FROM app.plan p WHERE p.id = pp.plan_id AND pp.id = $1 AND pp.status = 'pending_payment'
        RETURNING p.kind, p.item_id, p.service, p.provider_account_id, p.units, p.discount_percent, p.validity_days`,
       [purchaseId, paidPaise],
@@ -326,6 +337,7 @@ export class PlansService implements OnModuleInit {
       { action: 'plan_purchase.activated', entity: 'plan_purchase', entityId: purchaseId },
       client,
     );
+    await this.renewals.afterActivation(client, purchaseId);
   }
 
   private async entitlements(purchaseId: string, client: Pick<pg.Pool, 'query'> = this.pool) {

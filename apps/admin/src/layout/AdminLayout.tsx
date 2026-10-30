@@ -17,6 +17,7 @@ export type Section =
   | 'referrals'
   | 'catalogue'
   | 'settings'
+  | 'content'
   | 'security'
   | 'users'
   | 'admins'

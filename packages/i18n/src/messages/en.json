@@ -89,7 +89,12 @@
     "lab_sample_collected": "Your HEACH lab sample has been collected.",
     "lab_sample_received": "Your HEACH lab sample has reached the lab.",
     "plan_expiring": "Your HEACH plan ends on {time}. Open the app to see what is left.",
-    "coupon_issued": "You have a new HEACH discount coupon. Open the app to see it."
+    "coupon_issued": "You have a new HEACH discount coupon. Open the app to see it.",
+    "plan_renewal_notice": "Your HEACH plan renews on {time} for {amount} from your saved payment method. Turn off renewal in the app to stop it.",
+    "plan_renewed": "Your HEACH plan has renewed. Open the app to see what is included.",
+    "plan_renewal_failed": "We could not renew your HEACH plan. We will try again; check your payment method in your bank or UPI app.",
+    "plan_renewal_paused": "Your HEACH plan was not renewed after several tries. Renewal is paused; turn it on again in the app.",
+    "commission_credit_issued": "A provider you invited has qualified. You pay less commission on your next completed bookings."
   },
   "welcome": {
     "title": "Choose your language",
@@ -748,8 +753,10 @@
       "earning": "Booking completed",
       "reversal": "Refund to patient",
       "no_show_fee": "Missed-visit fee",
-      "payout": "Paid to your account"
-    }
+      "payout": "Paid to your account",
+      "commission_rebate": "Commission back for a provider you invited"
+    },
+    "invite": "Invite a provider"
   },
   "notifications": {
     "title": "Alerts",
@@ -984,7 +991,9 @@
     "noPlan": "Pay normally",
     "useCoupon": "Apply a coupon",
     "noCoupon": "No coupon",
-    "by": "By {name}"
+    "by": "By {name}",
+    "renewalPaused": "Renewal paused after failed payments. Turn renewal on to try again.",
+    "autoRenewHint": "We send a notice a day before each renewal. You can turn it off at any time; the plan runs to its end date."
   },
   "referral": {
     "title": "Invite friends and family",
@@ -1012,6 +1021,17 @@
       "used": "Used",
       "cancelled": "Cancelled"
     },
-    "noCoupons": "No coupons yet."
+    "noCoupons": "No coupons yet.",
+    "providerIntro": "Invite another provider. When they are approved and complete their first bookings, you pay less commission on your next completed bookings.",
+    "creditsLeft": "Commission discount left on {count} bookings"
+  },
+  "pages": {
+    "notFound": "This page is not available in your language yet.",
+    "updated": "Last updated {time}",
+    "terms": "Terms of use",
+    "privacy": "Privacy notice",
+    "faq": "Questions and answers",
+    "refunds": "Cancellation and refunds",
+    "links": "About HEACH"
   }
 }

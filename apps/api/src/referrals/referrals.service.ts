@@ -15,6 +15,7 @@ import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { type TransactionClient, withTransaction } from '../data-stores/transaction.js';
 import { JobRunner } from '../jobs/runner/job-runner.js';
 import { Notifier } from '../notifications/notifier.service.js';
+import { LedgerService } from '../payouts/ledger.service.js';
 import { Settings } from '../settings/settings.service.js';
 import type { AdminReferralDto, ReferralDto } from './referrals.dto.js';
 
@@ -28,7 +29,7 @@ export function newReferralCode(): string {
 }
 
 /**
- * Referrals and coupons (RR-01 to RR-08). Rewards come only after the invited person's first
+ * Referrals and coupons (RR-01 to RR-08). Provider referrals earn commission back (RR-04). Rewards come only after the invited person's first
  * completed booking, never at sign-up (RR-03); a referrer without a care role is never rewarded,
  * so no provider earns from a patient's booking (RR-05). Self-referral, a second referral for
  * one account and more than the monthly cap are blocked or held for review (RR-06).
@@ -41,10 +42,15 @@ export class ReferralsService implements OnModuleInit {
     private readonly jobs: JobRunner,
     private readonly notifier: Notifier,
     private readonly audit: AuditService,
+    private readonly ledger: LedgerService,
   ) {}
 
   onModuleInit(): void {
-    this.jobs.register(REFERRAL_QUALIFY_JOB, (payload) => this.qualify(payload.bookingId ?? ''));
+    this.jobs.register(REFERRAL_QUALIFY_JOB, async (payload) => {
+      await this.qualify(payload.bookingId ?? '');
+      await this.qualifyProvider(payload.bookingId ?? '');
+      await this.rebate(payload.bookingId ?? '');
+    });
   }
 
   async mine(accountId: string): Promise<Plain<ReferralDto>> {
@@ -67,16 +73,24 @@ export class ReferralsService implements OnModuleInit {
       'SELECT 1 FROM app.referral WHERE invitee_account_id = $1',
       [accountId],
     );
+    const credit = await this.pool.query<{ left: number }>(
+      'SELECT bookings_left AS left FROM app.commission_credit WHERE account_id = $1',
+      [accountId],
+    );
     return {
       code,
       invitees: invitees.rows,
       coupons: coupons.rows,
       invited: invited.rows.length > 0,
+      commissionCreditBookings: credit.rows[0]?.left ?? 0,
     };
   }
 
-  /** Joins with someone's code: within the window, once, never one's own (RR-06). */
-  async join(accountId: string, code: string): Promise<void> {
+  /**
+   * Joins with someone's code: within the window, once, never one's own (RR-06). A provider
+   * joins only with another provider's code (RR-04).
+   */
+  async join(accountId: string, code: string, kind: 'patient' | 'provider'): Promise<void> {
     const windowDays = await this.settings.get('referral_join_window_days');
     const cap = await this.settings.get('referral_monthly_cap');
     await withTransaction(this.pool, async (client) => {
@@ -85,8 +99,10 @@ export class ReferralsService implements OnModuleInit {
         fresh: boolean;
         booked: boolean;
         recent: number;
+        provides: boolean;
       }>(
         `SELECT rc.account_id AS referrer,
+                EXISTS (SELECT 1 FROM app.role_assignment g WHERE g.account_id = rc.account_id AND g.side = 'provider') AS provides,
                 (SELECT a.created_at > now() - make_interval(days => $3) FROM app.account a WHERE a.id = $2) AS fresh,
                 EXISTS (SELECT 1 FROM app.booking b WHERE b.booker_account_id = $2 AND b.status = 'completed') AS booked,
                 (SELECT count(*)::int FROM app.referral r WHERE r.referrer_account_id = rc.account_id
@@ -95,11 +111,17 @@ export class ReferralsService implements OnModuleInit {
         [code, accountId, windowDays],
       );
       const found = rows[0];
-      if (!found || found.referrer === accountId || !found.fresh || found.booked)
+      if (
+        !found ||
+        found.referrer === accountId ||
+        !found.fresh ||
+        found.booked ||
+        (kind === 'provider' && !found.provides)
+      )
         throw reason(ConflictException, 'referral_not_allowed');
       const flagged = found.recent >= cap;
       const inserted = await client.query(
-        `INSERT INTO app.referral (id, referrer_account_id, invitee_account_id, status, flag_reason) VALUES ($1, $2, $3, $4, $5)
+        `INSERT INTO app.referral (id, referrer_account_id, invitee_account_id, status, flag_reason, kind) VALUES ($1, $2, $3, $4, $5, $6)
          ON CONFLICT (invitee_account_id) DO NOTHING`,
         [
           randomUUID(),
@@ -107,6 +129,7 @@ export class ReferralsService implements OnModuleInit {
           accountId,
           flagged ? 'flagged' : 'joined',
           flagged ? 'velocity' : null,
+          kind,
         ],
       );
       if (inserted.rowCount !== 1) throw reason(ConflictException, 'referral_not_allowed');
@@ -131,7 +154,7 @@ export class ReferralsService implements OnModuleInit {
                 EXISTS (SELECT 1 FROM app.role_assignment g WHERE g.account_id = r.referrer_account_id AND g.side = 'care') AS referrer_cares,
                 (SELECT count(*)::int FROM app.booking b WHERE b.booker_account_id = r.invitee_account_id AND b.status = 'completed') AS completed
            FROM app.booking bk JOIN app.referral r ON r.invitee_account_id = bk.booker_account_id
-          WHERE bk.id = $1 AND r.status = 'joined' FOR UPDATE OF r`,
+          WHERE bk.id = $1 AND r.status = 'joined' AND r.kind = 'patient' FOR UPDATE OF r`,
         [bookingId],
       );
       const referral = rows[0];
@@ -164,6 +187,74 @@ export class ReferralsService implements OnModuleInit {
       return [referral.referrer, referral.invitee];
     });
     for (const accountId of issued) await this.notifier.notify(accountId, 'coupon_issued');
+  }
+
+  /**
+   * After a booking completes: an invited provider who is approved and has completed enough
+   * bookings earns their referrer commission back on later bookings (RR-04).
+   */
+  async qualifyProvider(bookingId: string): Promise<void> {
+    const needed = await this.settings.get('provider_referral_bookings');
+    const credits = await this.settings.get('provider_referral_rebate_bookings');
+    const referrer = await withTransaction(this.pool, async (client) => {
+      const { rows } = await client.query<{ id: string; referrer: string }>(
+        `SELECT r.id, r.referrer_account_id AS referrer
+           FROM app.booking bk JOIN app.referral r ON r.invitee_account_id = bk.provider_account_id
+          WHERE bk.id = $1 AND r.status = 'joined' AND r.kind = 'provider'
+            AND EXISTS (SELECT 1 FROM app.role_assignment g WHERE g.account_id = r.invitee_account_id
+                          AND g.side = 'provider' AND g.application_status = 'approved')
+            AND (SELECT count(*) FROM app.booking b WHERE b.provider_account_id = r.invitee_account_id
+                   AND b.status = 'completed') >= $2
+          FOR UPDATE OF r`,
+        [bookingId, needed],
+      );
+      const referral = rows[0];
+      if (!referral) return undefined;
+      await client.query(
+        `UPDATE app.referral SET status = 'rewarded', rewarded_at = now() WHERE id = $1`,
+        [referral.id],
+      );
+      await client.query(
+        `INSERT INTO app.commission_credit (account_id, bookings_left) VALUES ($1, $2)
+         ON CONFLICT (account_id) DO UPDATE SET bookings_left = app.commission_credit.bookings_left + EXCLUDED.bookings_left, updated_at = now()`,
+        [referral.referrer, credits],
+      );
+      await this.audit.record(
+        { action: 'referral.provider_rewarded', entity: 'referral', entityId: referral.id },
+        client,
+      );
+      return referral.referrer;
+    });
+    if (referrer) await this.notifier.notify(referrer, 'commission_credit_issued');
+  }
+
+  /** A provider with credit gets part of this booking's commission back in their earnings (RR-04). */
+  async rebate(bookingId: string): Promise<void> {
+    const percent = await this.settings.get('provider_referral_rebate_percent');
+    await withTransaction(this.pool, async (client) => {
+      const { rows } = await client.query<{ provider: string; commission: number }>(
+        `SELECT bk.provider_account_id AS provider, bk.commission_paise AS commission
+           FROM app.booking bk JOIN app.commission_credit c ON c.account_id = bk.provider_account_id
+          WHERE bk.id = $1 AND bk.status = 'completed' AND c.bookings_left > 0
+          FOR UPDATE OF c`,
+        [bookingId],
+      );
+      const due = rows[0];
+      const amountPaise = due ? Math.round((due.commission * percent) / 100) : 0;
+      if (!due || amountPaise <= 0) return;
+      const credited = await this.ledger.earn(client, {
+        providerId: due.provider,
+        bookingId,
+        amountPaise,
+        kind: 'commission_rebate',
+        at: new Date(),
+      });
+      if (credited)
+        await client.query(
+          'UPDATE app.commission_credit SET bookings_left = bookings_left - 1, updated_at = now() WHERE account_id = $1',
+          [due.provider],
+        );
+    });
   }
 
   async queue(status?: string): Promise<Plain<AdminReferralDto>[]> {

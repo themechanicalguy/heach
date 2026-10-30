@@ -38,6 +38,11 @@ export class ReferralDto {
 
   @ApiProperty({ description: 'This account joined with someone’s code' })
   invited!: boolean;
+
+  @ApiProperty({
+    description: 'Providers: later completed bookings that still earn commission back (RR-04)',
+  })
+  commissionCreditBookings!: number;
 }
 
 export class JoinDto {
