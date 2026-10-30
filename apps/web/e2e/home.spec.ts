@@ -21,7 +21,8 @@ test.describe('with a Hindi browser', () => {
 
   test('I18N-01.1 / redirects to the browser language', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveURL(/\/hi$/);
+    // With the accounts flag on, the first visit lands on the language choice (AC-02).
+    await expect(page).toHaveURL(/\/hi(\/welcome)?$/);
   });
 });
 
