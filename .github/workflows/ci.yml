@@ -280,7 +280,8 @@ jobs:
         run: |
           for i in $(seq 1 60); do curl -fsSk https://127.0.0.1/api/readyz && break; sleep 2; done
           curl -fsSk https://127.0.0.1/api/readyz | grep -q '"postgres":"ok"'
-          curl -fsSk https://127.0.0.1/or | grep -q 'heach-button'
+          # The home page's service tiles (SD-01), shown with the accounts flag on as on dev.
+          curl -fsSk https://127.0.0.1/or | grep -q 'service-tile'
           curl -fsSk https://127.0.0.1:8443/ | grep -q '<div id="root">'
           curl -fsSk https://127.0.0.1/healthz | grep -q '"status":"ok"'
           curl -sSkI https://127.0.0.1/or | grep -qi '^strict-transport-security'
