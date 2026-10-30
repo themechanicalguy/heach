@@ -6,6 +6,7 @@ import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
 import { usePending } from '../use-pending';
 import { useReverified } from '../use-reverified';
+import { Checklists } from './Checklists';
 
 /** Operations settings (AD-08): super admin changes one at a time after a fresh TOTP code. */
 export function Settings({ canChange }: Readonly<{ canChange: boolean }>) {
@@ -84,6 +85,7 @@ export function Settings({ canChange }: Readonly<{ canChange: boolean }>) {
         ]}
       />
       {sheet}
+      <Checklists canChange={canChange} />
     </>
   );
 }

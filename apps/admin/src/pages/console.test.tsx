@@ -127,6 +127,50 @@ describe('Settings (AD-08)', () => {
     });
   });
 
+  it('AD-08 changes a checklist item to optional; police verification stays required', async () => {
+    const calls = serve({
+      'GET /settings': () => [200, []],
+      'GET /checklists': () => [
+        200,
+        [
+          {
+            role: 'nurse',
+            items: [
+              {
+                key: 'qualification_certificate',
+                required: true,
+                reference: false,
+                expiry: false,
+                fixed: false,
+              },
+              {
+                key: 'police_verification',
+                required: true,
+                reference: true,
+                expiry: true,
+                fixed: true,
+              },
+            ],
+          },
+        ],
+      ],
+      'PUT /checklists/nurse/qualification_certificate': () => [204],
+    });
+    render(<Settings canChange />);
+    expect(await screen.findByText(en.checklists.fixed)).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: `${en.checklists.makeOptional} nurse qualification_certificate`,
+      }),
+    );
+    await waitFor(() => {
+      expect(
+        calls.find((call) => call.route === 'PUT /checklists/nurse/qualification_certificate')
+          ?.body,
+      ).toEqual({ required: false });
+    });
+  });
+
   it('AD-08 other sub-roles only read them', async () => {
     serve({ 'GET /settings': () => [200, [{ key: 'commission_bps', value: 1500 }]] });
     render(<Settings canChange={false} />);
