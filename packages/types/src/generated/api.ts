@@ -4469,6 +4469,11 @@ export interface components {
       unitsTotal: number;
       unitsUsed: number;
     };
+    PersonUseDto: {
+      /** @description null: the buyer themselves */
+      linkedPatientId: string | null;
+      unitsUsed: number;
+    };
     PurchaseDto: {
       /** Format: uuid */
       id: string;
@@ -4488,6 +4493,10 @@ export interface components {
       /** Format: date-time */
       endsAt: string | null;
       entitlements: components['schemas']['EntitlementDto'][];
+      /** @description People covered besides the buyer (PK-02) */
+      familyMembers: number;
+      /** @description Units used per covered person (PK-04) */
+      people: components['schemas']['PersonUseDto'][];
       /** @description What cancelling now would refund, pro-rata (PK-07) */
       refundIfCancelledPaise: number;
     };

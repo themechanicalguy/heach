@@ -16,6 +16,7 @@ export async function packagePlan(
   units: number,
   pricePaise: number,
   discountPercent = 0,
+  familyMembers = 0,
 ) {
   const admin = await adminSignIn(app, 'super_admin');
   const created = await request(app.getHttpServer())
@@ -26,7 +27,7 @@ export async function packagePlan(
       itemCode,
       units,
       discountPercent,
-      familyMembers: 0,
+      familyMembers,
       validityDays: 60,
       pricePaise,
       texts: texts(`Synthetic ${itemCode} pack`),

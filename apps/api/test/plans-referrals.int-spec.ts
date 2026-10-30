@@ -249,6 +249,52 @@ describe('Entitlement ledger invariants (PK-04, Step 9 checks)', () => {
     expect((await book(2)).fees).toMatchObject({ discountPaise: 10_000 });
     expect(await timers.ledgerMismatches()).toBe(mismatchesBefore);
   });
+
+  it('PK-04 a plan for the buyer and one family member refuses a third person and shows use per person', async () => {
+    const nurse = await listedProvider(app(), 'nurse', 'nursing_vitals_check', {
+      feePaise: 30_000,
+    });
+    const planId = await packagePlan(app(), 'nursing_vitals_check', 5, 100_000, 0, 1);
+    const patient = await signedUp(app());
+    const purchaseId = await buy(app(), patient.login, planId);
+    const relative = async (fullName: string) =>
+      (
+        (
+          await server()
+            .post('/v1/me/linked-patients')
+            .set(bearer(patient.login))
+            .send({ fullName, birthYear: 1950, gender: 'female', relationship: 'parent' })
+            .expect(201)
+        ).body as { id: string }
+      ).id;
+    const mother = await relative('Synthetic Mother');
+    const aunt = await relative('Synthetic Aunt');
+    const bookFor = async (nth: number, status: number, recipientId?: string) => {
+      const startsAt = await firstSlot(app(), nurse.accountId, nurse.listingId, nth * 4);
+      return createBooking(app(), patient.login, {
+        listingId: nurse.listingId,
+        startsAt,
+        purchaseId,
+        ...(recipientId ? { recipientId } : {}),
+      }).expect(status);
+    };
+    await bookFor(0, 201);
+    await bookFor(1, 201, mother);
+    await bookFor(2, 201, mother);
+    const refused = await bookFor(3, 409, aunt);
+    expect(refused.body).toMatchObject({ code: 'plan_person_limit' });
+    const [plan] = (
+      await server().get('/v1/me/plans?locale=en').set(bearer(patient.login)).expect(200)
+    ).body as {
+      familyMembers: number;
+      people: { linkedPatientId: string | null; unitsUsed: number }[];
+    }[];
+    expect(plan?.familyMembers).toBe(1);
+    expect(plan?.people).toEqual([
+      { linkedPatientId: null, unitsUsed: 1 },
+      { linkedPatientId: mother, unitsUsed: 2 },
+    ]);
+  });
 });
 
 describe('Cancelling a plan (PK-07)', () => {

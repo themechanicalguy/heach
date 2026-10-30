@@ -188,6 +188,14 @@ export class EntitlementDto {
   unitsUsed!: number;
 }
 
+export class PersonUseDto {
+  @ApiProperty({ type: String, nullable: true, description: 'null: the buyer themselves' })
+  linkedPatientId!: string | null;
+
+  @ApiProperty()
+  unitsUsed!: number;
+}
+
 export class PurchaseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
@@ -224,6 +232,12 @@ export class PurchaseDto {
 
   @ApiProperty({ type: [EntitlementDto] })
   entitlements!: EntitlementDto[];
+
+  @ApiProperty({ description: 'People covered besides the buyer (PK-02)' })
+  familyMembers!: number;
+
+  @ApiProperty({ type: [PersonUseDto], description: 'Units used per covered person (PK-04)' })
+  people!: PersonUseDto[];
 
   @ApiProperty({ description: 'What cancelling now would refund, pro-rata (PK-07)' })
   refundIfCancelledPaise!: number;
