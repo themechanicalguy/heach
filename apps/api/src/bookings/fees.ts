@@ -39,7 +39,8 @@ export interface RefundPolicy {
 /**
  * What a cancellation refunds (BK-04, PY-02): everything paid while the provider has not yet
  * accepted, or when the provider or admin cancels; for a patient cancelling a confirmed booking,
- * everything before the free window and the late share after it.
+ * everything before the free window and the late share after it. Once shifts have begun, only
+ * the shifts not worked come back, whoever cancels (owner decision FU-39).
  */
 export function cancellationRefund(input: {
   status: 'pending_payment' | 'requested' | 'confirmed' | 'in_progress';
@@ -48,7 +49,15 @@ export function cancellationRefund(input: {
   startsAt: Date;
   now: Date;
   policy: RefundPolicy;
+  /** For a shift booking under way: its total and how many of its shifts were worked. */
+  shifts?: { totalPaise: number; worked: number; count: number } | undefined;
 }): number {
+  if (input.status === 'in_progress' && input.shifts && input.shifts.count > 0) {
+    const workedPaise = Math.round(
+      (input.shifts.totalPaise * input.shifts.worked) / input.shifts.count,
+    );
+    return Math.max(0, input.paidPaise - workedPaise);
+  }
   if (input.by !== 'patient' || input.status !== 'confirmed') return input.paidPaise;
   const hoursLeft = (input.startsAt.getTime() - input.now.getTime()) / 3_600_000;
   if (hoursLeft >= input.policy.freeCancellationHours) return input.paidPaise;

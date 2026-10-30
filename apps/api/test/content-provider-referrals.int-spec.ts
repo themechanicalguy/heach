@@ -2,6 +2,7 @@ import type { FakeSmsSender } from '../src/adapters/fakes.js';
 import { SMS_SENDER } from '../src/adapters/sms.port.js';
 import { smsText } from '../src/adapters/sms-text.js';
 import { Notifier } from '../src/notifications/notifier.service.js';
+import { randomUUID } from 'node:crypto';
 import { adminSignIn, nextTotp, signedUp, useApp } from './account-helpers.js';
 import { bearer, type Login } from './auth-helpers.js';
 import { completedVisit, runJobs } from './booking-helpers.js';
@@ -137,5 +138,39 @@ describe('Provider referral (RR-04, RR-05)', () => {
     // Commission is 15 % of ₹400; half of it comes back.
     expect(rows).toEqual([{ amount: 3_000 }]);
     expect(await credit()).toBe(9);
+  });
+});
+
+describe('One referral reward per device (RR-06)', () => {
+  const { app, server } = useApp();
+
+  it('RR-06 a second invitee joining from the same device is held for review', async () => {
+    const referrer = await signedUp(app());
+    const { code } = (await server().get('/v1/me/referral').set(bearer(referrer.login)).expect(200))
+      .body as { code: string };
+    const device = `heach_referral_device=${randomUUID()}`;
+    const join = async (invitee: Login) =>
+      server()
+        .post('/v1/me/referral/join')
+        .set(bearer(invitee))
+        .set('Cookie', device)
+        .send({ code })
+        .expect(204);
+    const support = await adminSignIn(app(), 'support');
+    const sameDevice = async () =>
+      (
+        (await server().get('/admin/v1/referrals?status=flagged').set(bearer(support)).expect(200))
+          .body as { flagReason: string | null }[]
+      ).filter((row) => row.flagReason === 'same_device').length;
+    const before = await sameDevice();
+    const first = await signedUp(app());
+    const second = await signedUp(app());
+    await join(first.login);
+    expect(await sameDevice()).toBe(before);
+    await join(second.login);
+    expect(await sameDevice()).toBe(before + 1);
+    // A browser without the cookie is given one when it opens its referral page.
+    const opened = await server().get('/v1/me/referral').set(bearer(second.login)).expect(200);
+    expect(String(opened.headers['set-cookie'])).toContain('heach_referral_device=');
   });
 });

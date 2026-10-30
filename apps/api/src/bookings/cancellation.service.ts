@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import type pg from 'pg';
+import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
 import { RefundsService } from '../payments/refunds.service.js';
 import { Settings } from '../settings/settings.service.js';
@@ -22,6 +24,7 @@ export class CancellationService {
     private readonly dispatch: DispatchRepository,
     private readonly settings: Settings,
     private readonly discounts: DiscountsService,
+    @Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>,
   ) {}
 
   /** What cancelling now would refund, for the policy shown before the patient confirms. */
@@ -43,7 +46,23 @@ export class CancellationService {
       startsAt: booking.startsAt,
       now,
       policy,
+      shifts: booking.kind === 'shift' ? await this.shiftsWorked(booking) : undefined,
     });
+  }
+
+  /** Shifts checked in or out count as worked; the attendant is paid for them (FU-39). */
+  private async shiftsWorked(booking: BookingRow) {
+    const { rows } = await this.pool.query<{ worked: number; count: number }>(
+      `SELECT count(*) FILTER (WHERE status IN ('checked_in', 'checked_out'))::int AS worked,
+              count(*)::int AS count
+         FROM app.shift WHERE booking_id = $1`,
+      [booking.id],
+    );
+    return {
+      totalPaise: booking.totalPaise,
+      worked: rows[0]?.worked ?? 0,
+      count: rows[0]?.count ?? 0,
+    };
   }
 
   /** Plans a refund without a status change (a late payment, a price difference). */

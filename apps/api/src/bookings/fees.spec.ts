@@ -57,4 +57,21 @@ describe('Fees and refunds (BK-01, BK-04, PY-01, PY-02, Q-COMMISSION, Q-ADVANCE)
       cancellationRefund({ ...base, by: 'provider', now: new Date('2026-11-02T04:00:00Z') }),
     ).toBe(10_000);
   });
+
+  it('FU-39 once shifts have begun, only the shifts not worked come back, never more than paid', () => {
+    const base = {
+      status: 'in_progress' as const,
+      by: 'admin' as const,
+      startsAt,
+      now: new Date('2026-11-02T10:00:00Z'),
+      policy,
+      shifts: { totalPaise: 300_000, worked: 1, count: 3 },
+    };
+    expect(cancellationRefund({ ...base, paidPaise: 300_000 })).toBe(200_000);
+    expect(cancellationRefund({ ...base, by: 'patient', paidPaise: 300_000 })).toBe(200_000);
+    expect(cancellationRefund({ ...base, paidPaise: 90_000 })).toBe(0);
+    expect(
+      cancellationRefund({ ...base, paidPaise: 300_000, shifts: { ...base.shifts, worked: 0 } }),
+    ).toBe(300_000);
+  });
 });

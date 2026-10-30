@@ -10,16 +10,18 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { principalOf } from '../auth/auth.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { CARE_ROLES } from '../common/request-context.js';
 import { ONBOARDING_ROLES } from '../onboarding/checklists.js';
 import { requireFlag } from '../flags/flags.module.js';
 import { AdminReferralDto, JoinDto, ReferralDto, ReferralQueryDto } from './referrals.dto.js';
+import { ReferralDevices } from './referral-device.js';
 import { ReferralsService } from './referrals.service.js';
 
 const uuid = new ParseUUIDPipe({ version: '4' });
@@ -33,13 +35,21 @@ const REFERRING_ROLES = [...CARE_ROLES, ...ONBOARDING_ROLES];
 @Controller('v1/me/referral')
 @UseGuards(requireFlag('accounts'))
 export class ReferralsController {
-  constructor(private readonly referrals: ReferralsService) {}
+  constructor(
+    private readonly referrals: ReferralsService,
+    private readonly devices: ReferralDevices,
+  ) {}
 
   @Get()
   @Header('Cache-Control', 'no-store')
   @Roles(...REFERRING_ROLES)
   @ApiOkResponse({ type: ReferralDto })
-  async mine(@Req() request: Request): Promise<ReferralDto> {
+  async mine(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<ReferralDto> {
+    // Gives this browser its referral device ID before any code is entered (RR-06).
+    this.devices.hashFor(request, response);
     return this.referrals.mine(principalOf(request).userId);
   }
 
@@ -47,12 +57,21 @@ export class ReferralsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(...REFERRING_ROLES)
   @ApiNoContentResponse()
-  async join(@Body() body: JoinDto, @Req() request: Request): Promise<void> {
+  async join(
+    @Body() body: JoinDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
     const principal = principalOf(request);
     const kind = (ONBOARDING_ROLES as readonly string[]).includes(principal.role)
       ? 'provider'
       : 'patient';
-    await this.referrals.join(principal.userId, body.code, kind);
+    await this.referrals.join(
+      principal.userId,
+      body.code,
+      kind,
+      this.devices.hashFor(request, response),
+    );
   }
 }
 
