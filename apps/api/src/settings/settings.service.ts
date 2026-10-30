@@ -26,6 +26,7 @@ export const SETTING_KEYS = [
   'provider_referral_bookings',
   'provider_referral_rebate_percent',
   'provider_referral_rebate_bookings',
+  'slot_hold_minutes',
 ] as const;
 export type SettingKey = (typeof SETTING_KEYS)[number];
 

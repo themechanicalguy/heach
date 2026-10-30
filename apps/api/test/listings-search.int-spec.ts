@@ -1,4 +1,7 @@
+import { randomUUID } from 'node:crypto';
+import type { Redis } from 'ioredis';
 import { SlotLocks } from '../src/availability/slot-locks.js';
+import { REDIS_CLIENT } from '../src/data-stores/data-stores.tokens.js';
 import { adminSignIn, signedUp, useApp } from './account-helpers.js';
 import { bearer } from './auth-helpers.js';
 import { listedProvider, PILOT_PIN, submittedProvider } from './provider-helpers.js';
@@ -162,9 +165,24 @@ describe('Search, profiles and slot holds (SD-02 to SD-05, PO-05, AV-02)', () =>
 });
 
 describe('Slot holds and catalogue administration (AV-02, AD-04, AD-08)', () => {
-  const { app, server } = useApp();
+  const { app, server, db } = useApp();
   const search = async (query: string) =>
     (await server().get(`/v1/search?${query}`).expect(200)).body as Result[];
+
+  it('AD-08 the hold lasts as long as the slot_hold_minutes setting says', async () => {
+    const redis = app().get<Redis>(REDIS_CLIENT);
+    const start = new Date(Date.now() + 86_400_000);
+    const providerId = randomUUID();
+    await db().query(`UPDATE app.setting SET value = 3 WHERE key = 'slot_hold_minutes'`);
+    try {
+      expect(await app().get(SlotLocks).acquire(providerId, start, 'holder')).toBe(true);
+      const ttl = await redis.ttl(`slot-lock:${providerId}:${start.toISOString()}`);
+      expect(ttl).toBeGreaterThan(170);
+      expect(ttl).toBeLessThanOrEqual(180);
+    } finally {
+      await db().query(`UPDATE app.setting SET value = 10 WHERE key = 'slot_hold_minutes'`);
+    }
+  });
 
   it('AV-02 two patients cannot hold one slot; a hold hides the slot from others', async () => {
     const physio = await listedProvider(app(), 'physiotherapist', 'physio_neuro_rehab');
