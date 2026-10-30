@@ -10,6 +10,7 @@ import { BookAny, BookChosen } from '../booking/BookPages';
 import { BookingDetailView, BookingsView } from '../booking/BookingsView';
 import { CollectionsView, LabOrdersView } from '../lab/LabOrdersView';
 import { PlansView } from '../plans/PlansView';
+import { isProviderRole } from '../../lib/routing';
 import { ReferralView } from '../plans/ReferralView';
 import { VaultView } from '../vault/VaultView';
 import { EarningsView } from '../work/EarningsView';
@@ -112,5 +113,9 @@ export function PlansPage() {
 }
 
 export function ReferralPage() {
-  return <RequireAccount page="care">{() => <ReferralView />}</RequireAccount>;
+  return (
+    <RequireAccount page="any">
+      {(me) => <ReferralView provider={isProviderRole(me.activeRole)} />}
+    </RequireAccount>
+  );
 }

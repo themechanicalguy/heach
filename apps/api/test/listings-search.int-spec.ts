@@ -142,8 +142,8 @@ describe('Search, profiles and slot holds (SD-02 to SD-05, PO-05, AV-02)', () =>
     expect(has(await search(`${base}&q=बुज़ुर्गों`))).toBe(true);
     expect(has(await search(`${base}&q=cardiology`))).toBe(false);
     expect(has(await search(`${base}&maxFeePaise=50000`))).toBe(false);
-    expect(has(await search(`${base}&language=or`))).toBe(true);
-    expect(has(await search(`${base}&gender=male`))).toBe(false);
+    expect(has(await search(`${base}&q=geriatric&language=or`))).toBe(true);
+    expect(has(await search(`${base}&q=geriatric&gender=male`))).toBe(false);
   });
 
   it('PO-05 a public profile shows Approved providers only, with the nurse registration number', async () => {

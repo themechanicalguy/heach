@@ -33,6 +33,8 @@ export interface SmsMessage {
   locale: Locale;
   templateId: SmsTemplate;
   params: Readonly<Record<string, string>>;
+  /** An admin-edited wording of the template in this language (AD-09), used instead of the catalogue. */
+  text?: string;
 }
 
 /** Sends transactional SMS (OTP, reminders). Text never contains Restricted data (EN, NT). */

@@ -11,6 +11,7 @@ import { destinationFor, isOrganisationOwner } from '../../lib/routing';
 import { useSession } from '../../lib/session';
 import { usePending } from '../../lib/use-pending';
 import { AddRole } from './AddRole';
+import { PAGE_SLUGS } from '../content/ContentPageView';
 import { DataRights } from './DataRights';
 import { Invitations } from './Invitations';
 import { MobileChange } from './MobileChange';
@@ -97,6 +98,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
         />
       )}
       {usable && <DataRights me={me} />}
+      <AboutLinks />
       <SignOutCard />
     </section>
   );
@@ -172,5 +174,22 @@ function SignOutCard() {
         {t('account.signOutAll')}
       </Button>
     </div>
+  );
+}
+
+/** Terms, privacy, questions and refunds, edited by operations (AD-09). */
+function AboutLinks() {
+  const { locale, t } = useI18n();
+  return (
+    <nav className="flow__card" aria-label={t('pages.links')}>
+      <h2 className="flow__subtitle">{t('pages.links')}</h2>
+      <ul>
+        {PAGE_SLUGS.map((slug) => (
+          <li key={slug}>
+            <Link href={`/${locale}/pages/${slug}`}>{t(`pages.${slug}`)}</Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

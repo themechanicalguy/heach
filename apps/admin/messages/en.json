@@ -21,7 +21,8 @@
     "plans": "Plans",
     "referrals": "Referrals",
     "settings": "Settings",
-    "security": "Security"
+    "security": "Security",
+    "content": "Content"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -77,7 +78,9 @@
     "listing_not_eligible": "That listing cannot take this booking.",
     "break_glass_required": "Open the private details first (break-glass).",
     "plan_invalid": "Those plan details do not fit together. Check the kind, item and period.",
-    "plan_item_required": "Choose the catalogue item or service the plan covers."
+    "plan_item_required": "Choose the catalogue item or service the plan covers.",
+    "template_placeholders": "The wording must keep exactly the same placeholders as the default.",
+    "template_invalid": "The wording has unmatched braces."
   },
   "users": {
     "title": "Users",
@@ -504,5 +507,36 @@
     "granted": "Granted",
     "expires": "Expires",
     "none": "No break-glass grants."
+  },
+  "content": {
+    "title": "Content",
+    "intro": "Notification wording and the static pages per language (AD-09). Changes apply at once, need a fresh code and are audited. A real SMS provider sends only registered templates: register edited SMS wording with the provider first.",
+    "templates": "Notification templates",
+    "template": "Template",
+    "locale": "Language",
+    "text": "Wording in use",
+    "placeholders": "Must keep: {list}",
+    "none": "none",
+    "edit": "Edit",
+    "save": "Save",
+    "reset": "Restore default",
+    "saved": "Saved.",
+    "pages": "Static pages",
+    "page": "Page",
+    "pageTitle": "Title",
+    "body": "Text (blank lines separate paragraphs)",
+    "savePage": "Save page",
+    "readOnly": "Only a super admin can change content.",
+    "slugs": {
+      "terms": "Terms of use",
+      "privacy": "Privacy notice",
+      "faq": "Questions and answers",
+      "refunds": "Cancellation and refunds"
+    },
+    "languages": {
+      "or": "Odia",
+      "en": "English",
+      "hi": "Hindi"
+    }
   }
 }

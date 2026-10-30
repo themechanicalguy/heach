@@ -753,8 +753,10 @@
       "earning": "Booking completed",
       "reversal": "Refund to patient",
       "no_show_fee": "Missed-visit fee",
-      "payout": "Paid to your account"
-    }
+      "payout": "Paid to your account",
+      "commission_rebate": "Commission back for a provider you invited"
+    },
+    "invite": "Invite a provider"
   },
   "notifications": {
     "title": "Alerts",

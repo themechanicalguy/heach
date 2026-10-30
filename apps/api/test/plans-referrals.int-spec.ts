@@ -3,10 +3,10 @@ import { adminSignIn, nextTotp, signedUp, useApp } from './account-helpers.js';
 import { bearer, type Login } from './auth-helpers.js';
 import {
   bookingOf,
+  completedVisit,
   createBooking,
   firstSlot,
   gateway,
-  pay,
   runJobs,
   type Booking,
 } from './booking-helpers.js';
@@ -153,34 +153,7 @@ describe('Referrals and coupons (RR-01 to RR-08, AD-16)', () => {
     const nurse = await listedProvider(app(), 'nurse', 'nursing_wound_dressing', {
       feePaise: 40_000,
     });
-    const created = (
-      await createBooking(app(), invitee.login, {
-        listingId: nurse.listingId,
-        startsAt: await firstSlot(app(), nurse.accountId, nurse.listingId),
-      }).expect(201)
-    ).body as Booking;
-    await pay(app(), invitee.login, created.checkout?.orderId ?? '');
-    await server()
-      .post(`/v1/provider/requests/${created.id}/accept`)
-      .set(bearer(nurse.login))
-      .expect(204);
-    await db().query(
-      `UPDATE app.booking SET starts_at = now() + interval '5 minutes', ends_at = now() + interval '50 minutes' WHERE id = $1`,
-      [created.id],
-    );
-    const { code: visitCode } = (
-      await server().get(`/v1/bookings/${created.id}/code`).set(bearer(invitee.login)).expect(200)
-    ).body as { code: string };
-    await server()
-      .post(`/v1/provider/bookings/${created.id}/start`)
-      .set(bearer(nurse.login))
-      .send({ code: visitCode })
-      .expect(204);
-    await server()
-      .post(`/v1/provider/bookings/${created.id}/complete`)
-      .set(bearer(nurse.login))
-      .send({ procedure: 'a', observations: 'b', advice: 'c' })
-      .expect(204);
+    await completedVisit(app(), db(), invitee.login, nurse);
     await runJobs(app());
     const [reward] = await coupons(referrer.login);
     expect(reward).toMatchObject({ status: 'active', valuePaise: 10_000 });

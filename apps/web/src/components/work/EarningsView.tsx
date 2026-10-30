@@ -3,6 +3,7 @@
 import { formatDate, formatDateTime } from '@heach/i18n';
 import { EmptyState } from '@heach/ui';
 import type { Earnings } from '@heach/types';
+import Link from 'next/link';
 import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { useResource } from '../../lib/use-resource';
@@ -19,6 +20,9 @@ export function EarningsView() {
         <h1 id="earnings-title" className="flow__title">
           {t('earnings.title')}
         </h1>
+        <p>
+          <Link href={`/${locale}/referral`}>{t('earnings.invite')}</Link>
+        </p>
         <ResourceView resource={resource} reload={reload}>
           {(data) => (
             <>

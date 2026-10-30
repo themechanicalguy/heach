@@ -17,13 +17,17 @@ import type { Request } from 'express';
 import { principalOf } from '../auth/auth.guard.js';
 import { Roles } from '../auth/roles.decorator.js';
 import { CARE_ROLES } from '../common/request-context.js';
+import { ONBOARDING_ROLES } from '../onboarding/checklists.js';
 import { requireFlag } from '../flags/flags.module.js';
 import { AdminReferralDto, JoinDto, ReferralDto, ReferralQueryDto } from './referrals.dto.js';
 import { ReferralsService } from './referrals.service.js';
 
 const uuid = new ParseUUIDPipe({ version: '4' });
 
-/** The account's referral code, invitees and coupons (RR-01, RR-07, RR-08). */
+/** Patients invite patients; providers invite providers (RR-04). */
+const REFERRING_ROLES = [...CARE_ROLES, ...ONBOARDING_ROLES];
+
+/** The account's referral code, invitees and coupons (RR-01, RR-04, RR-07, RR-08). */
 @ApiTags('referrals')
 @ApiBearerAuth()
 @Controller('v1/me/referral')
@@ -33,7 +37,7 @@ export class ReferralsController {
 
   @Get()
   @Header('Cache-Control', 'no-store')
-  @Roles(...CARE_ROLES)
+  @Roles(...REFERRING_ROLES)
   @ApiOkResponse({ type: ReferralDto })
   async mine(@Req() request: Request): Promise<ReferralDto> {
     return this.referrals.mine(principalOf(request).userId);
@@ -41,10 +45,14 @@ export class ReferralsController {
 
   @Post('join')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(...CARE_ROLES)
+  @Roles(...REFERRING_ROLES)
   @ApiNoContentResponse()
   async join(@Body() body: JoinDto, @Req() request: Request): Promise<void> {
-    await this.referrals.join(principalOf(request).userId, body.code);
+    const principal = principalOf(request);
+    const kind = (ONBOARDING_ROLES as readonly string[]).includes(principal.role)
+      ? 'provider'
+      : 'patient';
+    await this.referrals.join(principal.userId, body.code, kind);
   }
 }
 

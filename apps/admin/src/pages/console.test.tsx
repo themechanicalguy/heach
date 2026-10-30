@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { Content } from './Content';
 import { Dashboard } from './Dashboard';
 import { Plans } from './Plans';
 import { Referrals } from './Referrals';
@@ -194,5 +195,49 @@ describe('Plans and referrals (PK-01, PK-02, RR-06, AD-14, AD-16)', () => {
     fireEvent.change(screen.getByLabelText(en.referrals.coupon), { target: { value: 'c1' } });
     fireEvent.click(screen.getByRole('button', { name: en.referrals.cancelCoupon }));
     expect(await screen.findByText(en.referrals.cancelled)).toBeTruthy();
+  });
+});
+
+describe('Content (AD-09)', () => {
+  it('AD-09 edits a template after a fresh code; support only reads', async () => {
+    let reverified = false;
+    const template = {
+      template: 'plan_expiring',
+      locale: 'en',
+      defaultText: 'Your HEACH plan ends on {time}.',
+      override: null,
+      placeholders: ['time'],
+    };
+    const calls = serve({
+      'GET /content/templates': () => [200, [template]],
+      'GET /content/pages': () => [200, []],
+      'PUT /content/templates/plan_expiring/en': () =>
+        reverified ? [204] : [403, { code: 'reverification_required' }],
+      'POST /auth/reverify': (body) => {
+        reverified = body.code === '123456';
+        return [204];
+      },
+    });
+    const { unmount } = render(<Content canChange />);
+    fireEvent.click(
+      await screen.findByRole('button', { name: `${en.content.edit} plan_expiring en` }),
+    );
+    fireEvent.change(screen.getByLabelText(/^plan_expiring/), {
+      target: { value: 'Your care plan ends {time}.' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: en.content.save }));
+    const sheet = within(await screen.findByRole('dialog'));
+    fireEvent.change(sheet.getByLabelText(en.signIn.code), { target: { value: '123456' } });
+    fireEvent.click(sheet.getByRole('button', { name: en.reverify.confirm }));
+    expect(await screen.findByText(en.content.saved)).toBeTruthy();
+    expect(calls.filter((call) => call.route.startsWith('PUT')).at(-1)?.body).toEqual({
+      text: 'Your care plan ends {time}.',
+    });
+    unmount();
+    render(<Content canChange={false} />);
+    expect(await screen.findByText(en.content.readOnly)).toBeTruthy();
+    expect(
+      screen.queryByRole('button', { name: `${en.content.edit} plan_expiring en` }),
+    ).toBeNull();
   });
 });

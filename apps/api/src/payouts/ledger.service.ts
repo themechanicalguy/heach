@@ -70,14 +70,14 @@ export class LedgerService implements OnModuleInit {
       providerId: string;
       bookingId: string;
       amountPaise: number;
-      kind: 'earning' | 'no_show_fee';
+      kind: 'earning' | 'no_show_fee' | 'commission_rebate';
       at: Date;
       /** `visit`, or `shift:N` when each shift is paid on its own (PK-07). */
       sessionKey?: string;
     },
-  ): Promise<void> {
+  ): Promise<boolean> {
     const holdHours = await this.settings.get('payout_hold_hours');
-    await client.query(
+    const inserted = await client.query(
       `INSERT INTO app.ledger_entry (id, provider_account_id, booking_id, kind, amount_paise, available_at, session_key)
        VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT DO NOTHING`,
       [
@@ -90,6 +90,7 @@ export class LedgerService implements OnModuleInit {
         entry.sessionKey ?? 'visit',
       ],
     );
+    return inserted.rowCount === 1;
   }
 
   /** Takes back from the provider what a refund after completion returned to the patient. */

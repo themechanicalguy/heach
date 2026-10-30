@@ -432,6 +432,20 @@ export class NotificationDto {
 
   @ApiProperty({ type: Date, nullable: true })
   readAt!: Date | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Edited wording of the template in the requested language (AD-09)',
+  })
+  override!: string | null;
+}
+
+export class NotificationQueryDto {
+  @ApiPropertyOptional({ enum: ['or', 'en', 'hi'] })
+  @IsOptional()
+  @IsIn(['or', 'en', 'hi'])
+  locale?: 'or' | 'en' | 'hi';
 }
 
 /** The policy shown before payment (BK-04, AD-08). */

@@ -27,6 +27,7 @@ import { VaultModule } from './vault/vault.module.js';
 import { PlansModule } from './plans/plans.module.js';
 import { ReferralsModule } from './referrals/referrals.module.js';
 import { ConsoleModule } from './console/console.module.js';
+import { ContentModule } from './content/content.module.js';
 import { JobsModule } from './jobs/runner/jobs.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { PayoutsModule } from './payouts/payouts.module.js';
@@ -76,6 +77,7 @@ export class AppModule {
         PlansModule,
         ReferralsModule,
         ConsoleModule,
+        ContentModule,
         ReviewsModule,
       ],
       controllers: [HealthController],

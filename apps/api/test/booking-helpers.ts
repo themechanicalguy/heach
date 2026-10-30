@@ -1,6 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
+import type pg from 'pg';
 import type { FakePaymentGateway } from '../src/adapters/fakes.js';
 import { PAYMENT_GATEWAY } from '../src/adapters/payments.port.js';
 import { JobRunner } from '../src/jobs/runner/job-runner.js';
@@ -97,4 +98,47 @@ export async function paidBooking(
   const created = (await createBooking(app, login, body).expect(201)).body as Booking;
   await pay(app, login, created.checkout?.orderId ?? '');
   return bookingOf(app, login, created.id);
+}
+
+/**
+ * A home visit taken through to completion: booked, paid, accepted, moved to start now, started
+ * with the patient's code and completed with notes. Returns the booking ID.
+ */
+export async function completedVisit(
+  app: INestApplication<App>,
+  db: Pick<pg.Client, 'query'>,
+  patient: Login,
+  provider: { login: Login; accountId: string; listingId: string },
+  slot = 0,
+): Promise<string> {
+  const server = () => request(app.getHttpServer());
+  const created = (
+    await createBooking(app, patient, {
+      listingId: provider.listingId,
+      startsAt: await firstSlot(app, provider.accountId, provider.listingId, slot),
+    }).expect(201)
+  ).body as Booking;
+  await pay(app, patient, created.checkout?.orderId ?? '');
+  await server()
+    .post(`/v1/provider/requests/${created.id}/accept`)
+    .set(bearer(provider.login))
+    .expect(204);
+  await db.query(
+    `UPDATE app.booking SET starts_at = now() + interval '5 minutes', ends_at = now() + interval '50 minutes' WHERE id = $1`,
+    [created.id],
+  );
+  const { code } = (
+    await server().get(`/v1/bookings/${created.id}/code`).set(bearer(patient)).expect(200)
+  ).body as { code: string };
+  await server()
+    .post(`/v1/provider/bookings/${created.id}/start`)
+    .set(bearer(provider.login))
+    .send({ code })
+    .expect(204);
+  await server()
+    .post(`/v1/provider/bookings/${created.id}/complete`)
+    .set(bearer(provider.login))
+    .send({ procedure: 'a', observations: 'b', advice: 'c' })
+    .expect(204);
+  return created.id;
 }
