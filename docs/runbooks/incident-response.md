@@ -1,8 +1,20 @@
 # Incident response
 
-- **Status:** Draft for owner review (30 October 2026), Step 10 "Prepare the launch". Needs the on-call rota and incident channel before go-live (go-live checklist).
+- **Status:** Draft for owner review (30 October 2026), Step 10 "Prepare the launch". On-call rota and incident channel set by the owner on 30 October 2026 (below).
 - **Applies to:** anyone who sees an alert (LM-07) or a report of the service misbehaving, and the on-call engineer.
 - **Related:** [breach response](breach-response.md) when personal data may be exposed; [clinical emergency](clinical-emergency-during-visit.md) for a patient's safety; [backup and restore](backup-restore.md); [key rotation](key-rotation.md); [secret rotation](secret-rotation.md); deploys and rollback in [environments](../environments.md#how-a-deploy-works).
+
+## On call and the incident channel
+
+- **On call:** the account owner, alone, at all hours for SEV1 (owner decision, 30 October 2026).
+  Review when a second person joins; contact details live outside this repository.
+- **Alerts:** the API and the host publish to the SNS topic `heach-credit-reminders`
+  (`ALERT_TOPIC_ARN` on the dev host): repeated authorisation failures, unusual record reads
+  (AD-17), a failed restore check, payment or ledger reconciliation mismatches, and the credit
+  and budget alerts. Its email subscription was confirmed on 30 October 2026, and delivery was
+  proven by the restore-check alert of 25 October 2026.
+- **Incident channel:** the email thread of the alert, until a chat channel is set up; every
+  update in this runbook goes there.
 
 ## Severity
 
