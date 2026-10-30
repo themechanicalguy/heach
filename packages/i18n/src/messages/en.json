@@ -585,7 +585,8 @@
     "earliest": "Earliest: {time}",
     "noSlot": "No free time in the next 7 days",
     "view": "View and book",
-    "pinInvalid": "Enter a 6-digit PIN code."
+    "pinInvalid": "Enter a 6-digit PIN code.",
+    "text": "Provider or service name (optional)"
   },
   "providerServices": {
     "title": "My services",

@@ -100,6 +100,25 @@ describe('SearchView (SD-02 to SD-04)', () => {
     expect(await screen.findByText(/No verified provider visits this PIN code/)).toBeTruthy();
   });
 
+  it('SD-02 searches by provider or service name from the URL', async () => {
+    state.params = new URLSearchParams('pin=751001&q=Synthetic');
+    route({ '/catalogue': [], '/search': [] });
+    inEnglish(<SearchView service="nursing" />);
+    await screen.findByText(/No verified provider visits this PIN code/);
+    expect(
+      (state.api.mock.calls as [string][]).some(([path]) => path.includes('q=Synthetic')),
+    ).toBe(true);
+    const box = screen.getByLabelText(CATALOGUES.en.search.text);
+    expect(box).toHaveProperty('value', 'Synthetic');
+    fireEvent.change(box, { target: { value: 'Physio' } });
+    fireEvent.click(screen.getByRole('button', { name: CATALOGUES.en.search.find }));
+    await waitFor(() => {
+      expect((state.api.mock.calls as [string][]).some(([path]) => path.includes('q=Physio'))).toBe(
+        true,
+      );
+    });
+  });
+
   it('UX-04 shows an error with retry when search fails', async () => {
     state.params = new URLSearchParams('pin=751001');
     state.api.mockImplementation((path: string) =>

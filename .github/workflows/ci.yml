@@ -163,6 +163,12 @@ jobs:
           E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL="$mailpit" \
             pnpm --filter @heach/web exec playwright test e2e/sign-in-setup.spec.ts \
             e2e/account-flows.spec.ts
+      # Providers and plans are seeded through the API; the patient's steps run in the browser.
+      - name: Booking journeys J3, J4, J7, J8 and J9 in the browser
+        run: |
+          mailpit="$(grep '^MAILPIT_API_URL=' .env | cut -d= -f2-)"
+          E2E_BASE_URL=http://localhost:3000 E2E_MAILPIT_URL="$mailpit" \
+            pnpm --filter @heach/web exec playwright test e2e/journeys.spec.ts
       # After the web suite: the admin suite opens one of the OTP accounts it made.
       - name: Admin sign-in with TOTP, masked users, suspend, admin accounts and recovery
         run: |
