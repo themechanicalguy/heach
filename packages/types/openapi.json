@@ -4110,6 +4110,39 @@
         "tags": ["vault"]
       }
     },
+    "/admin/v1/vault/accounts/{accountId}/revoke-shares": {
+      "post": {
+        "operationId": "AdminVaultController_revokeShares",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokedSharesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/admin/v1/vault/stats": {
       "get": {
         "operationId": "AdminVaultController_stats",
@@ -10010,6 +10043,18 @@
           }
         },
         "required": ["code"]
+      },
+      "RevokedSharesDto": {
+        "type": "object",
+        "properties": {
+          "shares": {
+            "type": "number"
+          },
+          "links": {
+            "type": "number"
+          }
+        },
+        "required": ["shares", "links"]
       },
       "VaultStatsDto": {
         "type": "object",

@@ -382,3 +382,12 @@ export class ProviderRecordInputDto {
   @Type(() => UploadDto)
   file?: UploadDto;
 }
+
+/** What a breach containment revoked (SO-09). */
+export class RevokedSharesDto {
+  @ApiProperty()
+  shares!: number;
+
+  @ApiProperty()
+  links!: number;
+}

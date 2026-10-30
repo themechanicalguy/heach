@@ -243,9 +243,11 @@ export class VaultRepository {
       attempts: number;
       expiresAt: Date;
       revokedAt: Date | null;
+      ownerSuspended: boolean;
     }>(
-      `SELECT id, owner_account_id AS "ownerId", record_ids AS "recordIds", code_hash AS "codeHash", attempts,
-              expires_at AS "expiresAt", revoked_at AS "revokedAt" FROM app.external_share WHERE token_hash = $1`,
+      `SELECT s.id, s.owner_account_id AS "ownerId", s.record_ids AS "recordIds", s.code_hash AS "codeHash", s.attempts,
+              s.expires_at AS "expiresAt", s.revoked_at AS "revokedAt", a.status = 'suspended' AS "ownerSuspended"
+         FROM app.external_share s JOIN app.account a ON a.id = s.owner_account_id WHERE s.token_hash = $1`,
       [tokenHash],
     );
     return rows[0];
@@ -301,5 +303,18 @@ export class VaultRepository {
       [recordId],
     );
     return rows;
+  }
+
+  /** Breach containment (SO-09): every live share and link of one account stops at once. */
+  async revokeAllFor(accountId: string): Promise<{ shares: number; links: number }> {
+    const shares = await this.pool.query(
+      'UPDATE app.record_share SET revoked_at = now() WHERE owner_account_id = $1 AND revoked_at IS NULL',
+      [accountId],
+    );
+    const links = await this.pool.query(
+      'UPDATE app.external_share SET revoked_at = now() WHERE owner_account_id = $1 AND revoked_at IS NULL',
+      [accountId],
+    );
+    return { shares: shares.rowCount ?? 0, links: links.rowCount ?? 0 };
   }
 }
