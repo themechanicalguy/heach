@@ -94,7 +94,8 @@
     "plan_renewed": "Your HEACH plan has renewed. Open the app to see what is included.",
     "plan_renewal_failed": "We could not renew your HEACH plan. We will try again; check your payment method in your bank or UPI app.",
     "plan_renewal_paused": "Your HEACH plan was not renewed after several tries. Renewal is paused; turn it on again in the app.",
-    "commission_credit_issued": "A provider you invited has qualified. You pay less commission on your next completed bookings."
+    "commission_credit_issued": "A provider you invited has qualified. You pay less commission on your next completed bookings.",
+    "plan_units_low": "One visit or session is left on your HEACH plan. Open the app to see it or to renew."
   },
   "welcome": {
     "title": "Choose your language",

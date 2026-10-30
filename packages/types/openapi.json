@@ -5234,6 +5234,33 @@
         "tags": ["admin"]
       }
     },
+    "/admin/v1/plans/purchases": {
+      "get": {
+        "operationId": "AdminPlansController_purchases",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminPurchaseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/admin/v1/plans/{id}/approve": {
       "post": {
         "operationId": "AdminPlansController_approve",
@@ -10554,6 +10581,64 @@
           "validityDays",
           "pricePaise",
           "texts"
+        ]
+      },
+      "AdminPurchaseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["package", "subscription"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending_payment", "active", "expired", "cancelled"]
+          },
+          "renewal": {
+            "type": "boolean",
+            "description": "This purchase renews an earlier one (PK-05)"
+          },
+          "autoRenew": {
+            "type": "boolean"
+          },
+          "renewalPaused": {
+            "type": "boolean"
+          },
+          "paidPaise": {
+            "type": "number"
+          },
+          "refundedPaise": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "planName",
+          "kind",
+          "status",
+          "renewal",
+          "autoRenew",
+          "renewalPaused",
+          "paidPaise",
+          "refundedPaise",
+          "createdAt",
+          "endsAt"
         ]
       },
       "InviteeDto": {

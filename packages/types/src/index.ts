@@ -95,6 +95,7 @@ export type VaultUsage = components['schemas']['UsageDto'];
 export type VaultStats = components['schemas']['VaultStatsDto'];
 export type Plan = components['schemas']['PlanDto'];
 export type PlanInput = components['schemas']['PlanInputDto'];
+export type AdminPurchase = components['schemas']['AdminPurchaseDto'];
 export type Purchase = components['schemas']['PurchaseDto'];
 export type PurchaseCheckout = components['schemas']['PurchaseCheckoutDto'];
 export type Referral = components['schemas']['ReferralDto'];

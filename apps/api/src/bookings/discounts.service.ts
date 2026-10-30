@@ -4,6 +4,7 @@ import type pg from 'pg';
 import { reason } from '../common/error-response.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
+import { JobRunner } from '../jobs/runner/job-runner.js';
 import type { EligibleListing } from './dispatch.repository.js';
 import type { FeeBreakdown } from './fees.js';
 
@@ -29,6 +30,8 @@ interface EntitlementRow {
   discount_percent: number;
 }
 
+export const PLAN_UNITS_LOW_JOB = 'plan_units_low';
+
 /**
  * Plan entitlements and coupons at checkout (BK-08, PK-04, RR-08). An entitlement covers the
  * fee of the units it has left, or gives its discount once they are used; one coupon then takes
@@ -38,7 +41,10 @@ interface EntitlementRow {
  */
 @Injectable()
 export class DiscountsService {
-  constructor(@Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>) {}
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>,
+    private readonly jobs: JobRunner,
+  ) {}
 
   async quote(
     bookerId: string,
@@ -101,6 +107,7 @@ export class DiscountsService {
           discount.entitlementPaise,
         ],
       );
+      if (discount.units > 0) await this.remindIfLow(client, discount.entitlementId);
     }
     if (discount.couponId) {
       const coupon = await client.query(
@@ -113,6 +120,22 @@ export class DiscountsService {
         discount.couponId,
       ]);
     }
+  }
+
+  /** One unit left of several: the buyer hears it after the booking commits (PK-08). */
+  private async remindIfLow(client: TransactionClient, entitlementId: string): Promise<void> {
+    const { rows } = await client.query<{ buyer: string; left: number; total: number }>(
+      `SELECT pp.buyer_account_id AS buyer, e.units_total - e.units_used AS left, e.units_total AS total
+         FROM app.entitlement e JOIN app.plan_purchase pp ON pp.id = e.purchase_id WHERE e.id = $1`,
+      [entitlementId],
+    );
+    const row = rows[0];
+    if (!row || row.total < 2 || row.left !== 1) return;
+    await this.jobs.enqueue(client, {
+      kind: PLAN_UNITS_LOW_JOB,
+      payload: { buyer: row.buyer },
+      dedupeKey: `plan-units-low:${entitlementId}`,
+    });
   }
 
   /** Gives back what a cancelled booking drew (the units, and the coupon if still valid). */
