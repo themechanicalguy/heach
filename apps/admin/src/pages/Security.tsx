@@ -33,7 +33,14 @@ export function Security() {
         <dd>{String(data.flaggedReferrals)}</dd>
         <dt>{t('security.infected')}</dt>
         <dd>{String(data.infectedUploads)}</dd>
+        <dt>{t('security.authz')}</dt>
+        <dd>{String(data.authzFailuresToday)}</dd>
+        <dt>{t('security.unusual')}</dt>
+        <dd>{String(data.unusualReadersToday)}</dd>
+        <dt>{t('security.reads')}</dt>
+        <dd>{String(data.recordReads24h)}</dd>
       </dl>
+      <AccessReview admins={data.adminAccess} />
       <h2>{t('security.breakGlass')}</h2>
       {data.breakGlass.length === 0 ? (
         <EmptyState message={t('security.none')} />
@@ -58,6 +65,41 @@ export function Security() {
           ]}
         />
       )}
+    </>
+  );
+}
+
+type Admin = SecurityConsole['adminAccess'][number];
+
+/** The admin access review (AD-17): who has access, and who has not used it for 90 days. */
+function AccessReview({ admins }: Readonly<{ admins: readonly Admin[] }>) {
+  return (
+    <>
+      <h2>{t('security.accessReview')}</h2>
+      <Table
+        caption={t('security.accessReview')}
+        rows={admins}
+        rowKey={(row) => row.email}
+        columns={[
+          { key: 'email', header: t('security.email'), cell: (row: Admin) => row.email },
+          {
+            key: 'role',
+            header: t('security.adminRoleCol'),
+            cell: (row: Admin) => t(`adminRoles.${row.role as 'super_admin'}`),
+          },
+          { key: 'status', header: t('security.status'), cell: (row: Admin) => row.status },
+          {
+            key: 'last',
+            header: t('security.lastSignIn'),
+            cell: (row: Admin) => (row.lastSignInAt ? when(row.lastSignInAt) : t('security.never')),
+          },
+          {
+            key: 'review',
+            header: '',
+            cell: (row: Admin) => t(row.stale ? 'security.stale' : 'security.ok'),
+          },
+        ]}
+      />
     </>
   );
 }

@@ -17,6 +17,7 @@ import type { Principal } from '../common/request-context.js';
 import { FIELD_ENCRYPTOR } from '../crypto/crypto.tokens.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { withTransaction } from '../data-stores/transaction.js';
+import { UnusualReadMonitor } from '../security/unusual-read.monitor.js';
 import { Settings } from '../settings/settings.service.js';
 import { type StoredFile, UploadsService } from '../uploads/uploads.service.js';
 import { ShareKeys } from './share-keys.js';
@@ -56,7 +57,14 @@ export class VaultService {
     private readonly settings: Settings,
     private readonly audit: AuditService,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
+    private readonly reads: UnusualReadMonitor,
   ) {}
+
+  /** Every read by someone else is logged (MV-10) and watched for unusual volume (AD-17). */
+  private async logRead(access: Parameters<VaultRepository['logAccess']>[0]): Promise<void> {
+    await this.vault.logAccess(access);
+    await this.reads.record(access.accessorId ?? `link:${access.linkId ?? 'unknown'}`);
+  }
 
   async list(ownerId: string, query: VaultQueryDto): Promise<Plain<RecordDto>[]> {
     const rows = (await this.vault.records(ownerId)).filter((row) =>
@@ -212,7 +220,7 @@ export class VaultService {
       (row) => row.ownerId === share.ownerId,
     );
     for (const row of rows)
-      await this.vault.logAccess({
+      await this.logRead({
         recordId: row.id,
         accessorId: provider.userId,
         role: provider.role,
@@ -230,7 +238,7 @@ export class VaultService {
         ? await this.uploads.read(row.objectId)
         : undefined;
     if (!share || !file) throw new NotFoundException();
-    await this.vault.logAccess({
+    await this.logRead({
       recordId,
       accessorId: provider.userId,
       role: provider.role,
@@ -322,7 +330,7 @@ export class VaultService {
     );
     const files = [];
     for (const row of rows) {
-      await this.vault.logAccess({
+      await this.logRead({
         recordId: row.id,
         accessorId: null,
         role: 'external_doctor',

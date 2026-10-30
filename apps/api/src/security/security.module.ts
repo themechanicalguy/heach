@@ -4,9 +4,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { EnvVars } from '../config/env.schema.js';
 import { ALERT_PUBLISHER, LogAlertPublisher, SnsAlertPublisher } from './alert-publisher.js';
 import { AuthzFailureMonitor } from './authz-failure.monitor.js';
+import { UnusualReadMonitor } from './unusual-read.monitor.js';
 import { ADDRESS_THROTTLER, USER_THROTTLER } from './user-throttler.guard.js';
 
-/** Rate limits per address and per user (SO-08.1, SO-08.12) and security alerts (SO-08.3). */
+/** Rate limits per address and per user (SO-08.1, SO-08.12) and security alerts (SO-08.3, AD-17). */
 @Global()
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { ADDRESS_THROTTLER, USER_THROTTLER } from './user-throttler.guard.js';
           : new LogAlertPublisher(),
     },
     AuthzFailureMonitor,
+    UnusualReadMonitor,
   ],
-  exports: [ALERT_PUBLISHER, AuthzFailureMonitor],
+  exports: [ALERT_PUBLISHER, AuthzFailureMonitor, UnusualReadMonitor],
 })
 export class SecurityModule {}

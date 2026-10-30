@@ -4667,6 +4667,16 @@ export interface components {
       /** Format: date-time */
       expiresAt: string;
     };
+    AdminAccessDto: {
+      email: string;
+      role: string;
+      /** @enum {string} */
+      status: 'active' | 'disabled';
+      /** Format: date-time */
+      lastSignInAt: string | null;
+      /** @description Active but not signed in for 90 days: review or disable */
+      stale: boolean;
+    };
     SecurityDto: {
       breakGlass: components['schemas']['BreakGlassEntryDto'][];
       /** @description Provider strike reviews still open (A12) */
@@ -4677,6 +4687,12 @@ export interface components {
       infectedUploads: number;
       /** @description Records read through shares in the last 24 hours (unusual-read watch) */
       recordReads24h: number;
+      /** @description Authorisation failures today (UTC); ten in five minutes alert */
+      authzFailuresToday: number;
+      /** @description Readers who crossed the unusual-read threshold today */
+      unusualReadersToday: number;
+      /** @description Access review of admin accounts */
+      adminAccess: components['schemas']['AdminAccessDto'][];
     };
     PageDto: {
       /** @enum {string} */

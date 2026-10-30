@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { REDIS_CLIENT } from '../data-stores/data-stores.tokens.js';
 import { ALERT_PUBLISHER, type AlertPublisher } from './alert-publisher.js';
+import { dayKey } from './unusual-read.monitor.js';
 
 export const AUTHZ_FAILURE_THRESHOLD = 10;
 export const AUTHZ_FAILURE_WINDOW_SECONDS = 5 * 60;
@@ -20,6 +21,8 @@ export class AuthzFailureMonitor {
       .multi()
       .incr(key)
       .expire(key, AUTHZ_FAILURE_WINDOW_SECONDS, 'NX')
+      .incr(dayKey('authz-fail'))
+      .expire(dayKey('authz-fail'), 2 * 86_400)
       .exec()) as [[null, number], unknown];
     if (count === AUTHZ_FAILURE_THRESHOLD) {
       await this.alerts.publish(
