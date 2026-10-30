@@ -1,5 +1,6 @@
 import { CATALOGUES, LOCALES, type Locale } from '@heach/i18n';
 import { expect, type Page, test } from '@playwright/test';
+import { expectAccessible } from './accessibility';
 import { completeProviderSetup, confirmItIsMe, signInByOtp, syntheticMobile } from './otp-helpers';
 
 /**
@@ -60,6 +61,8 @@ for (const locale of LOCALES) {
       await signInByOtp(page, locale, mobile);
       await completeProviderSetup(page, 'nurse', 'Synthetic Onboarding Nurse', locale);
       await expect(page).toHaveURL(new RegExp(`/${locale}/provider$`));
+      await expect(page.getByRole('heading', { name: t.application.title })).toBeVisible();
+      await expectAccessible(page, 'provider application');
       await uploadDocuments(page, locale);
       await page.getByRole('button', { name: t.application.verifyIdentity }).click();
       // The partner sends the browser back through the identity return page to the application.
