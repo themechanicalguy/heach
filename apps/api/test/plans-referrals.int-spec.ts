@@ -70,26 +70,6 @@ describe('Packages and entitlements (J8; PK-01, PK-03, PK-04, PK-07, BK-08)', ()
     }).expect(409);
   });
 
-  it('PK-07 cancelling a plan refunds the unused share pro-rata', async () => {
-    const nurse = await listedProvider(app(), 'nurse', 'nursing_vitals_check', {
-      feePaise: 30_000,
-    });
-    const planId = await packagePlan(app(), 'nursing_vitals_check', 4, 100_000);
-    const patient = await signedUp(app());
-    const purchaseId = await buy(app(), patient.login, planId);
-    await createBooking(app(), patient.login, {
-      listingId: nurse.listingId,
-      startsAt: await firstSlot(app(), nurse.accountId, nurse.listingId),
-      purchaseId,
-    }).expect(201);
-    expect((await plansOf(app(), patient.login))[0]?.refundIfCancelledPaise).toBe(75_000);
-    await server().post(`/v1/me/plans/${purchaseId}/cancel`).set(bearer(patient.login)).expect(204);
-    const [plan] = await plansOf(app(), patient.login);
-    expect(plan).toMatchObject({ status: 'cancelled' });
-    expect(gateway(app()).refunds.some((refund) => refund.amountPaise === 75_000)).toBe(true);
-    await server().post(`/v1/me/plans/${purchaseId}/cancel`).set(bearer(patient.login)).expect(409);
-  });
-
   it('PK-01 a provider package waits for admin approval before sale', async () => {
     const nurse = await listedProvider(app(), 'nurse', 'nursing_wound_dressing');
     const own = await server()
@@ -314,5 +294,41 @@ describe('Entitlement ledger invariants (PK-04, Step 9 checks)', () => {
       { linkedPatientId: null, unitsUsed: 1 },
       { linkedPatientId: mother, unitsUsed: 2 },
     ]);
+  });
+});
+
+describe('Cancelling a plan (PK-07)', () => {
+  const { app, server } = useApp();
+
+  it('PK-07 a plan with an upcoming booking cancels only after that booking; then the unused share comes back', async () => {
+    const nurse = await listedProvider(app(), 'nurse', 'nursing_vitals_check', {
+      feePaise: 30_000,
+    });
+    const planId = await packagePlan(app(), 'nursing_vitals_check', 4, 100_000);
+    const patient = await signedUp(app());
+    const purchaseId = await buy(app(), patient.login, planId);
+    const booking = (
+      await createBooking(app(), patient.login, {
+        listingId: nurse.listingId,
+        startsAt: await firstSlot(app(), nurse.accountId, nurse.listingId),
+        purchaseId,
+      }).expect(201)
+    ).body as Booking;
+    const cancelPlan = () =>
+      server().post(`/v1/me/plans/${purchaseId}/cancel`).set(bearer(patient.login));
+    expect((await cancelPlan().expect(409)).body).toMatchObject({
+      code: 'plan_has_upcoming_bookings',
+    });
+    await server()
+      .post(`/v1/bookings/${booking.id}/cancel`)
+      .set(bearer(patient.login))
+      .send({ reason: 'changed_plans' })
+      .expect(200);
+    expect((await plansOf(app(), patient.login))[0]?.refundIfCancelledPaise).toBe(100_000);
+    await cancelPlan().expect(204);
+    const [plan] = await plansOf(app(), patient.login);
+    expect(plan).toMatchObject({ status: 'cancelled' });
+    expect(gateway(app()).refunds.some((refund) => refund.amountPaise === 100_000)).toBe(true);
+    await cancelPlan().expect(409);
   });
 });
