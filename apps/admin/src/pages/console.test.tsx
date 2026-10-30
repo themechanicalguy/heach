@@ -92,12 +92,26 @@ describe('Dashboard and security console (AD-10, AD-17)', () => {
           openStrikeReviews: 2,
           flaggedReferrals: 1,
           infectedUploads: 0,
+          recordReads24h: 12,
+          authzFailuresToday: 4,
+          unusualReadersToday: 0,
+          adminAccess: [
+            {
+              email: 'old@heach.invalid',
+              role: 'support',
+              status: 'active',
+              lastSignInAt: null,
+              stale: true,
+            },
+          ],
         },
       ],
     });
     render(<Security />);
     expect(await screen.findByText(en.security.none)).toBeTruthy();
     expect(screen.getByText('2')).toBeTruthy();
+    expect(screen.getByText('4')).toBeTruthy();
+    expect(screen.getByText(en.security.stale)).toBeTruthy();
   });
 });
 

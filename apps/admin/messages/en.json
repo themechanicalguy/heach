@@ -516,7 +516,7 @@
   },
   "security": {
     "title": "Security",
-    "intro": "Security console (AD-17): break-glass grants, strike reviews, flagged referrals and infected uploads.",
+    "intro": "Security console (AD-17): break-glass grants, alerts for failed authorisation and unusual reads, the admin access review, strike reviews, flagged referrals and infected uploads.",
     "strikes": "Strike reviews open",
     "referrals": "Referrals flagged",
     "infected": "Infected uploads",
@@ -525,7 +525,18 @@
     "reason": "Reason",
     "granted": "Granted",
     "expires": "Expires",
-    "none": "No break-glass grants."
+    "none": "No break-glass grants.",
+    "authz": "Authorisation failures today",
+    "unusual": "Unusual readers today",
+    "reads": "Record reads in 24 hours",
+    "accessReview": "Admin access review",
+    "email": "Email",
+    "adminRoleCol": "Role",
+    "status": "Status",
+    "lastSignIn": "Last sign-in",
+    "never": "Never",
+    "stale": "Review: no sign-in for 90 days",
+    "ok": "OK"
   },
   "content": {
     "title": "Content",

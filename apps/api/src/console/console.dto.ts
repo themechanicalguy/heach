@@ -70,6 +70,24 @@ export class BreakGlassEntryDto {
   expiresAt!: Date;
 }
 
+/** One admin in the access review (AD-17): stale when not signed in for 90 days. */
+export class AdminAccessDto {
+  @ApiProperty()
+  email!: string;
+
+  @ApiProperty()
+  role!: string;
+
+  @ApiProperty({ enum: ['active', 'disabled'] })
+  status!: string;
+
+  @ApiProperty({ type: Date, nullable: true })
+  lastSignInAt!: Date | null;
+
+  @ApiProperty({ description: 'Active but not signed in for 90 days: review or disable' })
+  stale!: boolean;
+}
+
 export class SecurityDto {
   @ApiProperty({ type: [BreakGlassEntryDto] })
   breakGlass!: BreakGlassEntryDto[];
@@ -87,4 +105,13 @@ export class SecurityDto {
     description: 'Records read through shares in the last 24 hours (unusual-read watch)',
   })
   recordReads24h!: number;
+
+  @ApiProperty({ description: 'Authorisation failures today (UTC); ten in five minutes alert' })
+  authzFailuresToday!: number;
+
+  @ApiProperty({ description: 'Readers who crossed the unusual-read threshold today' })
+  unusualReadersToday!: number;
+
+  @ApiProperty({ type: [AdminAccessDto], description: 'Access review of admin accounts' })
+  adminAccess!: AdminAccessDto[];
 }
