@@ -4608,7 +4608,8 @@ export interface components {
         | 'provider_referral_bookings'
         | 'provider_referral_rebate_percent'
         | 'provider_referral_rebate_bookings'
-        | 'slot_hold_minutes';
+        | 'slot_hold_minutes'
+        | 'referral_qualifying_bookings';
       value: number;
     };
     SettingInputDto: {
@@ -4637,7 +4638,8 @@ export interface components {
         | 'provider_referral_bookings'
         | 'provider_referral_rebate_percent'
         | 'provider_referral_rebate_bookings'
-        | 'slot_hold_minutes';
+        | 'slot_hold_minutes'
+        | 'referral_qualifying_bookings';
       value: number;
     };
     CountDto: {

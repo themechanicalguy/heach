@@ -247,6 +247,10 @@ export class PlansService implements OnModuleInit {
       const purchase = rows[0];
       if (!purchase) throw new NotFoundException();
       if (purchase.status !== 'active') throw reason(ConflictException, 'plan_not_active');
+      // A session booked but not yet held would count as used: those bookings are cancelled
+      // first, which gives their units back, so the refund covers them (PK-07).
+      if (await this.hasUpcoming(client, purchaseId))
+        throw reason(ConflictException, 'plan_has_upcoming_bookings');
       const entitlements = await this.entitlements(purchaseId, client);
       const amount = proRataRefund(
         purchase.paid - purchase.refunded,
@@ -361,6 +365,17 @@ export class PlansService implements OnModuleInit {
       client,
     );
     await this.renewals.afterActivation(client, purchaseId);
+  }
+
+  private async hasUpcoming(client: TransactionClient, purchaseId: string): Promise<boolean> {
+    const { rows } = await client.query(
+      `SELECT 1 FROM app.entitlement_use u JOIN app.entitlement e ON e.id = u.entitlement_id
+         JOIN app.booking b ON b.id = u.booking_id
+        WHERE e.purchase_id = $1 AND u.reversed_at IS NULL
+          AND b.status IN ('pending_payment', 'requested', 'confirmed') LIMIT 1`,
+      [purchaseId],
+    );
+    return rows.length > 0;
   }
 
   private async entitlements(purchaseId: string, client: Pick<pg.Pool, 'query'> = this.pool) {
