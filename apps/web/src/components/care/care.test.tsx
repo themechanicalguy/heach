@@ -108,7 +108,15 @@ describe('SearchView (SD-02 to SD-04)', () => {
     expect(
       (state.api.mock.calls as [string][]).some(([path]) => path.includes('q=Synthetic')),
     ).toBe(true);
-    expect(screen.getByLabelText(CATALOGUES.en.search.text)).toHaveProperty('value', 'Synthetic');
+    const box = screen.getByLabelText(CATALOGUES.en.search.text);
+    expect(box).toHaveProperty('value', 'Synthetic');
+    fireEvent.change(box, { target: { value: 'Physio' } });
+    fireEvent.click(screen.getByRole('button', { name: CATALOGUES.en.search.find }));
+    await waitFor(() => {
+      expect((state.api.mock.calls as [string][]).some(([path]) => path.includes('q=Physio'))).toBe(
+        true,
+      );
+    });
   });
 
   it('UX-04 shows an error with retry when search fails', async () => {

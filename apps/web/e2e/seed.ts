@@ -1,6 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { randomInt } from 'node:crypto';
-import { createAdmin, PASSWORD, totp } from '../../admin/e2e/admin-helpers';
+import { createHmac, randomInt, randomUUID } from 'node:crypto';
 import { codeFor, inboxOf, syntheticMobile } from './otp-helpers';
 
 /**
@@ -16,6 +15,42 @@ const UPLOAD = 'application/vnd.heach.upload+json';
 /** A word unique to this run, letters only (names refuse digits). */
 const uniqueWord = () =>
   Array.from({ length: 10 }, () => 'abcdefghijklmnopqrstuvwxyz'[randomInt(0, 26)]).join('');
+
+const PASSWORD = 'synthetic-admin-password';
+const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+/** RFC 6238 code for a base32 secret, as the admin's authenticator app would show it. */
+function totp(secret: string, step = Math.floor(Date.now() / 30_000)): string {
+  const bits = Array.from(secret, (c) => BASE32.indexOf(c).toString(2).padStart(5, '0')).join('');
+  const key = Buffer.from((bits.match(/.{8}/g) ?? []).map((byte) => parseInt(byte, 2)));
+  const counter = Buffer.alloc(8);
+  counter.writeBigUInt64BE(BigInt(step));
+  const digest = createHmac('sha1', key).update(counter).digest();
+  const offset = (digest.at(-1) ?? 0) & 0x0f;
+  return String((digest.readUInt32BE(offset) & 0x7fffffff) % 1_000_000).padStart(6, '0');
+}
+
+/**
+ * A synthetic admin through the operator CLI, password on standard input. The same steps as the
+ * admin suite's helper; kept here because the web image build compiles this folder without the
+ * admin app's test dependencies.
+ */
+function createAdmin(role: string): string {
+  const email = `${role}-${randomUUID()}@heach.invalid`;
+  execFileSync(
+    process.execPath,
+    [
+      '--env-file-if-exists=../../.env',
+      'dist/jobs/create-admin.js',
+      '--email',
+      email,
+      '--role',
+      role,
+    ],
+    { input: PASSWORD, cwd: '../api', stdio: ['pipe', 'ignore', 'inherit'] },
+  );
+  return email;
+}
 
 export interface Session {
   mobile: string;
