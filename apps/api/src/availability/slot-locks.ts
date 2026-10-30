@@ -1,9 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { REDIS_CLIENT } from '../data-stores/data-stores.tokens.js';
-
-/** How long a slot stays held during checkout (AV-02, AD-08). */
-export const SLOT_LOCK_SECONDS = 10 * 60;
+import { Settings } from '../settings/settings.service.js';
 
 const key = (providerId: string, start: Date) => `slot-lock:${providerId}:${start.toISOString()}`;
 
@@ -13,12 +11,17 @@ const key = (providerId: string, start: Date) => `slot-lock:${providerId}:${star
  */
 @Injectable()
 export class SlotLocks {
-  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
+  constructor(
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly settings: Settings,
+  ) {}
 
   async acquire(providerId: string, start: Date, holder: string): Promise<boolean> {
     const current = await this.redis.get(key(providerId, start));
     if (current === holder) return true;
-    const set = await this.redis.set(key(providerId, start), holder, 'EX', SLOT_LOCK_SECONDS, 'NX');
+    // How long the hold lasts is the `slot_hold_minutes` setting (AV-02, AD-08).
+    const seconds = (await this.settings.get('slot_hold_minutes')) * 60;
+    const set = await this.redis.set(key(providerId, start), holder, 'EX', seconds, 'NX');
     return set === 'OK';
   }
 

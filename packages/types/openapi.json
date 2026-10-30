@@ -10764,7 +10764,8 @@
               "renewal_max_attempts",
               "provider_referral_bookings",
               "provider_referral_rebate_percent",
-              "provider_referral_rebate_bookings"
+              "provider_referral_rebate_bookings",
+              "slot_hold_minutes"
             ]
           },
           "value": {
@@ -10801,7 +10802,8 @@
               "renewal_max_attempts",
               "provider_referral_bookings",
               "provider_referral_rebate_percent",
-              "provider_referral_rebate_bookings"
+              "provider_referral_rebate_bookings",
+              "slot_hold_minutes"
             ]
           },
           "value": {

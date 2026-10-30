@@ -4607,7 +4607,8 @@ export interface components {
         | 'renewal_max_attempts'
         | 'provider_referral_bookings'
         | 'provider_referral_rebate_percent'
-        | 'provider_referral_rebate_bookings';
+        | 'provider_referral_rebate_bookings'
+        | 'slot_hold_minutes';
       value: number;
     };
     SettingInputDto: {
@@ -4635,7 +4636,8 @@ export interface components {
         | 'renewal_max_attempts'
         | 'provider_referral_bookings'
         | 'provider_referral_rebate_percent'
-        | 'provider_referral_rebate_bookings';
+        | 'provider_referral_rebate_bookings'
+        | 'slot_hold_minutes';
       value: number;
     };
     CountDto: {
