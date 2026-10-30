@@ -2,7 +2,7 @@
 
 import { formatDateTime, formatPaise } from '@heach/i18n';
 import { Button, Card, CheckboxField, EmptyState, Notice } from '@heach/ui';
-import type { Plan, Purchase, PurchaseCheckout } from '@heach/types';
+import type { LinkedPatient, Plan, Purchase, PurchaseCheckout } from '@heach/types';
 import Link from 'next/link';
 import { useState } from 'react';
 import { api } from '../../lib/api';
@@ -93,6 +93,31 @@ function PlanCard({ plan, onBought }: Readonly<{ plan: Plan; onBought: () => Pro
   );
 }
 
+/** Units used per covered person (PK-04), named from the account's own linked patients. */
+function PeopleUse({ people }: Readonly<{ people: Purchase['people'] }>) {
+  const { t } = useI18n();
+  const linked = useResource<LinkedPatient[]>('/me/linked-patients');
+  const names = new Map(
+    linked.resource.state === 'ready'
+      ? linked.resource.data.map((person) => [person.id, person.fullName])
+      : [],
+  );
+  return (
+    <ul>
+      {people.map((person) => (
+        <li key={person.linkedPatientId ?? 'self'}>
+          {t('plans.personUsed', {
+            name: person.linkedPatientId
+              ? (names.get(person.linkedPatientId) ?? '…')
+              : t('book.myself'),
+            count: person.unitsUsed,
+          })}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function PurchaseCard({
   purchase,
   onChanged,
@@ -116,6 +141,7 @@ function PurchaseCard({
           })}
         </p>
       ))}
+      {purchase.people.length > 0 && <PeopleUse people={purchase.people} />}
       {purchase.renewalPaused && <Notice tone="warning">{t('plans.renewalPaused')}</Notice>}
       {active && purchase.kind === 'subscription' && (
         <CheckboxField

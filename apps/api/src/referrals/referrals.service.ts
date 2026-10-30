@@ -90,7 +90,12 @@ export class ReferralsService implements OnModuleInit {
    * Joins with someone's code: within the window, once, never one's own (RR-06). A provider
    * joins only with another provider's code (RR-04).
    */
-  async join(accountId: string, code: string, kind: 'patient' | 'provider'): Promise<void> {
+  async join(
+    accountId: string,
+    code: string,
+    kind: 'patient' | 'provider',
+    deviceHash: string,
+  ): Promise<void> {
     const windowDays = await this.settings.get('referral_join_window_days');
     const cap = await this.settings.get('referral_monthly_cap');
     await withTransaction(this.pool, async (client) => {
@@ -100,15 +105,17 @@ export class ReferralsService implements OnModuleInit {
         booked: boolean;
         recent: number;
         provides: boolean;
+        sameDevice: boolean;
       }>(
         `SELECT rc.account_id AS referrer,
                 EXISTS (SELECT 1 FROM app.role_assignment g WHERE g.account_id = rc.account_id AND g.side = 'provider') AS provides,
+                EXISTS (SELECT 1 FROM app.referral d WHERE d.device_hash = $4 AND d.invitee_account_id <> $2) AS "sameDevice",
                 (SELECT a.created_at > now() - make_interval(days => $3) FROM app.account a WHERE a.id = $2) AS fresh,
                 EXISTS (SELECT 1 FROM app.booking b WHERE b.booker_account_id = $2 AND b.status = 'completed') AS booked,
                 (SELECT count(*)::int FROM app.referral r WHERE r.referrer_account_id = rc.account_id
                    AND r.created_at > now() - interval '30 days') AS recent
            FROM app.referral_code rc WHERE rc.code = $1`,
-        [code, accountId, windowDays],
+        [code, accountId, windowDays, deviceHash],
       );
       const found = rows[0];
       if (
@@ -119,17 +126,21 @@ export class ReferralsService implements OnModuleInit {
         (kind === 'provider' && !found.provides)
       )
         throw reason(ConflictException, 'referral_not_allowed');
-      const flagged = found.recent >= cap;
+      // Over the monthly cap, or a second invitee from one device: held for review (RR-06).
+      let flagReason: string | null = null;
+      if (found.recent >= cap) flagReason = 'velocity';
+      else if (found.sameDevice) flagReason = 'same_device';
       const inserted = await client.query(
-        `INSERT INTO app.referral (id, referrer_account_id, invitee_account_id, status, flag_reason, kind) VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (invitee_account_id) DO NOTHING`,
+        `INSERT INTO app.referral (id, referrer_account_id, invitee_account_id, status, flag_reason, kind, device_hash)
+         VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (invitee_account_id) DO NOTHING`,
         [
           randomUUID(),
           found.referrer,
           accountId,
-          flagged ? 'flagged' : 'joined',
-          flagged ? 'velocity' : null,
+          flagReason ? 'flagged' : 'joined',
+          flagReason,
           kind,
+          deviceHash,
         ],
       );
       if (inserted.rowCount !== 1) throw reason(ConflictException, 'referral_not_allowed');

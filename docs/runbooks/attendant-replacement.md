@@ -20,16 +20,12 @@ Reassignment is not available once shifts have begun, and there is no "end early
    booking and book another attendant for the remaining days (the patient books it; support
    cannot book for a patient).
 2. To stop it, **Cancel** in the bookings console with the reason *provider unavailable*.
-   Today this **refunds everything paid, including shifts already done**, and the attendant keeps
-   what they earned for completed shifts; the platform absorbs the difference. Tell the owner for
-   any booking above ₹5,000 before cancelling.
+   The patient gets back the share for the shifts not worked; shifts checked in or out stay paid
+   to the attendant (owner decision FU-39).
 3. Record the absence. If the attendant missed a shift without notice, it counts as a provider
    no-show strike (A12).
 
 ## Gap to close later
 
-- Shift-by-shift replacement inside one booking, and booking on the patient's behalf.
-- A refund for only the shifts not done when an in-progress booking is cancelled (owner decision:
-  today the full amount is refunded).
-
-Both are in the follow-up register.
+- Shift-by-shift replacement inside one booking, and booking on the patient's behalf (follow-up
+  register).

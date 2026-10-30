@@ -92,6 +92,7 @@ export class DiscountsService {
   /** Draws the entitlement and uses the coupon, in the booking's transaction. */
   async draw(client: TransactionClient, bookingId: string, discount: Discount): Promise<void> {
     if (discount.entitlementId) {
+      await this.checkPerson(client, bookingId, discount.entitlementId);
       const used = await client.query(
         'UPDATE app.entitlement SET units_used = units_used + $2 WHERE id = $1 AND units_used + $2 <= units_total',
         [discount.entitlementId, discount.units],
@@ -120,6 +121,36 @@ export class DiscountsService {
         discount.couponId,
       ]);
     }
+  }
+
+  /**
+   * A plan covers the buyer and up to its `family_members` others (PK-02, PK-04): a booking for a
+   * new person beyond that is refused. The entitlement row is locked so two bookings cannot both
+   * take the last place.
+   */
+  private async checkPerson(
+    client: TransactionClient,
+    bookingId: string,
+    entitlementId: string,
+  ): Promise<void> {
+    const { rows } = await client.query<{ limit: number; people: number; covered: boolean }>(
+      `WITH target AS (
+         SELECT e.purchase_id, p.family_members + 1 AS lim
+           FROM app.entitlement e JOIN app.plan_purchase pp ON pp.id = e.purchase_id
+           JOIN app.plan p ON p.id = pp.plan_id WHERE e.id = $1 FOR UPDATE OF e),
+       person AS (SELECT coalesce(linked_patient_id::text, 'self') AS who FROM app.booking WHERE id = $2),
+       uses AS (
+         SELECT DISTINCT coalesce(b.linked_patient_id::text, 'self') AS who
+           FROM app.entitlement_use u JOIN app.entitlement e ON e.id = u.entitlement_id
+           JOIN app.booking b ON b.id = u.booking_id
+          WHERE e.purchase_id = (SELECT purchase_id FROM target) AND u.reversed_at IS NULL)
+       SELECT (SELECT lim FROM target) AS "limit", (SELECT count(*)::int FROM uses) AS people,
+              EXISTS (SELECT 1 FROM uses WHERE who = (SELECT who FROM person)) AS covered`,
+      [entitlementId, bookingId],
+    );
+    const row = rows[0];
+    if (row && !row.covered && row.people >= row.limit)
+      throw reason(ConflictException, 'plan_person_limit');
   }
 
   /** One unit left of several: the buyer hears it after the booking commits (PK-08). */

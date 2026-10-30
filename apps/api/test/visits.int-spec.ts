@@ -234,6 +234,51 @@ describe('Attendant shifts (J4; HS-05, PK-07)', () => {
   });
 });
 
+describe('Attendant unavailable mid-booking (A13, FU-39)', () => {
+  const { app, db, server } = useApp();
+
+  it('FU-39 cancelling after one of three shifts refunds only the two not worked', async () => {
+    const attendant = await listedProvider(app(), 'attendant', 'attendant_night_12h', {
+      feePaise: 90_000,
+    });
+    const patient = await signedUp(app());
+    const booking = await paidBooking(app(), patient.login, {
+      listingId: attendant.listingId,
+      startsAt: await firstSlot(app(), attendant.accountId, attendant.listingId),
+      shiftDays: 3,
+    });
+    await server()
+      .post(`/v1/provider/requests/${booking.id}/accept`)
+      .set(bearer(attendant.login))
+      .expect(204);
+    await startIn(db(), booking.id, -10);
+    const balance = await server()
+      .post(`/v1/bookings/${booking.id}/balance`)
+      .set(bearer(patient.login))
+      .expect(200);
+    await pay(app(), patient.login, (balance.body as { orderId: string }).orderId);
+    for (const move of ['check-in', 'check-out']) {
+      const { code } = await codeOf(app(), patient.login, booking.id);
+      await server()
+        .post(`/v1/provider/bookings/${booking.id}/shifts/0/${move}`)
+        .set(bearer(attendant.login))
+        .send({ code })
+        .expect(204);
+    }
+    const support = await adminSignIn(app(), 'support');
+    await server()
+      .post(`/admin/v1/bookings/${booking.id}/cancel`)
+      .set(bearer(support))
+      .send({ reason: 'provider_unavailable' })
+      .expect(204);
+    const after = await bookingOf(app(), patient.login, booking.id);
+    expect(after.fees.paidPaise).toBe(after.fees.totalPaise);
+    expect(after.fees.refundedPaise).toBe(
+      after.fees.totalPaise - Math.round(after.fees.totalPaise / 3),
+    );
+  });
+});
+
 describe('Absences, strikes and safety (A12, A15, HS-06, AD-06, SE-03, SE-06)', () => {
   const { app, db, server } = useApp();
 

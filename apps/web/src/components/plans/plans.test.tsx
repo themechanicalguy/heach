@@ -56,6 +56,11 @@ const purchase: Purchase = {
     { id: 'e1', itemCode: 'physio_ortho_rehab', service: null, unitsTotal: 10, unitsUsed: 3 },
   ],
   refundIfCancelledPaise: 280_000,
+  familyMembers: 1,
+  people: [
+    { linkedPatientId: null, unitsUsed: 2 },
+    { linkedPatientId: 'lp1', unitsUsed: 1 },
+  ],
 };
 
 function route(responses: Record<string, unknown>) {
@@ -97,9 +102,15 @@ describe('Plans on the web (PK-01 to PK-07)', () => {
   });
 
   it('PK-04 PK-06 PK-07 my plan shows what is left, toggles renewal and cancels with the refund shown', async () => {
-    route({ '/me/plans': [purchase], '/plans': [] });
+    route({
+      '/me/plans': [purchase],
+      '/plans': [],
+      '/me/linked-patients': [{ id: 'lp1', fullName: 'Synthetic Mother' }],
+    });
     inEnglish(<PlansView />);
     expect(await screen.findByText('7 of 10 left')).toBeTruthy();
+    expect(screen.getByText('Myself: 2 used')).toBeTruthy();
+    expect(await screen.findByText('Synthetic Mother: 1 used')).toBeTruthy();
     fireEvent.click(screen.getByLabelText('Renew automatically'));
     await waitFor(() => {
       expect(JSON.parse(posted('/me/plans/pp1/auto-renew')?.[1]?.body as string)).toEqual({
