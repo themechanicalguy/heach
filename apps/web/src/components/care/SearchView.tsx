@@ -30,6 +30,7 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
     item: params.get('item') ?? '',
     language: params.get('language') ?? '',
     gender: params.get('gender') ?? '',
+    q: params.get('q') ?? '',
   });
   const [items, setItems] = useState<CatalogueItem[]>([]);
   const [results, setResults] = useState<Results>({ state: 'idle' });
@@ -44,7 +45,7 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
   const run = useCallback(
     async (current: Filters) => {
       const query = new URLSearchParams({ service, locale, pin: current.pin });
-      for (const key of ['item', 'language', 'gender'] as const)
+      for (const key of ['item', 'language', 'gender', 'q'] as const)
         if (current[key]) query.set(key, current[key]);
       setResults({ state: 'loading' });
       try {
@@ -105,7 +106,7 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
   );
 }
 
-type Filters = Record<'pin' | 'item' | 'language' | 'gender', string>;
+type Filters = Record<'pin' | 'item' | 'language' | 'gender' | 'q', string>;
 
 interface FormProps {
   filters: Filters;
@@ -135,6 +136,14 @@ function SearchForm({ filters, items, pinError, onChange, onSubmit }: Readonly<F
         error={pinError ? t('search.pinInvalid') : undefined}
         onChange={(event) => {
           onChange('pin', event.currentTarget.value.trim());
+        }}
+      />
+      <TextField
+        label={t('search.text')}
+        maxLength={60}
+        value={filters.q}
+        onChange={(event) => {
+          onChange('q', event.currentTarget.value);
         }}
       />
       <Select
