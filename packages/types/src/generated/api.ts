@@ -4517,6 +4517,11 @@ export interface components {
       unitsTotal: number;
       unitsUsed: number;
     };
+    PersonUseDto: {
+      /** @description null: the buyer themselves */
+      linkedPatientId: string | null;
+      unitsUsed: number;
+    };
     PurchaseDto: {
       /** Format: uuid */
       id: string;
@@ -4536,6 +4541,10 @@ export interface components {
       /** Format: date-time */
       endsAt: string | null;
       entitlements: components['schemas']['EntitlementDto'][];
+      /** @description People covered besides the buyer (PK-02) */
+      familyMembers: number;
+      /** @description Units used per covered person (PK-04) */
+      people: components['schemas']['PersonUseDto'][];
       /** @description What cancelling now would refund, pro-rata (PK-07) */
       refundIfCancelledPaise: number;
     };
@@ -4656,7 +4665,8 @@ export interface components {
         | 'provider_referral_bookings'
         | 'provider_referral_rebate_percent'
         | 'provider_referral_rebate_bookings'
-        | 'slot_hold_minutes';
+        | 'slot_hold_minutes'
+        | 'referral_qualifying_bookings';
       value: number;
     };
     SettingInputDto: {
@@ -4685,7 +4695,8 @@ export interface components {
         | 'provider_referral_bookings'
         | 'provider_referral_rebate_percent'
         | 'provider_referral_rebate_bookings'
-        | 'slot_hold_minutes';
+        | 'slot_hold_minutes'
+        | 'referral_qualifying_bookings';
       value: number;
     };
     CountDto: {

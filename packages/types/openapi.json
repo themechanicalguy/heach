@@ -10529,6 +10529,20 @@
         },
         "required": ["id", "itemCode", "service", "unitsTotal", "unitsUsed"]
       },
+      "PersonUseDto": {
+        "type": "object",
+        "properties": {
+          "linkedPatientId": {
+            "type": "string",
+            "nullable": true,
+            "description": "null: the buyer themselves"
+          },
+          "unitsUsed": {
+            "type": "number"
+          }
+        },
+        "required": ["linkedPatientId", "unitsUsed"]
+      },
       "PurchaseDto": {
         "type": "object",
         "properties": {
@@ -10578,6 +10592,17 @@
               "$ref": "#/components/schemas/EntitlementDto"
             }
           },
+          "familyMembers": {
+            "type": "number",
+            "description": "People covered besides the buyer (PK-02)"
+          },
+          "people": {
+            "description": "Units used per covered person (PK-04)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonUseDto"
+            }
+          },
           "refundIfCancelledPaise": {
             "type": "number",
             "description": "What cancelling now would refund, pro-rata (PK-07)"
@@ -10596,6 +10621,8 @@
           "refundedPaise",
           "endsAt",
           "entitlements",
+          "familyMembers",
+          "people",
           "refundIfCancelledPaise"
         ]
       },
@@ -10883,7 +10910,8 @@
               "provider_referral_bookings",
               "provider_referral_rebate_percent",
               "provider_referral_rebate_bookings",
-              "slot_hold_minutes"
+              "slot_hold_minutes",
+              "referral_qualifying_bookings"
             ]
           },
           "value": {
@@ -10921,7 +10949,8 @@
               "provider_referral_bookings",
               "provider_referral_rebate_percent",
               "provider_referral_rebate_bookings",
-              "slot_hold_minutes"
+              "slot_hold_minutes",
+              "referral_qualifying_bookings"
             ]
           },
           "value": {

@@ -174,3 +174,41 @@ describe('One referral reward per device (RR-06)', () => {
     expect(String(opened.headers['set-cookie'])).toContain('heach_referral_device=');
   });
 });
+
+describe('The qualifying event is a setting (RR-02)', () => {
+  const { app, server, db } = useApp();
+
+  it('RR-02 with two qualifying bookings, the coupons come after the second completed booking', async () => {
+    const referrer = await signedUp(app());
+    const { code } = (await server().get('/v1/me/referral').set(bearer(referrer.login)).expect(200))
+      .body as { code: string };
+    const invitee = await signedUp(app());
+    await server()
+      .post('/v1/me/referral/join')
+      .set(bearer(invitee.login))
+      .send({ code })
+      .expect(204);
+    const nurse = await listedProvider(app(), 'nurse', 'nursing_wound_dressing', {
+      feePaise: 40_000,
+    });
+    const coupons = async () =>
+      (
+        (await server().get('/v1/me/referral').set(bearer(referrer.login)).expect(200)).body as {
+          coupons: unknown[];
+        }
+      ).coupons.length;
+    await db().query(`UPDATE app.setting SET value = 2 WHERE key = 'referral_qualifying_bookings'`);
+    try {
+      await completedVisit(app(), db(), invitee.login, nurse);
+      await runJobs(app());
+      expect(await coupons()).toBe(0);
+      await completedVisit(app(), db(), invitee.login, nurse, 4);
+      await runJobs(app());
+      expect(await coupons()).toBe(1);
+    } finally {
+      await db().query(
+        `UPDATE app.setting SET value = 1 WHERE key = 'referral_qualifying_bookings'`,
+      );
+    }
+  });
+});
