@@ -10931,6 +10931,31 @@
         },
         "required": ["adminRole", "reason", "grantedAt", "expiresAt"]
       },
+      "AdminAccessDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "disabled"]
+          },
+          "lastSignInAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "Active but not signed in for 90 days: review or disable"
+          }
+        },
+        "required": ["email", "role", "status", "lastSignInAt", "stale"]
+      },
       "SecurityDto": {
         "type": "object",
         "properties": {
@@ -10955,6 +10980,21 @@
           "recordReads24h": {
             "type": "number",
             "description": "Records read through shares in the last 24 hours (unusual-read watch)"
+          },
+          "authzFailuresToday": {
+            "type": "number",
+            "description": "Authorisation failures today (UTC); ten in five minutes alert"
+          },
+          "unusualReadersToday": {
+            "type": "number",
+            "description": "Readers who crossed the unusual-read threshold today"
+          },
+          "adminAccess": {
+            "description": "Access review of admin accounts",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAccessDto"
+            }
           }
         },
         "required": [
@@ -10962,7 +11002,10 @@
           "openStrikeReviews",
           "flaggedReferrals",
           "infectedUploads",
-          "recordReads24h"
+          "recordReads24h",
+          "authzFailuresToday",
+          "unusualReadersToday",
+          "adminAccess"
         ]
       },
       "PageDto": {

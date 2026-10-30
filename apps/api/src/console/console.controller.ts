@@ -10,11 +10,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import type { Redis } from 'ioredis';
 import type pg from 'pg';
 import { AuditService } from '../audit/audit.service.js';
 import { RequireReverification } from '../auth/reverification.js';
 import { Roles } from '../auth/roles.decorator.js';
-import { PG_POOL } from '../data-stores/data-stores.tokens.js';
+import { PG_POOL, REDIS_CLIENT } from '../data-stores/data-stores.tokens.js';
+import { dayKey } from '../security/unusual-read.monitor.js';
 import { requireFlag } from '../flags/flags.module.js';
 import { Settings } from '../settings/settings.service.js';
 import { DashboardDto, SecurityDto, SettingDto, SettingInputDto } from './console.dto.js';
@@ -37,6 +39,7 @@ export class ConsoleController {
     @Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>,
     private readonly settings: Settings,
     private readonly audit: AuditService,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
   @Get('settings')
@@ -126,6 +129,26 @@ export class ConsoleController {
       infectedUploads: 0,
       recordReads24h: 0,
     };
-    return { breakGlass: grants.rows, ...totals };
+    const [failures, unusual] = await this.redis.mget(
+      dayKey('authz-fail'),
+      dayKey('unusual-readers'),
+    );
+    return {
+      breakGlass: grants.rows,
+      ...totals,
+      authzFailuresToday: Number(failures ?? 0),
+      unusualReadersToday: Number(unusual ?? 0),
+      adminAccess: await this.adminAccess(),
+    };
+  }
+
+  /** Admins oldest sign-in first; an active admin silent for 90 days is flagged (AD-17). */
+  private async adminAccess(): Promise<SecurityDto['adminAccess']> {
+    const { rows } = await this.pool.query<SecurityDto['adminAccess'][number]>(
+      `SELECT email, role, status, last_sign_in_at AS "lastSignInAt",
+              status = 'active' AND (last_sign_in_at IS NULL OR last_sign_in_at < now() - interval '90 days') AS stale
+         FROM app.admin_account ORDER BY last_sign_in_at NULLS FIRST LIMIT 200`,
+    );
+    return rows;
   }
 }
