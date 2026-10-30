@@ -206,9 +206,9 @@ export class PlansService implements OnModuleInit {
 
   async mine(buyerId: string, locale: string): Promise<Plain<PurchaseDto>[]> {
     const { rows } = await this.pool.query<
-      Omit<Plain<PurchaseDto>, 'entitlements' | 'refundIfCancelledPaise'>
+      Omit<Plain<PurchaseDto>, 'entitlements' | 'refundIfCancelledPaise' | 'people'>
     >(
-      `SELECT pp.id, pp.plan_id AS "planId", t.name, p.kind, pp.status, pp.auto_renew AS "autoRenew",
+      `SELECT pp.id, pp.plan_id AS "planId", t.name, p.kind, p.family_members AS "familyMembers", pp.status, pp.auto_renew AS "autoRenew",
               pp.renewal_paused AS "renewalPaused", pp.price_paise AS "pricePaise",
               pp.paid_paise AS "paidPaise", pp.refunded_paise AS "refundedPaise", pp.ends_at AS "endsAt"
          FROM app.plan_purchase pp JOIN app.plan p ON p.id = pp.plan_id
@@ -226,7 +226,7 @@ export class PlansService implements OnModuleInit {
           row.status === 'active'
             ? proRataRefund(row.paidPaise - row.refundedPaise, total, used)
             : 0;
-        return { ...row, entitlements, refundIfCancelledPaise };
+        return { ...row, entitlements, refundIfCancelledPaise, people: await this.people(row.id) };
       }),
     );
   }
@@ -361,6 +361,19 @@ export class PlansService implements OnModuleInit {
       client,
     );
     await this.renewals.afterActivation(client, purchaseId);
+  }
+
+  /** Units used per covered person, the booker being `null` (PK-04). */
+  private async people(purchaseId: string) {
+    const { rows } = await this.pool.query<{ linkedPatientId: string | null; unitsUsed: number }>(
+      `SELECT b.linked_patient_id AS "linkedPatientId", sum(u.units)::int AS "unitsUsed"
+         FROM app.entitlement_use u JOIN app.entitlement e ON e.id = u.entitlement_id
+         JOIN app.booking b ON b.id = u.booking_id
+        WHERE e.purchase_id = $1 AND u.reversed_at IS NULL
+        GROUP BY b.linked_patient_id ORDER BY b.linked_patient_id NULLS FIRST`,
+      [purchaseId],
+    );
+    return rows;
   }
 
   private async entitlements(purchaseId: string, client: Pick<pg.Pool, 'query'> = this.pool) {
