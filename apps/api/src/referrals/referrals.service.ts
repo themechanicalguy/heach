@@ -151,7 +151,7 @@ export class ReferralsService implements OnModuleInit {
     });
   }
 
-  /** After a booking completes: the booker's first completion rewards their referral (RR-02, RR-03). */
+  /** After a booking completes: the booker's qualifying completion rewards their referral (RR-02, RR-03). */
   async qualify(bookingId: string): Promise<void> {
     const issued = await withTransaction(this.pool, async (client) => {
       const { rows } = await client.query<{
@@ -169,7 +169,9 @@ export class ReferralsService implements OnModuleInit {
         [bookingId],
       );
       const referral = rows[0];
-      if (referral?.completed !== 1) return [];
+      // The qualifying event: the invitee's n-th completed booking (RR-02, a setting).
+      const needed = await this.settings.get('referral_qualifying_bookings');
+      if (referral?.completed !== needed) return [];
       if (!referral.referrer_cares) {
         await client.query(
           `UPDATE app.referral SET status = 'rejected', flag_reason = 'provider_referrer' WHERE id = $1`,

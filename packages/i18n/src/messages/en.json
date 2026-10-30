@@ -199,6 +199,7 @@
     "referral_not_allowed": "This code cannot be used for your account.",
     "plan_item_required": "Choose the service the package covers.",
     "plan_invalid": "Check the plan's details.",
+    "plan_has_upcoming_bookings": "Cancel the upcoming bookings that use this plan first; their sessions then come back and are refunded with the plan.",
     "plan_person_limit": "This plan already covers as many people as it allows. Pay normally for this person."
   },
   "setup": {
