@@ -26,7 +26,8 @@ export type SmsTemplate =
   | 'plan_renewal_failed'
   | 'plan_renewal_paused'
   | 'commission_credit_issued'
-  | 'plan_units_low';
+  | 'plan_units_low'
+  | 'security_notice';
 
 export interface SmsMessage {
   to: string;

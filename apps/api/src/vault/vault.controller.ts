@@ -17,7 +17,9 @@ import {
 import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import type pg from 'pg';
+import { AuditService } from '../audit/audit.service.js';
 import { principalOf } from '../auth/auth.guard.js';
+import { RequireReverification } from '../auth/reverification.js';
 import { Public, Roles } from '../auth/roles.decorator.js';
 import { CARE_ROLES } from '../common/request-context.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
@@ -35,6 +37,7 @@ import {
   ProviderRecordInputDto,
   RecordDto,
   RecordInputDto,
+  RevokedSharesDto,
   ShareDto,
   ShareInputDto,
   SharedRecordsDto,
@@ -255,7 +258,30 @@ export class SharedLinkController {
 @Controller('admin/v1/vault')
 @UseGuards(requireFlag('accounts'))
 export class AdminVaultController {
-  constructor(@Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>) {}
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>,
+    private readonly vault: VaultRepository,
+    private readonly audit: AuditService,
+  ) {}
+
+  /**
+   * Breach containment (SO-09, breach runbook): every live booking share and outside link of one
+   * account stops at once, without opening any record. Needs a fresh code; audited.
+   */
+  @Post('accounts/:accountId/revoke-shares')
+  @HttpCode(HttpStatus.OK)
+  @Roles('super_admin', 'support')
+  @UseGuards(RequireReverification)
+  @ApiOkResponse({ type: RevokedSharesDto })
+  async revokeShares(@Param('accountId', uuid) accountId: string): Promise<RevokedSharesDto> {
+    const revoked = await this.vault.revokeAllFor(accountId);
+    await this.audit.record({
+      action: 'vault.shares_revoked',
+      entity: 'account',
+      entityId: accountId,
+    });
+    return revoked;
+  }
 
   @Get('stats')
   @Header('Cache-Control', 'no-store')

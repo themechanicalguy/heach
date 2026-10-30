@@ -4,10 +4,10 @@ import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { UPLOAD_CONTENT_TYPE } from '../src/app.factory.js';
 import { Settings } from '../src/settings/settings.service.js';
-import { adminSignIn, signedUp, useApp } from './account-helpers.js';
+import { adminSignIn, nextTotp, signedUp, useApp } from './account-helpers.js';
 import { bearer, type Login } from './auth-helpers.js';
 import { firstSlot, paidBooking } from './booking-helpers.js';
-import { listedProvider, SYNTHETIC_PDF } from './provider-helpers.js';
+import { accountIdOf, listedProvider, SYNTHETIC_PDF } from './provider-helpers.js';
 
 interface VaultRecord {
   id: string;
@@ -342,5 +342,43 @@ describe('External links and admin counts (MV-09, AD-15)', () => {
     ]);
     const finance = await adminSignIn(app(), 'finance');
     await server().get('/admin/v1/vault/stats').set(bearer(finance)).expect(403);
+  });
+});
+
+describe('Breach containment (SO-09)', () => {
+  const { app, server } = useApp();
+
+  it('SO-09 suspending the owner stops their links; an admin revokes every share and link at once', async () => {
+    const { login } = await signedUp(app());
+    const accountId = await accountIdOf(app(), login);
+    const record = (await upload(app(), login, OLD_SCAN).expect(201)).body as VaultRecord;
+    const link = (
+      await server()
+        .post('/v1/vault/links')
+        .set(bearer(login))
+        .send({ recordIds: [record.id], hours: 24 })
+        .expect(201)
+    ).body as { token: string; code: string };
+    const open = () => server().post(`/v1/shared-records/${link.token}`).send({ code: link.code });
+    const support = await adminSignIn(app(), 'support');
+    await server()
+      .post('/admin/v1/auth/reverify')
+      .set(bearer(support))
+      .send({ code: nextTotp(support.secret) })
+      .expect(204);
+    await server()
+      .post(`/admin/v1/users/${accountId}/suspend`)
+      .set(bearer(support))
+      .send({ reason: 'fraud' })
+      .expect(204);
+    await open().expect(404);
+    await server().post(`/admin/v1/users/${accountId}/reinstate`).set(bearer(support)).expect(204);
+    await open().expect(200);
+
+    const revoke = () =>
+      server().post(`/admin/v1/vault/accounts/${accountId}/revoke-shares`).set(bearer(support));
+    expect((await revoke().expect(200)).body).toEqual({ shares: 0, links: 1 });
+    await open().expect(404);
+    expect((await revoke().expect(200)).body).toEqual({ shares: 0, links: 0 });
   });
 });

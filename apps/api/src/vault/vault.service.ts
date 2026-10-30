@@ -319,7 +319,9 @@ export class VaultService {
 
   async openLink(token: string, code: string): Promise<Plain<SharedRecordsDto>> {
     const link = await this.vault.linkByToken(this.keys.hash(token));
-    if (!link || link.revokedAt || link.expiresAt < new Date()) throw new NotFoundException();
+    // A suspended owner's links stop too, so suspending an account contains a leak (SO-09).
+    if (!link || link.revokedAt || link.ownerSuspended || link.expiresAt < new Date())
+      throw new NotFoundException();
     if (link.attempts >= MAX_LINK_ATTEMPTS) throw reason(ForbiddenException, 'code_locked');
     if (!this.keys.matches(code, link.codeHash)) {
       await this.vault.failLink(link.id);
