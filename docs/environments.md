@@ -61,6 +61,24 @@ aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target 
 # then open https://localhost:9443 (web and API; Caddy adds the test sign-in key)
 ```
 
+## Accounts, SMS inbox and job worker on dev
+
+Dev runs with the `accounts` flag on (sign-in, setup, services, booking, labs, vault and the rest
+of Steps 3 to 10). No real SMS provider exists yet (FU-30): every SMS, OTPs included, goes to a
+Mailpit inbox that is published on the host's loopback only, so a code never reaches a phone.
+Sign in on `https://15.252.65.98` with a **synthetic** number, then read the code through Session
+Manager:
+
+```sh
+aws ssm start-session --profile saurav-heach-admin --region ap-south-1 --target <instance-id> \
+  --document-name AWS-StartPortForwardingSession --parameters portNumber=8025,localPortNumber=8025
+# then open http://localhost:8025 (the inbox empties when the API or Mailpit is recreated)
+```
+
+The `worker` container runs due jobs (reminders, auto-cancel, payouts, notifications) with the
+API's image, settings and AWS role. Search lists no providers until a synthetic provider signs up,
+completes onboarding and is approved in the admin panel.
+
 ## Branch protection on main
 
 **Proposed, not applied (owner decision).** On 17 October 2026 GitHub refused branch protection on

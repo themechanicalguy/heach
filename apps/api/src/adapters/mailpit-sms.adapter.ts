@@ -2,9 +2,9 @@ import type { SmsMessage, SmsSender } from './sms.port.js';
 import { smsText } from './sms-text.js';
 
 /**
- * Local development only (decision L-8): each SMS becomes an email in the Mailpit inbox, through
- * Mailpit's send API, so the OTP can be read at http://localhost:8025. Nothing leaves the machine.
- * This is a developer tool, not an SMS integration.
+ * Local, test and dev only (decision L-8): each SMS becomes an email in the Mailpit inbox, through
+ * Mailpit's send API, so the OTP can be read at http://localhost:8025 (on dev, through Session
+ * Manager). Nothing leaves the machine. This is a developer tool, not an SMS integration.
  */
 export class MailpitSmsSender implements SmsSender {
   constructor(

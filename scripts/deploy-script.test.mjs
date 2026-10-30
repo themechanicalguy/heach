@@ -5,11 +5,11 @@ import { URL } from 'node:url';
 
 const deploy = readFileSync(new URL('../deploy/dev/deploy.sh', import.meta.url), 'utf8');
 
-test('EN-12.2: every deploy restarts the API after bootstrap sets the role passwords', () => {
+test('EN-12.2: every deploy restarts the API and the worker after bootstrap sets the role passwords', () => {
   const bootstrap = deploy.indexOf('dist/db/bootstrap.js');
-  const restart = deploy.indexOf('up -d --no-deps --force-recreate api');
+  const restart = deploy.indexOf('up -d --no-deps --force-recreate api worker');
   assert.ok(bootstrap > 0, 'deploy.sh runs db:bootstrap');
-  assert.ok(restart > bootstrap, 'the API is recreated after bootstrap');
+  assert.ok(restart > bootstrap, 'the API and the worker are recreated after bootstrap');
 });
 
 const compose = readFileSync(new URL('../deploy/dev/compose.yml', import.meta.url), 'utf8');
@@ -19,10 +19,11 @@ const credentials = readFileSync(
   'utf8',
 );
 
-/** The text of one Compose service, up to the next top-level service key. */
+/** The text of one Compose service (with or without a YAML anchor), up to the next service key. */
 function service(name) {
-  const start = compose.indexOf(`\n  ${name}:\n`);
-  const next = compose.slice(start + 1).search(/\n {2}[a-z]+:\n|\nvolumes:/);
+  const start = compose.search(new RegExp(`\\n  ${name}:( &\\w+)?\\n`));
+  assert.ok(start >= 0, `compose.yml has a ${name} service`);
+  const next = compose.slice(start + 1).search(/\n {2}[a-z]+:( &\w+)?\n|\nvolumes:/);
   return compose.slice(start, start + 1 + next);
 }
 
@@ -90,4 +91,24 @@ test('EN-10.5: every deploy installs and enables the weekly restore check timer'
   );
   assert.match(timer, /OnCalendar=Sun \*-\*-\* 00:00:00 UTC/);
   assert.match(timer, /Persistent=true/);
+});
+
+test('L-8: dev SMS go to a Mailpit inbox published on loopback only', () => {
+  assert.match(service('api'), /SMS_PROVIDER: local/);
+  assert.match(service('api'), /MAILPIT_API_URL: http:\/\/mailpit:8025/);
+  const published = compose
+    .split('\n')
+    .filter((line) => line.trim().startsWith('- ') && line.includes(':8025'));
+  assert.deepEqual(
+    published.map((line) => line.trim().split(' ')[1]),
+    ['127.0.0.1:8025:8025'],
+  );
+});
+
+test('EN-12.4: the job worker runs with the API settings and role, and publishes no port', () => {
+  const worker = service('worker');
+  assert.ok(compose.includes('\n  api: &api\n'), 'the API service is the anchor');
+  assert.match(worker, /<<: \*api/);
+  assert.match(worker, /dist\/jobs\/worker\.js/);
+  assert.doesNotMatch(worker, /ports:/);
 });

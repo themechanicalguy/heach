@@ -123,8 +123,8 @@ export class EnvVars {
   RATE_LIMIT_WINDOW_SECONDS = 60;
 
   /**
-   * `fake` keeps SMS in memory (tests); `local` delivers them to the Mailpit inbox (local and test
-   * only). No real SMS provider exists until DLT registration (#20, decision L-8).
+   * `fake` keeps SMS in memory (tests); `local` delivers them to the Mailpit inbox (local, test and
+   * dev only). No real SMS provider exists until DLT registration (#20, decision L-8).
    */
   @IsIn(['fake', 'local'])
   SMS_PROVIDER: 'fake' | 'local' = 'fake';

@@ -69,9 +69,9 @@ DB_ADMIN_PASSWORD="$(param POSTGRES_PASSWORD)" DB_MIGRATOR_PASSWORD="$(param DB_
 DB_MIGRATOR_PASSWORD="$(param DB_MIGRATOR_PASSWORD)" \
   docker compose run --rm --no-deps -e SECRETS_SOURCE=env api node dist/db/migrate.js
 docker compose up -d --remove-orphans
-# The API reads its secrets only at start-up and bootstrap may have just changed the role
-# passwords (EN-12.2 rotation); a same-tag deploy would otherwise keep the old API running.
-docker compose up -d --no-deps --force-recreate api
+# The API and the worker read their secrets only at start-up and bootstrap may have just changed
+# the role passwords (EN-12.2 rotation); a same-tag deploy would otherwise keep the old ones running.
+docker compose up -d --no-deps --force-recreate api worker
 
 # Nightly backup timer (EN-10.3) and weekly restore check (EN-10.5); Persistent=true catches up
 # after the host sleeps. API role credentials every 15 minutes (finding 7).

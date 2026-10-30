@@ -32,8 +32,9 @@ services:
     environment:
       NODE_ENV: production
       APP_ENV: ${APP_ENV:-dev}
-      # The Step 2 sample note and test sign-in exist in dev and test only (FF-01).
-      FEATURE_FLAGS: sample-patient-note
+      # Accounts and every flow behind them, the Step 2 sample note and test sign-in: dev and
+      # test only (FF-01).
+      FEATURE_FLAGS: accounts,sample-patient-note
     restart: unless-stopped
 
   admin:
@@ -43,7 +44,7 @@ services:
   # Secrets are read from Parameter Store at start-up (EN-12.1); none are set here. AWS access is
   # the API role's, from ./aws (api-credentials.sh), never the instance role's: KMS data keys
   # (EN-04) and exactly its own parameters. One-off tasks: `run --rm api node dist/db/…`.
-  api:
+  api: &api
     image: ${REGISTRY}/heach/api:${IMAGE_TAG}
     environment:
       NODE_ENV: production
@@ -57,7 +58,12 @@ services:
       KMS_ALIAS_PREFIX: alias/heach-dev
       LOCAL_KEY_SEED: ${LOCAL_KEY_SEED:-}
       DATA_TLS_CA_FILE: /certs/ca.crt
-      FEATURE_FLAGS: sample-patient-note
+      FEATURE_FLAGS: accounts,sample-patient-note
+      # Partners' return links (identity, payments) point at the public entry.
+      WEB_ORIGIN: https://${PUBLIC_HOST:?}
+      # OTP and other SMS land in the loopback-only Mailpit inbox below; no real SMS until FU-30.
+      SMS_PROVIDER: local
+      MAILPIT_API_URL: http://mailpit:8025
       ALERT_TOPIC_ARN: ${ALERT_TOPIC_ARN:-}
       AWS_CONFIG_FILE: /aws/config
       DATABASE_URL: postgresql://heach_app@postgres:5432/heach
@@ -77,6 +83,29 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
+      mailpit: { condition: service_healthy }
+    restart: unless-stopped
+
+  # Reminders, auto-cancel, payouts and notifications (Step 5 D-QUEUE): the API image and settings,
+  # without HTTP. The image's health check calls the API's port, which the worker does not open.
+  worker:
+    <<: *api
+    command: ['node', '--import', './dist/telemetry.js', 'dist/jobs/worker.js']
+    healthcheck:
+      disable: true
+
+  # Inbox for SMS sent on dev (synthetic numbers only): loopback only, read through Session
+  # Manager port forwarding (`localhost:8025`), like admin. Messages live in the container and go
+  # with each recreate.
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    ports:
+      - 127.0.0.1:8025:8025
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 5s
+      timeout: 3s
+      retries: 30
     restart: unless-stopped
 
   postgres:

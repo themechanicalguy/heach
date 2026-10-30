@@ -16,22 +16,23 @@ import { VIRUS_SCANNER } from './scanner.port.js';
 import { SMS_SENDER, type SmsSender } from './sms.port.js';
 import { VIDEO_ROOMS } from './video.port.js';
 
-const LOCAL_SMS_ENVS = new Set(['local', 'test']);
+// Dev too: its Mailpit inbox is loopback only, for synthetic numbers (decision L-8, as amended).
+const MAILPIT_SMS_ENVS = new Set(['local', 'test', 'dev']);
 
-/** The SMS adapter for this environment; Mailpit delivery never runs on a host (decision L-8). */
+/** The SMS adapter for this environment; Mailpit delivery never runs in staging or production. */
 export function createSmsSender(env: EnvVars): SmsSender {
   if (env.SMS_PROVIDER === 'fake') {
     return new FakeSmsSender();
   }
-  if (!LOCAL_SMS_ENVS.has(env.APP_ENV)) {
+  if (!MAILPIT_SMS_ENVS.has(env.APP_ENV)) {
     throw new Error(`SMS provider ${env.SMS_PROVIDER} is not allowed in ${env.APP_ENV}`);
   }
   return new MailpitSmsSender(env.MAILPIT_API_URL);
 }
 
 /**
- * Binds each third-party port to an implementation. Only test doubles and the local Mailpit SMS
- * tool exist; the real providers arrive with the steps that use them and are chosen here by
+ * Binds each third-party port to an implementation. Only test doubles and the Mailpit SMS
+ * developer tool exist; the real providers arrive with the steps that use them and are chosen here by
  * environment.
  */
 @Global()
