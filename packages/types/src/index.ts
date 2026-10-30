@@ -104,6 +104,7 @@ export type ContentTemplate = components['schemas']['TemplateDto'];
 export type Coupon = components['schemas']['CouponDto'];
 export type AdminReferral = components['schemas']['AdminReferralDto'];
 export type Setting = components['schemas']['SettingDto'];
+export type ChecklistRole = components['schemas']['ChecklistRoleDto'];
 export type AdminDashboard = components['schemas']['DashboardDto'];
 export type SecurityConsole = components['schemas']['SecurityDto'];
 

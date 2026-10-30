@@ -1721,6 +1721,77 @@
         "tags": ["admin"]
       }
     },
+    "/admin/v1/checklists": {
+      "get": {
+        "operationId": "AdminChecklistsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChecklistRoleDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/checklists/{role}/{item}": {
+      "put": {
+        "operationId": "AdminChecklistsController_set",
+        "parameters": [
+          {
+            "name": "role",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "item",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChecklistInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/v1/catalogue": {
       "get": {
         "operationId": "CatalogueController_list",
@@ -7848,6 +7919,53 @@
           }
         },
         "required": ["decision"]
+      },
+      "ChecklistSettingDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "reference": {
+            "type": "boolean"
+          },
+          "expiry": {
+            "type": "boolean"
+          },
+          "fixed": {
+            "type": "boolean",
+            "description": "Required by an owner decision; cannot be made optional"
+          }
+        },
+        "required": ["key", "required", "reference", "expiry", "fixed"]
+      },
+      "ChecklistRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["physiotherapist", "nurse", "attendant", "lab", "sample_collector"]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChecklistSettingDto"
+            }
+          }
+        },
+        "required": ["role", "items"]
+      },
+      "ChecklistInputDto": {
+        "type": "object",
+        "properties": {
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": ["required"]
       },
       "CatalogueItemDto": {
         "type": "object",

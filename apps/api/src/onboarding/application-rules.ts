@@ -1,5 +1,5 @@
 import type { ApplicationStatus } from '../accounts/account.repository.js';
-import { CHECKLISTS, needsPayout, type OnboardingRole } from './checklists.js';
+import { type ChecklistItem, needsPayout, type OnboardingRole } from './checklists.js';
 
 /** The provider may change their application only in these statuses (PO-03, PO-04). */
 export const EDITABLE: readonly ApplicationStatus[] = ['draft', 'changes_requested'];
@@ -14,6 +14,8 @@ const DECIDED: Record<Decision, ApplicationStatus> = {
 
 export interface ApplicationFacts {
   role: OnboardingRole;
+  /** The role's checklist with today's required flags (AD-08). */
+  checklist: readonly ChecklistItem[];
   identityVerified: boolean;
   payoutOnFile: boolean;
   /** Checklist keys with a clean document, and whether each has its reference and expiry. */
@@ -25,7 +27,7 @@ export interface ApplicationFacts {
 export function missingForSubmit(facts: ApplicationFacts): string[] {
   const missing: string[] = [];
   if (!facts.identityVerified) missing.push('identity');
-  for (const entry of CHECKLISTS[facts.role]) {
+  for (const entry of facts.checklist) {
     const document = facts.documents.get(entry.key);
     if (!document) {
       if (entry.required) missing.push(entry.key);

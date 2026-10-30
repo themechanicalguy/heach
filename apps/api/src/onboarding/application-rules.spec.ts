@@ -5,10 +5,11 @@ import {
   missingForSubmit,
   opensReview,
 } from './application-rules.js';
-import { checklistItem, isOnboardingRole, needsPayout } from './checklists.js';
+import { CHECKLISTS, checklistItem, isOnboardingRole, needsPayout } from './checklists.js';
 
 const nurse = (overrides: Partial<ApplicationFacts> = {}): ApplicationFacts => ({
   role: 'nurse',
+  checklist: CHECKLISTS.nurse,
   identityVerified: true,
   payoutOnFile: true,
   today: '2026-10-30',
@@ -21,6 +22,17 @@ const nurse = (overrides: Partial<ApplicationFacts> = {}): ApplicationFacts => (
 });
 
 describe('Provider application rules (PO-01, PO-04)', () => {
+  it('AD-08 an item made optional by operations may be left out', () => {
+    const checklist = CHECKLISTS.nurse.map((entry) =>
+      entry.key === 'qualification_certificate' ? { ...entry, required: false } : entry,
+    );
+    const documents = new Map([
+      ['nursing_registration', { reference: true, expiresOn: '2027-10-30' }],
+      ['police_verification', { reference: true, expiresOn: '2027-01-01' }],
+    ]);
+    expect(missingForSubmit(nurse({ checklist, documents }))).toEqual([]);
+  });
+
   it('PO-01 a complete nurse application has nothing missing', () => {
     expect(missingForSubmit(nurse())).toEqual([]);
   });
@@ -44,6 +56,7 @@ describe('Provider application rules (PO-01, PO-04)', () => {
   it('PO-01 optional items may be left out; sample collectors need no payout details', () => {
     const facts: ApplicationFacts = {
       role: 'sample_collector',
+      checklist: CHECKLISTS.sample_collector,
       identityVerified: true,
       payoutOnFile: false,
       today: '2026-10-30',

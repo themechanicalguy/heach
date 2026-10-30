@@ -1,8 +1,10 @@
-import { CATALOGUES, LOCALES, type Locale } from '@heach/i18n';
-import { expect, type Page, test } from '@playwright/test';
+import { CATALOGUES, LOCALES } from '@heach/i18n';
+import { expect, test } from '@playwright/test';
 import {
   codeFor,
   completePatientSetup,
+  completeProviderSetup,
+  confirmItIsMe,
   inboxOf,
   signInByOtp,
   syntheticMobile,
@@ -13,34 +15,6 @@ import {
  * mobile, tablet and desktop projects. Needs the API with the `accounts` flag and Mailpit as the
  * SMS inbox: runs when E2E_API=1.
  */
-
-/** Answers the fresh-code sheet with the code sent to the account's own number (AC-05). */
-async function confirmItIsMe(page: Page, locale: Locale, mobile: string): Promise<void> {
-  const t = CATALOGUES[locale];
-  const before = await inboxOf(mobile);
-  await page.getByRole('button', { name: t.reverify.send, exact: true }).click();
-  await page
-    .getByRole('dialog')
-    .getByLabel(t.signIn.codeLabel)
-    .fill(await codeFor(mobile, before));
-  await page.getByRole('button', { name: t.reverify.confirm, exact: true }).click();
-}
-
-/** Setup through the forms for a role with spoken languages and, for a lab, its name. */
-async function completeProviderSetup(page: Page, role: 'lab' | 'nurse', name: string) {
-  const t = CATALOGUES.en;
-  await page.getByRole('radio', { name: t.roles[role].label }).check();
-  await page.getByRole('button', { name: t.setup.continue, exact: true }).click();
-  await page.getByLabel(t.setup.details.fullName).fill(name);
-  await page.getByRole('radio', { name: t.genders.male, exact: true }).check();
-  await page.getByRole('checkbox', { name: t.locale.or }).check();
-  if (role === 'lab') await page.getByLabel(t.setup.details.organisation).fill('Synthetic E2E Lab');
-  await page.getByRole('checkbox', { name: t.setup.details.adult }).check();
-  await page.getByRole('button', { name: t.setup.continue, exact: true }).click();
-  await page.getByRole('checkbox', { name: t.setup.consent.terms }).check();
-  await page.getByRole('checkbox', { name: t.setup.consent.privacy }).check();
-  await page.getByRole('button', { name: t.setup.consent.finish, exact: true }).click();
-}
 
 test.describe('Linked patients (AC-03)', () => {
   test.skip(!process.env.E2E_API, 'Needs the API, database and Mailpit (E2E_API=1)');

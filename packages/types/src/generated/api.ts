@@ -868,6 +868,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/v1/checklists': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AdminChecklistsController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/checklists/{role}/{item}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AdminChecklistsController_set'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/catalogue': {
     parameters: {
       query?: never;
@@ -3579,6 +3611,22 @@ export interface components {
         | 'police_verification_failed'
         | 'other';
     };
+    ChecklistSettingDto: {
+      key: string;
+      required: boolean;
+      reference: boolean;
+      expiry: boolean;
+      /** @description Required by an owner decision; cannot be made optional */
+      fixed: boolean;
+    };
+    ChecklistRoleDto: {
+      /** @enum {string} */
+      role: 'physiotherapist' | 'nurse' | 'attendant' | 'lab' | 'sample_collector';
+      items: components['schemas']['ChecklistSettingDto'][];
+    };
+    ChecklistInputDto: {
+      required: boolean;
+    };
     CatalogueItemDto: {
       code: string;
       /** @enum {string} */
@@ -6130,6 +6178,49 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['DecisionDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminChecklistsController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChecklistRoleDto'][];
+        };
+      };
+    };
+  };
+  AdminChecklistsController_set: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        role: string;
+        item: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChecklistInputDto'];
       };
     };
     responses: {

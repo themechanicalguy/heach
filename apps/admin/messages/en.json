@@ -80,7 +80,8 @@
     "plan_invalid": "Those plan details do not fit together. Check the kind, item and period.",
     "plan_item_required": "Choose the catalogue item or service the plan covers.",
     "template_placeholders": "The wording must keep exactly the same placeholders as the default.",
-    "template_invalid": "The wording has unmatched braces."
+    "template_invalid": "The wording has unmatched braces.",
+    "checklist_item_fixed": "Police verification stays required for everyone who visits a home."
   },
   "users": {
     "title": "Users",
@@ -566,6 +567,36 @@
       "or": "Odia",
       "en": "English",
       "hi": "Hindi"
+    }
+  },
+  "checklists": {
+    "title": "Document checklists",
+    "intro": "Which documents each provider type must upload (PO-01, AD-08). Police verification stays required for everyone who visits a home.",
+    "caption": "Checklist for {role}",
+    "item": "Document",
+    "required": "Required",
+    "fixed": "Always required",
+    "makeRequired": "Make required",
+    "makeOptional": "Make optional",
+    "yes": "Yes",
+    "no": "No",
+    "items": {
+      "nursing_registration": "Nursing council registration",
+      "qualification_certificate": "Qualification certificate",
+      "police_verification": "Police verification",
+      "council_registration": "Council registration",
+      "address_proof": "Address proof",
+      "reference_letter": "Reference letter",
+      "training_certificate": "Training certificate",
+      "establishment_registration": "Establishment registration",
+      "nabl_certificate": "NABL certificate"
+    },
+    "roles": {
+      "physiotherapist": "Physiotherapist",
+      "nurse": "Nurse",
+      "attendant": "Attendant",
+      "lab": "Lab",
+      "sample_collector": "Sample collector"
     }
   }
 }

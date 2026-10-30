@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { ApplicationStatus } from '../accounts/account.repository.js';
 import { EDITABLE, missingForSubmit } from './application-rules.js';
-import { CHECKLISTS, needsPayout, type OnboardingRole } from './checklists.js';
+import { ChecklistSettings } from './checklist-settings.js';
+import { needsPayout, type OnboardingRole } from './checklists.js';
 import type { ApplicationDto, IdentityState } from './onboarding.dto.js';
 import { type DocumentRow, OnboardingRepository } from './onboarding.repository.js';
 
@@ -13,16 +14,20 @@ export function todayInIndia(now = new Date()): string {
 /** Builds the checklist hub a provider and a reviewer both see (PO-01, PO-04). */
 @Injectable()
 export class ApplicationView {
-  constructor(private readonly onboarding: OnboardingRepository) {}
+  constructor(
+    private readonly onboarding: OnboardingRepository,
+    private readonly checklists: ChecklistSettings,
+  ) {}
 
   async build(
     accountId: string,
     grant: { role: OnboardingRole; status: ApplicationStatus; statusReason: string | null },
   ): Promise<ApplicationDto> {
-    const [documents, identity, payout] = await Promise.all([
+    const [documents, identity, payout, checklist] = await Promise.all([
       this.onboarding.documents(accountId),
       this.onboarding.identity(accountId),
       this.onboarding.payout(accountId),
+      this.checklists.for(grant.role),
     ]);
     const byItem = new Map(documents.map((row) => [row.item, row]));
     const identityState = (identity?.status ?? 'not_started') as IdentityState;
@@ -33,12 +38,13 @@ export class ApplicationView {
       identity: identityState,
       needsPayout: needsPayout(grant.role),
       payout: payout ?? null,
-      items: CHECKLISTS[grant.role].map((entry) => ({
+      items: checklist.map((entry) => ({
         ...entry,
         document: documentView(byItem.get(entry.key)),
       })),
       missing: missingForSubmit({
         role: grant.role,
+        checklist,
         identityVerified: identityState === 'verified',
         payoutOnFile: Boolean(payout),
         documents: cleanDocuments(documents),
