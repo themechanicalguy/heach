@@ -96,3 +96,12 @@ Not Step 2 or Step 3 work. Each is accepted in writing in the ADR named; listed 
 | ID | Item | Owner | Trigger or due | Verification procedure | Expected evidence | Blocks | Closure condition | State |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | FU-45 | Complete the fee-range filter (SD-03): API and web currently accept a maximum fee only | Codex through a PR | Before SD-03 is marked Done | Search with both lower and upper fee bounds, including boundary and invalid-range cases | API/web tests and updated status | SD-03 Done | Both bounds available and verified | Open |
+
+## Dependency audit (2 November 2026)
+
+| ID | Item | Owner | Trigger or due | Verification procedure | Expected evidence | Blocks | Closure condition | State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FU-46 | Triage three moderate dependency advisories found by the full audit: `qs` 6.16.0 ([GHSA-6pq8-jhm2-2vcw](https://github.com/advisories/GHSA-6pq8-jhm2-2vcw), patched in 6.16.1); `minimatch` 10.2.6 / 5.1.9 / 3.1.5 ([GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249), patched in 11.0.1); `glob` 13.0.6 ([GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4), patched in 14.0.2). Paths include Express, migrations and build/test tooling; this inventory does not establish application reachability | Developer through a dependency-maintenance PR; owner reviews any residual risk | Before the next real-user deployment | Inspect each dependency path and affected API usage; apply compatible patches or upstream updates, checking major-version compatibility; rerun the full audit and build/tests | Reviewed dependency diff and audit report, or a documented reachability/risk decision | Closing these advisories; the configured high/critical audit gate currently passes | Advisories removed or explicitly assessed and accepted with an owner and review date | Open |
+
+The verification round reports zero high or critical findings. The full audit reports the three
+moderate advisories above; no dependency, scanner exclusion or severity threshold was changed.
