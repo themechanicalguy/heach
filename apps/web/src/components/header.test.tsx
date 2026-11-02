@@ -113,6 +113,16 @@ describe('HeaderAccount', () => {
     expect(screen.queryByRole('button')).toBeNull();
   });
 
+  it('reserves a non-interactive sign-in slot while checking the session', () => {
+    state.status = 'checking';
+    state.pathname = '/en';
+    const { container } = inEnglish(<HeaderAccount />);
+    const slot = container.querySelector('.header-sign-in');
+    expect(slot?.getAttribute('aria-hidden')).toBe('true');
+    expect(slot?.hasAttribute('href')).toBe(false);
+    expect(slot?.textContent).toContain(CATALOGUES.en.nav.signIn);
+  });
+
   it('SE-07.10 signed in, signs this device out and goes home', async () => {
     state.status = 'signed-in';
     inEnglish(<HeaderAccount />);

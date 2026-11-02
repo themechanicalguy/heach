@@ -138,6 +138,10 @@ body {
   text-decoration: none;
 }
 
+.header-sign-in[aria-hidden='true'] {
+  visibility: hidden;
+}
+
 .language-switch {
   position: relative;
 }

@@ -2,6 +2,31 @@ import { CATALOGUES, LOCALES } from '@heach/i18n';
 import { expect, test } from '@playwright/test';
 
 for (const locale of LOCALES) {
+  test(`PF-03 the ${locale} header keeps its height after session restoration`, async ({
+    page,
+  }) => {
+    let release: () => void = () => undefined;
+    const restoring = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route('**/api/v1/auth/refresh', async (route) => {
+      await restoring;
+      await route.fulfill({ status: 401, json: { code: 'unauthorized' } });
+    });
+    try {
+      await page.goto(`/${locale}`);
+      await expect(page.locator('.header-sign-in[aria-hidden="true"]')).toHaveCount(1);
+      await page.evaluate(() => document.fonts.ready);
+      const before = await page.getByRole('banner').boundingBox();
+      release();
+      await expect(page.getByRole('link', { name: CATALOGUES[locale].nav.signIn })).toBeVisible();
+      const after = await page.getByRole('banner').boundingBox();
+      expect(after?.height).toBe(before?.height);
+    } finally {
+      release();
+    }
+  });
+
   test(`TS-07.1 the shell in ${locale} matches its visual baseline`, async ({ page }) => {
     await page.route('**/api/v1/service-prices', (route) => route.fulfill({ json: [] }));
     await page.goto(`/${locale}`);

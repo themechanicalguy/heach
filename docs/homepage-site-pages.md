@@ -144,3 +144,23 @@ password tests do not contend with every build and UI suite at once. Assertions,
 rules, the 170 KB budget and git hooks are unchanged. Script test files run serially so their
 load generators do not compete with the half-second load-test fixture. The sandbox needs access to the existing
 SWC native cache; checks are run with the required execution permission.
+
+### CI follow-up (2 November 2026)
+
+The first CI run passed Checks (including integration/coverage), API-backed E2E, API image, deploy
+bundle, infra, implementation-status and secret scanning. Two failures were fixed before retrying:
+
+- Static analysis rejected dynamic SQL identifiers in the content restoration helper. It now selects
+  complete fixed SQL statements for each of the two supported tables, with all values parameterized.
+  The full pinned Semgrep command (TypeScript, Node, React and repository policies) passes locally.
+  Both affected integration files pass twice: 6 tests per run; temporary PostgreSQL/Redis data removed.
+- Lighthouse mobile performance was below 90 in Odia/Hindi. The session check initially omitted the
+  sign-in control, then wrapped the header when inserting it, shifting the whole page. A hidden,
+  non-interactive slot now reserves the same space during checking, without revealing session data.
+  New browser tests hold restoration and compare header height before/after: 9 passed across all
+  locales/viewports. A unit regression verifies the placeholder has no link target or accessible action.
+  Local Hindi Lighthouse improved to 98 with CLS 0, using the existing mobile settings. The 90-point
+  threshold, other assertions and all scanner rules remain unchanged.
+
+`pnpm check` remains green (37/37 tasks; web unit count now 215); `pnpm format:check` is clean.
+The follow-up changes no requirement status or module total. CI confirmation is recorded on PR #125.

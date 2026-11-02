@@ -33,9 +33,15 @@ export function HeaderAccount() {
       </button>
     );
   }
-  if (status !== 'signed-out' || SIGN_IN_PAGES.test(pathname)) return null;
+  if (SIGN_IN_PAGES.test(pathname)) return null;
+  // Reserve the signed-out action's space while restoring the session (PF-03: no layout shift).
+  const checking = status === 'checking';
   return (
-    <a href={`/${locale}/sign-in`} className="heach-button header-sign-in">
+    <a
+      href={checking ? undefined : `/${locale}/sign-in`}
+      aria-hidden={checking || undefined}
+      className="heach-button header-sign-in"
+    >
       <Icon name="log-in" size={18} />
       {t('nav.signIn')}
     </a>
