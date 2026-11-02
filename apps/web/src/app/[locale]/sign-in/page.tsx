@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { SignInFlow } from '../../../components/account/SignInFlow';
 import { TestSignIn } from '../../../components/TestSignIn';
@@ -19,9 +20,11 @@ export default async function SignInPage({ searchParams }: Readonly<Props>) {
   if (!accounts && !testSignIn) notFound();
   const { next } = await searchParams;
   return (
-    <main className="page">
-      {accounts && <SignInFlow next={safeNext(typeof next === 'string' ? next : undefined)} />}
-      {testSignIn && <TestSignIn />}
-    </main>
+    <PageMessages>
+      <main className="page">
+        {accounts && <SignInFlow next={safeNext(typeof next === 'string' ? next : undefined)} />}
+        {testSignIn && <TestSignIn />}
+      </main>
+    </PageMessages>
   );
 }

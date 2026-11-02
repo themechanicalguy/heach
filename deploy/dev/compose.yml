@@ -35,6 +35,14 @@ services:
       # Accounts and every flow behind them, the Step 2 sample note and test sign-in: dev and
       # test only (FF-01).
       FEATURE_FLAGS: accounts,sample-patient-note
+      API_ORIGIN: http://api:3001
+      # Public operational details only; unset values show marked placeholders.
+      SITE_HELPLINE: ${SITE_HELPLINE:-}
+      SITE_SUPPORT_EMAIL: ${SITE_SUPPORT_EMAIL:-}
+      SITE_LEGAL_NAME: ${SITE_LEGAL_NAME:-}
+      SITE_LEGAL_ADDRESS: ${SITE_LEGAL_ADDRESS:-}
+      SITE_METRICS: ${SITE_METRICS:-}
+      SITE_REVIEWS: ${SITE_REVIEWS:-}
     restart: unless-stopped
 
   admin:

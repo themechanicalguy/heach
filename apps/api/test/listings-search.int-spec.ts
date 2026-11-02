@@ -112,22 +112,29 @@ describe('Listings, service areas and availability (SL-02 to SL-07, AV-01, AV-03
 });
 
 describe('Search, profiles and slot holds (SD-02 to SD-05, PO-05, AV-02)', () => {
-  const { app, server } = useApp();
+  const { app, server, db } = useApp();
   const search = async (query: string) =>
     (await server().get(`/v1/search?${query}`).expect(200)).body as Result[];
 
   it('SD-04 search finds Approved providers serving the PIN code only, in the reader language', async () => {
     const nurse = await listedProvider(app(), 'nurse', 'nursing_catheter_care');
+    const name = `Synthetic ${randomUUID().replaceAll('-', '')}`;
+    await db().query('UPDATE app.account_profile SET full_name = $1 WHERE account_id = $2', [
+      name,
+      nurse.accountId,
+    ]);
     const found = await search(
-      `service=nursing&pin=${PILOT_PIN}&item=nursing_catheter_care&locale=en`,
+      `service=nursing&pin=${PILOT_PIN}&item=nursing_catheter_care&locale=en&q=${encodeURIComponent(name)}`,
     );
     const mine = found.find((result) => result.providerId === nurse.accountId);
     expect(mine).toMatchObject({ itemName: 'Catheter care', feePaise: 60_000 });
     expect(mine?.earliestSlot).not.toBeNull();
-    const elsewhere = await search('service=nursing&pin=753001&item=nursing_catheter_care');
+    const elsewhere = await search(
+      `service=nursing&pin=753001&item=nursing_catheter_care&q=${encodeURIComponent(name)}`,
+    );
     expect(elsewhere.some((result) => result.providerId === nurse.accountId)).toBe(false);
     const odia = await search(
-      `service=nursing&pin=${PILOT_PIN}&item=nursing_catheter_care&locale=or`,
+      `service=nursing&pin=${PILOT_PIN}&item=nursing_catheter_care&locale=or&q=${encodeURIComponent(name)}`,
     );
     expect(odia.find((result) => result.providerId === nurse.accountId)?.itemName).toBe(
       'କ୍ୟାଥେଟର ଯତ୍ନ',
@@ -147,6 +154,35 @@ describe('Search, profiles and slot holds (SD-02 to SD-05, PO-05, AV-02)', () =>
     expect(has(await search(`${base}&maxFeePaise=50000`))).toBe(false);
     expect(has(await search(`${base}&q=geriatric&language=or`))).toBe(true);
     expect(has(await search(`${base}&q=geriatric&gender=male`))).toBe(false);
+  });
+
+  it('SD-02/03 POST search tolerates spelling and applies fee, rating and availability filters', async () => {
+    const nurse = await listedProvider(app(), 'nurse', 'nursing_vitals_check', {
+      feePaise: 19_999,
+    });
+    const body = {
+      service: 'nursing',
+      pin: PILOT_PIN,
+      item: 'nursing_vitals_check',
+      q: 'Synthetc',
+      maxFeePaise: 19_999,
+    };
+    const found = await server().post('/v1/search').send(body).expect(200);
+    expect((found.body as Result[]).some((row) => row.providerId === nurse.accountId)).toBe(true);
+    const deadline = await server()
+      .post('/v1/search')
+      .send({ ...body, availableBy: '2000-01-01T00:00:00Z' })
+      .expect(200);
+    expect(deadline.body).toEqual([]);
+    const rated = await server()
+      .post('/v1/search')
+      .send({ ...body, minRating: 5 })
+      .expect(200);
+    expect((rated.body as Result[]).some((row) => row.providerId === nurse.accountId)).toBe(false);
+    await server()
+      .post('/v1/search')
+      .send({ ...body, pin: 'invalid' })
+      .expect(400);
   });
 
   it('PO-05 a public profile shows Approved providers only, with the nurse registration number', async () => {

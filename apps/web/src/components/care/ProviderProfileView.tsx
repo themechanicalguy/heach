@@ -93,10 +93,17 @@ function ListingCard({
   );
 }
 
-function SlotPicker({
+export function SlotPicker({
   providerId,
   listingId,
-}: Readonly<{ providerId: string; listingId: string }>) {
+  onSelect,
+  selected,
+}: Readonly<{
+  providerId: string;
+  listingId: string;
+  onSelect?: (time: string) => void;
+  selected?: string;
+}>) {
   const { locale, t } = useI18n();
   const { resource, reload } = useResource<Slots>(
     `/providers/${providerId}/slots?listing=${listingId}&days=7`,
@@ -119,12 +126,25 @@ function SlotPicker({
       <ul className="slot-list">
         {slots.map((slot) => (
           <li key={slot}>
-            <Link
-              className="heach-button heach-button--secondary"
-              href={`/${locale}/book/${listingId}?provider=${providerId}&start=${encodeURIComponent(slot)}`}
-            >
-              {t('profile.book', { time: formatDateTime(new Date(slot), locale) })}
-            </Link>
+            {onSelect ? (
+              <button
+                type="button"
+                className="heach-button heach-button--secondary"
+                aria-pressed={selected === slot}
+                onClick={() => {
+                  onSelect(slot);
+                }}
+              >
+                {formatDateTime(new Date(slot), locale)}
+              </button>
+            ) : (
+              <Link
+                className="heach-button heach-button--secondary"
+                href={`/${locale}/book/${listingId}?provider=${providerId}&start=${encodeURIComponent(slot)}`}
+              >
+                {t('profile.book', { time: formatDateTime(new Date(slot), locale) })}
+              </Link>
+            )}
           </li>
         ))}
       </ul>

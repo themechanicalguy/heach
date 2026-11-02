@@ -8,6 +8,7 @@ import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { usePending } from '../../lib/use-pending';
+import { FileDownload } from '../files/FileDownload';
 import { useResource } from '../../lib/use-resource';
 
 /** A lab order as the patient sees it (LB-05 to LB-08): stage, collector, sample, code, report. */
@@ -15,7 +16,7 @@ export function PatientLabPanel({ bookingId }: Readonly<{ bookingId: string }>) 
   const { locale, t } = useI18n();
   const { resource } = useResource<LabOrder>(`/bookings/${bookingId}/lab?locale=${locale}`);
   const [code, setCode] = useState<string | undefined>();
-  const [report, setReport] = useState<string | undefined>();
+  const [report, setReport] = useState<StoredFile | undefined>();
   const { pending, error, run } = usePending();
   if (resource.state !== 'ready') return null;
   const order = resource.data;
@@ -62,15 +63,17 @@ export function PatientLabPanel({ bookingId }: Readonly<{ bookingId: string }>) 
         ))}
       {order.reports.length > 0 &&
         (report ? (
-          <a href={report} download={`report-${bookingId}.pdf`}>
-            {t('lab.report')}
-          </a>
+          <FileDownload
+            file={report}
+            filename={`report-${bookingId}.pdf`}
+            label={t('lab.report')}
+          />
         ) : (
           <Button
             onClick={() =>
               void run(async () => {
                 const file = await api<StoredFile>(`/bookings/${bookingId}/lab/report`);
-                setReport(`data:${file.contentType};base64,${file.contentBase64}`);
+                setReport(file);
               })
             }
             disabled={pending}

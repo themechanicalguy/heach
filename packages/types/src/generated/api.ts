@@ -1076,6 +1076,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/service-prices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SearchController_prices'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/search': {
     parameters: {
       query?: never;
@@ -1085,7 +1101,7 @@ export interface paths {
     };
     get: operations['SearchController_find'];
     put?: never;
-    post?: never;
+    post: operations['SearchController_searchBody'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1118,6 +1134,22 @@ export interface paths {
     get: operations['SearchController_slots'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/coverage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CoverageController_check'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1389,7 +1421,7 @@ export interface paths {
     };
     get: operations['AnySlotsController_anySlots'];
     put?: never;
-    post?: never;
+    post: operations['AnySlotsController_anySlotsBody'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1646,6 +1678,22 @@ export interface paths {
     get: operations['VaultController_list'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/vault/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VaultController_searchRecords'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2948,6 +2996,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/me/care-pin/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['CarePinController_read'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/care-pin': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['CarePinController_save'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3288,6 +3368,11 @@ export interface components {
       /** Format: uuid */
       id: string;
     };
+    ExportCarePinDto: {
+      pin: string | null;
+      /** Format: uuid */
+      person: string | null;
+    };
     AccountExportDto: {
       /** Format: date-time */
       exportedAt: string;
@@ -3300,6 +3385,7 @@ export interface components {
       consents: components['schemas']['ExportConsentDto'][];
       membership: components['schemas']['MembershipDto'] | null;
       linkedPatients: components['schemas']['LinkedPatientDto'][];
+      carePins: components['schemas']['ExportCarePinDto'][];
       /** Format: date-time */
       deletionRequestedAt: string | null;
     };
@@ -3751,6 +3837,11 @@ export interface components {
       /** Format: date-time */
       end: string;
     };
+    ServicePriceDto: {
+      /** @enum {string} */
+      service: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+      feePaise: number;
+    };
     SearchResultDto: {
       /** Format: uuid */
       providerId: string;
@@ -3776,6 +3867,34 @@ export interface components {
       /** @description Average rating, 1 to 5 */
       rating: number | null;
       ratingCount: number;
+    };
+    SearchQueryDto: {
+      /** @enum {string} */
+      service: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+      /** @description Patient's PIN code: results are limited to it (SD-04) */
+      pin: string;
+      /** @description Catalogue item code */
+      item?: string;
+      /** @description Provider or service name, any of the three languages */
+      q?: string;
+      /** @enum {string} */
+      gender?: 'female' | 'male';
+      /**
+       * @description Language the provider speaks
+       * @enum {string}
+       */
+      language?: 'or' | 'en' | 'hi';
+      /** @description Latest acceptable start, interpreted in India time */
+      availableBy?: string;
+      /** @description Highest fee in paise */
+      maxFeePaise?: number;
+      /**
+       * @description Language of the result text
+       * @enum {string}
+       */
+      locale?: 'or' | 'en' | 'hi';
+      /** @description Lowest average rating (SD-03) */
+      minRating?: number;
     };
     ProfileListingDto: {
       /** Format: uuid */
@@ -3808,6 +3927,15 @@ export interface components {
     };
     SlotsDto: {
       slots: string[];
+    };
+    CoverageInputDto: {
+      /** @description Confidential search PIN; request body only, never logged */
+      pin: string;
+    };
+    CoverageDto: {
+      served: boolean;
+      /** @description Public services with published listings serving the requested area */
+      services: ('physiotherapy' | 'nursing' | 'attendant' | 'lab')[];
     };
     LedgerLineDto: {
       bookingId: string | null;
@@ -4094,6 +4222,12 @@ export interface components {
         | 'provider_unavailable'
         | 'admin_decision';
     };
+    AnySlotsQueryDto: {
+      item: string;
+      pin: string;
+      /** @enum {string} */
+      gender?: 'female' | 'male';
+    };
     AnySlotsDto: {
       slots: string[];
       /** @description Highest price among the providers who may take it; any difference is refunded */
@@ -4226,6 +4360,25 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    VaultQueryDto: {
+      /** @description A linked patient ID, or `self` */
+      person?: string;
+      /** @enum {string} */
+      type?:
+        | 'prescription'
+        | 'lab_report'
+        | 'scan'
+        | 'discharge_summary'
+        | 'vaccination'
+        | 'visit_note'
+        | 'other';
+      /** Format: date */
+      from?: string;
+      /** Format: date */
+      to?: string;
+      /** @description Search titles, tags and provider names (MV-06) */
+      q?: string;
+    };
     RecordInputDto: {
       /**
        * Format: uuid
@@ -4339,10 +4492,11 @@ export interface components {
       expiresAt: string;
     };
     SharedFileDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      contentBase64: string;
       /** Format: uuid */
       recordId: string;
-      contentType: string;
-      contentBase64: string;
     };
     SharedRecordsDto: {
       records: components['schemas']['RecordDto'][];
@@ -4775,14 +4929,28 @@ export interface components {
     };
     PageDto: {
       /** @enum {string} */
-      slug: 'terms' | 'privacy' | 'faq' | 'refunds';
+      slug:
+        | 'terms'
+        | 'privacy'
+        | 'faq'
+        | 'refunds'
+        | 'about'
+        | 'verification'
+        | 'areas'
+        | 'contact'
+        | 'grievance'
+        | 'provider-agreement'
+        | 'patient-rights';
       /** @enum {string} */
       locale: 'or' | 'en' | 'hi';
       title: string;
       /** @description Plain text; blank lines separate paragraphs */
       body: string;
-      /** Format: date-time */
-      updatedAt: string;
+      /**
+       * Format: date-time
+       * @description Public publication date; null identifies a catalogue draft pending review
+       */
+      updatedAt: string | null;
     };
     TemplateDto: {
       template: string;
@@ -4904,6 +5072,25 @@ export interface components {
         | 'grandchild'
         | 'other_relative'
         | 'other';
+    };
+    CarePersonDto: {
+      /**
+       * Format: uuid
+       * @description Confidential linked-person ID; absent means the account holder
+       */
+      person?: string;
+    };
+    CarePinDto: {
+      pin: string | null;
+    };
+    CarePinInputDto: {
+      /**
+       * Format: uuid
+       * @description Confidential linked-person ID; absent means the account holder
+       */
+      person?: string;
+      /** @description Confidential saved search PIN, never in URLs or logs */
+      pin: string;
     };
   };
   responses: never;
@@ -6509,6 +6696,25 @@ export interface operations {
       };
     };
   };
+  SearchController_prices: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ServicePriceDto'][];
+        };
+      };
+    };
+  };
   SearchController_find: {
     parameters: {
       query: {
@@ -6522,6 +6728,8 @@ export interface operations {
         gender?: 'female' | 'male';
         /** @description Language the provider speaks */
         language?: 'or' | 'en' | 'hi';
+        /** @description Latest acceptable start, interpreted in India time */
+        availableBy?: string;
         /** @description Highest fee in paise */
         maxFeePaise?: number;
         /** @description Language of the result text */
@@ -6534,6 +6742,29 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchResultDto'][];
+        };
+      };
+    };
+  };
+  SearchController_searchBody: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SearchQueryDto'];
+      };
+    };
     responses: {
       200: {
         headers: {
@@ -6588,6 +6819,29 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['SlotsDto'];
+        };
+      };
+    };
+  };
+  CoverageController_check: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CoverageInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CoverageDto'];
         };
       };
     };
@@ -6995,6 +7249,29 @@ export interface operations {
       };
     };
   };
+  AnySlotsController_anySlotsBody: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AnySlotsQueryDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AnySlotsDto'];
+        };
+      };
+    };
+  };
   BookingPolicyController_policy: {
     parameters: {
       query?: never;
@@ -7341,6 +7618,29 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RecordDto'][];
+        };
+      };
+    };
+  };
+  VaultController_searchRecords: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VaultQueryDto'];
+      };
+    };
     responses: {
       200: {
         headers: {
@@ -9223,6 +9523,50 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CarePinController_read: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CarePersonDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CarePinDto'];
+        };
+      };
+    };
+  };
+  CarePinController_save: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CarePinInputDto'];
+      };
+    };
     responses: {
       204: {
         headers: {

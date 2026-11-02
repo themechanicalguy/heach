@@ -1,3 +1,4 @@
+import { ExportCarePinDto } from '../linked-patients/care-pin.dto.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -344,6 +345,7 @@ export class AccountExportDto {
   @ApiProperty({ type: [ExportConsentDto] }) consents!: ExportConsentDto[];
   @ApiProperty({ type: MembershipDto, nullable: true }) membership!: MembershipDto | null;
   @ApiProperty({ type: [LinkedPatientDto] }) linkedPatients!: LinkedPatientDto[];
+  @ApiProperty({ type: [ExportCarePinDto] }) carePins!: ExportCarePinDto[];
   @ApiProperty({ format: 'date-time', nullable: true, type: String })
   deletionRequestedAt!: string | null;
 }

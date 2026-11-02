@@ -3,7 +3,7 @@
  * the base rules are for 360 to 599 px; tablet and desktop rules follow in media queries (UX-02).
  */
 :root {
-  /* Lavender and peach, from apps/web/design-mockups.html (mirrors src/tokens.ts). */
+  /* Lavender and peach, from apps/web/design-mockup.html (mirrors src/tokens.ts). */
   --heach-primary: #6b4fa3;
   --heach-primary-soft: #efeaf8;
   --heach-on-primary: #ffffff;
@@ -25,9 +25,10 @@
   --heach-touch: 48px; /* A11Y-03 */
   --heach-radius: 0.75rem;
   --heach-radius-card: 1rem;
+  --heach-radius-tile: 1.375rem;
   --heach-radius-pill: 1.625rem;
   --heach-space: 1rem;
-  --heach-bottom-nav-height: 76px;
+  --heach-bottom-nav-height: 4.75rem;
 }
 
 .heach-visually-hidden {
@@ -101,6 +102,8 @@
 /* Form fields */
 .heach-field {
   display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.25rem;
   margin-block: var(--heach-space);
 }
@@ -123,6 +126,7 @@
 
 .heach-input {
   width: 100%;
+  min-width: 0;
   min-height: 52px;
   padding: 0.5rem 0.875rem;
   border: 1.5px solid var(--heach-border);
@@ -151,6 +155,8 @@
 
 /* Card, table */
 .heach-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: var(--heach-space);
   border: 1px solid var(--heach-border);
   border-radius: var(--heach-radius-card);
@@ -503,4 +509,10 @@
   .heach-card {
     padding: calc(var(--heach-space) * 1.5);
   }
+}
+
+/* Fieldsets otherwise impose an intrinsic width that overflows narrow, zoomed forms. */
+.heach-choice-group,
+fieldset {
+  min-inline-size: 0;
 }

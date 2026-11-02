@@ -36,7 +36,7 @@ export default defineConfig({
       url: `http://localhost:${String(PORT)}/healthz`,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
-      env: { APP_ENV: 'test', FEATURE_FLAGS: 'sample-patient-note' },
+      env: { APP_ENV: 'test', FEATURE_FLAGS: 'accounts,sample-patient-note' },
     },
   }),
 });

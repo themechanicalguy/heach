@@ -68,6 +68,25 @@ describe('The vault: filing, uploads and history (J9; MV-01 to MV-06, MV-12, MV-
   const vault = async (login: Login, query = '') =>
     (await server().get(`/v1/vault${query}`).set(bearer(login)).expect(200)).body as VaultRecord[];
 
+  it('SE-02/EN-11 POST vault search keeps health terms in the body and enforces ownership', async () => {
+    const owner = await signedUp(app());
+    const other = await signedUp(app());
+    await upload(app(), owner.login, OLD_SCAN).expect(201);
+    const own = await server()
+      .post('/v1/vault/search')
+      .set(bearer(owner.login))
+      .send({ q: 'knee' })
+      .expect(200);
+    expect((own.body as VaultRecord[]).map((row) => row.title)).toContain(OLD_SCAN.title);
+    const refused = await server()
+      .post('/v1/vault/search')
+      .set(bearer(other.login))
+      .send({ q: 'knee' })
+      .expect(200);
+    expect(refused.body).toEqual([]);
+    await server().post('/v1/vault/search').send({ q: 'knee' }).expect(401);
+  });
+
   it('MV-02 visit notes are filed automatically as a record issued by the nurse', async () => {
     const { nurse, patient, booking } = await completedVisit(app(), db());
     await server()

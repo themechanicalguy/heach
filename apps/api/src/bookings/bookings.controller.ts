@@ -129,6 +129,15 @@ export class BookingsController {
 export class AnySlotsController {
   constructor(private readonly checkout: CheckoutService) {}
 
+  @Post('any-slots')
+  @HttpCode(HttpStatus.OK)
+  @Public('PIN codes travel in request bodies, not access-log URLs')
+  @Header('Cache-Control', 'no-store')
+  @ApiOkResponse({ type: AnySlotsDto })
+  async anySlotsBody(@Body() query: AnySlotsQueryDto): Promise<AnySlotsDto> {
+    return this.checkout.anySlots(query);
+  }
+
   @Get('any-slots')
   @Public('Open times are public so a patient can choose before signing in')
   @Header('Cache-Control', 'no-store')

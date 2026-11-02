@@ -1,3 +1,4 @@
+import { PAGE_SLUGS } from '@heach/i18n';
 import { Button, Notice, TextField } from '@heach/ui';
 import type { ContentPage } from '@heach/types';
 import { useCallback, useState } from 'react';
@@ -8,7 +9,6 @@ import { usePending } from '../use-pending';
 import { useReverified } from '../use-reverified';
 import { Choice } from './Tickets';
 
-const SLUGS = ['terms', 'privacy', 'faq', 'refunds'];
 const LANGUAGES = ['or', 'en', 'hi'];
 
 /** Static pages per language (AD-09): pick a page and a language, then write it. */
@@ -26,7 +26,7 @@ export function ContentPages({ canChange }: Readonly<{ canChange: boolean }>) {
         value={slug}
         onChange={setSlug}
         group="content.slugs"
-        values={SLUGS}
+        values={PAGE_SLUGS}
       />
       <Choice
         label={t('content.locale')}

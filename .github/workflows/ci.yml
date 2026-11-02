@@ -106,6 +106,14 @@ jobs:
           APP_ENV: test
           # The runner has no user namespace sandbox for Chrome; CI only.
           LHCI_COLLECT__SETTINGS__CHROME_FLAGS: --headless=new --no-sandbox
+      - name: Retain Lighthouse reports for performance diagnosis
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lighthouse-web
+          path: apps/web/.lighthouseci
+          include-hidden-files: true
+          retention-days: 7
       - run: pnpm --filter @heach/admin test:e2e
         env:
           CI: true

@@ -8,3 +8,14 @@ const meta = {
 export default meta;
 
 export const Default: StoryObj<typeof meta> = {};
+
+export const CareServices: StoryObj<typeof meta> = {
+  render: () => (
+    <div>
+      <Icon name="physiotherapy" />
+      <Icon name="nurse" />
+      <Icon name="attendant" />
+      <Icon name="lab" />
+    </div>
+  ),
+};

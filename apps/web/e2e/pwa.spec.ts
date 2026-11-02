@@ -33,7 +33,7 @@ test.describe('PWA (PF-07.1, EN-11)', () => {
 
     await context.setOffline(true);
     await page.reload();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(CATALOGUES.en.home.title);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(CATALOGUES.en.site.promise);
     await expect(page.getByText(CATALOGUES.en.offline.banner)).toBeVisible();
 
     const cachedUrls = await page.evaluate(async () => {

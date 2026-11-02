@@ -1,12 +1,15 @@
+import { PageMessages } from '../../../components/PageMessages';
 import { notFound } from 'next/navigation';
-import { ProviderPage } from '../../../components/account/AccountPages';
+import { ProviderPage } from '../../../components/account/ProviderPage';
 import { serverFlags } from '../../../lib/flags';
 
 export default function Page() {
   if (!serverFlags().isOn('accounts')) notFound();
   return (
-    <main className="page">
-      <ProviderPage />
-    </main>
+    <PageMessages>
+      <main className="page">
+        <ProviderPage />
+      </main>
+    </PageMessages>
   );
 }

@@ -2176,6 +2176,28 @@
         "tags": ["provider"]
       }
     },
+    "/v1/service-prices": {
+      "get": {
+        "operationId": "SearchController_prices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServicePriceDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
     "/v1/search": {
       "get": {
         "operationId": "SearchController_find",
@@ -2236,6 +2258,15 @@
             }
           },
           {
+            "name": "availableBy",
+            "required": false,
+            "in": "query",
+            "description": "Latest acceptable start, interpreted in India time",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "maxFeePaise",
             "required": false,
             "in": "query",
@@ -2266,6 +2297,36 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      },
+      "post": {
+        "operationId": "SearchController_searchBody",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchQueryDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -2360,6 +2421,35 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SlotsDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
+    "/v1/coverage": {
+      "post": {
+        "operationId": "CoverageController_check",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoverageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageDto"
                 }
               }
             }
@@ -2942,6 +3032,33 @@
       }
     },
     "/v1/search/any-slots": {
+      "post": {
+        "operationId": "AnySlotsController_anySlotsBody",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnySlotsQueryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnySlotsDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      },
       "get": {
         "operationId": "AnySlotsController_anySlots",
         "parameters": [
@@ -3528,6 +3645,43 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecordDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["vault"]
+      }
+    },
+    "/v1/vault/search": {
+      "post": {
+        "operationId": "VaultController_searchRecords",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VaultQueryDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -6332,6 +6486,67 @@
         ],
         "tags": ["account"]
       }
+    },
+    "/v1/me/care-pin/read": {
+      "post": {
+        "operationId": "CarePinController_read",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CarePersonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarePinDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/care-pin": {
+      "put": {
+        "operationId": "CarePinController_save",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CarePinInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
     }
   },
   "info": {
@@ -7032,6 +7247,21 @@
         },
         "required": ["fullName", "birthYear", "gender", "relationship", "id"]
       },
+      "ExportCarePinDto": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": "string",
+            "nullable": true
+          },
+          "person": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": ["pin", "person"]
+      },
       "AccountExportDto": {
         "type": "object",
         "properties": {
@@ -7077,6 +7307,12 @@
               "$ref": "#/components/schemas/LinkedPatientDto"
             }
           },
+          "carePins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportCarePinDto"
+            }
+          },
           "deletionRequestedAt": {
             "type": "string",
             "format": "date-time",
@@ -7092,6 +7328,7 @@
           "consents",
           "membership",
           "linkedPatients",
+          "carePins",
           "deletionRequestedAt"
         ]
       },
@@ -8360,6 +8597,19 @@
         },
         "required": ["start", "end"]
       },
+      "ServicePriceDto": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string",
+            "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+          },
+          "feePaise": {
+            "type": "number"
+          }
+        },
+        "required": ["service", "feePaise"]
+      },
       "SearchResultDto": {
         "type": "object",
         "properties": {
@@ -8442,6 +8692,56 @@
           "rating",
           "ratingCount"
         ]
+      },
+      "SearchQueryDto": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string",
+            "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+          },
+          "pin": {
+            "type": "string",
+            "description": "Patient's PIN code: results are limited to it (SD-04)"
+          },
+          "item": {
+            "type": "string",
+            "description": "Catalogue item code"
+          },
+          "q": {
+            "type": "string",
+            "description": "Provider or service name, any of the three languages"
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male"]
+          },
+          "language": {
+            "type": "string",
+            "enum": ["or", "en", "hi"],
+            "description": "Language the provider speaks"
+          },
+          "availableBy": {
+            "type": "string",
+            "description": "Latest acceptable start, interpreted in India time"
+          },
+          "maxFeePaise": {
+            "type": "number",
+            "description": "Highest fee in paise"
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"],
+            "description": "Language of the result text"
+          },
+          "minRating": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Lowest average rating (SD-03)"
+          }
+        },
+        "required": ["service", "pin"]
       },
       "ProfileListingDto": {
         "type": "object",
@@ -8567,6 +8867,33 @@
           }
         },
         "required": ["slots"]
+      },
+      "CoverageInputDto": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": "string",
+            "description": "Confidential search PIN; request body only, never logged"
+          }
+        },
+        "required": ["pin"]
+      },
+      "CoverageDto": {
+        "type": "object",
+        "properties": {
+          "served": {
+            "type": "boolean"
+          },
+          "services": {
+            "type": "array",
+            "description": "Public services with published listings serving the requested area",
+            "items": {
+              "type": "string",
+              "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+            }
+          }
+        },
+        "required": ["served", "services"]
       },
       "LedgerLineDto": {
         "type": "object",
@@ -9321,6 +9648,22 @@
         },
         "required": ["reason"]
       },
+      "AnySlotsQueryDto": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "pin": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male"]
+          }
+        },
+        "required": ["item", "pin"]
+      },
       "AnySlotsDto": {
         "type": "object",
         "properties": {
@@ -9704,6 +10047,39 @@
           "createdAt"
         ]
       },
+      "VaultQueryDto": {
+        "type": "object",
+        "properties": {
+          "person": {
+            "type": "string",
+            "description": "A linked patient ID, or `self`"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "prescription",
+              "lab_report",
+              "scan",
+              "discharge_summary",
+              "vaccination",
+              "visit_note",
+              "other"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "q": {
+            "type": "string",
+            "description": "Search titles, tags and provider names (MV-06)"
+          }
+        }
+      },
       "RecordInputDto": {
         "type": "object",
         "properties": {
@@ -9968,18 +10344,19 @@
       "SharedFileDto": {
         "type": "object",
         "properties": {
-          "recordId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "contentType": {
-            "type": "string"
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
           },
           "contentBase64": {
             "type": "string"
+          },
+          "recordId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
-        "required": ["recordId", "contentType", "contentBase64"]
+        "required": ["contentType", "contentBase64", "recordId"]
       },
       "SharedRecordsDto": {
         "type": "object",
@@ -11176,7 +11553,19 @@
         "properties": {
           "slug": {
             "type": "string",
-            "enum": ["terms", "privacy", "faq", "refunds"]
+            "enum": [
+              "terms",
+              "privacy",
+              "faq",
+              "refunds",
+              "about",
+              "verification",
+              "areas",
+              "contact",
+              "grievance",
+              "provider-agreement",
+              "patient-rights"
+            ]
           },
           "locale": {
             "type": "string",
@@ -11191,7 +11580,9 @@
           },
           "updatedAt": {
             "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "nullable": true,
+            "description": "Public publication date; null identifies a catalogue draft pending review"
           }
         },
         "required": ["slug", "locale", "title", "body", "updatedAt"]
@@ -11486,6 +11877,41 @@
           }
         },
         "required": ["fullName", "birthYear", "gender", "relationship"]
+      },
+      "CarePersonDto": {
+        "type": "object",
+        "properties": {
+          "person": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Confidential linked-person ID; absent means the account holder"
+          }
+        }
+      },
+      "CarePinDto": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["pin"]
+      },
+      "CarePinInputDto": {
+        "type": "object",
+        "properties": {
+          "person": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Confidential linked-person ID; absent means the account holder"
+          },
+          "pin": {
+            "type": "string",
+            "description": "Confidential saved search PIN, never in URLs or logs"
+          }
+        },
+        "required": ["pin"]
       }
     }
   }

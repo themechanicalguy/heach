@@ -25,5 +25,16 @@ export function ResourceView<T>({ resource, reload, children }: Readonly<Props<T
       />
     );
   }
-  return <>{children(resource.data)}</>;
+  return (
+    <>
+      {children(resource.data)}
+      {resource.refreshError !== undefined && (
+        <ErrorState
+          message={t(errorMessageKey(resource.refreshError))}
+          retryLabel={t('state.retry')}
+          onRetry={() => void reload()}
+        />
+      )}
+    </>
+  );
 }

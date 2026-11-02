@@ -8,7 +8,9 @@ for (const locale of LOCALES) {
     await page.goto(`/${locale}`);
 
     await expect(page.locator('html')).toHaveAttribute('lang', locale);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(CATALOGUES[locale].home.title);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      CATALOGUES[locale].site.promise,
+    );
     const overflows = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     );

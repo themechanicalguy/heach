@@ -1,8 +1,9 @@
+import { PAGE_SLUGS } from '@heach/i18n';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, Length } from 'class-validator';
 
 export const CONTENT_LOCALES = ['or', 'en', 'hi'] as const;
-export const PAGE_SLUGS = ['terms', 'privacy', 'faq', 'refunds'] as const;
+export { PAGE_SLUGS } from '@heach/i18n';
 export type PageSlug = (typeof PAGE_SLUGS)[number];
 
 export class TemplateDto {
@@ -43,8 +44,12 @@ export class PageDto {
   @ApiProperty({ description: 'Plain text; blank lines separate paragraphs' })
   body!: string;
 
-  @ApiProperty()
-  updatedAt!: Date;
+  @ApiProperty({
+    type: Date,
+    nullable: true,
+    description: 'Public publication date; null identifies a catalogue draft pending review',
+  })
+  updatedAt!: Date | null;
 }
 
 export class PageInputDto {

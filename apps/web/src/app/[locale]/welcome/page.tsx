@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../components/PageMessages';
 import { LOCALES } from '@heach/i18n';
 import { notFound } from 'next/navigation';
 import { translatorFor } from '../../../i18n/messages';
@@ -13,29 +14,31 @@ export default async function WelcomePage({
   if (!serverFlags().isOn('accounts')) notFound();
   const { t } = translatorFor((await params).locale);
   return (
-    <main className="page">
-      <section className="flow" aria-labelledby="welcome-title">
-        <div className="flow__card">
-          <h1 id="welcome-title" className="flow__title">
-            {t('welcome.title')}
-          </h1>
-          <p>{t('welcome.intro')}</p>
-          <ul className="language-choices">
-            {LOCALES.map((code) => (
-              <li key={code}>
-                <a
-                  href={`/${code}`}
-                  lang={code}
-                  hrefLang={code}
-                  className="heach-button heach-button--secondary"
-                >
-                  {translatorFor(code).t(`locale.${code}`)}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    </main>
+    <PageMessages>
+      <main className="page">
+        <section className="flow" aria-labelledby="welcome-title">
+          <div className="flow__card">
+            <h1 id="welcome-title" className="flow__title">
+              {t('welcome.title')}
+            </h1>
+            <p>{t('welcome.intro')}</p>
+            <ul className="language-choices">
+              {LOCALES.map((code) => (
+                <li key={code}>
+                  <a
+                    href={`/${code}`}
+                    lang={code}
+                    hrefLang={code}
+                    className="heach-button heach-button--secondary"
+                  >
+                    {translatorFor(code).t(`locale.${code}`)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </main>
+    </PageMessages>
   );
 }

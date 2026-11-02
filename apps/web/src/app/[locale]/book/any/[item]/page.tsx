@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { BookAnyPage } from '../../../../../components/account/AccountPages';
@@ -9,5 +10,5 @@ export default async function Page({ params }: Readonly<{ params: Promise<{ item
   const { item } = await params;
   if (!serverFlags().isOn('accounts') || !PATTERN.test(item)) notFound();
   const page = <BookAnyPage itemCode={item} />;
-  return <main className="page">{<Suspense>{page}</Suspense>}</main>;
+  return <PageMessages>{<main className="page">{<Suspense>{page}</Suspense>}</main>}</PageMessages>;
 }

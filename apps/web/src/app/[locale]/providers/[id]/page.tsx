@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ProviderProfileView } from '../../../../components/care/ProviderProfileView';
@@ -9,10 +10,12 @@ export default async function Page({ params }: Readonly<{ params: Promise<{ id: 
   const { id } = await params;
   if (!serverFlags().isOn('accounts') || !UUID.test(id)) notFound();
   return (
-    <main className="page">
-      <Suspense>
-        <ProviderProfileView providerId={id} />
-      </Suspense>
-    </main>
+    <PageMessages>
+      <main className="page">
+        <Suspense>
+          <ProviderProfileView providerId={id} />
+        </Suspense>
+      </main>
+    </PageMessages>
   );
 }

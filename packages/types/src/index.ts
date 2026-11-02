@@ -113,3 +113,5 @@ export interface ApiErrorBody {
   statusCode: number;
   code?: string;
 }
+
+export type ServicePrice = components['schemas']['ServicePriceDto'];

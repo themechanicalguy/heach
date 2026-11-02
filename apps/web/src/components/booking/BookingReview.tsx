@@ -2,6 +2,7 @@
 
 import { Button, Card, Notice } from '@heach/ui';
 import type { Booking, BookingPolicy } from '@heach/types';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
@@ -16,6 +17,11 @@ import { money } from './money';
 export function BookingReview({ booking }: Readonly<{ booking: Booking }>) {
   const { locale, t } = useI18n();
   const router = useRouter();
+  const review = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    review.current?.focus({ preventScroll: true });
+  }, [booking.id]);
   const policy = useResource<BookingPolicy>('/booking-policy');
   const { pending, error, run } = usePending();
   const checkout = booking.checkout;
@@ -27,47 +33,49 @@ export function BookingReview({ booking }: Readonly<{ booking: Booking }>) {
       router.push(`/${locale}/bookings/${booking.id}?paid=1`);
     });
   return (
-    <Card title={t('book.reviewTitle')}>
-      <p>{booking.itemName}</p>
-      <dl className="facts">
-        <dt>{t('book.fee')}</dt>
-        <dd>{money(fees.feePaise)}</dd>
-        {fees.travelPaise > 0 && (
-          <>
-            <dt>{t('book.travel')}</dt>
-            <dd>{money(fees.travelPaise)}</dd>
-          </>
+    <div ref={review} tabIndex={-1} role="region" aria-label={t('book.reviewTitle')}>
+      <Card title={t('book.reviewTitle')}>
+        <p>{booking.itemName}</p>
+        <dl className="facts">
+          <dt>{t('book.fee')}</dt>
+          <dd>{money(fees.feePaise)}</dd>
+          {fees.travelPaise > 0 && (
+            <>
+              <dt>{t('book.travel')}</dt>
+              <dd>{money(fees.travelPaise)}</dd>
+            </>
+          )}
+          <dt>{t('book.total')}</dt>
+          <dd>{money(fees.totalPaise)}</dd>
+        </dl>
+        {fees.advancePaise < fees.totalPaise && (
+          <p>
+            {t('book.advanceNote', {
+              advance: money(fees.advancePaise),
+              balance: money(fees.totalPaise - fees.advancePaise),
+            })}
+          </p>
         )}
-        <dt>{t('book.total')}</dt>
-        <dd>{money(fees.totalPaise)}</dd>
-      </dl>
-      {fees.advancePaise < fees.totalPaise && (
-        <p>
-          {t('book.advanceNote', {
-            advance: money(fees.advancePaise),
-            balance: money(fees.totalPaise - fees.advancePaise),
-          })}
-        </p>
-      )}
-      {policy.resource.state === 'ready' && (
-        <p className="flow__muted">
-          {t('book.policy', {
-            hours: policy.resource.data.freeCancellationHours,
-            percent: policy.resource.data.lateRefundPercent,
-          })}
-        </p>
-      )}
-      {checkout?.sandbox && <Notice tone="info">{t('book.sandbox')}</Notice>}
-      {error && (
-        <Notice tone="danger" live>
-          {t(error)}
-        </Notice>
-      )}
-      {checkout && (
-        <Button onClick={() => void pay()} disabled={pending}>
-          {t('book.pay', { amount: money(checkout.amountPaise) })}
-        </Button>
-      )}
-    </Card>
+        {policy.resource.state === 'ready' && (
+          <p className="flow__muted">
+            {t('book.policy', {
+              hours: policy.resource.data.freeCancellationHours,
+              percent: policy.resource.data.lateRefundPercent,
+            })}
+          </p>
+        )}
+        {checkout?.sandbox && <Notice tone="info">{t('book.sandbox')}</Notice>}
+        {error && (
+          <Notice tone="danger" live>
+            {t(error)}
+          </Notice>
+        )}
+        {checkout && (
+          <Button onClick={() => void pay()} disabled={pending}>
+            {t('book.pay', { amount: money(checkout.amountPaise) })}
+          </Button>
+        )}
+      </Card>
+    </div>
   );
 }

@@ -1,20 +1,20 @@
-import { Button } from '@heach/ui';
-import { ServiceTiles } from '../../components/care/ServiceTiles';
-import { translatorFor } from '../../i18n/messages';
-import { serverFlags } from '../../lib/flags';
+import { PageMessages } from '../../components/PageMessages';
+import { HomeView } from '../../components/site/HomeView';
+import { PublicHome } from '../../components/site/PublicHome';
+import { PatientHome } from '../../components/site/PatientHome';
+import { siteConfig } from '../../lib/site-config';
 
 export default async function HomePage({
   params,
 }: Readonly<{ params: Promise<{ locale: string }> }>) {
-  const { locale, t } = translatorFor((await params).locale);
+  const { locale } = await params;
+  const config = siteConfig();
   return (
-    <main className="page">
-      <h1>{t('home.title')}</h1>
-      {serverFlags().isOn('accounts') ? (
-        <ServiceTiles locale={locale} t={t} />
-      ) : (
-        <Button>{t('home.findCare')}</Button>
-      )}
-    </main>
+    <PageMessages>
+      <HomeView
+        publicHome={<PublicHome config={config} locale={locale} />}
+        patientHome={<PatientHome config={config} locale={locale} />}
+      />
+    </PageMessages>
   );
 }

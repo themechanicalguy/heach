@@ -80,6 +80,7 @@ export class AccountDataService {
       })),
       membership,
       linkedPatients,
+      carePins: await this.linked.carePins(account.id),
       deletionRequestedAt: account.deletionRequestedAt?.toISOString() ?? null,
     };
   }

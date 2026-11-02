@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsIn,
+  IsISO8601,
   IsInt,
   IsOptional,
   IsString,
@@ -44,6 +45,11 @@ export class SearchQueryDto {
   @IsOptional()
   @IsIn(LOCALES)
   language?: (typeof LOCALES)[number];
+
+  @ApiPropertyOptional({ description: 'Latest acceptable start, interpreted in India time' })
+  @IsOptional()
+  @IsISO8601()
+  availableBy?: string;
 
   @ApiPropertyOptional({ description: 'Highest fee in paise' })
   @IsOptional()
@@ -212,4 +218,13 @@ export class ProfileQueryDto {
   @IsOptional()
   @IsIn(LOCALES)
   locale?: (typeof LOCALES)[number];
+}
+
+/** Public aggregate of active, approved listings; no patient data (DC: Public). */
+export class ServicePriceDto {
+  @ApiProperty({ enum: SERVICES })
+  service!: Service;
+
+  @ApiProperty()
+  feePaise!: number;
 }

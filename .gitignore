@@ -50,3 +50,7 @@ coverage-*/
 
 # Claude Code: settings.local.json, credentials and other per-machine state stay local.
 .claude/
+
+# Local design references
+apps/web/design-mockup.html
+apps/web/design-mockups.html

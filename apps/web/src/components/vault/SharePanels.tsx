@@ -9,6 +9,7 @@ import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
+import { FileDownload } from '../files/FileDownload';
 import { RecordCard } from './RecordCard';
 import { RecordPicker } from './VaultView';
 
@@ -172,12 +173,11 @@ export function SharedLinkView({ token }: Readonly<{ token: string }>) {
                     </p>
                     {record.notes && <p>{record.notes}</p>}
                     {file && (
-                      <a
-                        href={`data:${file.contentType};base64,${file.contentBase64}`}
-                        download={`${record.title}.pdf`}
-                      >
-                        {t('sharedLink.download')}
-                      </a>
+                      <FileDownload
+                        file={file}
+                        filename={`${record.title}.pdf`}
+                        label={t('sharedLink.download')}
+                      />
                     )}
                   </Card>
                 </li>

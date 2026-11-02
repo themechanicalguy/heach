@@ -23,7 +23,7 @@ export function deviceClass(width: number): DeviceClass {
 }
 
 /**
- * Lavender and peach palette from the design reference (apps/web/design-mockups.html). Text
+ * Lavender and peach palette from the design reference (apps/web/design-mockup.html). Text
  * colours meet 4.5:1 on the surfaces they sit on (A11Y-03).
  */
 export const colors = {
@@ -48,3 +48,6 @@ export const colors = {
 
 /** Minimum touch target in CSS pixels (A11Y-03). */
 export const touchTarget = 48;
+
+/** Corners from the approved home and booking boards (UX-01). */
+export const radii = { input: 12, card: 16, tile: 22 } as const;

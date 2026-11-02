@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type pg from 'pg';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { type TransactionClient, withTransaction } from '../data-stores/transaction.js';
@@ -17,6 +17,43 @@ export class LinkedPatientsRepository {
 
   transaction<T>(work: (client: TransactionClient) => Promise<T>): Promise<T> {
     return withTransaction(this.pool, work);
+  }
+
+  async assertOwnedPerson(ownerId: string, person?: string): Promise<void> {
+    if (!person) return;
+    const result = await this.pool.query(
+      'SELECT 1 FROM app.linked_patient WHERE id = $1 AND owner_account_id = $2',
+      [person, ownerId],
+    );
+    if (!result.rowCount) throw new NotFoundException();
+  }
+
+  async carePin(ownerId: string, person?: string): Promise<string | null> {
+    const { rows } = await this.pool.query<{ pin: string }>(
+      'SELECT pin FROM app.care_pin WHERE account_id = $1 AND linked_patient_id IS NOT DISTINCT FROM $2::uuid',
+      [ownerId, person ?? null],
+    );
+    return rows[0]?.pin ?? null;
+  }
+
+  async carePins(ownerId: string): Promise<{ person: string | null; pin: string }[]> {
+    return (
+      await this.pool.query<{ person: string | null; pin: string }>(
+        'SELECT linked_patient_id AS person, pin FROM app.care_pin WHERE account_id = $1',
+        [ownerId],
+      )
+    ).rows;
+  }
+
+  async saveCarePin(ownerId: string, person: string | undefined, pin: string): Promise<void> {
+    const result = await this.pool.query(
+      `INSERT INTO app.care_pin (account_id, linked_patient_id, pin)
+       SELECT $1, $2::uuid, $3 WHERE $2::uuid IS NULL OR EXISTS
+         (SELECT 1 FROM app.linked_patient WHERE id = $2 AND owner_account_id = $1)
+       ON CONFLICT (account_id, linked_patient_id) DO UPDATE SET pin = EXCLUDED.pin`,
+      [ownerId, person ?? null, pin],
+    );
+    if (!result.rowCount) throw new NotFoundException();
   }
 
   async list(ownerId: string): Promise<LinkedPatientDto[]> {

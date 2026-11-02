@@ -41,6 +41,13 @@ export function proxy(request: NextRequest): NextResponse {
   );
   const headers = new Headers(request.headers);
   headers.set('x-nonce', nonce);
+  headers.set('x-heach-locale', first);
+  const segments = pathname.split('/');
+  const section = segments[2] ?? 'home';
+  headers.set(
+    'x-heach-page',
+    section === 'provider' && segments[3] ? `${section}/${segments[3]}` : section,
+  );
   headers.set('Content-Security-Policy', csp);
   const response = NextResponse.next({ request: { headers } });
   response.headers.set('Content-Security-Policy', csp);
@@ -61,10 +68,6 @@ export const config = {
       // Pages only: not the API, Next assets, the service worker, the manifest or health checks.
       source:
         '/((?!api|_next/static|_next/image|healthz|sw.js|manifest.webmanifest|icons|favicon.ico).*)',
-      missing: [
-        { type: 'header', key: 'next-router-prefetch' },
-        { type: 'header', key: 'purpose', value: 'prefetch' },
-      ],
     },
   ],
 };

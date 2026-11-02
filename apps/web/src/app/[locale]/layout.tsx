@@ -1,7 +1,9 @@
+import { colors } from '@heach/ui';
+import Link from 'next/link';
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { isLocale, LOCALES, messagesFor } from '@heach/i18n';
+import { isLocale, LOCALES } from '@heach/i18n';
 import { ErrorTracking } from '../../components/ErrorTracking';
 import { HeaderAccount } from '../../components/HeaderAccount';
 import { LanguageSwitch } from '../../components/LanguageSwitch';
@@ -15,6 +17,12 @@ import { I18nProvider } from '../../lib/i18n-context';
 import { SessionProvider } from '../../lib/session';
 import { fontClassNames } from '../fonts';
 import { translatorFor } from '../../i18n/messages';
+import { CareSearchProvider } from '../../lib/care-search';
+import { HeaderCare } from '../../components/site/HeaderCare';
+import { ContactAction } from '../../components/site/ContactAction';
+import { SiteFooter } from '../../components/site/SiteFooter';
+import { shellMessages } from '../../lib/client-messages';
+import { siteConfig } from '../../lib/site-config';
 import '@heach/ui/ui.css';
 import '../globals.css';
 
@@ -38,7 +46,7 @@ export async function generateMetadata({ params }: Omit<Props, 'children'>): Pro
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#1f4e79',
+  themeColor: colors.primary,
 };
 
 export default async function LocaleLayout({ children, params }: Readonly<Props>) {
@@ -50,23 +58,28 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
   return (
     <html lang={locale} className={fontClassNames}>
       <body>
-        <I18nProvider locale={locale} messages={messagesFor(locale)}>
+        <I18nProvider locale={locale} messages={shellMessages(locale)}>
           <SessionProvider>
             <AccountProvider enabled={accounts}>
-              <header className="shell-header">
-                <a href={`/${locale}`} className="shell-header__name">
-                  <span className="shell-header__mark" aria-hidden="true" />
-                  <span className="shell-header__label">{t('app.name')}</span>
-                </a>
-                <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
-                <div className="shell-header__actions">
-                  <LanguageSwitch />
-                  <HeaderAccount />
-                </div>
-              </header>
-              <OfflineStatus />
-              {children}
-              <ErrorTracking />
+              <CareSearchProvider>
+                <header className="shell-header">
+                  <Link href={`/${locale}`} className="shell-header__name">
+                    <span className="shell-header__mark" aria-hidden="true" />
+                    <span className="shell-header__label">{t('app.name')}</span>
+                  </Link>
+                  <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
+                  <div className="shell-header__actions">
+                    <HeaderCare />
+                    <LanguageSwitch />
+                    <ContactAction locale={locale} config={siteConfig()} compact />
+                    <HeaderAccount />
+                  </div>
+                </header>
+                <OfflineStatus />
+                {children}
+                <SiteFooter config={siteConfig()} locale={locale} />
+                <ErrorTracking />
+              </CareSearchProvider>
             </AccountProvider>
           </SessionProvider>
           <ServiceWorker />

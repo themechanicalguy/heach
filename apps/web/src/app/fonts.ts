@@ -1,9 +1,9 @@
-import { Noto_Sans, Noto_Sans_Devanagari, Noto_Sans_Oriya } from 'next/font/google';
+import { Anek_Latin, Anek_Odia, Noto_Sans_Devanagari } from 'next/font/google';
 
 // Bundled and subset at build time, served from this origin (I18N-06.1): Latin, Odia and
 // Devanagari. Only Latin is preloaded; the script fonts swap in, so text shows at once.
-const latin = Noto_Sans({ subsets: ['latin'], variable: '--font-latin', display: 'swap' });
-const odia = Noto_Sans_Oriya({
+const latin = Anek_Latin({ subsets: ['latin'], variable: '--font-latin', display: 'swap' });
+const odia = Anek_Odia({
   subsets: ['oriya'],
   variable: '--font-odia',
   display: 'swap',
