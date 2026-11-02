@@ -67,6 +67,7 @@ const inEnglish = (node: ReactNode) =>
   );
 
 beforeEach(() => {
+  document.title = '';
   vi.spyOn(window, 'scrollTo')
     .mockImplementation(() => undefined)
     .mockClear();
@@ -91,9 +92,11 @@ it.each(['or', 'en', 'hi'] as const)(
       fireEvent.click(
         await screen.findByRole('button', { name: `${String(index + 1)}. ${label}` }),
       );
-      expect(document.title).toBe(
-        `${label} · ${messages.application.title} · ${messages.app.name}`,
-      );
+      await waitFor(() => {
+        expect(document.title).toBe(
+          `${label} · ${messages.application.title} · ${messages.app.name}`,
+        );
+      });
     }
   },
 );

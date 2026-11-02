@@ -164,3 +164,11 @@ bundle, infra, implementation-status and secret scanning. Two failures were fixe
 
 `pnpm check` remains green (37/37 tasks; web unit count now 215); `pnpm format:check` is clean.
 The follow-up changes no requirement status or module total. CI confirmation is recorded on PR #125.
+
+CI retry confirmation: the static-analysis and Lighthouse smoke jobs both passed on `c0e9526`,
+as did API-backed E2E, deploy bundle, image, infra and secrets. The coverage-instrumented unit
+run then exposed an asynchronous assertion in the existing onboarding title test: it read
+`document.title` immediately after a DOM update, before the passive effect ran. The regression
+now waits for the same exact localized title after each step and resets the document title
+between cases. No assertion, timeout, coverage threshold or product behavior changed.
+The nine onboarding tests pass with V8 coverage enabled.
