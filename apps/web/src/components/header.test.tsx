@@ -147,7 +147,7 @@ describe('ShellNav', () => {
   it('shows Account once signed in', () => {
     state.status = 'signed-in';
     inEnglish(<ShellNav accounts sample={false} />);
-    expect(linkNames()).toEqual(['Home', 'Account']);
-    expect(screen.getByRole('link', { name: 'Account' }).getAttribute('href')).toBe('/en/account');
+    expect(linkNames()).toEqual(['Home', 'Profile']);
+    expect(screen.getByRole('link', { name: 'Profile' }).getAttribute('href')).toBe('/en/account');
   });
 });

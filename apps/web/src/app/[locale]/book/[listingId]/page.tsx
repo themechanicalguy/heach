@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { BookChosenPage } from '../../../../components/account/AccountPages';
@@ -11,5 +12,5 @@ export default async function Page({
   const { listingId } = await params;
   if (!serverFlags().isOn('accounts') || !PATTERN.test(listingId)) notFound();
   const page = <BookChosenPage listingId={listingId} />;
-  return <main className="page">{<Suspense>{page}</Suspense>}</main>;
+  return <PageMessages>{<main className="page">{<Suspense>{page}</Suspense>}</main>}</PageMessages>;
 }

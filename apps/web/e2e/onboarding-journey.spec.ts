@@ -37,12 +37,15 @@ async function uploadDocuments(page: Page, locale: Locale): Promise<void> {
 
 async function payoutAndSubmit(page: Page, locale: Locale, mobile: string): Promise<void> {
   const t = CATALOGUES[locale];
+  await expectAccessible(page, 'provider payout step');
   await page.getByRole('radio', { name: t.application.payoutMethod.upi }).check();
   await page.getByLabel(t.application.holderName).fill('Synthetic Nurse');
   await page.getByLabel(t.application.upiId).fill('synthetic@okbank');
   await page.getByRole('button', { name: t.application.savePayout }).click();
   await confirmItIsMe(page, locale, mobile);
-  const submit = page.getByRole('button', { name: t.application.submit });
+  await page.getByRole('button', { name: new RegExp(t.application.steps.review) }).click();
+  await expectAccessible(page, 'provider review step');
+  const submit = page.getByRole('button', { name: t.application.submit, exact: true });
   await expect(submit).toBeEnabled({ timeout: 15_000 });
   await submit.click();
   await expect(page.getByText(t.application.statusText.submitted)).toBeVisible();
@@ -63,12 +66,20 @@ for (const locale of LOCALES) {
       await expect(page).toHaveURL(new RegExp(`/${locale}/provider$`));
       await expect(page.getByRole('heading', { name: t.application.title })).toBeVisible();
       await expectAccessible(page, 'provider application');
+      await page.getByRole('button', { name: new RegExp(t.application.steps.documents) }).click();
+      await expectAccessible(page, 'provider document step');
       await uploadDocuments(page, locale);
+      await page
+        .getByRole('button', {
+          name: new RegExp(t.application.steps.identity.replaceAll(/[()]/g, '.')),
+        })
+        .click();
       await page.getByRole('button', { name: t.application.verifyIdentity }).click();
       // The partner sends the browser back through the identity return page to the application.
       await page.waitForURL(/\/provider\/onboarding\/identity/);
       await page.waitForURL(new RegExp(`/${locale}/provider$`));
       await expect(page.getByText(t.application.identityState.verified)).toBeVisible();
+      await page.getByRole('button', { name: new RegExp(t.application.steps.payout) }).click();
       await expect(page.getByRole('button', { name: t.application.savePayout })).toBeVisible();
       await payoutAndSubmit(page, locale, mobile);
     });

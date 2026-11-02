@@ -561,7 +561,14 @@
       "terms": "Terms of use",
       "privacy": "Privacy notice",
       "faq": "Questions and answers",
-      "refunds": "Cancellation and refunds"
+      "refunds": "Cancellation and refunds",
+      "about": "About HEACH",
+      "verification": "How we verify providers",
+      "areas": "Areas we serve",
+      "contact": "Contact us",
+      "grievance": "Grievance officer and complaints",
+      "provider-agreement": "Provider agreement",
+      "patient-rights": "Patient rights"
     },
     "languages": {
       "or": "Odia",

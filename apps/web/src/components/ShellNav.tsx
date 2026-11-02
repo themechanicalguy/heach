@@ -54,8 +54,6 @@ function roleLinks(me: Me | undefined): Link[] {
       home,
       { path: '/bookings', key: 'nav.bookings', icon: 'file' },
       { path: '/vault', key: 'nav.vault', icon: 'note' },
-      { path: '/plans', key: 'nav.plans', icon: 'file' },
-      { path: '/notifications', key: 'nav.notifications', icon: 'note' },
     ];
   }
   return [home];
@@ -68,12 +66,14 @@ export function ShellNav({ accounts, sample }: Readonly<Props>) {
   const { status } = useSession();
   const links = [
     ...roleLinks(account.state === 'ready' ? account.me : undefined),
-    ...(sample ? [{ path: '/notes', key: 'nav.notes', icon: 'note' } as const] : []),
+    ...(sample && !(account.state === 'ready' && isCareRole(account.me.activeRole))
+      ? [{ path: '/notes', key: 'nav.notes', icon: 'note' } as const]
+      : []),
     ...(status === 'signed-in'
       ? [
           {
             path: `/${accounts ? 'account' : 'sign-in'}`,
-            key: 'nav.account',
+            key: 'site.profile',
             icon: 'user',
           } as const,
         ]

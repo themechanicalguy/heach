@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { BookingPage } from '../../../../components/account/AccountPages';
@@ -9,5 +10,5 @@ export default async function Page({ params }: Readonly<{ params: Promise<{ id: 
   const { id } = await params;
   if (!serverFlags().isOn('accounts') || !PATTERN.test(id)) notFound();
   const page = <BookingPage bookingId={id} />;
-  return <main className="page">{<Suspense>{page}</Suspense>}</main>;
+  return <PageMessages>{<main className="page">{<Suspense>{page}</Suspense>}</main>}</PageMessages>;
 }

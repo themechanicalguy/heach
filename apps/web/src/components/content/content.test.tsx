@@ -40,9 +40,27 @@ describe('Content edited by operations (AD-09) and provider referrals (RR-04)', 
     expect(state.api).toHaveBeenCalledWith('/pages/faq?locale=en');
   });
 
+  it('keeps server content without refetching and labels an undated draft', () => {
+    inEnglish(
+      <ContentPageView
+        slug="about"
+        initial={{
+          slug: 'about',
+          locale: 'en',
+          title: 'Synthetic draft',
+          body: 'Pending review.',
+          updatedAt: null,
+        }}
+      />,
+    );
+    expect(screen.getByText(CATALOGUES.en.pages.draft)).toBeTruthy();
+    expect(screen.queryByText(/Updated/)).toBeNull();
+    expect(state.api).not.toHaveBeenCalled();
+  });
+
   it('AD-09 a page not yet written in this language says so', async () => {
     state.api.mockRejectedValue(new ApiModule.ApiError(404));
-    inEnglish(<ContentPageView slug="terms" />);
+    inEnglish(<ContentPageView slug="unwritten" />);
     expect(await screen.findByText(CATALOGUES.en.pages.notFound)).toBeTruthy();
   });
 

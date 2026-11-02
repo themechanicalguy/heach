@@ -1,5 +1,21 @@
 /** Line icons drawn on a 24 px grid, after the design reference; stroke follows the text colour. */
 const PATHS = {
+  physiotherapy: [
+    'M12 3a2 2 0 1 0 0 4a2 2 0 1 0 0-4',
+    'M5 9h14',
+    'M12 7v7',
+    'm12 14-5 7',
+    'm12 14 5 7',
+  ],
+  nurse: ['M5 7h14v13H5z', 'M9 7V4h6v3', 'M12 11v6', 'M9 14h6'],
+  attendant: [
+    'M3 6v15',
+    'M3 17h18v4',
+    'M3 13h5v4',
+    'M8 11h9a4 4 0 0 1 4 4v2',
+    'M5 9a2 2 0 1 0 4 0a2 2 0 1 0-4 0',
+  ],
+  lab: ['M9 3h6', 'M10 3v7l-6 9a1 1 0 0 0 1 2h14a1 1 0 0 0 1-2l-6-9V3', 'M7 15h10'],
   home: ['M3 10.5 12 3l9 7.5', 'M5 9v11h14V9', 'M10 20v-6h4v6'],
   file: ['M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z', 'M14 3v5h5'],
   note: [

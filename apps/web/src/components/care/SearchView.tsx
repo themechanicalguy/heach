@@ -1,14 +1,14 @@
 'use client';
 
-import { formatDateTime, formatPaise } from '@heach/i18n';
-import { Button, Card, EmptyState, ErrorState, Notice, Skeleton, TextField } from '@heach/ui';
+import { Button, EmptyState, ErrorState, Notice, Skeleton, TextField } from '@heach/ui';
 import type { CatalogueItem, SearchResult } from '@heach/types';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import { errorMessageKey } from '../../lib/errors';
 import { useI18n } from '../../lib/i18n-context';
+import { useCareSearch } from '../../lib/care-search';
+import { ProviderCard } from './ProviderCard';
 import { PIN_PATTERN, type Service } from './services';
 
 type Results =
@@ -18,19 +18,20 @@ type Results =
   | { state: 'ready'; items: SearchResult[] };
 
 /**
- * Search for one service in the patient's PIN code (SD-02 to SD-04). The query lives in the URL
- * only, so nothing about the search is stored on the device.
+ * Search intent stays in memory; POST bodies keep PIN and care terms out of URLs (SD-02/03).
  */
 export function SearchView({ service }: Readonly<{ service: Service }>) {
   const { locale, t } = useI18n();
-  const params = useSearchParams();
-  const router = useRouter();
+  const { search, setSearch } = useCareSearch();
   const [filters, setFilters] = useState<Filters>({
-    pin: params.get('pin') ?? '',
-    item: params.get('item') ?? '',
-    language: params.get('language') ?? '',
-    gender: params.get('gender') ?? '',
-    q: params.get('q') ?? '',
+    pin: search.pin,
+    q: search.q,
+    item: '',
+    language: '',
+    gender: '',
+    maxFeePaise: '',
+    minRating: '',
+    availableBy: '',
   });
   const [items, setItems] = useState<CatalogueItem[]>([]);
   const [results, setResults] = useState<Results>({ state: 'idle' });
@@ -44,14 +45,26 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
 
   const run = useCallback(
     async (current: Filters) => {
-      const query = new URLSearchParams({ service, locale, pin: current.pin });
-      for (const key of ['item', 'language', 'gender', 'q'] as const)
-        if (current[key]) query.set(key, current[key]);
+      const body = {
+        service,
+        locale,
+        ...Object.fromEntries(
+          Object.entries(current)
+            .filter(([, value]) => value)
+            .map(([key, value]) => [
+              key,
+              ['maxFeePaise', 'minRating'].includes(key) ? Number(value) : value,
+            ]),
+        ),
+      };
       setResults({ state: 'loading' });
       try {
         setResults({
           state: 'ready',
-          items: await api<SearchResult[]>(`/search?${query.toString()}`),
+          items: await api<SearchResult[]>('/search', {
+            method: 'POST',
+            body: JSON.stringify(body),
+          }),
         });
       } catch (error) {
         setResults({ state: 'error', error });
@@ -62,7 +75,7 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
 
   const initial = useRef(filters);
   useEffect(() => {
-    // A shared or reloaded URL searches by itself, once.
+    // A search begun on the home page continues without putting it in a URL.
     if (PIN_PATTERN.test(initial.current.pin)) void run(initial.current);
   }, [run]);
 
@@ -72,17 +85,16 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
       return;
     }
     setPinError(false);
-    const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
-    router.replace(`/${locale}/services/${service}?${query.toString()}`);
+    setSearch({ service, pin: filters.pin, q: filters.q });
     void run(filters);
   };
 
   return (
-    <section className="flow" aria-labelledby="search-title">
+    <section className="flow" aria-labelledby="search-title" id="find-care">
       <div className="flow__card">
-        <h1 id="search-title" className="flow__title">
+        <h2 id="search-title" className="flow__title">
           {t('search.title', { service: t(`services.${service}`) })}
-        </h1>
+        </h2>
         <SearchForm
           filters={filters}
           items={items}
@@ -95,7 +107,7 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
         {results.state === 'ready' && filters.item && PIN_PATTERN.test(filters.pin) && (
           <Link
             className="heach-button heach-button--secondary"
-            href={`/${locale}/book/any/${filters.item}?pin=${filters.pin}`}
+            href={`/${locale}/book/any/${filters.item}`}
           >
             {t('book.anyTitle')}
           </Link>
@@ -106,7 +118,10 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
   );
 }
 
-type Filters = Record<'pin' | 'item' | 'language' | 'gender' | 'q', string>;
+type Filters = Record<
+  'pin' | 'item' | 'language' | 'gender' | 'q' | 'maxFeePaise' | 'minRating' | 'availableBy',
+  string
+>;
 
 interface FormProps {
   filters: Filters;
@@ -165,9 +180,9 @@ function SearchForm({ filters, items, pinError, onChange, onSubmit }: Readonly<F
         }}
         options={[
           ['', t('search.anyLanguage')],
-          ['or', 'ଓଡ଼ିଆ'],
-          ['en', 'English'],
-          ['hi', 'हिन्दी'],
+          ['or', t('locale.or')],
+          ['en', t('locale.en')],
+          ['hi', t('locale.hi')],
         ]}
       />
       <Select
@@ -182,6 +197,7 @@ function SearchForm({ filters, items, pinError, onChange, onSubmit }: Readonly<F
           ['male', t('search.genderMale')],
         ]}
       />
+      <AdvancedFilters filters={filters} onChange={onChange} />
       <Button type="submit">{t('search.find')}</Button>
     </form>
   );
@@ -217,7 +233,7 @@ export function Select({ label, value, options, onChange }: Readonly<SelectProps
 }
 
 function ResultList({ results, onRetry }: Readonly<{ results: Results; onRetry: () => void }>) {
-  const { locale, t } = useI18n();
+  const { t } = useI18n();
   if (results.state === 'idle') return null;
   if (results.state === 'loading') return <Skeleton label={t('state.loading')} />;
   if (results.state === 'error') {
@@ -238,30 +254,49 @@ function ResultList({ results, onRetry }: Readonly<{ results: Results; onRetry: 
       <ul className="role-list">
         {results.items.map((result) => (
           <li key={result.listingId}>
-            <Card title={result.name}>
-              <p>{result.itemName}</p>
-              <p className="flow__muted">
-                {t('search.fee', { fee: formatPaise(result.feePaise) })}
-                {result.travelSurchargePaise > 0 &&
-                  ` ${t('search.surcharge', { fee: formatPaise(result.travelSurchargePaise) })}`}
-              </p>
-              <p className="flow__muted">
-                {result.earliestSlot
-                  ? t('search.earliest', {
-                      time: formatDateTime(new Date(result.earliestSlot), locale),
-                    })
-                  : t('search.noSlot')}
-              </p>
-              <Link
-                className="heach-button"
-                href={`/${locale}/providers/${result.providerId}?listing=${result.listingId}`}
-              >
-                {t('search.view')}
-              </Link>
-            </Card>
+            <ProviderCard result={result} />
           </li>
         ))}
       </ul>
+    </>
+  );
+}
+
+function AdvancedFilters({ filters, onChange }: Readonly<Pick<FormProps, 'filters' | 'onChange'>>) {
+  const { t } = useI18n();
+  return (
+    <>
+      <TextField
+        label={t('site.maxFee')}
+        type="number"
+        min={1}
+        value={filters.maxFeePaise ? String(Number(filters.maxFeePaise) / 100) : ''}
+        onChange={(event) => {
+          onChange(
+            'maxFeePaise',
+            event.currentTarget.value ? String(Number(event.currentTarget.value) * 100) : '',
+          );
+        }}
+      />
+      <Select
+        label={t('site.rating')}
+        value={filters.minRating}
+        onChange={(value) => {
+          onChange('minRating', value);
+        }}
+        options={[
+          ['', t('search.anyItem')],
+          ...[1, 2, 3, 4, 5].map((value): [string, string] => [String(value), String(value)]),
+        ]}
+      />
+      <TextField
+        label={t('site.earliest')}
+        type="datetime-local"
+        value={filters.availableBy}
+        onChange={(event) => {
+          onChange('availableBy', event.currentTarget.value);
+        }}
+      />
     </>
   );
 }

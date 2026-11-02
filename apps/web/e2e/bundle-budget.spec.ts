@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { initialJsGzipBytes } from '../scripts/bundle-budget.mjs';
 
 const BUDGET = 170 * 1024; // PF-02.1: initial JS per entry route, gzipped
-const ENTRY_ROUTES = ['/or', '/or/notes', '/or/sign-in'];
+const ENTRY_ROUTES = ['/or', '/en', '/hi', '/or/provider', '/or/notes', '/or/sign-in'];
 
 test.describe('Bundle budget (PF-02.1)', () => {
   for (const route of ENTRY_ROUTES) {
@@ -10,7 +10,9 @@ test.describe('Bundle budget (PF-02.1)', () => {
       request,
     }, testInfo) => {
       test.skip(testInfo.project.name !== 'desktop', 'Measured once, on the desktop project');
-      const html = await (await request.get(route)).text();
+      const response = await request.get(route);
+      expect(response.status(), route).toBe(200);
+      const html = await response.text();
       const bytes = await initialJsGzipBytes(html, async (src) =>
         Buffer.from(await (await request.get(src)).body()),
       );
@@ -26,10 +28,13 @@ test('PF-05.1 routes are split: each entry route loads code the others do not', 
   test.skip(testInfo.project.name !== 'desktop', 'Checked once, on the desktop project');
   const { initialScripts } = await import('../scripts/bundle-budget.mjs');
   const scripts = await Promise.all(
-    ENTRY_ROUTES.map(
-      async (route) => new Set(initialScripts(await (await request.get(route)).text())),
-    ),
+    ENTRY_ROUTES.map(async (route) => {
+      const response = await request.get(route);
+      expect(response.status(), route).toBe(200);
+      return new Set(initialScripts(await response.text()));
+    }),
   );
-  const [home, notes] = scripts;
+  const home = scripts[ENTRY_ROUTES.indexOf('/or')];
+  const notes = scripts[ENTRY_ROUTES.indexOf('/or/notes')];
   expect([...(notes ?? [])].some((src) => !home?.has(src))).toBe(true);
 });

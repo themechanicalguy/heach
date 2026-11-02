@@ -70,6 +70,15 @@ export class VaultController {
     return this.vault.list(owner(request), query);
   }
 
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'no-store')
+  @Roles(...CARE_ROLES)
+  @ApiOkResponse({ type: [RecordDto] })
+  async searchRecords(@Body() query: VaultQueryDto, @Req() request: Request): Promise<RecordDto[]> {
+    return this.vault.list(owner(request), query);
+  }
+
   /** JSON, or the upload content type with a file (MV-03). */
   @Post('records')
   @HttpCode(HttpStatus.CREATED)

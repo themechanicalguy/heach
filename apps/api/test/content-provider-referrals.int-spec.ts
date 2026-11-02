@@ -1,3 +1,4 @@
+import { restoreContentPages, restoreContentTemplates } from './content-restore.js';
 import type { FakeSmsSender } from '../src/adapters/fakes.js';
 import { SMS_SENDER } from '../src/adapters/sms.port.js';
 import { smsText } from '../src/adapters/sms-text.js';
@@ -10,6 +11,8 @@ import { accountIdOf, listedProvider } from './provider-helpers.js';
 
 describe('Content without a deployment (AD-09)', () => {
   const { app, server, db } = useApp();
+  restoreContentPages(db, ['faq']);
+  restoreContentTemplates(db, ['plan_expiring']);
 
   const reverified = async (role: 'super_admin' | 'support') => {
     const admin = await adminSignIn(app(), role);

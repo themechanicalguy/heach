@@ -1,12 +1,12 @@
-import type { MessageKey, Messages } from '@heach/i18n';
+import type { MessageKey, MessageTree, Messages } from '@heach/i18n';
 
 type Key = MessageKey<Messages>;
 
 // The catalogue of the page's locale, registered by I18nProvider; no catalogue is imported here,
 // so this module adds no language data to the bundle.
-let active: Messages | undefined;
+let active: MessageTree | undefined;
 
-export function registerMessages(messages: Messages): void {
+export function registerMessages(messages: MessageTree): void {
   active = messages;
 }
 

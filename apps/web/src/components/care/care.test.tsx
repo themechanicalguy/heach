@@ -10,7 +10,17 @@ import { ProviderProfileView } from './ProviderProfileView';
 import { SearchView } from './SearchView';
 import { ServiceTiles } from './ServiceTiles';
 
-const state = vi.hoisted(() => ({ api: vi.fn(), replace: vi.fn(), params: new URLSearchParams() }));
+const state = vi.hoisted(() => ({
+  api: vi.fn(),
+  replace: vi.fn(),
+  params: new URLSearchParams(),
+  search: { pin: '', q: '', service: 'nursing' },
+  setSearch: vi.fn(),
+}));
+
+vi.mock('../../lib/care-search', () => ({
+  useCareSearch: () => ({ search: state.search, setSearch: state.setSearch }),
+}));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace: state.replace }),
@@ -59,6 +69,7 @@ beforeEach(() => {
   state.api.mockReset();
   state.replace.mockReset();
   state.params = new URLSearchParams();
+  state.search = { pin: '', q: '', service: 'nursing' };
 });
 
 describe('Home tiles (SD-01)', () => {
@@ -89,38 +100,49 @@ describe('SearchView (SD-02 to SD-04)', () => {
     expect(screen.getByRole('link', { name: 'View and book' }).getAttribute('href')).toContain(
       '/en/providers/',
     );
-    expect(state.replace).toHaveBeenCalledWith('/en/services/nursing?pin=751001&language=or');
-    expect(String(state.api.mock.calls.at(-1)?.[0])).toContain('language=or');
+    const [path, init] = state.api.mock.calls.at(-1) as [string, RequestInit];
+    expect(path).toBe('/search');
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body as string)).toMatchObject({ pin: '751001', language: 'or' });
+    expect(state.replace).not.toHaveBeenCalled();
   });
 
-  it('SD-04 searches at once from a shared URL and says when nobody serves the PIN', async () => {
-    state.params = new URLSearchParams('pin=753001');
+  it('SD-04 continues an in-memory search and says when nobody serves the PIN', async () => {
+    state.search.pin = '753001';
     route({ '/catalogue': [], '/search': [] });
     inEnglish(<SearchView service="lab" />);
     expect(await screen.findByText(/No verified provider visits this PIN code/)).toBeTruthy();
   });
 
-  it('SD-02 searches by provider or service name from the URL', async () => {
-    state.params = new URLSearchParams('pin=751001&q=Synthetic');
+  it('SD-02 searches by provider or service name without putting it in a URL', async () => {
+    state.search = { pin: '751001', q: 'Synthetic', service: 'nursing' };
     route({ '/catalogue': [], '/search': [] });
     inEnglish(<SearchView service="nursing" />);
     await screen.findByText(/No verified provider visits this PIN code/);
     expect(
-      (state.api.mock.calls as [string][]).some(([path]) => path.includes('q=Synthetic')),
+      state.api.mock.calls.some(([, init]) =>
+        ((init as RequestInit | undefined)?.body as string | undefined)
+          ?.toString()
+          .includes('Synthetic'),
+      ),
     ).toBe(true);
     const box = screen.getByLabelText(CATALOGUES.en.search.text);
     expect(box).toHaveProperty('value', 'Synthetic');
     fireEvent.change(box, { target: { value: 'Physio' } });
     fireEvent.click(screen.getByRole('button', { name: CATALOGUES.en.search.find }));
     await waitFor(() => {
-      expect((state.api.mock.calls as [string][]).some(([path]) => path.includes('q=Physio'))).toBe(
-        true,
-      );
+      expect(
+        state.api.mock.calls.some(([, init]) =>
+          ((init as RequestInit | undefined)?.body as string | undefined)
+            ?.toString()
+            .includes('Physio'),
+        ),
+      ).toBe(true);
     });
   });
 
   it('UX-04 shows an error with retry when search fails', async () => {
-    state.params = new URLSearchParams('pin=751001');
+    state.search.pin = '751001';
     state.api.mockImplementation((path: string) =>
       path.startsWith('/search') ? Promise.reject(new TypeError('offline')) : Promise.resolve([]),
     );

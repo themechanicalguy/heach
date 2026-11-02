@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { CollectionsPage } from '../../../../components/account/AccountPages';
 import { serverFlags } from '../../../../lib/flags';
@@ -5,8 +6,10 @@ import { serverFlags } from '../../../../lib/flags';
 export default function Page() {
   if (!serverFlags().isOn('accounts')) notFound();
   return (
-    <main className="page">
-      <CollectionsPage />
-    </main>
+    <PageMessages>
+      <main className="page">
+        <CollectionsPage />
+      </main>
+    </PageMessages>
   );
 }

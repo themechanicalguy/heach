@@ -21,7 +21,7 @@
     "notifications": "Alerts",
     "lab": "Lab orders",
     "collections": "Collections",
-    "vault": "My records",
+    "vault": "Records",
     "plans": "Plans",
     "referral": "Invite"
   },
@@ -350,7 +350,7 @@
     },
     "stepDone": "Done",
     "stepNotOpen": "Not open yet",
-    "progress": "{done} of {total} done",
+    "progress": "Step {current} of {total} · {remaining, plural, one {# step left} other {# steps left}}",
     "reviewTime": "After you submit, our team reviews your application within a few working days.",
     "identityState": {
       "not_started": "Not started",
@@ -412,7 +412,8 @@
       "qualification_not_recognised": "the qualification is not recognised",
       "police_verification_failed": "police verification was not cleared",
       "other": "please contact support"
-    }
+    },
+    "progressHint": "Uploaded documents and saved details are kept. Save each section before moving on."
   },
   "account": {
     "title": "Your account",
@@ -1038,6 +1039,215 @@
     "privacy": "Privacy notice",
     "faq": "Questions and answers",
     "refunds": "Cancellation and refunds",
-    "links": "About HEACH"
+    "links": "About HEACH",
+    "about": "About HEACH",
+    "verification": "How we verify providers",
+    "areas": "Areas we serve",
+    "contact": "Contact us",
+    "grievance": "Grievance officer and complaints",
+    "provider-agreement": "Provider agreement",
+    "patient-rights": "Patient rights",
+    "draft": "Draft — pending review"
+  },
+  "site": {
+    "promise": "Verified care, at your home.",
+    "intro": "Find physiotherapy, nurses, attendants and lab tests in Odisha.",
+    "need": "Which service do you need?",
+    "services": "Services",
+    "find": "Find care",
+    "call": "Call us",
+    "help": "Not sure what you need? Call our helpline.",
+    "contactPending": "Helpline details pending. Please visit Help for updates.",
+    "emergency": "Call 108. Do not wait for an online booking.",
+    "emergencyTitle": "In an emergency",
+    "next": "Next booking",
+    "details": "Details",
+    "near": "Near you",
+    "servesPin": "Serves your PIN code",
+    "verified": "Verified provider",
+    "from": "From {fee}",
+    "pricePending": "Prices available when listings are published",
+    "forMe": "For me",
+    "forPatients": "For patients",
+    "forProviders": "For providers",
+    "company": "Company and legal",
+    "legalPending": "Company legal name and address: pending confirmation",
+    "how": "How it works",
+    "choose": "Choose a service and enter your PIN code.",
+    "providerSlot": "Choose a verified provider and an available time.",
+    "pay": "Review the full price and pay securely.",
+    "careRate": "Receive care at home, then rate your experience.",
+    "verification": "How we verify providers",
+    "verificationBody": "Identity through Aadhaar or DigiLocker; qualifications checked by our team; admin approval before listing. Look for the verification badge. Live identity-partner activation is pending.",
+    "why": "Why HEACH",
+    "clearPrices": "Clear prices before you pay",
+    "replacement": "Free replacement support when an attendant is unavailable — draft policy pending review.",
+    "refund": "Read the refund policy before booking",
+    "odiaProviders": "Filter for Odia-speaking providers",
+    "vault": "Your records, encrypted",
+    "vaultBody": "Keep prescriptions, reports and history together. Choose what to share, see access history and stop sharing when you want.",
+    "areas": "Areas we serve",
+    "areasBody": "Launch cities and PIN codes are pending confirmation. Check your PIN code for currently published providers.",
+    "faq": "Frequently asked questions",
+    "join": "Become a provider",
+    "joinBody": "Offer care in your community. Set your service area, availability and fees.",
+    "documents": "Documents you need",
+    "documentsBody": "Identity proof, role-specific qualifications or registration, service area and payout details. The application shows the checklist for your role.",
+    "payouts": "Payouts",
+    "payoutsBody": "Track completed work and earnings. Fees, commission and payout terms are shown before you agree. Live payment-partner activation is pending.",
+    "signUp": "Sign up",
+    "final": "Find care for you or your family",
+    "included": "What is included",
+    "qualifications": "Provider qualifications",
+    "prices": "Prices",
+    "book": "Book this service",
+    "pendingReview": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.",
+    "helpLink": "Help",
+    "more": "More",
+    "profile": "Profile",
+    "earliest": "Available by",
+    "maxFee": "Maximum fee (₹)",
+    "rating": "Minimum rating",
+    "bookingSummary": "Your booking",
+    "metricsTitle": "Care in numbers",
+    "reviewsTitle": "What people say",
+    "providerCount": "{count} providers",
+    "visitCount": "{count} visits",
+    "cityCount": "{count} cities",
+    "asOf": "As on {date}",
+    "reviewAttribution": "{name} · {service}",
+    "checkCoverage": "Check coverage",
+    "coverageServed": "These services cover this PIN.",
+    "coverageUnserved": "No published services cover this PIN yet."
+  },
+  "sitePages": {
+    "about": {
+      "title": "About HEACH",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nHEACH connects people in Odisha with independent care providers for physiotherapy, nursing, attendant care and lab tests. HEACH is not an emergency service."
+    },
+    "verification": {
+      "title": "How we verify providers",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nIdentity through Aadhaar or DigiLocker; qualifications checked by our team; admin approval before listing. Look for the verification badge. Live identity-partner activation is pending."
+    },
+    "areas": {
+      "title": "Areas we serve",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nLaunch cities and PIN codes are pending confirmation. Check your PIN code for currently published providers."
+    },
+    "contact": {
+      "title": "Contact us",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nHelpline, support email, legal company name and address: pending owner confirmation. WhatsApp is not currently offered. In an emergency call 108."
+    },
+    "grievance": {
+      "title": "Grievance officer and complaints",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nOfficer name, email, phone and response time: pending confirmation. Signed-in patients can report a concern from a booking and track its status. Include the booking reference, describe the concern privately and keep the complaint reference. Escalation contact and deadlines await legal review."
+    },
+    "provider-agreement": {
+      "title": "Provider agreement",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nProviders must supply accurate identity and qualification documents, obtain approval before listing, keep availability and prices current, protect patient information and deliver only services they are qualified to provide. Commission, payouts, cancellation, replacement and dispute terms require legal approval before live use."
+    },
+    "patient-rights": {
+      "title": "Patient rights",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nYou can see prices before paying, choose your provider, consent to sharing records, revoke sharing, see record access history and raise a complaint. Account settings offer correction, export and deletion requests. Retention and response deadlines await legal confirmation."
+    },
+    "terms": {
+      "title": "Terms of use",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nHEACH connects you with independent care providers. Review the provider, service, full price, cancellation terms and location before booking. Consent is needed for identity checks and sharing records. Use only accurate information and raise concerns through the booking or grievance process. HEACH is not for emergencies: call 108. Company details, dispute terms and final contractual wording await lawyer approval."
+    },
+    "privacy": {
+      "title": "Privacy notice",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nWe use account and booking information to arrange care. Health records are encrypted and private; sharing is controlled by the patient and access is recorded. Aadhaar numbers are not stored in full. Account settings support correction, export and deletion requests. Retention periods, response deadlines, company contact and the final privacy notice await legal confirmation."
+    },
+    "refunds": {
+      "title": "Cancellation and refunds",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nCheck the cancellation and refund terms shown before you pay. Eligible refunds return to the original payment method. If a provider declines or does not accept in time, the booking is cancelled and the amount paid is refunded. For attendant shifts already started, refunds cover unworked shifts under the booking policy. Final deadlines, replacement terms and dispute wording await owner and lawyer approval."
+    },
+    "faq": {
+      "title": "Questions and answers",
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nCan I book for family?\nYes. Add a person and select who will receive care.\n\nHow do I check availability?\nEnter your PIN code, choose a service and check open times.\n\nAre prices shown before payment?\nYes. Review the service fee, travel charges and discounts before paying.\n\nCan I cancel?\nRead the cancellation terms at checkout and the refund policy.\n\nWho can see my records?\nYour records are private. You control sharing and can inspect access history.\n\nIs this for emergencies?\nCall 108. Do not wait for an online booking."
+    }
+  },
+  "siteFaq": {
+    "0": {
+      "question": "Can I book for family?",
+      "answer": "Yes. Add a person and select who will receive care."
+    },
+    "1": {
+      "question": "How do I check availability?",
+      "answer": "Enter your PIN code, choose a service and check open times."
+    },
+    "2": {
+      "question": "Are prices shown before payment?",
+      "answer": "Yes. Review the service fee, travel charges and discounts before paying."
+    },
+    "3": {
+      "question": "Can I cancel?",
+      "answer": "Read the cancellation terms at checkout and the refund policy."
+    },
+    "4": {
+      "question": "Who can see my records?",
+      "answer": "Your records are private. You control sharing and can inspect access history."
+    },
+    "5": {
+      "question": "Is this for emergencies?",
+      "answer": "Call 108. Do not wait for an online booking."
+    }
+  },
+  "serviceDetails": {
+    "physiotherapy": {
+      "included": "Exercise and rehabilitation at home. Your provider agrees the session plan with you.",
+      "qualifications": "BPT or MPT qualification; registration where available; identity and admin checks.",
+      "faq": {
+        "0": {
+          "question": "What happens at a home physiotherapy visit?",
+          "answer": "The physiotherapist assesses your movement and agrees a care plan with you. The listing explains what the visit includes."
+        },
+        "1": {
+          "question": "How many physiotherapy visits will I need?",
+          "answer": "Your physiotherapist discusses the number of visits after assessment. Check the price and any package terms before paying."
+        }
+      }
+    },
+    "nursing": {
+      "included": "Nursing procedures at home, such as injections, dressing and vitals. Some services require a prescription.",
+      "qualifications": "ANM, GNM or B.Sc nursing qualification and nursing council registration; identity and admin checks.",
+      "faq": {
+        "0": {
+          "question": "Do I need a prescription for a nursing procedure?",
+          "answer": "Some procedures need a prescription. The selected procedure tells you whether to upload one before booking."
+        },
+        "1": {
+          "question": "Who carries out nursing visits?",
+          "answer": "An approved nurse or paramedical provider carries out the listed procedure. Check their qualifications and registration on the profile."
+        }
+      }
+    },
+    "attendant": {
+      "included": "Day, night or full-day bedside assistance. Review tasks, shift length and replacement terms before booking.",
+      "qualifications": "Identity and address checks, a reference and training certificate where held; admin approval. Attendants do not replace qualified nurses.",
+      "faq": {
+        "0": {
+          "question": "Can I choose day or night attendant care?",
+          "answer": "Choose a published day, night or full-day shift. The listing shows the shift duration, setting and fee."
+        },
+        "1": {
+          "question": "Can an attendant perform nursing procedures?",
+          "answer": "Attendants help with daily care. Book a qualified nurse separately for clinical procedures."
+        }
+      }
+    },
+    "lab": {
+      "included": "Book lab tests with home sample collection or a lab visit. Review preparation instructions and collection charges. Reports are added to your vault.",
+      "qualifications": "Lab registration and authorised signatory identity checked. Accreditation is shown only when held. Collectors must be linked to an approved lab.",
+      "faq": {
+        "0": {
+          "question": "Can a lab collect my sample at home?",
+          "answer": "Choose a test and a listing that offers home collection. Available collection times are shown before booking."
+        },
+        "1": {
+          "question": "Where will I find my lab report?",
+          "answer": "When the lab publishes your report, you can open it from your booking and your private records."
+        }
+      }
+    }
   }
 }

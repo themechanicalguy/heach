@@ -3,8 +3,11 @@ import { expect, test } from '@playwright/test';
 
 for (const locale of LOCALES) {
   test(`TS-07.1 the shell in ${locale} matches its visual baseline`, async ({ page }) => {
+    await page.route('**/api/v1/service-prices', (route) => route.fulfill({ json: [] }));
     await page.goto(`/${locale}`);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(CATALOGUES[locale].home.title);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      CATALOGUES[locale].site.promise,
+    );
     // The sign-in button appears once the session check ends; wait so the render is stable.
     await expect(page.getByRole('link', { name: CATALOGUES[locale].nav.signIn })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
@@ -43,7 +46,9 @@ test('AC-02 the language pill opens the three languages and goes to the chosen o
   page,
 }) => {
   await page.goto('/en');
-  const languages = page.getByRole('navigation', { name: CATALOGUES.en.locale.label });
+  const languages = page
+    .getByRole('banner')
+    .getByRole('navigation', { name: CATALOGUES.en.locale.label });
   const pill = languages.getByRole('button', { name: CATALOGUES.en.locale.en });
   await pill.click();
   await expect(pill).toHaveAttribute('aria-expanded', 'true');
@@ -53,7 +58,7 @@ test('AC-02 the language pill opens the three languages and goes to the chosen o
   await pill.click();
   await languages.getByRole('link', { name: CATALOGUES.hi.locale.hi }).click();
   await expect(page).toHaveURL(/\/hi$/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(CATALOGUES.hi.home.title);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(CATALOGUES.hi.site.promise);
 });
 
 test('a signed-out visitor can sign in or sign up from the header', async ({ page }) => {

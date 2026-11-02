@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../../components/PageMessages';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SharedLinkView } from '../../../../components/vault/SharePanels';
@@ -10,8 +11,10 @@ export default async function Page({ params }: Readonly<{ params: Promise<{ toke
   const { token } = await params;
   if (!serverFlags().isOn('accounts') || !/^[\w-]{20,64}$/.test(token)) notFound();
   return (
-    <main className="page">
-      <SharedLinkView token={token} />
-    </main>
+    <PageMessages>
+      <main className="page">
+        <SharedLinkView token={token} />
+      </main>
+    </PageMessages>
   );
 }

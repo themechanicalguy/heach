@@ -1,3 +1,4 @@
+import { PageMessages } from '../../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { SetupPage } from '../../../../components/setup/SetupPage';
 import { serverFlags } from '../../../../lib/flags';
@@ -10,8 +11,10 @@ export default async function SetupStepPage({
   if (!serverFlags().isOn('accounts') || !(SETUP_STEPS as readonly string[]).includes(step))
     notFound();
   return (
-    <main className="page">
-      <SetupPage step={step as SetupStep} />
-    </main>
+    <PageMessages>
+      <main className="page">
+        <SetupPage step={step as SetupStep} />
+      </main>
+    </PageMessages>
   );
 }

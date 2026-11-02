@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { CATALOGUES } from '@heach/i18n';
 import type { Plan, Purchase } from '@heach/types';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type * as ApiModule from '../../lib/api';
+import { clientMessages, shellMessages } from '../../lib/client-messages';
 import { I18nProvider } from '../../lib/i18n-context';
 import { PaymentOptions } from '../booking/PaymentOptions';
 import { PlansView } from './PlansView';
@@ -17,7 +17,10 @@ vi.mock('../../lib/api', async (original) => ({
 
 const inEnglish = (node: ReactNode) =>
   render(
-    <I18nProvider locale="en" messages={CATALOGUES.en}>
+    <I18nProvider
+      locale="en"
+      messages={{ ...shellMessages('en'), ...clientMessages('en', 'plans') }}
+    >
       {node}
     </I18nProvider>,
   );

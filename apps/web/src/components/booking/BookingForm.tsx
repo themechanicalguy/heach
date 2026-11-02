@@ -3,9 +3,10 @@
 import { formatDateTime } from '@heach/i18n';
 import { Button, Card, CheckboxField, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { Booking, LinkedPatient, ProfileListing } from '@heach/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api, UPLOAD_CONTENT_TYPE } from '../../lib/api';
 import { readAsBase64 } from '../../lib/files';
+import { useCareSearch } from '../../lib/care-search';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
@@ -20,24 +21,27 @@ export interface ItemFacts {
   itemName: string;
   kind: 'visit' | 'shift' | 'lab_test';
   prescriptionRequired: boolean;
+  feePaise?: number;
 }
 
 interface Props {
   target: BookingTarget;
   facts: ItemFacts;
   startsAt: string;
+  onBooked?: () => void;
   /** Other tests of the same lab that can join this booking (LB-03). */
   labTests?: readonly ProfileListing[];
 }
 
 /** The booking details (BK-01, BK-05): who it is for, where, notes, prescription, days. */
-export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly<Props>) {
+export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }: Readonly<Props>) {
   const { locale, t } = useI18n();
+  const { person, search, setPerson } = useCareSearch();
   const people = useResource<LinkedPatient[]>('/me/linked-patients');
   const [form, setForm] = useState<FormState>({
-    recipient: '',
+    recipient: person,
     address: '',
-    pin: target.kind === 'any' ? target.pin : '',
+    pin: target.kind === 'any' ? target.pin : search.pin,
     notes: '',
     days: '1',
     gender: '',
@@ -45,6 +49,9 @@ export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly
     purchaseId: '',
     couponId: '',
   });
+  useEffect(() => {
+    setForm((current) => ({ ...current, recipient: person }));
+  }, [person]);
   const [file, setFile] = useState<File | undefined>();
   const [extras, setExtras] = useState<string[]>([]);
   const [booking, setBooking] = useState<Booking | undefined>();
@@ -52,6 +59,7 @@ export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly
   if (booking) return <BookingReview booking={booking} />;
 
   const set = (key: keyof FormState) => (value: string) => {
+    if (key === 'recipient') setPerson(value);
     setForm((current) => ({ ...current, [key]: value }));
   };
   const submit = () =>
@@ -64,58 +72,68 @@ export function BookingForm({ target, facts, startsAt, labTests = [] }: Readonly
           body: JSON.stringify(body),
         }),
       );
+      onBooked?.();
     });
   const linked = people.resource.state === 'ready' ? people.resource.data : [];
 
   return (
-    <Card title={facts.itemName}>
-      <p>
-        {t('book.when')}: <strong>{formatDateTime(new Date(startsAt), locale)}</strong>
-      </p>
-      <form
-        className="flow__form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void submit();
-        }}
-      >
-        <BookingFields
-          form={form}
-          set={set}
-          target={target}
-          facts={facts}
-          linked={linked}
-          onFile={setFile}
-          needsPrescription={
-            facts.prescriptionRequired ||
-            labTests.some((test) => extras.includes(test.listingId) && test.prescriptionRequired)
-          }
-        />
-        {facts.kind === 'lab_test' && (
-          <LabChoices
+    <div className="booking-layout">
+      <Card title={facts.itemName}>
+        <p>
+          {t('book.when')}: <strong>{formatDateTime(new Date(startsAt), locale)}</strong>
+        </p>
+        <form
+          className="flow__form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
+          <BookingFields
             form={form}
             set={set}
-            labTests={labTests}
-            extras={extras}
-            onExtras={setExtras}
+            target={target}
+            facts={facts}
+            linked={linked}
+            onFile={setFile}
+            needsPrescription={
+              facts.prescriptionRequired ||
+              labTests.some((test) => extras.includes(test.listingId) && test.prescriptionRequired)
+            }
           />
-        )}
-        <PaymentOptions
-          purchaseId={form.purchaseId}
-          couponId={form.couponId}
-          onPurchase={set('purchaseId')}
-          onCoupon={set('couponId')}
-        />
-        {error && (
-          <Notice tone="danger" live>
-            {t(error)}
-          </Notice>
-        )}
-        <Button type="submit" disabled={pending}>
-          {t('book.continue')}
-        </Button>
-      </form>
-    </Card>
+          {facts.kind === 'lab_test' && (
+            <LabChoices
+              form={form}
+              set={set}
+              labTests={labTests}
+              extras={extras}
+              onExtras={setExtras}
+            />
+          )}
+          <PaymentOptions
+            purchaseId={form.purchaseId}
+            couponId={form.couponId}
+            onPurchase={set('purchaseId')}
+            onCoupon={set('couponId')}
+          />
+          {error && (
+            <Notice tone="danger" live>
+              {t(error)}
+            </Notice>
+          )}
+          <Button type="submit" disabled={pending}>
+            {t('book.continue')}
+          </Button>
+        </form>
+      </Card>
+      <aside className="booking-summary site-section">
+        <h2>{t('site.bookingSummary')}</h2>
+        <p>{facts.itemName}</p>
+        <p>{formatDateTime(new Date(startsAt), locale)}</p>
+        {facts.feePaise !== undefined && <p>{t('search.fee', { fee: money(facts.feePaise) })}</p>}
+        <p>{t('site.clearPrices')}</p>
+      </aside>
+    </div>
   );
 }
 

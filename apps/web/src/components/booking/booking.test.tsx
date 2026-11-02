@@ -4,6 +4,7 @@ import type { Booking, BookingSummary } from '@heach/types';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type * as ApiModule from '../../lib/api';
+import { clientMessages, shellMessages } from '../../lib/client-messages';
 import { I18nProvider } from '../../lib/i18n-context';
 import { clearOfflineSummary, readOfflineSummary } from '../../lib/offline-summary';
 import { BookAny, BookChosen } from './BookPages';
@@ -11,9 +12,20 @@ import { BookingDetailView, BookingsView } from './BookingsView';
 
 const state = vi.hoisted(() => ({
   api: vi.fn(),
+  scroll: vi.fn<(x: number, y: number) => void>(),
   push: vi.fn(),
   refresh: vi.fn(),
   params: new URLSearchParams(),
+  pin: '751001',
+  setSearch: vi.fn<(value: unknown) => void>(),
+}));
+vi.mock('../../lib/care-search', () => ({
+  useCareSearch: () => ({
+    search: { pin: state.pin, q: '', service: 'physiotherapy' },
+    setSearch: state.setSearch,
+    person: '',
+    setPerson: vi.fn(),
+  }),
 }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: state.push, refresh: state.refresh, replace: vi.fn() }),
@@ -26,7 +38,10 @@ vi.mock('../../lib/api', async (original) => ({
 
 const inEnglish = (node: ReactNode) =>
   render(
-    <I18nProvider locale="en" messages={CATALOGUES.en}>
+    <I18nProvider
+      locale="en"
+      messages={{ ...shellMessages('en'), ...clientMessages('en', 'book') }}
+    >
       {node}
     </I18nProvider>,
   );
@@ -86,6 +101,7 @@ const booking = (overrides: Partial<Booking> = {}): Booking => ({
 
 function route(responses: Record<string, unknown>) {
   state.api.mockImplementation((path: string, init?: RequestInit) => {
+    if (path.includes('/slots?')) return Promise.resolve({ slots: [START] });
     const key = Object.keys(responses).find((prefix) => path.startsWith(prefix));
     // Panels a test does not care about answer with their empty shape.
     if (path.endsWith('/shared')) return Promise.resolve({ records: [], history: [], files: [] });
@@ -107,7 +123,11 @@ const bodyOf = (path: string) => {
 };
 
 beforeEach(() => {
+  vi.spyOn(window, 'scrollTo').mockImplementation(state.scroll);
+  state.scroll.mockClear();
   state.api.mockReset();
+  state.pin = '751001';
+  state.setSearch.mockClear();
   state.push.mockReset();
   state.params = new URLSearchParams(`provider=p1&start=${START}`);
   clearOfflineSummary();
@@ -148,6 +168,8 @@ describe('Booking a chosen provider (J3; BK-01, BK-04, BK-05, PY-01)', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Continue to payment' }));
     expect(await screen.findByText('Check and pay')).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole('region', { name: 'Check and pay' }));
+    expect(state.scroll).toHaveBeenCalledWith(0, 0);
     expect(bodyOf('/bookings')).toMatchObject({
       listingId: LISTING,
       pin: '751001',
@@ -179,14 +201,10 @@ describe('Booking a chosen provider (J3; BK-01, BK-04, BK-05, PY-01)', () => {
         },
       ],
     });
-    const view = inEnglish(<BookAny itemCode="physio_neuro_rehab" />);
-    expect(await screen.findByText(/You pay up to ₹700.00/)).toBeTruthy();
-    expect(screen.getByRole('link', { name: /Mon/ }).getAttribute('href')).toContain(
-      '/en/book/any/physio_neuro_rehab?pin=751001&start=',
-    );
-    view.unmount();
-    state.params = new URLSearchParams(`pin=751001&start=${START}`);
     inEnglish(<BookAny itemCode="physio_neuro_rehab" />);
+    expect(await screen.findByText(/You pay up to ₹700.00/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Mon/ }));
+    expect(bodyOf('/search/any-slots')).toEqual({ item: 'physio_neuro_rehab', pin: '751001' });
     expect(await screen.findByText('Provider gender')).toBeTruthy();
   });
 });
@@ -288,6 +306,25 @@ describe('A lab cart (LB-02, LB-03)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue to payment' }));
     await waitFor(() => {
       expect(bodyOf('/bookings')).toMatchObject({ collection: 'walk_in', extraListingIds: [LAB] });
+    });
+  });
+});
+
+it('A10 can re-enter a PIN after reloading without making invalid availability requests', async () => {
+  state.pin = '';
+  route({ '/catalogue': [] });
+  inEnglish(<BookAny itemCode="physio_assessment" />);
+  expect(screen.getByLabelText(CATALOGUES.en.search.pin)).toBeTruthy();
+  expect(state.api.mock.calls.some(([path]) => path === '/search/any-slots')).toBe(false);
+  fireEvent.change(screen.getByLabelText(CATALOGUES.en.search.pin), {
+    target: { value: '751001' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: CATALOGUES.en.setup.continue }));
+  await waitFor(() => {
+    expect(state.setSearch).toHaveBeenCalledWith({
+      pin: '751001',
+      q: '',
+      service: 'physiotherapy',
     });
   });
 });

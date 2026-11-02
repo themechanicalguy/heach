@@ -1,7 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+import { SERVICES, type Service } from '../catalogue/services.js';
+import { searchPatterns } from './search-patterns.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
-import type { ProfileListingDto, SearchQueryDto, SearchResultDto } from './search.dto.js';
+import type {
+  ProfileListingDto,
+  SearchQueryDto,
+  SearchResultDto,
+  ServicePriceDto,
+} from './search.dto.js';
 
 export type SearchRow = Omit<SearchResultDto, 'earliestSlot'>;
 
@@ -29,8 +36,31 @@ const RESULT_COLUMNS = `l.id AS "listingId", l.provider_account_id AS "providerI
 export class SearchRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>) {}
 
+  async coverage(pin: string): Promise<Service[]> {
+    const { rows } = await this.pool.query<{ service: Service }>(
+      `SELECT DISTINCT i.service FROM app.listing l
+       JOIN app.catalogue_item i ON i.id = l.item_id AND i.active
+       ${PUBLISHED}
+       WHERE l.active AND i.service = ANY($2::text[])
+         AND EXISTS (SELECT 1 FROM app.service_area sa JOIN app.pin_code pc ON pc.pin = sa.pin
+           WHERE sa.account_id = l.provider_account_id AND sa.pin = $1 AND pc.serviceable)
+       ORDER BY i.service`,
+      [pin, SERVICES],
+    );
+    return rows.map((row) => row.service);
+  }
+
+  async startingPrices(): Promise<ServicePriceDto[]> {
+    const { rows } = await this.pool.query<ServicePriceDto>(
+      `SELECT i.service, min(l.fee_paise)::int AS "feePaise" FROM app.listing l
+       JOIN app.catalogue_item i ON i.id = l.item_id AND i.active
+       ${PUBLISHED} WHERE l.active GROUP BY i.service`,
+    );
+    return rows;
+  }
+
   async search(query: SearchQueryDto): Promise<SearchRow[]> {
-    const text = query.q ? `%${query.q.toLowerCase().replaceAll(/[%_\\]/g, '')}%` : null;
+    const text = searchPatterns(query.q);
     const { rows } = await this.pool.query<SearchRow>(
       `SELECT ${RESULT_COLUMNS}
          FROM app.listing l
@@ -43,9 +73,9 @@ export class SearchRepository {
           AND ($5::text IS NULL OR p.gender = $5)
           AND ($6::text IS NULL OR $6 = ANY (p.languages))
           AND ($7::int IS NULL OR l.fee_paise <= $7)
-          AND ($8::text IS NULL OR lower(coalesce(o.name, p.full_name)) LIKE $8
+          AND ($8::text[] IS NULL OR lower(coalesce(o.name, p.full_name)) LIKE ANY($8)
                OR EXISTS (SELECT 1 FROM app.catalogue_item_text tt
-                           WHERE tt.item_id = i.id AND tt.search_name LIKE $8))
+                           WHERE tt.item_id = i.id AND tt.search_name LIKE ANY($8)))
           AND ($9::int IS NULL OR rv.rating >= $9)
         ORDER BY l.fee_paise
         LIMIT 50`,

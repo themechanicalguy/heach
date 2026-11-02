@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { mockBlobUrls } from '../../test/blob-urls';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CATALOGUES } from '@heach/i18n';
 import type { LabOrder } from '@heach/types';
 import type { ReactNode } from 'react';
@@ -59,6 +60,7 @@ const posted = (path: string) =>
   );
 
 beforeEach(() => {
+  mockBlobUrls();
   state.api.mockReset();
 });
 
@@ -90,7 +92,7 @@ describe('Lab orders on the web (LB-05 to LB-11)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Download report' }));
     expect(
       (await screen.findByRole('link', { name: 'Download report' })).getAttribute('href'),
-    ).toBe('data:application/pdf;base64,JVBERg==');
+    ).toBe('blob:http://localhost/synthetic-file');
   });
 
   it('LB-11 the lab sees its dashboard, assigns a collector and marks a sample received', async () => {
@@ -169,4 +171,9 @@ describe('Home collection by the collector (LB-06)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Confirm collection' }));
     expect(await screen.findByText('Collected. Sample ID HX-0123456789.')).toBeTruthy();
   });
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
 });

@@ -1,8 +1,8 @@
 'use client';
 
-import { Button, Notice } from '@heach/ui';
+import { Button, Notice, Progress } from '@heach/ui';
 import type { Application } from '@heach/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
@@ -23,7 +23,9 @@ const TONE: Record<Application['status'], 'info' | 'warning' | 'danger' | 'succe
   suspended: 'danger',
 };
 
-/** The provider's checklist hub (J1, PO-01 to PO-06): identity, documents, payout, submit. */
+type Step = 'identity' | 'documents' | 'payout' | 'review';
+
+/** The provider's guided application (J1, PO-01 to PO-06): identity, documents, payout, submit. */
 export function OnboardingView() {
   const { resource, reload } = useResource<Application>('/provider/application');
   return (
@@ -36,7 +38,18 @@ export function OnboardingView() {
 function Hub({ initial }: Readonly<{ initial: Application }>) {
   const { t } = useI18n();
   const [application, setApplication] = useState(initial);
+  const [step, setStep] = useState<Step>('identity');
+  const heading = useRef<HTMLHeadingElement>(null);
+  const steps: Step[] = initial.needsPayout
+    ? ['identity', 'documents', 'payout', 'review']
+    : ['identity', 'documents', 'review'];
   const { pending, error, run } = usePending();
+  useEffect(() => {
+    const stepTitle = t(`application.steps.${step}`);
+    document.title = `${stepTitle} · ${t('application.title')} · ${t('app.name')}`;
+    window.scrollTo(0, 0);
+    heading.current?.focus({ preventScroll: true });
+  }, [step, t]);
   useEffect(() => {
     setApplication(initial);
   }, [initial]);
@@ -46,9 +59,10 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
     });
 
   return (
-    <section className="flow" aria-labelledby="application-title">
+    <section className="flow onboarding-layout" aria-labelledby="application-title">
+      <StepNavigation steps={steps} step={step} onSelect={setStep} />
       <div className="flow__card">
-        <h1 id="application-title" className="flow__title">
+        <h1 ref={heading} tabIndex={-1} id="application-title" className="flow__title">
           {t('application.title')}
         </h1>
         <p className="flow__muted">
@@ -61,25 +75,25 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
         <Notice tone={TONE[application.status]} live>
           {t(`application.statusText.${application.status}`)}
         </Notice>
-        <IdentityStep application={application} />
-        <h2 className="flow__subtitle">{t('application.steps.documents')}</h2>
-        <ul className="role-list">
-          {application.items.map((entry) => (
-            <li key={entry.key}>
-              <DocumentItem
-                entry={entry}
-                editable={application.editable}
-                onSaved={setApplication}
-              />
-            </li>
-          ))}
-        </ul>
-        {application.needsPayout && (
+        <Progress
+          label={t('application.progress', {
+            current: steps.indexOf(step) + 1,
+            total: steps.length,
+            remaining: steps.length - steps.indexOf(step) - 1,
+          })}
+          current={steps.indexOf(step) + 1}
+          total={steps.length}
+        />
+        {step === 'identity' && <IdentityStep application={application} />}
+        {step === 'documents' && <Documents application={application} onSaved={setApplication} />}
+        {step === 'payout' && application.needsPayout && (
           <PayoutForm application={application} onSaved={setApplication} />
         )}
-        {application.editable && (
+        {step === 'review' && application.editable && (
           <Submit application={application} pending={pending} onSubmit={submit} />
         )}
+        <StepActions steps={steps} step={step} onSelect={setStep} />
+        <p>{t('application.progressHint')}</p>
         {error && (
           <Notice tone="danger" live>
             {t(error)}
@@ -118,6 +132,79 @@ function Submit({ application, pending, onSubmit }: Readonly<SubmitProps>) {
         {t('application.submit')}
       </Button>
       <p className="flow__muted">{t('application.reviewTime')}</p>
+    </>
+  );
+}
+
+interface StepProps {
+  steps: Step[];
+  step: Step;
+  onSelect: (step: Step) => void;
+}
+function StepNavigation({ steps, step, onSelect }: Readonly<StepProps>) {
+  const { t } = useI18n();
+  return (
+    <nav className="onboarding-steps" aria-label={t('application.title')}>
+      {steps.map((entry, index) => (
+        <button
+          type="button"
+          key={entry}
+          className="header-pill"
+          aria-current={step === entry ? 'step' : undefined}
+          onClick={() => {
+            onSelect(entry);
+          }}
+        >
+          {String(index + 1)}.{' '}
+          {t(entry === 'review' ? 'application.steps.review' : `application.steps.${entry}`)}
+        </button>
+      ))}
+    </nav>
+  );
+}
+function StepActions({ steps, step, onSelect }: Readonly<StepProps>) {
+  const { t } = useI18n();
+  const previous = steps[steps.indexOf(step) - 1];
+  const next = steps[steps.indexOf(step) + 1];
+  return (
+    <div className="actions">
+      {previous && (
+        <Button
+          className="heach-button--secondary"
+          onClick={() => {
+            onSelect(previous);
+          }}
+        >
+          {t('setup.back')}
+        </Button>
+      )}
+      {next && (
+        <Button
+          onClick={() => {
+            onSelect(next);
+          }}
+        >
+          {t('setup.continue')}
+        </Button>
+      )}
+    </div>
+  );
+}
+function Documents({
+  application,
+  onSaved,
+}: Readonly<{ application: Application; onSaved: (value: Application) => void }>) {
+  const { t } = useI18n();
+  return (
+    <>
+      <h2 className="flow__subtitle">{t('application.steps.documents')}</h2>
+      <ul className="role-list">
+        {application.items.map((entry) => (
+          <li key={entry.key}>
+            <DocumentItem entry={entry} editable={application.editable} onSaved={onSaved} />
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

@@ -9,9 +9,14 @@ import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 
 /** A static page edited by operations (AD-09), shown as plain paragraphs; no markup is rendered. */
-export function ContentPageView({ slug }: Readonly<{ slug: string }>) {
+export function ContentPageView({
+  slug,
+  initial,
+}: Readonly<{ slug: string; initial?: ContentPage }>) {
   const { locale, t } = useI18n();
-  const { resource, reload } = useResource<ContentPage>(`/pages/${slug}?locale=${locale}`);
+  const loaded = useResource<ContentPage>(`/pages/${slug}?locale=${locale}`, undefined, !initial);
+  const { reload } = loaded;
+  const resource = initial ? { state: 'ready' as const, data: initial } : loaded.resource;
   return (
     <section className="flow" aria-labelledby="page-title">
       <div className="flow__card">
@@ -30,7 +35,9 @@ export function ContentPageView({ slug }: Readonly<{ slug: string }>) {
                   <p key={String(index)}>{paragraph}</p>
                 ))}
                 <p className="flow__muted">
-                  {t('pages.updated', { time: formatDate(new Date(page.updatedAt), locale) })}
+                  {page.updatedAt
+                    ? t('pages.updated', { time: formatDate(new Date(page.updatedAt), locale) })
+                    : t('pages.draft')}
                 </p>
               </>
             )}
@@ -41,4 +48,4 @@ export function ContentPageView({ slug }: Readonly<{ slug: string }>) {
   );
 }
 
-export const PAGE_SLUGS = ['terms', 'privacy', 'faq', 'refunds'] as const;
+export { PAGE_SLUGS } from '@heach/i18n';

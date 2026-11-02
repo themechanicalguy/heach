@@ -1,14 +1,19 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { CATALOGUES } from '@heach/i18n';
+import { VaultTimeline } from './VaultTimeline';
+import { mockBlobUrls } from '../../test/blob-urls';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { VaultRecord } from '@heach/types';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type * as ApiModule from '../../lib/api';
+import { clientMessages, shellMessages } from '../../lib/client-messages';
 import { I18nProvider } from '../../lib/i18n-context';
 import { SharedLinkView, SharedRecordsPanel, ShareWithBooking } from './SharePanels';
 import { VaultView } from './VaultView';
 
 const state = vi.hoisted(() => ({ api: vi.fn() }));
+vi.mock('../../lib/care-search', () => ({
+  useCareSearch: () => ({ person: '', setPerson: vi.fn() }),
+}));
 vi.mock('../../lib/api', async (original) => ({
   ...(await original<typeof ApiModule>()),
   api: state.api,
@@ -22,7 +27,10 @@ function first<T>(items: readonly T[]): T {
 
 const inEnglish = (node: ReactNode) =>
   render(
-    <I18nProvider locale="en" messages={CATALOGUES.en}>
+    <I18nProvider
+      locale="en"
+      messages={{ ...shellMessages('en'), ...clientMessages('en', 'vault') }}
+    >
       {node}
     </I18nProvider>,
   );
@@ -46,6 +54,7 @@ const record = (overrides: Partial<VaultRecord> = {}): VaultRecord => ({
 
 function route(responses: Record<string, unknown>) {
   state.api.mockImplementation((path: string, init?: RequestInit) => {
+    if (path === '/vault/search') return Promise.resolve(responses['/vault'] ?? []);
     const key = Object.keys(responses).find(
       (prefix) => path === prefix || path.startsWith(`${prefix}?`) || path.startsWith(`${prefix}/`),
     );
@@ -60,6 +69,7 @@ const call = (method: string, path: string) =>
   );
 
 beforeEach(() => {
+  mockBlobUrls();
   state.api.mockReset();
 });
 
@@ -105,7 +115,10 @@ describe('The vault on the web (MV-03 to MV-12)', () => {
     expect(await screen.findByText(/Synthetic allergy/)).toBeTruthy();
     fireEvent.change(first(screen.getAllByLabelText('Type')), { target: { value: 'scan' } });
     await waitFor(() => {
-      expect(state.api).toHaveBeenCalledWith('/vault?type=scan');
+      expect(state.api).toHaveBeenCalledWith('/vault/search', {
+        method: 'POST',
+        body: JSON.stringify({ person: 'self', type: 'scan' }),
+      });
     });
     fireEvent.click(first(screen.getAllByRole('button', { name: 'Who viewed' })));
     expect(await screen.findByText(/Synthetic Nurse via booking share/)).toBeTruthy();
@@ -232,7 +245,38 @@ describe('Sharing on the web (MV-07 to MV-09, MV-14)', () => {
     fireEvent.change(screen.getByLabelText('Code'), { target: { value: '654321' } });
     fireEvent.click(screen.getByRole('button', { name: 'Open records' }));
     expect((await screen.findByRole('link', { name: 'Open file' })).getAttribute('href')).toBe(
-      'data:application/pdf;base64,JVBERg==',
+      'blob:http://localhost/synthetic-file',
     );
   });
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+it('keeps desktop authorship visible outside collapsed clinical details', () => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: true,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+  inEnglish(
+    <VaultTimeline
+      records={[
+        record({
+          source: 'visit',
+          issuedBy: 'Synthetic Nurse',
+          visitNotes: {
+            procedure: 'Synthetic dressing',
+            observations: 'Synthetic observations',
+            advice: 'Synthetic advice',
+          },
+        }),
+      ]}
+      onRefresh={() => Promise.resolve()}
+    />,
+  );
+  expect(screen.getByText('Issued by Synthetic Nurse').closest('details')).toBeNull();
+  expect(screen.getByText('Synthetic dressing').closest('details')?.open).toBe(false);
 });

@@ -1,3 +1,4 @@
+import { StoredFileDto } from '../onboarding/onboarding.dto.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -293,15 +294,9 @@ export class LinkOpenDto {
   code!: string;
 }
 
-export class SharedFileDto {
+export class SharedFileDto extends StoredFileDto {
   @ApiProperty({ format: 'uuid' })
   recordId!: string;
-
-  @ApiProperty()
-  contentType!: string;
-
-  @ApiProperty()
-  contentBase64!: string;
 }
 
 export class SharedRecordsDto {

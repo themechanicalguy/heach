@@ -13,6 +13,10 @@ export class SearchService {
     private readonly slots: SlotService,
   ) {}
 
+  startingPrices() {
+    return this.search.startingPrices();
+  }
+
   async find(query: SearchQueryDto): Promise<SearchResultDto[]> {
     const rows = await this.search.search(query);
     const earliest = await this.slots.earliestFor(
@@ -24,9 +28,16 @@ export class SearchService {
       })),
     );
     const results = rows.map((row, index) => ({ ...row, earliestSlot: earliest[index] ?? null }));
-    return results.sort(
-      (a, b) => (a.earliestSlot?.getTime() ?? Infinity) - (b.earliestSlot?.getTime() ?? Infinity),
-    );
+    const deadline = availabilityDeadline(query.availableBy);
+    return results
+      .filter(
+        (row) =>
+          !query.availableBy ||
+          (row.earliestSlot !== null && row.earliestSlot.getTime() <= deadline),
+      )
+      .sort(
+        (a, b) => (a.earliestSlot?.getTime() ?? Infinity) - (b.earliestSlot?.getTime() ?? Infinity),
+      );
   }
 
   async profile(providerId: string, locale: string): Promise<ProviderProfileDto> {
@@ -73,4 +84,12 @@ export class SearchService {
       days,
     });
   }
+}
+
+/** Local date-times are India time; a date alone includes that entire local day. */
+function availabilityDeadline(value: string | undefined): number {
+  if (!value) return Infinity;
+  if (!value.includes('T')) return new Date(`${value}T23:59:59+05:30`).getTime();
+  const timestamp = /(?:Z|[+-]\d\d:\d\d)$/.test(value) ? value : `${value}+05:30`;
+  return new Date(timestamp).getTime();
 }

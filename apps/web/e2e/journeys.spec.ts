@@ -76,9 +76,12 @@ async function newPatient(lang: InLanguage): Promise<void> {
 /** From search to the booking form: the provider's card, a free time, the address. */
 async function startBooking(lang: InLanguage, provider: Provider, service: string, item: string) {
   const { page, t } = lang;
-  // The name narrows the search: a shared local database may hold many matching providers.
-  const query = new URLSearchParams({ pin: PILOT_PIN, item, q: provider.name });
-  await lang.goto(`/services/${service}?${query.toString()}`);
+  // Exercise the visible search form; private intent never travels in the URL.
+  await lang.goto(`/services/${service}#find-care`);
+  await page.getByLabel(t.search.pin, { exact: true }).fill(PILOT_PIN);
+  await page.getByLabel(t.search.text, { exact: true }).fill(provider.name);
+  await page.getByRole('combobox', { name: t.search.item, exact: true }).selectOption(item);
+  await page.getByRole('button', { name: t.search.find, exact: true }).click();
   const card = page.getByRole('listitem').filter({ hasText: provider.name });
   await expect(card).toBeVisible();
   await expectAccessible(page, 'search results');

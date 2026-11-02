@@ -97,7 +97,9 @@ test.describe('Sign-up and account setup', () => {
     await second.getByRole('button', { name: t.setup.consent.finish, exact: true }).click();
     await expect(second).toHaveURL(/\/en\/provider$/);
     await expect(second.getByText(t.application.status.draft)).toBeVisible();
-    await expect(second.getByText(t.application.steps.identity)).toBeVisible();
+    await expect(
+      second.getByRole('heading', { name: t.application.steps.identity, exact: true }),
+    ).toBeVisible();
   });
 
   test('SE-02 a protected page asks for sign-in and returns there afterwards', async ({ page }) => {
@@ -105,7 +107,7 @@ test.describe('Sign-up and account setup', () => {
     const mobile = syntheticMobile();
     await signInByOtp(page, 'hi', mobile);
     await completePatientSetup(page, 'hi', 'सीता साहू');
-    await page.getByRole('link', { name: t.nav.account }).click();
+    await page.getByRole('link', { name: t.site.profile }).click();
     await page
       .getByRole('main')
       .getByRole('button', { name: t.account.signOut, exact: true })
@@ -155,11 +157,11 @@ test.describe('Roles and sessions', () => {
     await completePatientSetup(page, 'en', 'Synthetic Person');
     await expect(page).toHaveURL(/\/en$/);
     await expect(header.getByRole('link', { name: t.nav.signIn })).toHaveCount(0);
-    await expect(page.getByRole('link', { name: t.nav.account })).toBeVisible();
+    await expect(page.getByRole('link', { name: t.site.profile })).toBeVisible();
     await header.getByRole('button', { name: t.nav.signOut }).click();
     await expect(header.getByRole('link', { name: t.nav.signIn })).toBeVisible();
     await expect(page).toHaveURL(/\/en$/);
-    await expect(page.getByRole('link', { name: t.nav.account })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: t.site.profile })).toHaveCount(0);
     await page.goto('/en/account');
     await expect(page).toHaveURL(/\/en\/sign-in\?next=/);
   });

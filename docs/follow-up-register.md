@@ -81,3 +81,18 @@ Not Step 2 or Step 3 work. Each is accepted in writing in the ADR named; listed 
 | FU-24 | Dynamic scan and penetration test (SO-04); review of Trivy's `--ignore-unfixed` (high findings without a fix pass the image scan today) | Step 2 spec "Out of scope"; ADR 0009 | Before the pilot | Pen test report; scan policy decided |
 | FU-25 | Shared rate-limit counters before a second API process or host (SO-08; backlog 8; one process on 25 October 2026) | Spec 002 D-1 | When a second process is planned | Redis-backed counters in place first |
 | FU-26 | Data-key rotation schedule; an optional `--rotate` run on dev (EN-05) | Owner's call (key-rotation runbook) | Pilot operations | Schedule recorded |
+
+## Homepage and public site review (1 November 2026)
+
+| ID | Item | Owner | Trigger or due | Verification procedure | Expected evidence | Blocks | Closure condition | State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FU-41 | Native Odia and Hindi review of `site`, `sitePages`, `siteFaq` and `serviceDetails` catalogues and bilingual page layouts | Owner with native reviewers | Before real users | Review every key in context on mobile and desktop | Corrections in a PR | Publication to real users | Native review applied | Open |
+| FU-42 | Lawyer review of seven new public pages, verification claims, replacement wording and related existing terms/refund/privacy pages | Owner with lawyer | Before real users | Written review of all three language versions | Approved wording applied | Publication to real users | Written sign-off | Open |
+| FU-43 | Confirm helpline, support email, legal company name/address, grievance officer name/email/phone and response times; launch cities/PINs, per-service starting prices and Odia hero tagline | Owner | Before launch | Replace each marked pending value and verify call/email actions, coverage and prices against actual operations | Configuration and approved content | Live operational claims | All placeholders replaced and checked | Open |
+| FU-44 | Real aggregate statistics with an as-of date and approved reviews (first name + service only) | Owner | When real, approved material exists | Check source totals and review consent; exclude conditions/health details | Approved Public content | Statistics/reviews sections only | Real content available and verified | Open; both sections hidden |
+
+## Search refinement (2 November 2026)
+
+| ID | Item | Owner | Trigger or due | Verification procedure | Expected evidence | Blocks | Closure condition | State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FU-45 | Complete the fee-range filter (SD-03): API and web currently accept a maximum fee only | Codex through a PR | Before SD-03 is marked Done | Search with both lower and upper fee bounds, including boundary and invalid-range cases | API/web tests and updated status | SD-03 Done | Both bounds available and verified | Open |

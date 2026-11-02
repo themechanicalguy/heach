@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, EmptyState, Notice, TextField } from '@heach/ui';
+import { Button, Card, Notice, TextField } from '@heach/ui';
 import type {
   HistoryEntry,
   LinkCreated,
@@ -8,7 +8,8 @@ import type {
   VaultRecord,
   VaultUsage,
 } from '@heach/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useCareSearch } from '../../lib/care-search';
 import { api, UPLOAD_CONTENT_TYPE } from '../../lib/api';
 import { readAsBase64 } from '../../lib/files';
 import { useI18n } from '../../lib/i18n-context';
@@ -17,7 +18,7 @@ import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { Select } from '../care/SearchView';
-import { RecordCard } from './RecordCard';
+import { VaultTimeline } from './VaultTimeline';
 
 const TYPES = [
   'prescription',
@@ -41,15 +42,20 @@ const KINDS = [
 /** The vault (J9; MV-01 to MV-12, MV-15): timeline with filters, uploads, history, external links. */
 export function VaultView() {
   const { t } = useI18n();
-  const [filters, setFilters] = useState({ person: '', type: '', q: '' });
-  const query = new URLSearchParams(
-    Object.entries(filters).filter(([, value]) => value),
-  ).toString();
-  const records = useResource<VaultRecord[]>(query ? `/vault?${query}` : '/vault');
+  const { person, setPerson } = useCareSearch();
+  const [filters, setFilters] = useState({ person: person || 'self', type: '', q: '' });
+  useEffect(() => {
+    setFilters((current) => ({ ...current, person: person || 'self' }));
+  }, [person]);
+  const body = JSON.stringify(
+    Object.fromEntries(Object.entries(filters).filter(([, value]) => value)),
+  );
+  const records = useResource<VaultRecord[]>('/vault/search', body);
   const people = useResource<LinkedPatient[]>('/me/linked-patients');
   const usage = useResource<VaultUsage>('/vault/usage');
   const linked = people.resource.state === 'ready' ? people.resource.data : [];
   const set = (key: keyof typeof filters) => (value: string) => {
+    if (key === 'person') setPerson(value === 'self' ? '' : value);
     setFilters((current) => ({ ...current, [key]: value }));
   };
   const refresh = async () => {
@@ -57,7 +63,10 @@ export function VaultView() {
     await usage.reload();
   };
   return (
-    <section className="flow" aria-labelledby="vault-title">
+    <section className="flow vault-layout" aria-labelledby="vault-title">
+      <aside className="vault-profile">
+        <HistorySection person={filters.person} />
+      </aside>
       <div className="flow__card">
         <h1 id="vault-title" className="flow__title">
           {t('vault.title')}
@@ -91,29 +100,10 @@ export function VaultView() {
           }}
         />
         <ResourceView resource={records.resource} reload={records.reload}>
-          {(rows) =>
-            rows.length === 0 ? (
-              <EmptyState message={t('vault.empty')} />
-            ) : (
-              <ul className="role-list">
-                {rows.map((record) => (
-                  <li key={record.id}>
-                    <RecordCard
-                      record={record}
-                      showAccess
-                      onDelete={async () => {
-                        await api(`/vault/records/${record.id}`, { method: 'DELETE' });
-                        await refresh();
-                      }}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )
-          }
+          {(rows) => <VaultTimeline records={rows} onRefresh={refresh} />}
         </ResourceView>
         <UploadForm people={linked} onSaved={refresh} />
-        <HistorySection />
+
         {records.resource.state === 'ready' && <LinkForm records={records.resource.data} />}
       </div>
     </section>
@@ -249,13 +239,19 @@ function UploadForm({
   );
 }
 
-function HistorySection() {
+function HistorySection({ person }: Readonly<{ person: string }>) {
   const { t } = useI18n();
   const { resource, reload } = useResource<HistoryEntry[]>('/vault/history');
   const [kind, setKind] = useState<string>('allergy');
   const [text, setText] = useState('');
   const { pending, error, run } = usePending();
-  const entries = resource.state === 'ready' ? resource.data : [];
+  const entries =
+    resource.state === 'ready'
+      ? resource.data.filter(
+          (entry) =>
+            !person || (person === 'self' ? entry.personId == null : entry.personId === person),
+        )
+      : [];
   return (
     <Card title={t('vault.historyTitle')}>
       <ul>
@@ -300,7 +296,14 @@ function HistorySection() {
         disabled={pending || !text}
         onClick={() =>
           void run(async () => {
-            await api('/vault/history', { method: 'POST', body: JSON.stringify({ kind, text }) });
+            await api('/vault/history', {
+              method: 'POST',
+              body: JSON.stringify({
+                kind,
+                text,
+                ...(person && person !== 'self' ? { personId: person } : {}),
+              }),
+            });
             setText('');
             await reload();
           })

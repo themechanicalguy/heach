@@ -4,7 +4,13 @@ import type pg from 'pg';
 import { reason } from '../common/error-response.js';
 import type { Plain } from '../common/plain.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
-import { CONTENT_LOCALES, type PageDto, type PageSlug, type TemplateDto } from './content.dto.js';
+import {
+  CONTENT_LOCALES,
+  PAGE_SLUGS,
+  type PageDto,
+  type PageSlug,
+  type TemplateDto,
+} from './content.dto.js';
 
 /** Sign-in and confirmation codes keep their fixed, reviewed wording (SE-01): never edited. */
 const FIXED_PREFIX = 'otp_';
@@ -77,7 +83,13 @@ export class ContentService {
     const { rows } = await this.pool.query<Plain<PageDto>>(
       'SELECT slug, locale, title, body, updated_at AS "updatedAt" FROM app.content_page ORDER BY slug, locale',
     );
-    return rows;
+    const saved = new Map(rows.map((row) => [`${row.slug}:${row.locale}`, row]));
+    return PAGE_SLUGS.flatMap((slug) =>
+      CONTENT_LOCALES.flatMap((locale) => {
+        const page = saved.get(`${slug}:${locale}`) ?? this.defaultPage(slug, locale);
+        return page ? [page] : [];
+      }),
+    );
   }
 
   async page(slug: string, locale: Locale): Promise<Plain<PageDto>> {
@@ -86,7 +98,7 @@ export class ContentService {
         WHERE slug = $1 AND locale = $2`,
       [slug, locale],
     );
-    const page = rows[0];
+    const page = rows[0] ?? this.defaultPage(slug, locale);
     if (!page) throw new NotFoundException();
     return page;
   }
@@ -97,6 +109,13 @@ export class ContentService {
        ON CONFLICT (slug, locale) DO UPDATE SET title = EXCLUDED.title, body = EXCLUDED.body, updated_at = now()`,
       [slug, locale, title, body],
     );
+  }
+
+  private defaultPage(slug: string, locale: Locale): Plain<PageDto> | undefined {
+    const defaults = CATALOGUES[locale].sitePages;
+    if (!(slug in defaults)) return undefined;
+    const page = defaults[slug as keyof typeof defaults];
+    return { slug, locale, ...page, updatedAt: null };
   }
 
   private defaultText(template: string, locale: Locale): string {
