@@ -172,3 +172,9 @@ run then exposed an asynchronous assertion in the existing onboarding title test
 now waits for the same exact localized title after each step and resets the document title
 between cases. No assertion, timeout, coverage threshold or product behavior changed.
 The nine onboarding tests pass with V8 coverage enabled.
+
+The next CI run passed coverage/Checks but Hindi Lighthouse scored 87, despite passing in
+the preceding run with identical application code. A Linux Playwright Chromium reproduction
+using the same mobile settings scored 100 with CLS 0. CI now retains `.lighthouseci` reports
+on both success and failure so runner-specific FCP/LCP, blocking time and shift data can be
+reviewed. This adds diagnostics only; the 90-point threshold and three-run aggregation stay intact.
