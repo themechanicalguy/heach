@@ -12,6 +12,11 @@ body {
   line-height: 1.5;
 }
 
+/* Hindi takes the shared danda and Vedic marks from Devanagari, so Odia is not downloaded. */
+:root:lang(hi) body {
+  font-family: var(--font-latin), var(--font-devanagari), var(--font-odia), system-ui, sans-serif;
+}
+
 .page {
   width: 100%;
   max-width: 64rem;
@@ -591,15 +596,6 @@ body {
 .site-section--peach {
   background: var(--heach-accent-soft);
 }
-.bilingual {
-  display: grid;
-  gap: 0.3rem;
-}
-.bilingual__secondary {
-  font-size: 0.7em;
-  font-weight: 500;
-  color: var(--heach-muted);
-}
 .care-finder {
   display: grid;
   gap: 1rem;
@@ -836,7 +832,7 @@ body {
   border-radius: var(--heach-radius);
   background: var(--heach-primary-soft);
 }
-.service-tile .bilingual > span:first-child {
+.service-tile__title {
   font-size: 1.125rem;
 }
 .patient-home-grid .service-tiles {

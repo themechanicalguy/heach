@@ -2,7 +2,6 @@ import { translatorFor } from '../../i18n/messages';
 import type { SiteConfig } from '../../lib/site-config';
 import { PublicServices } from './PublicServices';
 import { ServiceTiles } from '../care/ServiceTiles';
-import { Bilingual } from './Bilingual';
 import { CoverageCheck } from './CoverageCheck';
 import { CareFinder } from './CareFinder';
 import { ContactAction } from './ContactAction';
@@ -17,18 +16,14 @@ export function PublicHome({ config, locale }: Readonly<{ config: SiteConfig; lo
   return (
     <main className="page site-home">
       <section className="site-hero">
-        <h1>
-          <Bilingual locale={locale} message="site.promise" />
-        </h1>
+        <h1>{t('site.promise')}</h1>
         <p>{t('site.intro')}</p>
         <CareFinder />
         <ContactAction locale={locale} config={config} />
       </section>
       <EmergencyBanner locale={locale} />
       <section className="site-section" aria-labelledby="public-services">
-        <h2 id="public-services">
-          <Bilingual locale={locale} message="site.need" />
-        </h2>
+        <h2 id="public-services">{t('site.need')}</h2>
         <PublicServices>
           <ServiceTiles locale={locale} t={t} showPrices />
         </PublicServices>

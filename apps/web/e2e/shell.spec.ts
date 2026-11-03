@@ -95,6 +95,25 @@ test('a signed-out visitor can sign in or sign up from the header', async ({ pag
   ).toHaveCount(0);
 });
 
+test('I18N-01 English and Hindi pages show no Odia text and load no Odia font', async ({
+  page,
+}) => {
+  for (const locale of ['en', 'hi'] as const) {
+    for (const path of ['', '/services/nursing', '/providers/join']) {
+      await page.goto(`/${locale}${path}`);
+      await page.evaluate(() => document.fonts.ready);
+      // The closed language menu's own "ଓଡ଼ିଆ" label is the only Odia allowed on these pages.
+      expect(await page.locator('main').first().innerText()).not.toMatch(/[\u0B00-\u0B7F]/);
+      const loadedOdia = await page.evaluate(() =>
+        [...document.fonts].some(
+          (font) => font.status === 'loaded' && font.unicodeRange.includes('U+B01'),
+        ),
+      );
+      expect(loadedOdia).toBe(false);
+    }
+  }
+});
+
 test('PF-03 locale pages do not download an unused Devanagari font', async ({ page }) => {
   for (const locale of ['or', 'en'] as const) {
     await page.goto(`/${locale}`);

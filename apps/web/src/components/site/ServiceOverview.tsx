@@ -3,7 +3,6 @@ import type { ServicePrice } from '@heach/types';
 import { formatPaise } from '@heach/i18n';
 import type { Service } from '../care/services';
 import { translatorFor } from '../../i18n/messages';
-import { Bilingual } from './Bilingual';
 import { EmergencyBanner } from './EmergencyBanner';
 
 export function ServiceOverview({
@@ -17,9 +16,7 @@ export function ServiceOverview({
   return (
     <>
       <section className="site-hero">
-        <h1>
-          <Bilingual locale={locale} message={`services.${service}`} />
-        </h1>
+        <h1>{t(`services.${service}`)}</h1>
         <p>{t(`servicesHint.${service}`)}</p>
         <a className="heach-button" href={accounts ? '#find-care' : `/${locale}/pages/contact`}>
           {t('site.book')}
