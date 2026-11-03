@@ -65,9 +65,9 @@ export function proxy(request: NextRequest): NextResponse {
 export const config = {
   matcher: [
     {
-      // Pages only: not the API, Next assets, the service worker, the manifest or health checks.
+      // Pages only: not the API, static assets, the service worker, manifest or health checks.
       source:
-        '/((?!api|_next/static|_next/image|healthz|sw.js|manifest.webmanifest|icons|favicon.ico).*)',
+        '/((?!api|_next/static|_next/image|healthz|sw.js|manifest.webmanifest|icons|fonts|favicon.ico).*)',
     },
   ],
 };

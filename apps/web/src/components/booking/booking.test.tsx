@@ -168,7 +168,9 @@ describe('Booking a chosen provider (J3; BK-01, BK-04, BK-05, PY-01)', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Continue to payment' }));
     expect(await screen.findByText('Check and pay')).toBeTruthy();
-    expect(document.activeElement).toBe(screen.getByRole('region', { name: 'Check and pay' }));
+    await waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByRole('region', { name: 'Check and pay' }));
+    });
     expect(state.scroll).toHaveBeenCalledWith(0, 0);
     expect(bodyOf('/bookings')).toMatchObject({
       listingId: LISTING,

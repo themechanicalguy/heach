@@ -28,7 +28,11 @@ self.addEventListener('activate', (event) => {
 });
 
 function isCacheableAsset(url) {
-  return url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/icons/');
+  return (
+    url.pathname.startsWith('/_next/static/') ||
+    url.pathname.startsWith('/icons/') ||
+    url.pathname.startsWith('/fonts/')
+  );
 }
 
 /** Pages: network first; offline, the cached copy of the page or of its language's home. */
