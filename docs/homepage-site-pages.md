@@ -178,3 +178,50 @@ the preceding run with identical application code. A Linux Playwright Chromium r
 using the same mobile settings scored 100 with CLS 0. CI now retains `.lighthouseci` reports
 on both success and failure so runner-specific FCP/LCP, blocking time and shift data can be
 reviewed. This adds diagnostics only; the 90-point threshold and three-run aggregation stay intact.
+
+### Requested fresh build and full test round (2 November 2026)
+
+The owner requested one fresh build/check round before committing and updating the PR. This
+round tested application commit `16dd56a`; no application code, dependencies, test assertions,
+timeouts, snapshots, scanner rules or budgets needed changing. The resulting documentation
+commit records this evidence and the moderate dependency findings in FU-46.
+
+| Gate / actual command | Result |
+| --- | --- |
+| `pnpm exec turbo run lint typecheck test build --concurrency=2 --force --output-logs=errors-only` | 37/37 tasks, **0 cached**, 1 min 48 s; all apps/packages built and all 590 unit/component tests passed |
+| `pnpm check` | Passed, including script lint and all 46 script tests; 636 unit/component/script cases in total |
+| `pnpm format:check` / `pnpm secrets:scan` | Clean |
+| `node /private/tmp/heach-defects-integration.mjs --repeat=1` | 43 files / 358 passed; 170.43 s; isolated PostgreSQL and Redis data removed |
+| `node /private/tmp/heach-defects-e2e.mjs --no-api --ignore-snapshots --workers=1` | 136 passed, 137 expected API-dependent skips; 48.1 s |
+| `node /private/tmp/heach-defects-e2e.mjs --ignore-snapshots --workers=1` | 250 passed, 23 expected mode/project skips; 5.4 min |
+| `node /private/tmp/heach-defects-e2e.mjs --admin --workers=1` | 14 passed; 16.0 s |
+| `node /private/tmp/heach-defects-e2e.mjs --linux e2e/site-pages.spec.ts e2e/shell.spec.ts --workers=1` | 111 passed, 3 expected skips; 1.2 min; existing Linux snapshots matched without updates |
+| `node /private/tmp/heach-defects-e2e.mjs --smoke` | 118 passed across or/en/hi, including real coverage, admin publication, session restoration, 360 px and 200% text zoom |
+| `pnpm --filter @heach/ui build-storybook` | Production build passed |
+| `pnpm --filter @heach/types check` | Generated OpenAPI/client types are current |
+| Pinned Semgrep 1.179.0, TypeScript/Node/React plus `security/semgrep/heach.yml`, severity ERROR | Passed |
+| `pnpm audit --audit-level high --json` | Passed: zero high/critical findings. Full `pnpm audit --json` reports three moderate advisories, recorded in FU-46 |
+| Linux Playwright 1.63.0-noble, `lhci autorun` with the repository assertions and three samples per locale | All three configured performance assertions passed; nine reports retained in `/private/tmp/heach-final-lighthouse` |
+
+Unit totals: web 215, API 175, admin 31, UI 90, i18n 14, logger 43, crypto 15, flags 5, types 2;
+script tests 46. Browser modes cover mobile, tablet and desktop in all three locales.
+
+The Lighthouse wrapper `/private/tmp/heach-final-lighthouse-linux.cjs` copies the repository
+configuration, changes only collection URLs to the temporary server through a localhost proxy
+(:4200 to :3200), removes the command that would start a server on :3100, and writes reports to
+a temporary directory. It uses the container's Playwright Chromium through `CHROME_PATH` and
+the same CI sandbox flags. The 90-point assertion, `median-run` aggregation, mobile settings and
+three-run sample count are unchanged. Raw scores were Odia **83, 97, 99**, English **100, 100,
+100**, Hindi **87, 91, 91**; the configured representative-run assertions passed. These are raw
+samples, not a claim that every individual sample scored 90.
+
+Fresh initial-JS gzip measurements: `/or`, `/en`, `/hi` each **153,396 bytes**; `/or/provider`
+**154,537 bytes**. All remain below the unchanged **174,080-byte** budget.
+
+Test API/web/admin used only :3201/:3200/:3220, with fresh synthetic identities and normal
+per-number OTP caps. All temporary servers, the browser database and leased Redis data were
+removed; the normal web build was restored. Owner services on :3000/:3001/:3101/:13000 were not
+restarted. No mockup, secret, generated report or test data is included in the commit.
+
+Requirement statuses and module totals do not move in this verification round. FU-41–45 remain
+open; FU-46 adds triage of the three moderate `qs`, `minimatch` and `glob` advisories.
