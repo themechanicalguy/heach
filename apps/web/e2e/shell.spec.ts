@@ -95,6 +95,19 @@ test('a signed-out visitor can sign in or sign up from the header', async ({ pag
   ).toHaveCount(0);
 });
 
+test('PF-03 locale pages do not download an unused Devanagari font', async ({ page }) => {
+  for (const locale of ['or', 'en'] as const) {
+    await page.goto(`/${locale}`);
+    await page.evaluate(() => document.fonts.ready);
+    const loadedDevanagari = await page.evaluate(() =>
+      [...document.fonts].some(
+        (font) => font.status === 'loaded' && font.unicodeRange.includes('U+900'),
+      ),
+    );
+    expect(loadedDevanagari).toBe(false);
+  }
+});
+
 test('I18N-06.1 Odia and Devanagari fonts are bundled and text 40 percent longer does not overflow', async ({
   page,
 }) => {

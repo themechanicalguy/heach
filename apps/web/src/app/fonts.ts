@@ -1,20 +1,11 @@
-import { Anek_Latin, Anek_Odia, Noto_Sans_Devanagari } from 'next/font/google';
+import type { Locale } from '@heach/i18n';
 
-// Bundled and subset at build time, served from this origin (I18N-06.1): Latin, Odia and
-// Devanagari. Preload the script subsets too: bilingual headings need Odia, and Hindi
-// otherwise discovers its largest font only after CSS, delaying mobile first paint.
-const latin = Anek_Latin({ subsets: ['latin'], variable: '--font-latin', display: 'swap' });
-const odia = Anek_Odia({
-  subsets: ['oriya'],
-  variable: '--font-odia',
-  display: 'swap',
-  adjustFontFallback: false,
-});
-const devanagari = Noto_Sans_Devanagari({
-  subsets: ['devanagari'],
-  variable: '--font-devanagari',
-  display: 'swap',
-  adjustFontFallback: false,
-});
+const LATIN = '/fonts/c57421e1d9255fc5-s.p.1pv4tz9e8k6lo.woff2';
+const ODIA = '/fonts/c5abf1a92993a674-s.p.2xj_0ydqky0bd.woff2';
+const DEVANAGARI = '/fonts/e92fa6abd9c612ef-s.p.2oqonvbxcl6a7.woff2';
 
-export const fontClassNames = [latin.variable, odia.variable, devanagari.variable].join(' ');
+/** Prioritize visible scripts; bilingual headings use Odia in every locale (PF-03, I18N-06). */
+export function criticalFontFiles(locale: Locale): readonly string[] {
+  if (locale === 'hi') return [DEVANAGARI, ODIA, LATIN];
+  return locale === 'or' ? [ODIA, LATIN] : [LATIN, ODIA];
+}
