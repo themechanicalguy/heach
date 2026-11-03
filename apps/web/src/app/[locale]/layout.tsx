@@ -15,7 +15,7 @@ import { AccountProvider } from '../../lib/account';
 import { serverFlags } from '../../lib/flags';
 import { I18nProvider } from '../../lib/i18n-context';
 import { SessionProvider } from '../../lib/session';
-import { fontClassNames } from '../fonts';
+import { criticalFontFiles } from '../fonts';
 import { translatorFor } from '../../i18n/messages';
 import { CareSearchProvider } from '../../lib/care-search';
 import { HeaderCare } from '../../components/site/HeaderCare';
@@ -24,6 +24,7 @@ import { SiteFooter } from '../../components/site/SiteFooter';
 import { shellMessages } from '../../lib/client-messages';
 import { siteConfig } from '../../lib/site-config';
 import '@heach/ui/ui.css';
+import '../fonts.css';
 import '../globals.css';
 
 interface Props {
@@ -56,7 +57,20 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
   const flags = serverFlags();
   const accounts = flags.isOn('accounts');
   return (
-    <html lang={locale} className={fontClassNames}>
+    <html lang={locale}>
+      <head>
+        {criticalFontFiles(locale).map((href, index) => (
+          <link
+            key={href}
+            rel="preload"
+            href={href}
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+            fetchPriority={index === 0 ? 'high' : 'low'}
+          />
+        ))}
+      </head>
       <body>
         <I18nProvider locale={locale} messages={shellMessages(locale)}>
           <SessionProvider>

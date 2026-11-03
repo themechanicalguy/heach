@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
     Promise.resolve([
       // The service worker must update promptly; browsers check this file on each visit.
       { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache' }] },
+      {
+        source: '/fonts/:file(.*\\.woff2)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
     ]),
 };
 

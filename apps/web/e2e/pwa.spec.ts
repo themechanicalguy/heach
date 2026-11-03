@@ -45,6 +45,9 @@ test.describe('PWA (PF-07.1, EN-11)', () => {
       return urls;
     });
     expect(cachedUrls.length).toBeGreaterThan(0);
+    expect(cachedUrls.some((url) => url.startsWith('/fonts/') && url.endsWith('.woff2'))).toBe(
+      true,
+    );
     expect(cachedUrls.filter((url) => url.startsWith('/api/'))).toEqual([]);
     await context.setOffline(false);
   });
