@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, Notice, OtpField, TextField } from '@heach/ui';
 import type { OtpChallenge } from '@heach/types';
 import { useState } from 'react';
@@ -78,7 +79,7 @@ export function MobileChange() {
           maxLength={14}
           value={mobile}
           onChange={(event) => {
-            setMobile(event.target.value);
+            setMobile(normalizeDigits(event.target.value));
           }}
         />
         <Button type="submit" disabled={pending || mobile.trim() === ''} aria-busy={pending}>
@@ -95,7 +96,7 @@ export function MobileChange() {
           error={error && t(error)}
           value={code}
           onChange={(event) => {
-            setCode(event.target.value.replace(/\D/g, ''));
+            setCode(normalizeDigits(event.target.value).replace(/\D/g, ''));
           }}
         />
         <Button type="submit" disabled={pending || code.length !== 6} aria-busy={pending}>

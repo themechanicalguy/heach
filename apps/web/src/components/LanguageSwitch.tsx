@@ -2,7 +2,7 @@
 
 import { type Locale, LOCALES } from '@heach/i18n';
 import { Icon } from '@heach/ui';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { type RefObject, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useAccount } from '../lib/account';
 import { api } from '../lib/api';
@@ -48,6 +48,8 @@ export function LanguageSwitch() {
   const listId = useId();
   const rest = usePathname().split('/').slice(2).join('/');
   const suffix = rest ? `/${rest}` : '';
+  const searchParams = useSearchParams();
+  const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
   const close = useCallback(() => {
     setOpen(false);
   }, []);
@@ -82,7 +84,7 @@ export function LanguageSwitch() {
         {LOCALES.map((code) => (
           <li key={code}>
             <a
-              href={`/${code}${suffix}`}
+              href={`/${code}${suffix}${query}`}
               lang={code}
               hrefLang={code}
               aria-current={code === locale ? 'true' : undefined}

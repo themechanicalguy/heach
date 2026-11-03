@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime } from '@heach/i18n';
+import { formatDateTime, normalizeDigits } from '@heach/i18n';
 import { Button, Card, CheckboxField, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { Booking, LinkedPatient, ProfileListing } from '@heach/types';
 import { useEffect, useState } from 'react';
@@ -231,7 +231,7 @@ function BookingFields({
           required
           value={form.pin}
           onChange={(event) => {
-            set('pin')(event.currentTarget.value.trim());
+            set('pin')(normalizeDigits(event.currentTarget.value.trim()));
           }}
         />
       )}

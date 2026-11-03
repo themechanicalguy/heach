@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, OtpField } from '@heach/ui';
 import type { AccessToken, OtpChallenge } from '@heach/types';
 import { useState } from 'react';
@@ -59,7 +60,7 @@ export function CodeStep({ challenge, lastDigits, onSignedIn, onChangeNumber }: 
         error={failure && t(failure)}
         value={code}
         onChange={(event) => {
-          setCode(event.target.value.replace(/\D/g, ''));
+          setCode(normalizeDigits(event.target.value).replace(/\D/g, ''));
         }}
       />
       {resent && !failure && <p role="status">{t('signIn.codeResent')}</p>}

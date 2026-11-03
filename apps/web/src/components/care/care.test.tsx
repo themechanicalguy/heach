@@ -200,6 +200,7 @@ describe('ProviderProfileView (PO-05, AV-02)', () => {
     inEnglish(<ProviderProfileView providerId={profile.id} />);
     expect(await screen.findByText('Verified identity')).toBeTruthy();
     expect(screen.getByText('Registration number: SYN-1')).toBeTruthy();
+    expect(screen.getByText('Speaks: Odia, English')).toBeTruthy();
     expect(screen.getByText("Needs a doctor's prescription")).toBeTruthy();
     expect(screen.getByText('Rated 4.5 by 2 patients')).toBeTruthy();
     expect(screen.getByText('Preparation: Keep the area dry.')).toBeTruthy();

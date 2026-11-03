@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { useRef, useState } from 'react';
 import { Button, Notice, TextField } from '@heach/ui';
 import { api } from '../../lib/api';
@@ -44,7 +45,7 @@ export function CoverageCheck() {
         error={invalid ? t('search.pinInvalid') : undefined}
         onChange={(event) => {
           generation.current += 1;
-          setPin(event.currentTarget.value.trim());
+          setPin(normalizeDigits(event.currentTarget.value.trim()));
           setServices(undefined);
         }}
       />

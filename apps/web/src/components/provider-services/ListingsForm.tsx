@@ -1,5 +1,7 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
+
 import { Button, Card, CheckboxField, Notice, TextField } from '@heach/ui';
 import type { ListableItem, ProviderListings } from '@heach/types';
 import { useState } from 'react';
@@ -50,7 +52,7 @@ export function ListingRow({ role, item, onSaved }: Readonly<Props>) {
           inputMode="decimal"
           value={fee}
           onChange={(event) => {
-            setFee(event.currentTarget.value);
+            setFee(normalizeDigits(event.currentTarget.value));
             setSaved(false);
           }}
         />
@@ -59,7 +61,7 @@ export function ListingRow({ role, item, onSaved }: Readonly<Props>) {
           inputMode="numeric"
           value={minutes}
           onChange={(event) => {
-            setMinutes(event.currentTarget.value);
+            setMinutes(normalizeDigits(event.currentTarget.value));
             setSaved(false);
           }}
         />
@@ -145,7 +147,7 @@ export function AreaForm({
         inputMode="decimal"
         value={surcharge}
         onChange={(event) => {
-          setSurcharge(event.currentTarget.value);
+          setSurcharge(normalizeDigits(event.currentTarget.value));
         }}
       />
       {error && (

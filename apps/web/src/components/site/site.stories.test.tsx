@@ -1,5 +1,5 @@
 import { mockBlobUrls } from '../../test/blob-urls';
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { expectNoAxeViolations } from '../../../../../packages/ui/src/test/axe';
 
@@ -46,7 +46,9 @@ afterEach(() => {
 describe('Site stories in three languages', () => {
   it.each(stories)('$file $name passes axe', async ({ render: story }) => {
     const { container } = render(story?.());
-    await expectNoAxeViolations(container);
+    await act(async () => {
+      await expectNoAxeViolations(container);
+    });
   });
   it('covers all new site components', () => {
     expect(stories).toHaveLength(57);

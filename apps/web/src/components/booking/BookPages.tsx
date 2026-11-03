@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { formatDateTime, formatPaise } from '@heach/i18n';
 import { Button, Notice, Skeleton, TextField } from '@heach/ui';
 import type { AnySlots, CatalogueItem, ProviderProfile } from '@heach/types';
@@ -182,7 +183,7 @@ function BookingPin() {
         maxLength={6}
         error={invalid ? t('search.pinInvalid') : undefined}
         onChange={(event) => {
-          setPin(event.currentTarget.value.trim());
+          setPin(normalizeDigits(event.currentTarget.value.trim()));
         }}
       />
       <Button type="submit">{t('setup.continue')}</Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime, formatPaise } from '@heach/i18n';
+import { formatDateTime, formatPaise, isLocale } from '@heach/i18n';
 import { Card, ErrorState, Notice, Skeleton } from '@heach/ui';
 import type { ProfileListing, ProviderProfile, Slots } from '@heach/types';
 import Link from 'next/link';
@@ -10,8 +10,6 @@ import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
-
-const LANGUAGE_NAMES: Record<string, string> = { or: 'ଓଡ଼ିଆ', en: 'English', hi: 'हिन्दी' };
 
 /** A provider's public profile with free times per service (PO-05, AV-02). */
 export function ProviderProfileView({ providerId }: Readonly<{ providerId: string }>) {
@@ -48,7 +46,9 @@ function Profile({ profile }: Readonly<{ profile: ProviderProfile }>) {
         )}
         <p>
           {t('profile.languages', {
-            languages: profile.languages.map((code) => LANGUAGE_NAMES[code] ?? code).join(', '),
+            languages: profile.languages
+              .map((code) => (isLocale(code) ? t(`languages.${code}`) : code))
+              .join(', '),
           })}
         </p>
         <p className="flow__muted">

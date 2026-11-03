@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { LinkedPatientInput } from '@heach/types';
 import { useState } from 'react';
@@ -67,7 +68,7 @@ export function LinkedPatientForm({ person, onSave, onCancel }: Readonly<Props>)
         maxLength={4}
         value={form.birthYear}
         onChange={(event) => {
-          update({ birthYear: event.target.value.replace(/\D/g, '') });
+          update({ birthYear: normalizeDigits(event.target.value).replace(/\D/g, '') });
         }}
       />
       <ChoiceGroup

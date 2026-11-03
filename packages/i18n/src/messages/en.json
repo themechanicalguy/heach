@@ -201,7 +201,21 @@
     "plan_item_required": "Choose the service the package covers.",
     "plan_invalid": "Check the plan's details.",
     "plan_has_upcoming_bookings": "Cancel the upcoming bookings that use this plan first; their sessions then come back and are refunded with the plan.",
-    "plan_person_limit": "This plan already covers as many people as it allows. Pay normally for this person."
+    "plan_person_limit": "This plan already covers as many people as it allows. Pay normally for this person.",
+    "plan_not_renewable": "Only subscriptions can be renewed automatically.",
+    "application_not_in_review": "This application is no longer in review. Reload the list.",
+    "checklist_item_fixed": "Police verification must stay required for everyone who visits a home.",
+    "not_an_organisation_owner": "Only an organisation owner can make this change.",
+    "lab_named_at_setup": "The lab name is set during account setup.",
+    "account_missing": "Your account could not be found. Please sign in again.",
+    "template_invalid": "The message template is invalid. Check its formatting and braces.",
+    "template_placeholders": "Keep exactly the same placeholders as the default message.",
+    "status_unchanged": "The account already has that status.",
+    "self_change_refused": "You cannot change your own admin account here.",
+    "password_reused": "Choose a password different from your current password.",
+    "last_super_admin": "This is the last active super admin. Add another super admin first.",
+    "email_in_use": "An admin with this email already exists.",
+    "admin_suspended": "Your admin access is suspended. Contact your administrator."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -1249,5 +1263,10 @@
         }
       }
     }
+  },
+  "languages": {
+    "or": "Odia",
+    "en": "English",
+    "hi": "Hindi"
   }
 }

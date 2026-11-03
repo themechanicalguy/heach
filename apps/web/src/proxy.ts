@@ -43,7 +43,9 @@ export function proxy(request: NextRequest): NextResponse {
   headers.set('x-nonce', nonce);
   headers.set('x-heach-locale', first);
   const segments = pathname.split('/');
-  const section = segments[2] ?? 'home';
+  // Empty segments from /en/ must load the home namespace too.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const section = segments[2] || 'home';
   headers.set(
     'x-heach-page',
     section === 'provider' && segments[3] ? `${section}/${segments[3]}` : section,
@@ -51,7 +53,7 @@ export function proxy(request: NextRequest): NextResponse {
   headers.set('Content-Security-Policy', csp);
   const response = NextResponse.next({ request: { headers } });
   response.headers.set('Content-Security-Policy', csp);
-  if (accountsOn() && !pathname.startsWith(`/${first}/welcome`)) {
+  if (!pathname.startsWith(`/${first}/welcome`)) {
     response.cookies.set(LANGUAGE_COOKIE, first, {
       path: '/',
       maxAge: YEAR_SECONDS,

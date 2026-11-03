@@ -8,3 +8,15 @@ describe('negotiateLocale', () => {
     expect(negotiateLocale(null)).toBe('or');
   });
 });
+
+it.each([
+  ['en;q=0.5, or;q=1.0', 'or'],
+  ['or;q=0.1, hi-IN;q=0.9, en;q=0.5', 'hi'],
+  ['en;q=0, hi;q=0.5', 'hi'],
+  ['hi;q=0.8, en;q=0.8', 'hi'],
+  ['hi;q=2, en;q=0.5', 'en'],
+  ['hi;q=invalid, en', 'en'],
+  ['enough, hi', 'hi'],
+])('negotiates %s as %s', (header, expected) => {
+  expect(negotiateLocale(header)).toBe(expected);
+});

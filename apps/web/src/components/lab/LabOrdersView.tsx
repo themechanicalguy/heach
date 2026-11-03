@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { formatDateTime } from '@heach/i18n';
 import { Button, Card, EmptyState, Notice, TextField } from '@heach/ui';
 import type { Collector, LabDashboard, LabOrder } from '@heach/types';
@@ -166,7 +167,7 @@ export function CollectWithCode({ path, onDone }: Readonly<{ path: string; onDon
         maxLength={6}
         value={code}
         onChange={(event) => {
-          setCode(event.currentTarget.value.trim());
+          setCode(normalizeDigits(event.currentTarget.value.trim()));
         }}
       />
       {error && (

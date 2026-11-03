@@ -9,12 +9,18 @@ import { ShellNav } from './ShellNav';
 
 interface HeaderState {
   pathname: string;
+  query: string;
   status: 'checking' | 'signed-in' | 'signed-out';
   account: { state: string };
 }
 
 const state = vi.hoisted(() => {
-  const initial: HeaderState = { pathname: '', status: 'signed-out', account: { state: 'idle' } };
+  const initial: HeaderState = {
+    pathname: '',
+    query: '',
+    status: 'signed-out',
+    account: { state: 'idle' },
+  };
   return {
     ...initial,
     api: vi.fn(() => Promise.resolve()),
@@ -25,6 +31,7 @@ const state = vi.hoisted(() => {
 
 vi.mock('next/navigation', () => ({
   usePathname: () => state.pathname,
+  useSearchParams: () => new URLSearchParams(state.query),
   useRouter: () => ({ replace: state.replace }),
 }));
 vi.mock('../lib/session', () => ({
@@ -42,6 +49,7 @@ const inEnglish = (node: ReactNode) =>
 
 beforeEach(() => {
   state.pathname = '/en/account';
+  state.query = '';
   state.status = 'signed-out';
   state.account = { state: 'idle' };
   state.api.mockClear();
@@ -50,6 +58,16 @@ beforeEach(() => {
 });
 
 describe('LanguageSwitch', () => {
+  it('preserves repeated, empty and encoded query values when switching language', () => {
+    state.pathname = '/en/shared/token';
+    state.query = 'pin=123456&filter=a&filter=b&empty=&slot=a%2Bb';
+    inEnglish(<LanguageSwitch />);
+    fireEvent.click(screen.getByRole('button', { name: /English/ }));
+    expect(screen.getByRole('link', { name: 'ଓଡ଼ିଆ' }).getAttribute('href')).toBe(
+      `/or/shared/token?${state.query}`,
+    );
+  });
+
   it('AC-02 opens the three languages, each linking to the same page', () => {
     inEnglish(<LanguageSwitch />);
     const button = screen.getByRole('button', { name: /English/ });

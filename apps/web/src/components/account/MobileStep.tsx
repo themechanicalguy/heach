@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { TextField } from '@heach/ui';
 import type { OtpChallenge } from '@heach/types';
 import { useState } from 'react';
@@ -18,7 +19,7 @@ export function MobileStep({
   const [mobile, setMobile] = useState('');
   const [touched, setTouched] = useState(false);
   const { pending, error, run } = usePending();
-  const compact = mobile.replace(/[\s().-]/g, '');
+  const compact = normalizeDigits(mobile).replace(/[\s().-]/g, '');
   const invalid = !INDIAN_MOBILE.test(compact);
 
   const submit = (event: { preventDefault: () => void }) => {
