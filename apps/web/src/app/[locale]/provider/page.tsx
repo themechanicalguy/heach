@@ -7,7 +7,7 @@ export default function Page() {
   if (!serverFlags().isOn('accounts')) notFound();
   return (
     <PageMessages>
-      <main className="page">
+      <main className="page page--app">
         <ProviderPage />
       </main>
     </PageMessages>

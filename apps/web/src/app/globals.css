@@ -525,18 +525,28 @@ body {
 
 .status-card {
   display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-radius: 1rem;
+  gap: 0.625rem;
+  padding: 1rem 1.125rem;
+  border-radius: var(--heach-radius-card);
   background: var(--heach-primary);
   color: var(--heach-on-primary);
 }
 
+.status-card p {
+  margin: 0;
+}
+
+.status-card .heach-progress__label {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .status-card__line {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 1.0625rem;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.9375rem;
 }
 
 .status-card .heach-progress__label {
@@ -564,11 +574,39 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
   min-height: 60px;
   padding: 0.625rem 0.875rem;
   border: 1px solid var(--heach-border);
   border-radius: 0.875rem;
   background: var(--heach-surface);
+  color: var(--heach-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.checklist__item:hover {
+  border-color: var(--heach-border-strong);
+}
+
+/* Onboarding B states: done (purple check), in review (peach), needs attention, next (outlined). */
+.checklist__item[data-state='review'] {
+  border-color: #f0a582;
+  background: var(--heach-accent-soft);
+}
+
+.checklist__item[data-state='attention'] {
+  border-color: var(--heach-danger);
+  background: var(--heach-danger-soft);
+}
+
+.checklist__item[data-next='true'] {
+  border: 2px solid var(--heach-primary);
+}
+
+.checklist__item[aria-current='step'] {
+  background: var(--heach-primary-soft);
 }
 
 .checklist__number {
@@ -585,25 +623,227 @@ body {
   font-weight: 700;
 }
 
-.checklist__item[data-done='true'] .checklist__number {
+.checklist__item[data-state='done'] .checklist__number {
   border-color: var(--heach-primary);
   background: var(--heach-primary);
   color: var(--heach-on-primary);
 }
 
+.checklist__item[data-state='review'] .checklist__number {
+  border-color: var(--heach-on-accent);
+  color: var(--heach-on-accent);
+}
+
+.checklist__item[data-state='attention'] .checklist__number {
+  border-color: var(--heach-danger);
+  color: var(--heach-danger);
+}
+
+.checklist__item[data-next='true'] .checklist__number {
+  border-color: var(--heach-primary);
+  color: var(--heach-primary);
+}
+
 .checklist__label {
+  display: grid;
   flex: 1;
+  min-width: 0;
   font-weight: 600;
+  line-height: 1.35;
+}
+
+.checklist__detail {
+  color: var(--heach-muted);
+  font-size: var(--heach-text-small);
+  font-weight: 400;
+}
+
+.checklist__item[data-state='review'] .checklist__detail {
+  color: var(--heach-on-accent);
 }
 
 .checklist__state {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.125rem;
   color: var(--heach-muted);
-  font-size: 0.875rem;
+  font-size: var(--heach-text-small);
 }
 
-.checklist__item[data-done='true'] .checklist__state {
+.checklist__item[data-state='done'] .checklist__state,
+.checklist__item[data-next='true'] .checklist__state {
   color: var(--heach-primary);
+  font-weight: 700;
+}
+
+.checklist__item[data-state='review'] .checklist__state {
+  color: var(--heach-on-accent);
+  font-weight: 700;
+}
+
+.checklist__item[data-state='attention'] .checklist__state {
+  color: var(--heach-danger);
+  font-weight: 700;
+}
+
+/*
+ * Provider onboarding (G06, G13): the checklist overview on phones, one focused task at a time;
+ * from desktop width the checklist is a step rail beside the task (design reference, board 14).
+ */
+.onboarding {
+  display: grid;
+  gap: 1rem;
+  max-width: var(--heach-width-form);
+  margin-inline: auto;
+}
+
+.onboarding > * {
+  min-width: 0;
+}
+
+.onboarding__head p {
+  margin: 0.125rem 0 0;
+}
+
+.onboarding__rail {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.onboarding__panel,
+.onboarding__overview,
+.onboarding__body {
+  display: grid;
+  gap: 1rem;
+}
+
+.onboarding__overview p,
+.onboarding__body p {
+  margin: 0;
+}
+
+.onboarding__overview .flow__actions {
+  margin-inline: calc(var(--heach-gutter) * -1);
+  padding-inline: var(--heach-gutter);
+}
+
+.onboarding__back {
+  justify-self: start;
+  min-height: var(--heach-touch);
+  padding-inline: 0;
+  text-decoration: none;
+}
+
+.onboarding__position {
+  margin: 0;
+  color: var(--heach-muted);
+  font-size: var(--heach-text-small);
   font-weight: 600;
+}
+
+.onboarding__task-title {
+  margin: -0.75rem 0 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+
+.onboarding__subhead {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.onboarding__actions {
+  justify-content: space-between;
+}
+
+/* Lists of documents inside a task: lighter cards, not a card in a card. */
+.onboarding__task .heach-card {
+  padding: 0.875rem 1rem;
+  border-radius: var(--heach-radius);
+}
+
+.onboarding__task .heach-card .heach-card__title {
+  font-size: 1.0625rem;
+}
+
+.onboarding__task .flow__form > .heach-button,
+.onboarding__body > .heach-button {
+  justify-self: start;
+  min-height: var(--heach-touch);
+}
+
+@media (min-width: 600px) {
+  .onboarding__actions .flow__primary {
+    flex: 0 1 auto;
+    min-width: 10rem;
+  }
+}
+
+/* Phones: the overview or one task, never both. */
+@media (max-width: 1023px) {
+  .onboarding[data-view='task'] .onboarding__rail,
+  .onboarding[data-view='task'] .onboarding__head p {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .onboarding {
+    grid-template-columns: 19rem minmax(0, 1fr);
+    grid-template-areas:
+      'head head'
+      'rail panel';
+    gap: 1.25rem 1.75rem;
+    align-items: start;
+    max-width: 69rem;
+  }
+
+  .onboarding__head {
+    grid-area: head;
+  }
+
+  .onboarding__rail {
+    grid-area: rail;
+    position: sticky;
+    top: 5.5rem;
+    padding: 1rem;
+    border: 1px solid var(--heach-border);
+    border-radius: 1.25rem;
+    background: var(--heach-surface);
+  }
+
+  .onboarding__panel {
+    grid-area: panel;
+  }
+
+  /* The rail shows markers and names (board 14); the state words stay for screen readers. */
+  .onboarding__rail .checklist__state {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .onboarding__back {
+    display: none;
+  }
+
+  .onboarding[data-view='overview'] .onboarding__panel {
+    padding: 1.75rem;
+    border: 1px solid var(--heach-border);
+    border-radius: 1.25rem;
+    background: var(--heach-surface);
+  }
+
+  .onboarding__overview .flow__actions {
+    margin-inline: 0;
+    padding: 0;
+    border: none;
+  }
 }
 
 .language-choices,
@@ -1114,20 +1354,10 @@ body {
 }
 
 .booking-layout,
-.vault-layout,
-.onboarding-layout {
+.vault-layout {
   display: grid;
   gap: 1.5rem;
   align-items: start;
-}
-.onboarding-steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.onboarding-steps [aria-current='step'] {
-  border-color: var(--heach-primary);
-  background: var(--heach-primary-soft);
 }
 .vault-profile {
   order: 2;
@@ -1138,8 +1368,7 @@ body {
 }
 @media (min-width: 1024px) {
   .booking-flow,
-  .flow.vault-layout,
-  .flow.onboarding-layout {
+  .flow.vault-layout {
     max-width: none;
   }
   .booking-layout {
@@ -1149,17 +1378,11 @@ body {
     position: sticky;
     top: 8rem;
   }
-  .vault-layout,
-  .onboarding-layout {
+  .vault-layout {
     grid-template-columns: minmax(14rem, 1fr) minmax(0, 3fr);
   }
   .vault-profile {
     order: 0;
-  }
-  .onboarding-steps {
-    display: grid;
-    position: sticky;
-    top: 8rem;
   }
 }
 
@@ -1169,8 +1392,7 @@ body {
   outline-offset: 3px;
 }
 
-.vault-layout > *,
-.onboarding-layout > * {
+.vault-layout > * {
   min-width: 0;
 }
 .vault-record-details summary {

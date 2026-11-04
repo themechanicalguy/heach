@@ -427,7 +427,22 @@
       "police_verification_failed": "police verification was not cleared",
       "other": "please contact support"
     },
-    "progressHint": "Uploaded documents and saved details are kept. Save each section before moving on."
+    "progressHint": "Uploaded documents and saved details are kept. Save each section before moving on.",
+    "completion": "{done} of {total} done",
+    "stepOf": "Step {current} of {total}",
+    "allSteps": "All steps",
+    "continueTo": "Continue: {step}",
+    "taskState": {
+      "review": "In review",
+      "attention": "Needs attention",
+      "todo": "To do",
+      "start": "Start"
+    },
+    "documentsCount": "{done} of {total} required uploaded",
+    "payoutState": {
+      "missing": "Not added yet",
+      "added": "Added"
+    }
   },
   "account": {
     "title": "Your account",

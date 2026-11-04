@@ -97,9 +97,10 @@ test.describe('Sign-up and account setup', () => {
     await second.getByRole('button', { name: t.setup.consent.finish, exact: true }).click();
     await expect(second).toHaveURL(/\/en\/provider$/);
     await expect(second.getByText(t.application.status.draft)).toBeVisible();
-    await expect(
-      second.getByRole('heading', { name: t.application.steps.identity, exact: true }),
-    ).toBeVisible();
+    // The application opens on its checklist (G06), the identity check first.
+    await expect(second.locator('.checklist__item').first()).toContainText(
+      t.application.steps.identity,
+    );
   });
 
   test('SE-02 a protected page asks for sign-in and returns there afterwards', async ({ page }) => {

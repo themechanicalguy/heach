@@ -1,8 +1,8 @@
 'use client';
 
-import { Button, Notice, Progress } from '@heach/ui';
+import { Button, Icon, Notice } from '@heach/ui';
 import type { Application } from '@heach/types';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
@@ -11,7 +11,11 @@ import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { DocumentItem } from './DocumentItem';
 import { IdentityStep } from './IdentityStep';
+import { Checklist, StatusCard } from './OnboardingChecklist';
 import { PayoutForm } from './PayoutForm';
+import { nextTask, type Task, tasksFor } from './tasks';
+
+type View = Task | 'overview';
 
 const TONE: Record<Application['status'], 'info' | 'warning' | 'danger' | 'success'> = {
   draft: 'info',
@@ -23,8 +27,6 @@ const TONE: Record<Application['status'], 'info' | 'warning' | 'danger' | 'succe
   suspended: 'danger',
 };
 
-type Step = 'identity' | 'documents' | 'payout' | 'review';
-
 /** The provider's guided application (J1, PO-01 to PO-06): identity, documents, payout, submit. */
 export function OnboardingView() {
   const { resource, reload } = useResource<Application>('/provider/application');
@@ -35,21 +37,22 @@ export function OnboardingView() {
   );
 }
 
+/**
+ * Onboarding B (G06): the checklist overview with a purple completion card, then one focused task
+ * at a time. From desktop width the checklist stays beside the task as the step rail (board 14).
+ */
 function Hub({ initial }: Readonly<{ initial: Application }>) {
   const { t } = useI18n();
   const [application, setApplication] = useState(initial);
-  const [step, setStep] = useState<Step>('identity');
+  const [view, setView] = useState<View>('overview');
   const heading = useRef<HTMLHeadingElement>(null);
-  const steps: Step[] = initial.needsPayout
-    ? ['identity', 'documents', 'payout', 'review']
-    : ['identity', 'documents', 'review'];
   const { pending, error, run } = usePending();
   useEffect(() => {
-    const stepTitle = t(`application.steps.${step}`);
-    document.title = `${stepTitle} · ${t('application.title')} · ${t('app.name')}`;
+    const title = view === 'overview' ? undefined : t(`application.steps.${view}`);
+    document.title = [title, t('application.title'), t('app.name')].filter(Boolean).join(' · ');
     window.scrollTo(0, 0);
     heading.current?.focus({ preventScroll: true });
-  }, [step, t]);
+  }, [view, t]);
   useEffect(() => {
     setApplication(initial);
   }, [initial]);
@@ -57,43 +60,35 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
     run(async () => {
       setApplication(await api<Application>('/provider/application/submit', { method: 'POST' }));
     });
-
   return (
-    <section className="flow onboarding-layout" aria-labelledby="application-title">
-      <StepNavigation steps={steps} step={step} onSelect={setStep} />
-      <div className="flow__card">
+    <section className="onboarding" data-view={view === 'overview' ? 'overview' : 'task'}>
+      <header className="onboarding__head">
         <h1 ref={heading} tabIndex={-1} id="application-title" className="flow__title">
           {t('application.title')}
         </h1>
         <p className="flow__muted">
           {t(keyFor('roles', application.role, 'application.title', '.label'))}
         </p>
-        <p className="status-card__line">
-          <span>{t('application.statusLabel')}</span>
-          <strong>{t(`application.status.${application.status}`)}</strong>
-        </p>
-        <Notice tone={TONE[application.status]} live>
-          {t(`application.statusText.${application.status}`)}
-        </Notice>
-        <Progress
-          label={t('application.progress', {
-            current: steps.indexOf(step) + 1,
-            total: steps.length,
-            remaining: steps.length - steps.indexOf(step) - 1,
-          })}
-          current={steps.indexOf(step) + 1}
-          total={steps.length}
-        />
-        {step === 'identity' && <IdentityStep application={application} />}
-        {step === 'documents' && <Documents application={application} onSaved={setApplication} />}
-        {step === 'payout' && application.needsPayout && (
-          <PayoutForm application={application} onSaved={setApplication} />
+      </header>
+      <aside className="onboarding__rail" aria-labelledby="application-title">
+        <StatusCard application={application} />
+        <Checklist application={application} current={view} onSelect={setView} />
+      </aside>
+      <div className="onboarding__panel">
+        {view === 'overview' ? (
+          <Overview application={application} onSelect={setView} />
+        ) : (
+          <TaskPanel application={application} task={view} onSelect={setView}>
+            {view === 'identity' && <IdentityStep application={application} />}
+            {view === 'documents' && (
+              <Documents application={application} onSaved={setApplication} />
+            )}
+            {view === 'payout' && <PayoutForm application={application} onSaved={setApplication} />}
+            {view === 'review' && (
+              <Submit application={application} pending={pending} onSubmit={submit} />
+            )}
+          </TaskPanel>
         )}
-        {step === 'review' && application.editable && (
-          <Submit application={application} pending={pending} onSubmit={submit} />
-        )}
-        <StepActions steps={steps} step={step} onSelect={setStep} />
-        <p>{t('application.progressHint')}</p>
         {error && (
           <Notice tone="danger" live>
             {t(error)}
@@ -101,6 +96,94 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
         )}
       </div>
     </section>
+  );
+}
+
+/** What to do next, with the saved-progress reassurance (Onboarding B's footer). */
+function Overview({
+  application,
+  onSelect,
+}: Readonly<{ application: Application; onSelect: (view: View) => void }>) {
+  const { t } = useI18n();
+  const next = application.editable ? nextTask(application) : undefined;
+  return (
+    <div className="onboarding__overview">
+      <Notice tone={TONE[application.status]} live>
+        {t(`application.statusText.${application.status}`)}
+      </Notice>
+      {next && (
+        <div className="flow__actions">
+          <Button
+            className="flow__primary"
+            onClick={() => {
+              onSelect(next);
+            }}
+          >
+            {t('application.continueTo', { step: t(`application.steps.${next}`) })}
+          </Button>
+        </div>
+      )}
+      {application.editable && (
+        <>
+          <p className="flow__muted">{t('application.reviewTime')}</p>
+          <p className="flow__muted">{t('application.progressHint')}</p>
+        </>
+      )}
+    </div>
+  );
+}
+
+interface TaskPanelProps {
+  application: Application;
+  task: Task;
+  onSelect: (view: View) => void;
+  children: ReactNode;
+}
+
+/** One task on its own: its position (not completion), its content, and back and next. */
+function TaskPanel({ application, task, onSelect, children }: Readonly<TaskPanelProps>) {
+  const { t } = useI18n();
+  const tasks = tasksFor(application);
+  const index = tasks.indexOf(task);
+  const next = tasks[index + 1];
+  return (
+    <div className="flow__card onboarding__task">
+      <button
+        type="button"
+        className="heach-button heach-button--link onboarding__back"
+        onClick={() => {
+          onSelect('overview');
+        }}
+      >
+        <Icon name="chevron-left" size={18} />
+        {t('application.allSteps')}
+      </button>
+      <p className="onboarding__position">
+        {t('application.stepOf', { current: index + 1, total: tasks.length })}
+      </p>
+      <h2 className="flow__subtitle onboarding__task-title">{t(`application.steps.${task}`)}</h2>
+      {children}
+      <div className="flow__actions onboarding__actions">
+        <Button
+          className="heach-button--secondary"
+          onClick={() => {
+            onSelect(tasks[index - 1] ?? 'overview');
+          }}
+        >
+          {t('setup.back')}
+        </Button>
+        {next && (
+          <Button
+            className="flow__primary"
+            onClick={() => {
+              onSelect(next);
+            }}
+          >
+            {t('setup.continue')}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -116,11 +199,12 @@ function Submit({ application, pending, onSubmit }: Readonly<SubmitProps>) {
     key === 'identity' || key === 'payout'
       ? t(`application.missing.${key}`)
       : t(keyFor('application.items', key, 'application.steps.documents'));
+  if (!application.editable) return <p>{t(`application.statusText.${application.status}`)}</p>;
   return (
     <>
       {application.missing.length > 0 && (
         <>
-          <h2 className="flow__subtitle">{t('application.missingTitle')}</h2>
+          <h3 className="onboarding__subhead">{t('application.missingTitle')}</h3>
           <ul>
             {application.missing.map((key) => (
               <li key={key}>{missingLabel(key)}</li>
@@ -136,75 +220,17 @@ function Submit({ application, pending, onSubmit }: Readonly<SubmitProps>) {
   );
 }
 
-interface StepProps {
-  steps: Step[];
-  step: Step;
-  onSelect: (step: Step) => void;
-}
-function StepNavigation({ steps, step, onSelect }: Readonly<StepProps>) {
-  const { t } = useI18n();
-  return (
-    <nav className="onboarding-steps" aria-label={t('application.title')}>
-      {steps.map((entry, index) => (
-        <button
-          type="button"
-          key={entry}
-          className="header-pill"
-          aria-current={step === entry ? 'step' : undefined}
-          onClick={() => {
-            onSelect(entry);
-          }}
-        >
-          {String(index + 1)}.{' '}
-          {t(entry === 'review' ? 'application.steps.review' : `application.steps.${entry}`)}
-        </button>
-      ))}
-    </nav>
-  );
-}
-function StepActions({ steps, step, onSelect }: Readonly<StepProps>) {
-  const { t } = useI18n();
-  const previous = steps[steps.indexOf(step) - 1];
-  const next = steps[steps.indexOf(step) + 1];
-  return (
-    <div className="actions">
-      {previous && (
-        <Button
-          className="heach-button--secondary"
-          onClick={() => {
-            onSelect(previous);
-          }}
-        >
-          {t('setup.back')}
-        </Button>
-      )}
-      {next && (
-        <Button
-          onClick={() => {
-            onSelect(next);
-          }}
-        >
-          {t('setup.continue')}
-        </Button>
-      )}
-    </div>
-  );
-}
 function Documents({
   application,
   onSaved,
 }: Readonly<{ application: Application; onSaved: (value: Application) => void }>) {
-  const { t } = useI18n();
   return (
-    <>
-      <h2 className="flow__subtitle">{t('application.steps.documents')}</h2>
-      <ul className="role-list">
-        {application.items.map((entry) => (
-          <li key={entry.key}>
-            <DocumentItem entry={entry} editable={application.editable} onSaved={onSaved} />
-          </li>
-        ))}
-      </ul>
-    </>
+    <ul className="role-list">
+      {application.items.map((entry) => (
+        <li key={entry.key}>
+          <DocumentItem entry={entry} editable={application.editable} onSaved={onSaved} />
+        </li>
+      ))}
+    </ul>
   );
 }

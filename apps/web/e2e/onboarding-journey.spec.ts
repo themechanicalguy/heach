@@ -21,6 +21,18 @@ const PDF = {
   buffer: Buffer.from('%PDF-1.7\n% synthetic certificate\n'),
 };
 
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Opens one task from the application checklist (G06). On phones and tablets a task screen hides
+ * the checklist, so go back to all steps first.
+ */
+async function openTask(page: Page, locale: Locale, label: string): Promise<void> {
+  const back = page.getByRole('button', { name: CATALOGUES[locale].application.allSteps });
+  if (await back.isVisible()) await back.click();
+  await page.getByRole('button', { name: new RegExp(`^${escape(label)}`) }).click();
+}
+
 async function uploadDocuments(page: Page, locale: Locale): Promise<void> {
   const t = CATALOGUES[locale];
   for (const document of NURSE_DOCUMENTS) {
@@ -43,7 +55,7 @@ async function payoutAndSubmit(page: Page, locale: Locale, mobile: string): Prom
   await page.getByLabel(t.application.upiId).fill('synthetic@okbank');
   await page.getByRole('button', { name: t.application.savePayout }).click();
   await confirmItIsMe(page, locale, mobile);
-  await page.getByRole('button', { name: new RegExp(t.application.steps.review) }).click();
+  await openTask(page, locale, t.application.steps.review);
   await expectAccessible(page, 'provider review step');
   const submit = page.getByRole('button', { name: t.application.submit, exact: true });
   await expect(submit).toBeEnabled({ timeout: 15_000 });
@@ -66,20 +78,16 @@ for (const locale of LOCALES) {
       await expect(page).toHaveURL(new RegExp(`/${locale}/provider$`));
       await expect(page.getByRole('heading', { name: t.application.title })).toBeVisible();
       await expectAccessible(page, 'provider application');
-      await page.getByRole('button', { name: new RegExp(t.application.steps.documents) }).click();
+      await openTask(page, locale, t.application.steps.documents);
       await expectAccessible(page, 'provider document step');
       await uploadDocuments(page, locale);
-      await page
-        .getByRole('button', {
-          name: new RegExp(t.application.steps.identity.replaceAll(/[()]/g, '.')),
-        })
-        .click();
+      await openTask(page, locale, t.application.steps.identity);
       await page.getByRole('button', { name: t.application.verifyIdentity }).click();
       // The partner sends the browser back through the identity return page to the application.
       await page.waitForURL(/\/provider\/onboarding\/identity/);
       await page.waitForURL(new RegExp(`/${locale}/provider$`));
       await expect(page.getByText(t.application.identityState.verified)).toBeVisible();
-      await page.getByRole('button', { name: new RegExp(t.application.steps.payout) }).click();
+      await openTask(page, locale, t.application.steps.payout);
       await expect(page.getByRole('button', { name: t.application.savePayout })).toBeVisible();
       await payoutAndSubmit(page, locale, mobile);
     });

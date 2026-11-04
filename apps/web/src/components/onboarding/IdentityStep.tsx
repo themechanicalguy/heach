@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, Notice } from '@heach/ui';
+import { Button, Notice } from '@heach/ui';
 import type { Application, IdentityRedirect } from '@heach/types';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
@@ -20,7 +20,7 @@ export function IdentityStep({ application }: Readonly<{ application: Applicatio
     });
   const verified = application.identity === 'verified';
   return (
-    <Card title={t('application.steps.identity')}>
+    <div className="onboarding__body">
       <Notice tone={verified ? 'success' : 'info'}>
         {t(`application.identityState.${application.identity}`)}
       </Notice>
@@ -34,6 +34,6 @@ export function IdentityStep({ application }: Readonly<{ application: Applicatio
           {t('application.verifyIdentity')}
         </Button>
       )}
-    </Card>
+    </div>
   );
 }
