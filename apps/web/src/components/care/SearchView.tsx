@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, EmptyState, ErrorState, Notice, Skeleton, TextField } from '@heach/ui';
 import type { CatalogueItem, SearchResult } from '@heach/types';
 import Link from 'next/link';
@@ -150,7 +151,7 @@ function SearchForm({ filters, items, pinError, onChange, onSubmit }: Readonly<F
         value={filters.pin}
         error={pinError ? t('search.pinInvalid') : undefined}
         onChange={(event) => {
-          onChange('pin', event.currentTarget.value.trim());
+          onChange('pin', normalizeDigits(event.currentTarget.value.trim()));
         }}
       />
       <TextField
@@ -180,9 +181,9 @@ function SearchForm({ filters, items, pinError, onChange, onSubmit }: Readonly<F
         }}
         options={[
           ['', t('search.anyLanguage')],
-          ['or', t('locale.or')],
-          ['en', t('locale.en')],
-          ['hi', t('locale.hi')],
+          ['or', t('languages.or')],
+          ['en', t('languages.en')],
+          ['hi', t('languages.hi')],
         ]}
       />
       <Select

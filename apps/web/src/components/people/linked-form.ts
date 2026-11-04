@@ -1,3 +1,4 @@
+import { normalizeDigits } from '@heach/i18n';
 import type { LinkedPatientInput } from '@heach/types';
 
 export const RELATIONSHIPS = [
@@ -37,8 +38,9 @@ export function linkedFrom(person: LinkedPatientInput): LinkedForm {
 export function linkedErrors(form: LinkedForm, thisYear: number): LinkedError[] {
   const errors: LinkedError[] = [];
   if (!NAME.test(form.fullName.trim())) errors.push('fullName');
-  const year = Number(form.birthYear);
-  if (!/^\d{4}$/.test(form.birthYear) || year < 1900 || year > thisYear) errors.push('birthYear');
+  const year = Number(normalizeDigits(form.birthYear));
+  if (!/^\d{4}$/.test(normalizeDigits(form.birthYear)) || year < 1900 || year > thisYear)
+    errors.push('birthYear');
   if (!form.gender) errors.push('gender');
   if (!form.relationship) errors.push('relationship');
   return errors;
@@ -47,7 +49,7 @@ export function linkedErrors(form: LinkedForm, thisYear: number): LinkedError[] 
 export function linkedBody(form: LinkedForm): LinkedPatientInput {
   return {
     fullName: form.fullName.trim(),
-    birthYear: Number(form.birthYear),
+    birthYear: Number(normalizeDigits(form.birthYear)),
     gender: form.gender as LinkedPatientInput['gender'],
     relationship: form.relationship as LinkedPatientInput['relationship'],
   };

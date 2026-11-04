@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, Card, Notice, TextField } from '@heach/ui';
 import type { BookingPolicy, ProviderBooking, Shift } from '@heach/types';
 import { useState } from 'react';
@@ -68,7 +69,7 @@ function CodeAction({
         maxLength={6}
         value={code}
         onChange={(event) => {
-          setCode(event.currentTarget.value.trim());
+          setCode(normalizeDigits(event.currentTarget.value.trim()));
         }}
       />
       {error && (

@@ -43,3 +43,10 @@ describe('linked patient edit form', () => {
     expect(linkedFrom(person)).toEqual({ ...person, birthYear: '1950' });
   });
 });
+
+it.each(['୧୯୫୦', '१९५०'])('validates and serializes an Indic birth year %s', (birthYear) => {
+  const form = { fullName: 'Sita', birthYear, gender: 'female', relationship: 'parent' };
+  expect(linkedErrors(form, 2026)).toEqual([]);
+  expect(linkedBody(form).birthYear).toBe(1950);
+  expect(linkedErrors({ ...form, birthYear: '୧୯a୦' }, 2026)).toEqual(['birthYear']);
+});

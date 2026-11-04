@@ -1,5 +1,7 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
+
 import { formatDate } from '@heach/i18n';
 import { Button, Card, CheckboxField, Notice, TextField } from '@heach/ui';
 import type { Availability } from '@heach/types';
@@ -78,7 +80,7 @@ export function HoursForm({ availability, onSaved }: Readonly<Props>) {
         inputMode="numeric"
         value={buffer}
         onChange={(event) => {
-          setBuffer(event.currentTarget.value);
+          setBuffer(normalizeDigits(event.currentTarget.value));
         }}
       />
       {error && (

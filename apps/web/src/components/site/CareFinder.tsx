@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, Notice, TextField } from '@heach/ui';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -77,7 +78,7 @@ function CareFinderForm({
         value={draft.pin}
         error={invalid ? t('search.pinInvalid') : undefined}
         onChange={(event) => {
-          update({ pin: event.currentTarget.value.trim() });
+          update({ pin: normalizeDigits(event.currentTarget.value.trim()) });
         }}
       />
       <Select

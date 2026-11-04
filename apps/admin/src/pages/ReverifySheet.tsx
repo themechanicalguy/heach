@@ -1,3 +1,4 @@
+import { normalizeDigits } from '@heach/i18n';
 import { Button, OtpField, Sheet } from '@heach/ui';
 import { useState } from 'react';
 import { api } from '../api';
@@ -36,7 +37,7 @@ export function ReverifySheet({ open, onClose, onVerified }: Readonly<Props>) {
           value={code}
           error={error !== undefined ? errorText(error) : undefined}
           onChange={(event) => {
-            setCode(event.target.value.replace(/\D/g, ''));
+            setCode(normalizeDigits(event.target.value).replace(/\D/g, ''));
           }}
         />
         <Button type="submit" disabled={pending || code.length !== 6}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime, formatPaise } from '@heach/i18n';
+import { formatDateTime, formatPaise, isLocale } from '@heach/i18n';
 import { Card } from '@heach/ui';
 import type { SearchResult } from '@heach/types';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ export function ProviderCard({ result }: Readonly<{ result: SearchResult }>) {
       <p>{t('site.servesPin')}</p>
       <p>
         {result.languages
-          .map((code) => (['or', 'en', 'hi'].includes(code) ? t(`locale.${code as 'or'}`) : code))
+          .map((code) => (isLocale(code) ? t(`languages.${code}`) : code))
           .join(', ')}
       </p>
       <p className="flow__muted">

@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, OtpField, Sheet } from '@heach/ui';
 import type { OtpChallenge } from '@heach/types';
 import { useState } from 'react';
@@ -53,7 +54,7 @@ export function ReverifySheet({ open, onClose, onVerified }: Readonly<Props>) {
             error={error && t(error)}
             value={code}
             onChange={(event) => {
-              setCode(event.target.value.replace(/\D/g, ''));
+              setCode(normalizeDigits(event.target.value).replace(/\D/g, ''));
             }}
           />
           <Button type="submit" disabled={pending || code.length !== 6} aria-busy={pending}>

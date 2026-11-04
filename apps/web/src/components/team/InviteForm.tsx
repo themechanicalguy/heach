@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { Button, Notice, TextField } from '@heach/ui';
 import { useState } from 'react';
 import { api } from '../../lib/api';
@@ -49,7 +50,7 @@ export function InviteForm({
           maxLength={14}
           value={mobile}
           onChange={(event) => {
-            setMobile(event.target.value);
+            setMobile(normalizeDigits(event.target.value));
           }}
         />
         {sent && (

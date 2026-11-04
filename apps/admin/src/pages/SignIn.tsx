@@ -1,3 +1,4 @@
+import { normalizeDigits } from '@heach/i18n';
 import { Button, Card, OtpField, TextField } from '@heach/ui';
 import type { AccessToken, AdminPasswordAccepted } from '@heach/types';
 import { useState } from 'react';
@@ -127,7 +128,7 @@ function MfaStep({
         value={code}
         error={error !== undefined ? errorText(error) : undefined}
         onChange={(e) => {
-          setCode(e.target.value.replace(/\D/g, ''));
+          setCode(normalizeDigits(e.target.value).replace(/\D/g, ''));
         }}
       />
       <div className="admin-actions">

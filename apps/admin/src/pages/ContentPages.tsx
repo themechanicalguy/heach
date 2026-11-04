@@ -72,40 +72,42 @@ function PageEditor({ slug, locale, page, canChange, onSaved }: Readonly<EditorP
       onSaved();
     });
   return (
-    <form
-      className="admin-form"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void save();
-      }}
-    >
-      <TextField
-        label={t('content.pageTitle')}
-        required
-        readOnly={!canChange}
-        value={title}
-        onChange={(event) => {
-          setTitle(event.currentTarget.value);
+    <>
+      <form
+        className="admin-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void save();
         }}
-      />
-      <TextField
-        label={t('content.body')}
-        required
-        multiline
-        readOnly={!canChange}
-        value={body}
-        onChange={(event) => {
-          setBody(event.currentTarget.value);
-        }}
-      />
-      {error !== undefined && <Notice tone="danger">{errorText(error)}</Notice>}
-      {saved && <Notice tone="success">{t('content.saved')}</Notice>}
-      {canChange && (
-        <Button type="submit" disabled={pending}>
-          {t('content.savePage')}
-        </Button>
-      )}
+      >
+        <TextField
+          label={t('content.pageTitle')}
+          required
+          readOnly={!canChange}
+          value={title}
+          onChange={(event) => {
+            setTitle(event.currentTarget.value);
+          }}
+        />
+        <TextField
+          label={t('content.body')}
+          required
+          multiline
+          readOnly={!canChange}
+          value={body}
+          onChange={(event) => {
+            setBody(event.currentTarget.value);
+          }}
+        />
+        {error !== undefined && <Notice tone="danger">{errorText(error)}</Notice>}
+        {saved && <Notice tone="success">{t('content.saved')}</Notice>}
+        {canChange && (
+          <Button type="submit" disabled={pending}>
+            {t('content.savePage')}
+          </Button>
+        )}
+      </form>
       {sheet}
-    </form>
+    </>
   );
 }

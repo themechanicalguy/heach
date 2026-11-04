@@ -161,7 +161,7 @@ describe('Booking a chosen provider (J3; BK-01, BK-04, BK-05, PY-01)', () => {
     fireEvent.change(await screen.findByLabelText('Full address'), {
       target: { value: '12 Synthetic Lane' },
     });
-    fireEvent.change(screen.getByLabelText('PIN code'), { target: { value: '751001' } });
+    fireEvent.change(screen.getByLabelText('PIN code'), { target: { value: '୭୫୧୦୦୧' } });
     fireEvent.click(await screen.findByLabelText('Synthetic Child'));
     fireEvent.change(screen.getByLabelText("Doctor's prescription"), {
       target: { files: [new File(['%PDF'], 'rx.pdf', { type: 'application/pdf' })] },

@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeDigits } from '@heach/i18n';
 import { formatDateTime } from '@heach/i18n';
 import { Button, Card, CheckboxField, EmptyState, Notice, TextField } from '@heach/ui';
 import type { RecordShare, SharedRecords, VaultRecord } from '@heach/types';
@@ -193,7 +194,7 @@ export function SharedLinkView({ token }: Readonly<{ token: string }>) {
               maxLength={6}
               value={code}
               onChange={(event) => {
-                setCode(event.currentTarget.value.trim());
+                setCode(normalizeDigits(event.currentTarget.value.trim()));
               }}
             />
             {error && (

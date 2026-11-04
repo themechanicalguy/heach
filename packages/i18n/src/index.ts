@@ -11,3 +11,4 @@ export { formatCurrency, formatDate, formatDateTime, formatPaise } from './forma
 export { findCatalogueProblems, type CatalogueProblem } from './catalogues.js';
 
 export { PAGE_SLUGS } from './content-pages.js';
+export { normalizeDigits } from './normalize-digits.js';
