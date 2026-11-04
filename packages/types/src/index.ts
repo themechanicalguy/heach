@@ -44,6 +44,7 @@ export type DocumentUpload = components['schemas']['DocumentUploadDto'];
 export type PayoutDetails = components['schemas']['PayoutDetailsDto'];
 export type IdentityRedirect = components['schemas']['IdentityRedirectDto'];
 export type ApplicationSummary = components['schemas']['ApplicationSummaryDto'];
+export type ApplicationSearch = components['schemas']['ApplicationSearchDto'];
 export type ApplicationReview = components['schemas']['ApplicationReviewDto'];
 export type Decision = components['schemas']['DecisionDto'];
 export type DocumentReview = components['schemas']['DocumentReviewDto'];

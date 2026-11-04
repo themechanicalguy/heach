@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import type { QueueFilters } from './onboarding.repository.js';
 import type { ApplicationStatus } from '../accounts/account.repository.js';
 import type { SmsTemplate } from '../adapters/sms.port.js';
 import { AuditService } from '../audit/audit.service.js';
@@ -43,8 +44,11 @@ export class VerificationService {
     private readonly notifier: Notifier,
   ) {}
 
-  queue(view: 'open' | 'decided' = 'open'): Promise<ApplicationSummaryDto[]> {
-    return this.onboarding.queue(view === 'open' ? OPEN : DECIDED);
+  queue(
+    view: 'open' | 'decided' = 'open',
+    filters: QueueFilters = {},
+  ): Promise<ApplicationSummaryDto[]> {
+    return this.onboarding.queue(view === 'open' ? OPEN : DECIDED, filters);
   }
 
   async review(admin: Principal, accountId: string): Promise<ApplicationReviewDto> {

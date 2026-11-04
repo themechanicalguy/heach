@@ -20,6 +20,7 @@ import { requireFlag } from '../flags/flags.module.js';
 import {
   ApplicationQueryDto,
   ApplicationReviewDto,
+  ApplicationSearchDto,
   ApplicationSummaryDto,
   DecisionDto,
   DocumentReviewDto,
@@ -43,6 +44,16 @@ export class VerificationController {
   @ApiOkResponse({ type: [ApplicationSummaryDto] })
   async queue(@Query() query: ApplicationQueryDto): Promise<ApplicationSummaryDto[]> {
     return this.verification.queue(query.view);
+  }
+
+  /** The queue filtered by role and part of a name, sent in the body (G17). */
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'no-store')
+  @Roles('super_admin', 'verifier')
+  @ApiOkResponse({ type: [ApplicationSummaryDto] })
+  async search(@Body() body: ApplicationSearchDto): Promise<ApplicationSummaryDto[]> {
+    return this.verification.queue(body.view, { role: body.role, q: body.q });
   }
 
   @Get(':accountId')

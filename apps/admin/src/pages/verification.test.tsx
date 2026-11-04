@@ -62,6 +62,7 @@ function stubApi(status: ApplicationReview['status'] = 'under_review') {
       status: 'submitted',
       fullName: 'Synthetic Nurse',
       submittedAt: '2026-10-30T00:00:00Z',
+      identity: 'verified',
     },
   ];
   vi.stubGlobal(
