@@ -104,6 +104,17 @@ it('G02 puts the search and service tiles first, help and emergency in the side 
   expect(side?.querySelector('.emergency + .support-card')).toBeTruthy();
   expect(main?.querySelector('.emergency, .next-booking')).toBeNull();
 });
+it('desktop home board: one search bar with labelled fields, and no How it works once signed in', () => {
+  state.status = 'signed-in';
+  const { container } = show(<PatientHome config={{}} locale="en" />);
+  const bar = container.querySelector('form[role="search"] > .care-finder__bar');
+  expect(bar?.querySelector('.care-finder__icon svg[aria-hidden="true"]')).toBeTruthy();
+  const text = screen.getByLabelText(CATALOGUES.en.search.text);
+  expect(text.getAttribute('placeholder')).toBe(CATALOGUES.en.site.searchPlaceholder);
+  expect(screen.getByLabelText(CATALOGUES.en.search.pin).closest('.care-finder__bar')).toBe(bar);
+  expect(bar?.querySelector('button[type="submit"]')?.textContent).toBe(CATALOGUES.en.site.find);
+  expect(screen.queryByRole('heading', { name: CATALOGUES.en.site.how })).toBeNull();
+});
 it('G03 colours tiles by meaning, not position: lavender services, a peach records well', () => {
   state.status = 'signed-in';
   const { container } = show(<PatientHome config={{}} locale="en" />);
