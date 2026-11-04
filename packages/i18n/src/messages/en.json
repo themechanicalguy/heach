@@ -1149,7 +1149,7 @@
     },
     "contact": {
       "title": "Contact us",
-      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nHelpline, support email, legal company name and address: pending owner confirmation. WhatsApp is not currently offered. In an emergency call 108."
+      "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nWe help in Odia, English and Hindi. Choose what you need below and we will show you the fastest way. WhatsApp is not currently offered. HEACH is not an emergency service: in an emergency call 108."
     },
     "grievance": {
       "title": "Grievance officer and complaints",
@@ -1179,6 +1179,66 @@
       "title": "Questions and answers",
       "body": "Draft — pending legal and language review. Operational details marked pending must be confirmed before launch.\n\nCan I book for family?\nYes. Add a person and select who will receive care.\n\nHow do I check availability?\nEnter your PIN code, choose a service and check open times.\n\nAre prices shown before payment?\nYes. Review the service fee, travel charges and discounts before paying.\n\nCan I cancel?\nRead the cancellation terms at checkout and the refund policy.\n\nWho can see my records?\nYour records are private. You control sharing and can inspect access history.\n\nIs this for emergencies?\nCall 108. Do not wait for an online booking."
     }
+  },
+  "contact": {
+    "needTitle": "What do you need help with?",
+    "routes": {
+      "booking": {
+        "title": "A booking I made",
+        "body": "Report a problem from the booking and track its status"
+      },
+      "safety": {
+        "title": "A safety concern",
+        "body": "Report it from the booking. We respond to safety concerns first"
+      },
+      "refund": {
+        "title": "Payment or refund",
+        "body": "Read the refund policy or raise it from the booking"
+      },
+      "provider": {
+        "title": "Joining as a provider",
+        "body": "Application, documents and verification status"
+      },
+      "data": {
+        "title": "Your personal data",
+        "body": "See, correct, export or delete your data"
+      },
+      "other": {
+        "title": "Something else",
+        "body": "Call or write to us"
+      }
+    },
+    "talkTitle": "Talk to us",
+    "hours": "Hours",
+    "hoursValue": "{open} to {close}, every day",
+    "languages": "We speak",
+    "email": "Email",
+    "channelsPending": "Helpline and support email: pending confirmation.",
+    "reply": "{days, plural, one {We reply within # working day.} other {We reply within # working days.}}",
+    "noHealth": "Please do not send prescriptions or reports by email. Keep them in your records and share them from there.",
+    "grievanceTitle": "Complaints and grievance officer",
+    "name": "Name",
+    "designation": "Designation",
+    "designationValue": "Grievance Officer",
+    "phone": "Phone",
+    "deadlines": "We acknowledge your complaint within {hours} hours and resolve it within {days} days.",
+    "grievancePending": "Officer name, email, phone and response time: pending confirmation.",
+    "stepsTitle": "How a complaint works",
+    "steps": {
+      "0": "Raise it from your booking, or write to the officer.",
+      "1": "Keep the complaint reference we send you.",
+      "2": "Not satisfied? The complaints process lists the next steps."
+    },
+    "grievanceMore": "Read the full complaints process",
+    "dataTitle": "Questions about your personal data",
+    "dataBody": "Ask how we use your data or how to use your rights.",
+    "dataContact": "Data protection contact",
+    "dataPending": "Data protection contact: pending confirmation.",
+    "companyTitle": "Company details",
+    "legalName": "Legal name",
+    "cin": "Corporate identity number (CIN)",
+    "address": "Registered address",
+    "maps": "Open in maps"
   },
   "siteFaq": {
     "0": {

@@ -842,3 +842,101 @@ body {
 .shell-header__name {
   min-width: var(--heach-touch);
 }
+
+/* Contact page: route by need, then channels and published details (site pages). */
+.contact-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: start;
+}
+.contact-page > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.contact-page .contact-routes,
+.contact-page .site-section:last-child {
+  grid-column: 1 / -1;
+}
+.contact-page h2 {
+  font-size: 1.25rem;
+}
+.contact-page h3 {
+  font-size: 1.0625rem;
+}
+.contact-block {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+.contact-routes ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.contact-routes a {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  min-height: 4rem;
+  padding: 0.75rem;
+  border: 1px solid var(--heach-border);
+  border-radius: var(--heach-radius-card);
+  color: var(--heach-text);
+  text-decoration: none;
+}
+.contact-routes a:hover {
+  background: var(--heach-background);
+}
+.contact-routes__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--heach-radius);
+  background: var(--heach-primary-soft);
+  color: var(--heach-primary);
+}
+.contact-routes li:nth-child(2) .contact-routes__icon {
+  background: var(--heach-danger-soft);
+  color: var(--heach-danger);
+}
+.contact-routes__body {
+  display: block;
+  color: var(--heach-muted);
+  font-size: 0.9375rem;
+}
+.contact-details {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+.contact-details dt {
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+}
+.contact-details dd {
+  margin: 0;
+  font-weight: 500;
+}
+.contact-details a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--heach-touch);
+  color: var(--heach-primary);
+}
+.contact-page a:focus-visible {
+  outline: 3px solid var(--heach-focus);
+  outline-offset: 3px;
+}
+.contact-block .site-steps {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  margin: 0;
+}
