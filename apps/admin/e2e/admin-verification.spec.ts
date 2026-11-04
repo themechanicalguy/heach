@@ -20,7 +20,7 @@ test.describe('Admin verifies a provider (J5)', () => {
       .first()
       .click();
     const panel = page.getByRole('complementary', { name: en.verification.detailTitle });
-    await expect(panel.getByText(en.verification.documents)).toBeVisible();
+    await expect(panel.getByRole('heading', { name: en.verification.documents })).toBeVisible();
     const accept = panel.getByRole('button', { name: en.verification.accept, exact: true });
     const documents = await accept.count();
     expect(documents).toBeGreaterThan(0);
