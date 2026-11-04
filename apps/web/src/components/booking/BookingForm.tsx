@@ -1,15 +1,16 @@
 'use client';
 
 import { formatDateTime, normalizeDigits } from '@heach/i18n';
-import { Button, Card, CheckboxField, ChoiceGroup, Notice, TextField } from '@heach/ui';
+import { Button, CheckboxField, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { Booking, LinkedPatient, ProfileListing } from '@heach/types';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useId, useState } from 'react';
 import { api, UPLOAD_CONTENT_TYPE } from '../../lib/api';
 import { readAsBase64 } from '../../lib/files';
 import { useCareSearch } from '../../lib/care-search';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
+import { BookingReceipt } from './BookingReceipt';
 import { BookingReview } from './BookingReview';
 import { money } from './money';
 import { PaymentOptions } from './PaymentOptions';
@@ -27,17 +28,19 @@ export interface ItemFacts {
 interface Props {
   target: BookingTarget;
   facts: ItemFacts;
+  /** The chosen time; empty until one is picked in `schedule`. */
   startsAt: string;
-  onBooked?: () => void;
+  /** The day and time picker, shown as the first section (G07). */
+  schedule: ReactNode;
+  providerName?: string | undefined;
   /** Other tests of the same lab that can join this booking (LB-03). */
   labTests?: readonly ProfileListing[];
 }
 
 /** The booking details (BK-01, BK-05): who it is for, where, notes, prescription, days. */
-export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }: Readonly<Props>) {
-  const { locale, t } = useI18n();
+/** The form's values and the people it can be for; who follows the header's person picker. */
+function useBookingFields(target: BookingTarget) {
   const { person, search, setPerson } = useCareSearch();
-  const people = useResource<LinkedPatient[]>('/me/linked-patients');
   const [form, setForm] = useState<FormState>({
     recipient: person,
     address: '',
@@ -52,16 +55,33 @@ export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }
   useEffect(() => {
     setForm((current) => ({ ...current, recipient: person }));
   }, [person]);
-  const [file, setFile] = useState<File | undefined>();
-  const [extras, setExtras] = useState<string[]>([]);
-  const [booking, setBooking] = useState<Booking | undefined>();
-  const { pending, error, run } = usePending();
-  if (booking) return <BookingReview booking={booking} />;
-
   const set = (key: keyof FormState) => (value: string) => {
     if (key === 'recipient') setPerson(value);
     setForm((current) => ({ ...current, [key]: value }));
   };
+  const people = useResource<LinkedPatient[]>('/me/linked-patients');
+  const linked = people.resource.state === 'ready' ? people.resource.data : [];
+  return { form, set, linked };
+}
+
+export function BookingForm({
+  target,
+  facts,
+  startsAt,
+  schedule,
+  providerName,
+  labTests = [],
+}: Readonly<Props>) {
+  const { locale, t } = useI18n();
+  const { form, set, linked } = useBookingFields(target);
+  const [file, setFile] = useState<File | undefined>();
+  const [extras, setExtras] = useState<string[]>([]);
+  const [booking, setBooking] = useState<Booking | undefined>();
+  const { pending, error, run } = usePending();
+  const formId = useId();
+  if (booking)
+    return <BookingReview booking={booking} providerName={providerName} startsAt={startsAt} />;
+
   const submit = () =>
     run(async () => {
       const body = await bookingBody({ target, facts, startsAt, locale, form, extras, file });
@@ -72,68 +92,129 @@ export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }
           body: JSON.stringify(body),
         }),
       );
-      onBooked?.();
     });
-  const linked = people.resource.state === 'ready' ? people.resource.data : [];
 
+  const upTo = target.kind === 'any';
+  const needsPrescription =
+    facts.prescriptionRequired ||
+    labTests.some((test) => extras.includes(test.listingId) && test.prescriptionRequired);
+  const continueButton = (
+    <Button type="submit" form={formId} disabled={pending || !startsAt}>
+      {t('book.continue')}
+    </Button>
+  );
   return (
-    <div className="booking-layout">
-      <Card title={facts.itemName}>
-        <p>
-          {t('book.when')}: <strong>{formatDateTime(new Date(startsAt), locale)}</strong>
-        </p>
-        <form
-          className="flow__form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void submit();
-          }}
-        >
-          <BookingFields
-            form={form}
-            set={set}
-            target={target}
-            facts={facts}
-            linked={linked}
-            onFile={setFile}
-            needsPrescription={
-              facts.prescriptionRequired ||
-              labTests.some((test) => extras.includes(test.listingId) && test.prescriptionRequired)
-            }
-          />
-          {facts.kind === 'lab_test' && (
-            <LabChoices
+    <div className="booking">
+      <div className="booking__main">
+        <BookingSection step={1} title={t('book.stepWhen')}>
+          {schedule}
+        </BookingSection>
+        <BookingSection step={2} title={t('book.stepDetails')}>
+          <form
+            id={formId}
+            className="flow__form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submit();
+            }}
+          >
+            <BookingFields
               form={form}
               set={set}
-              labTests={labTests}
-              extras={extras}
-              onExtras={setExtras}
+              target={target}
+              facts={facts}
+              linked={linked}
+              onFile={setFile}
+              needsPrescription={needsPrescription}
             />
-          )}
-          <PaymentOptions
-            purchaseId={form.purchaseId}
-            couponId={form.couponId}
-            onPurchase={set('purchaseId')}
-            onCoupon={set('couponId')}
-          />
-          {error && (
-            <Notice tone="danger" live>
-              {t(error)}
-            </Notice>
-          )}
-          <Button type="submit" disabled={pending}>
-            {t('book.continue')}
-          </Button>
-        </form>
-      </Card>
-      <aside className="booking-summary site-section">
-        <h2>{t('site.bookingSummary')}</h2>
-        <p>{facts.itemName}</p>
-        <p>{formatDateTime(new Date(startsAt), locale)}</p>
-        {facts.feePaise !== undefined && <p>{t('search.fee', { fee: money(facts.feePaise) })}</p>}
-        <p>{t('site.clearPrices')}</p>
-      </aside>
+            {facts.kind === 'lab_test' && (
+              <LabChoices
+                form={form}
+                set={set}
+                labTests={labTests}
+                extras={extras}
+                onExtras={setExtras}
+              />
+            )}
+            <PaymentOptions
+              purchaseId={form.purchaseId}
+              couponId={form.couponId}
+              onPurchase={set('purchaseId')}
+              onCoupon={set('couponId')}
+            />
+            {error && (
+              <Notice tone="danger" live>
+                {t(error)}
+              </Notice>
+            )}
+          </form>
+        </BookingSection>
+      </div>
+      <BookingReceipt
+        providerName={providerName}
+        itemName={facts.itemName}
+        startsAt={startsAt}
+        feePaise={facts.feePaise}
+        upTo={upTo}
+      >
+        <div className="receipt__action">{continueButton}</div>
+      </BookingReceipt>
+      <BookingBar startsAt={startsAt} feePaise={facts.feePaise} upTo={upTo}>
+        {continueButton}
+      </BookingBar>
     </div>
+  );
+}
+
+/** Phones and tablets: the chosen time, the fee and Continue above the navigation (G08). */
+function BookingBar({
+  startsAt,
+  feePaise,
+  upTo,
+  children,
+}: Readonly<{
+  startsAt: string;
+  feePaise?: number | undefined;
+  upTo: boolean;
+  children: ReactNode;
+}>) {
+  const { locale, t } = useI18n();
+  return (
+    <div className="booking-bar">
+      <p className="booking-bar__summary">
+        <strong>
+          {startsAt ? formatDateTime(new Date(startsAt), locale) : t('book.selectTime')}
+        </strong>
+        {feePaise !== undefined && (
+          <span>
+            {upTo
+              ? t('book.anyFeeLine', { fee: money(feePaise) })
+              : t('book.feeLine', { fee: money(feePaise) })}
+          </span>
+        )}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+/** A numbered section of the booking page (desktop booking board). */
+function BookingSection({
+  step,
+  title,
+  children,
+}: Readonly<{ step: number; title: string; children: ReactNode }>) {
+  const id = useId();
+  return (
+    <section className="booking__section" aria-labelledby={id}>
+      <h2 id={id} className="booking__section-title">
+        <span className="booking__step" aria-hidden="true">
+          {String(step)}
+        </span>
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
 
@@ -205,6 +286,7 @@ function BookingFields({
     <>
       <ChoiceGroup
         legend={t('book.who')}
+        variant="chips"
         name="recipient"
         value={form.recipient}
         choices={[
@@ -260,6 +342,7 @@ function BookingFields({
       {target.kind === 'any' && (
         <ChoiceGroup
           legend={t('book.gender')}
+          variant="chips"
           name="gender"
           value={form.gender}
           choices={[
@@ -301,6 +384,7 @@ function LabChoices({ form, set, labTests, extras, onExtras }: Readonly<LabProps
     <>
       <ChoiceGroup
         legend={t('lab.collection')}
+        variant="chips"
         name="collection"
         value={form.collection}
         choices={[

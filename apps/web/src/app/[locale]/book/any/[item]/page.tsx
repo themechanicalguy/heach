@@ -10,5 +10,9 @@ export default async function Page({ params }: Readonly<{ params: Promise<{ item
   const { item } = await params;
   if (!serverFlags().isOn('accounts') || !PATTERN.test(item)) notFound();
   const page = <BookAnyPage itemCode={item} />;
-  return <PageMessages>{<main className="page">{<Suspense>{page}</Suspense>}</main>}</PageMessages>;
+  return (
+    <PageMessages>
+      {<main className="page page--app">{<Suspense>{page}</Suspense>}</main>}
+    </PageMessages>
+  );
 }

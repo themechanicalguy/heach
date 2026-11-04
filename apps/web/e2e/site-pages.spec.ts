@@ -285,7 +285,7 @@ for (const locale of LOCALES) {
     await expect(page.getByText(t.site.servesPin)).toBeVisible();
     await expect(page.getByLabel(t.search.pin, { exact: true })).toHaveValue('751001');
   });
-  test(`Booking A ${locale}: scrolling form and desktop summary match visual snapshot`, async ({
+  test(`Booking B ${locale}: day and time picker, receipt or action bar, and visual snapshot`, async ({
     page,
   }) => {
     await signedIn(page, locale);
@@ -294,6 +294,20 @@ for (const locale of LOCALES) {
     );
     await expect(page.getByLabel(t.book.address)).toBeVisible();
     await expect(page.getByRole('heading', { name: t.site.bookingSummary })).toBeVisible();
+    // G07: the chosen time is pressed within its part of the day; the day strip has seven days.
+    await expect(page.locator('.time-chip[aria-pressed="true"]')).toHaveCount(1);
+    await expect(page.locator('.day-chip')).toHaveCount(7);
+    await expect(page.getByRole('heading', { level: 3, name: t.book.parts.morning })).toBeVisible();
+    // G08/G09: one visible Continue: in the bottom action area on phones and tablets, in the
+    // sticky receipt on desktop; the receipt shows the listed fee and no total of its own.
+    const viewport = page.viewportSize();
+    const wide = (viewport?.width ?? 0) >= 1024;
+    const action = page.getByRole('button', { name: t.book.continue });
+    await expect(action).toHaveCount(1);
+    const box = await action.boundingBox();
+    if (!wide) expect(box && viewport && box.y + box.height <= viewport.height).toBe(true);
+    await expect(page.locator(wide ? '.receipt' : '.booking-bar')).toContainText('₹500.00');
+    await expect(page.locator('.receipt .receipt__total')).toHaveCount(0);
     await expectAccessible(page, `booking ${locale}`);
     await page.evaluate(() => document.fonts.ready);
     await expect(page).toHaveScreenshot(`booking-${locale}.png`, { fullPage: true });

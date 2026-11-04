@@ -693,7 +693,22 @@
     "pay": "Pay {amount}",
     "sandbox": "Test payment: no money moves.",
     "paid": "Payment received. We have sent your request.",
-    "signInFirst": "Sign in to book."
+    "signInFirst": "Sign in to book.",
+    "parts": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "earlierDays": "Earlier days",
+    "laterDays": "Later days",
+    "dayFull": "no free times",
+    "stepWhen": "Day and time",
+    "stepDetails": "Your details",
+    "selectTime": "Choose a day and time",
+    "feeLine": "{fee} service fee",
+    "anyFeeLine": "Up to {fee}",
+    "totalNext": "The total, with any travel charge or discount, is shown before you pay.",
+    "discount": "Discount"
   },
   "bookings": {
     "title": "My bookings",

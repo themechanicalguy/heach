@@ -204,6 +204,8 @@ describe('ProviderProfileView (PO-05, AV-02)', () => {
     expect(screen.getByText("Needs a doctor's prescription")).toBeTruthy();
     expect(screen.getByText('Rated 4.5 by 2 patients')).toBeTruthy();
     expect(screen.getByText('Preparation: Keep the area dry.')).toBeTruthy();
+    // G07: choose the time in the day picker, then the booking link appears.
+    fireEvent.click(await screen.findByRole('button', { name: /Fri, 30 Oct, 10:00/ }));
     const book = await screen.findByRole('link', { name: /^Book/ });
     expect(book.getAttribute('href')).toBe(
       `/en/book/${result.listingId}?provider=${profile.id}&start=${encodeURIComponent('2026-10-30T04:30:00.000Z')}`,

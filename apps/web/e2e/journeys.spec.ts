@@ -86,7 +86,14 @@ async function startBooking(lang: InLanguage, provider: Provider, service: strin
   await expect(card).toBeVisible();
   await expectAccessible(page, 'search results');
   await card.getByRole('link', { name: t.search.view }).click();
+  // G07: free times are chosen in each service's day picker; the chosen one links to booking.
   const slot = page.locator(`a[href*="/${lang.locale}/book/${provider.listingId}"]`).first();
+  const services = page.locator('.heach-card').filter({ has: page.locator('.time-chip') });
+  await expect(services.first()).toBeVisible();
+  for (let index = 0; index < (await services.count()); index += 1) {
+    if (await slot.isVisible()) break;
+    await services.nth(index).locator('.time-chip').first().click();
+  }
   await expect(slot).toBeVisible();
   await expectAccessible(page, 'provider profile');
   await slot.click();
