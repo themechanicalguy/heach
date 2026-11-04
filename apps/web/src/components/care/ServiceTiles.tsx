@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Icon } from '@heach/ui';
-import { createTranslator, messagesFor, formatPaise } from '@heach/i18n';
+import { formatPaise } from '@heach/i18n';
 import type { T } from '../../i18n/messages';
 import { StartingPrice } from '../site/PublicServices';
 import { SERVICES } from './services';
@@ -17,7 +17,6 @@ export function ServiceTiles({
   prices?: readonly { service: string; feePaise: number }[];
   showPrices?: boolean;
 }>) {
-  const odia = createTranslator(messagesFor('or'), 'or');
   return (
     <ul className="service-tiles">
       {SERVICES.map((service) => {
@@ -28,14 +27,7 @@ export function ServiceTiles({
               <span className="service-tile__icon">
                 <Icon name={service === 'nursing' ? 'nurse' : service} size={32} />
               </span>
-              <strong className="bilingual">
-                <span lang="or">{odia(`services.${service}`)}</span>
-                {locale !== 'or' && (
-                  <span lang={locale} className="bilingual__secondary">
-                    {t(`services.${service}`)}
-                  </span>
-                )}
-              </strong>
+              <strong className="service-tile__title">{t(`services.${service}`)}</strong>
               <span>{t(`servicesHint.${service}`)}</span>
               {showPrices && <StartingPrice service={service} />}
               {prices && (

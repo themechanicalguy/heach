@@ -1,5 +1,4 @@
 import { translatorFor } from '../../i18n/messages';
-import { Bilingual } from './Bilingual';
 
 export function ProviderJoin({
   accounts,
@@ -9,9 +8,7 @@ export function ProviderJoin({
   return (
     <main className="page site-home">
       <section className="site-hero">
-        <h1>
-          <Bilingual locale={locale} message="site.join" />
-        </h1>
+        <h1>{t('site.join')}</h1>
         <p>{t('site.joinBody')}</p>
         <a className="heach-button" href={`/${locale}/${accounts ? 'sign-in' : 'pages/contact'}`}>
           {t('site.signUp')}

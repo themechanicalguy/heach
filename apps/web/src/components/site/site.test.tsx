@@ -1,3 +1,4 @@
+import { ProviderJoin } from './ProviderJoin';
 import { ServiceOverview } from './ServiceOverview';
 import { SERVICES } from '../care/services';
 import { CATALOGUES } from '@heach/i18n';
@@ -196,3 +197,28 @@ it('keeps an in-progress care query when the saved PIN arrives, and clears it fo
   view.rerender(finder());
   expect(screen.getByLabelText<HTMLInputElement>(CATALOGUES.en.search.text).value).toBe('');
 });
+
+const ODIA_SCRIPT = /[଀-୿]/;
+it.each(['en', 'hi'] as const)(
+  'I18N-01 shows only the selected language, never Odia, on %s site pages',
+  (locale) => {
+    const pages = [
+      <PublicHome key="public" config={{}} locale={locale} />,
+      <PatientHome key="patient" config={{}} locale={locale} />,
+      <ProviderJoin key="join" accounts locale={locale} />,
+      ...SERVICES.map((service) => (
+        <ServiceOverview key={service} service={service} accounts locale={locale} />
+      )),
+    ];
+    for (const page of pages) {
+      const { container, unmount } = render(
+        <I18nProvider locale={locale} messages={CATALOGUES[locale]}>
+          {page}
+        </I18nProvider>,
+      );
+      expect(container.textContent).not.toMatch(ODIA_SCRIPT);
+      expect(container.querySelector('h1')?.textContent).toBeTruthy();
+      unmount();
+    }
+  },
+);

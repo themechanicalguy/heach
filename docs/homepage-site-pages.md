@@ -63,7 +63,7 @@ real-phone and screen-reader reviews remain external follow-ups and must not be 
   Visual review also caught the inherited narrow form width clipping table actions: desktop booking,
   vault and onboarding layouts now use the available page width, with a table-overflow regression.
 - D4: onboarding sets a localized document title for each step; tests cover or/en/hi.
-- D5: static home sections, service copy, bilingual labels, FAQ and footer links are server components;
+- D5: static home sections, service copy, headings, FAQ and footer links are server components;
   the session boundary accepts server-rendered children. Public prices are a small client island.
   Page-scoped client message props exclude legal bodies, service descriptions and FAQ bodies.
   The measured home entries are 153,373 bytes gzipped in each locale; provider entry is 154,514 bytes,
@@ -117,7 +117,7 @@ Owner servers on :3000, :3001, :3101 and :13000 were neither stopped nor restart
 
 All 46 changed PNGs were viewed: public shell and bottom navigation, patient home, Booking A,
 Records A and Onboarding A in or/en/hi on mobile, tablet and desktop. Lavender/peach surfaces,
-Odia-first bilingual headings, service tiles, desktop summaries/sidebar and visible record metadata
+Headings (bilingual at the time; single-language since 3 November 2026, see below), service tiles, desktop summaries/sidebar and visible record metadata
 match the selected reference layouts. The narrow desktop table found during review was fixed
 before the final complete verification pass. Snapshot thresholds and axe rules are unchanged.
 
@@ -225,3 +225,15 @@ restarted. No mockup, secret, generated report or test data is included in the c
 
 Requirement statuses and module totals do not move in this verification round. FU-41–45 remain
 open; FU-46 adds triage of the three moderate `qs`, `minimatch` and `glob` advisories.
+
+## Single-language headings (3 November 2026)
+
+English and Hindi pages showed Odia headings and service-tile titles, with the selected language as
+a smaller grey caption beneath. `Bilingual` and `ServiceTiles` always rendered the Odia catalogue,
+and `.bilingual__secondary` shrank the selected language. That breaks I18N-01/02: a page shows the
+language its route names. The site now renders headings and tiles from the route's catalogue only;
+`Bilingual` and its stories are removed. English pages preload only the Latin font and Hindi pages
+Devanagari and Latin, because no Odia is shown there. The Odia face still loads on demand by
+unicode-range, for example for "ଓଡ଼ିଆ" in the open language menu. Guards: a unit test renders the
+public home, patient home, join page and every service page in en and hi with no Odia script, and an
+E2E test (`shell.spec.ts`, I18N-01) checks the rendered `main` text and loaded fonts in a browser.
