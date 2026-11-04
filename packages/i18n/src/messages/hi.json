@@ -427,7 +427,22 @@
       "police_verification_failed": "पुलिस सत्यापन पास नहीं हुआ",
       "other": "कृपया सहायता से संपर्क करें"
     },
-    "progressHint": "अपलोड किए दस्तावेज़ और सहेजे विवरण बने रहते हैं। आगे बढ़ने से पहले हर भाग सहेजें।"
+    "progressHint": "अपलोड किए दस्तावेज़ और सहेजे विवरण बने रहते हैं। आगे बढ़ने से पहले हर भाग सहेजें।",
+    "completion": "{total} में से {done} पूरे",
+    "stepOf": "{total} में से चरण {current}",
+    "allSteps": "सभी चरण",
+    "continueTo": "आगे बढ़ें: {step}",
+    "taskState": {
+      "review": "जाँच जारी",
+      "attention": "ध्यान दें",
+      "todo": "बाकी",
+      "start": "शुरू करें"
+    },
+    "documentsCount": "{total} ज़रूरी में से {done} अपलोड",
+    "payoutState": {
+      "missing": "अभी नहीं जोड़ा",
+      "added": "जोड़ा गया"
+    }
   },
   "account": {
     "title": "आपका खाता",

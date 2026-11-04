@@ -96,10 +96,11 @@ test.describe('Sign-up and account setup', () => {
     await second.getByRole('checkbox', { name: t.setup.consent.privacy }).check();
     await second.getByRole('button', { name: t.setup.consent.finish, exact: true }).click();
     await expect(second).toHaveURL(/\/en\/provider$/);
-    await expect(second.getByText(t.application.status.draft)).toBeVisible();
-    await expect(
-      second.getByRole('heading', { name: t.application.steps.identity, exact: true }),
-    ).toBeVisible();
+    const card = second.locator('.status-card');
+    await expect(card.getByText(t.application.status.draft)).toBeVisible();
+    await expect(second.locator('.checklist__item').first()).toContainText(
+      t.application.steps.identity,
+    );
   });
 
   test('SE-02 a protected page asks for sign-in and returns there afterwards', async ({ page }) => {
@@ -147,7 +148,7 @@ test.describe('Roles and sessions', () => {
       .getByRole('button', { name: t.account.switchTo.replace('{role}', t.roles.attendant.name) })
       .click();
     await expect(page).toHaveURL(/\/or\/provider$/);
-    await expect(page.getByText(t.application.status.draft)).toBeVisible();
+    await expect(page.locator('.status-card').getByText(t.application.status.draft)).toBeVisible();
   });
 
   test('SE-07.10 the header swaps sign-in for Account and sign-out, and back', async ({ page }) => {

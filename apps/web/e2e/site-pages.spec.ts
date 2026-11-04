@@ -351,12 +351,18 @@ for (const locale of LOCALES) {
     await expect(page).toHaveScreenshot(`records-${locale}.png`, { fullPage: true });
     await expectResilientLayout(page);
   });
-  test(`Onboarding A ${locale}: one step and desktop progress match visual snapshot`, async ({
+  test(`Onboarding B ${locale}: checklist overview, focused task and visual snapshot`, async ({
     page,
   }) => {
     await signedIn(page, locale, 'nurse');
     await page.goto(`/${locale}/provider`);
-    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
+    // G06: completion is apart from the step position shown in a task. This synthetic nurse has
+    // no required documents left, so only that task counts as done.
+    const completion = page.getByRole('progressbar');
+    await expect(completion).toHaveAttribute('aria-valuenow', '1');
+    await expect(completion).toHaveAttribute('aria-valuemax', '4');
+    const identity = page.locator('.checklist__item').first();
+    await expect(identity).toHaveAttribute('data-next', 'true');
     // G16: the heading focused after load shows the peach marker, never the browser's blue ring.
     const title = page.getByRole('heading', { level: 1 });
     await expect(title).toBeFocused();
@@ -369,9 +375,19 @@ for (const locale of LOCALES) {
     await expectAccessible(page, `onboarding ${locale}`);
     await page.evaluate(() => document.fonts.ready);
     await expect(page).toHaveScreenshot(`onboarding-${locale}.png`, { fullPage: true });
+    await page.locator('.onboarding__overview .flow__primary').click();
+    await expect(
+      page.getByRole('heading', { level: 2, name: t.application.steps.identity }),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: t.application.verifyIdentity })).toBeVisible();
+    await expect(identity).toHaveAttribute('aria-current', 'step');
     await page.getByRole('button', { name: t.setup.continue, exact: true }).click();
-    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
-    await expect(page.getByRole('button', { name: t.application.verifyIdentity })).toHaveCount(0);
+    await expect(
+      page.getByRole('heading', { level: 2, name: t.application.steps.documents }),
+    ).toBeVisible();
+    await expectAccessible(page, `onboarding task ${locale}`);
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page).toHaveScreenshot(`onboarding-task-${locale}.png`, { fullPage: true });
     await expectResilientLayout(page);
   });
 }

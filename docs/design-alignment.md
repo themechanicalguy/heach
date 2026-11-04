@@ -73,14 +73,14 @@ Owner decisions of 4 November 2026, and the design choices from the alignment br
 | G03 | Positional service colours           | Done (1)        | `nth-child` colours removed; white tiles with explicit lavender wells; records tile in the grid with a peach well. |
 | G04 | Next-booking emphasis                | Done (1)        | Lavender panel; primary action by state (complete payment, show start code), Details secondary, status otherwise. |
 | G05 | Emergency and support cards          | Done (1)        | One emergency card (heading, explanation, Call 108) on home, services, contact and sign-in; help card. |
-| G06 | Onboarding visual system             | Pending (2)     |                                                                                                  |
+| G06 | Onboarding visual system             | Done (2)        | Checklist overview with a purple completion card (tasks done, not step position) and done, in-review, needs-attention and next states; one focused task at a time with "Step n of N"; desktop step rail. |
 | G07 | Date and time picker                 | Pending (3)     |                                                                                                  |
 | G08 | Mobile booking action area           | Pending (3)     |                                                                                                  |
 | G09 | Desktop booking receipt              | Pending (3)     |                                                                                                  |
 | G10 | Records browsing first               | Pending (4)     |                                                                                                  |
 | G11 | Records scanning cues                | Pending (4)     |                                                                                                  |
 | G12 | Health profile and sharing entry     | Pending (4)     |                                                                                                  |
-| G13 | Desktop layout widths                | Partial (1)     | Width tokens (form 40 rem, app 75 rem, site 76 rem) and `.page--app`; home uses the app width with a 20 rem side column. Onboarding, booking and records follow in parts 2–4. |
+| G13 | Desktop layout widths                | Partial (1)     | Width tokens (form 40 rem, app 75 rem, site 76 rem) and `.page--app`; home uses the app width with a 20 rem side column; onboarding a 19 rem rail beside the task within 69 rem (part 2). Booking and records follow in parts 3–4. |
 | G14 | Footer dominance                     | Done (1)        | Compact footer (help and legal links, company line) on task screens and once signed in; full directory on public pages while signed out; no second language switch. |
 | G15 | Typography and density               | Partial (1)     | Type scale (28 px phone, 32 px desktop titles), compact button and emergency button variants, brand-coloured plain links. Status, receipt, filter and admin variants follow. |
 | G16 | Programmatic focus styling           | Done (1)        | One branded focus ring for every control; script-focused headings show a peach marker, never the browser's blue. |
@@ -132,3 +132,36 @@ Evidence:
   provider join, sign-in, welcome, account, people, bookings, booking detail, plans, referral,
   notifications, records, provider application, provider services, requests, earnings, lab and
   team. No horizontal overflow and no browser exceptions.
+
+### Part 2: provider onboarding
+
+Files: `apps/web/src/components/onboarding/tasks.ts` (new: task states from the application),
+`OnboardingChecklist.tsx` (new: status card and checklist), `OnboardingView.tsx` (overview and
+task panels), `IdentityStep.tsx` and `PayoutForm.tsx` (no card inside the task card),
+`packages/ui/src/Progress.tsx` (`min`, for completion counts that start at zero),
+`apps/web/src/app/[locale]/provider/page.tsx` (app width), `globals.css`. Eleven new
+`application.*` keys per locale (draft Odia and Hindi, FU-41).
+
+- **States.** Each task's state comes from the application, never from the screen: identity
+  (not started, waiting, verified, failed), documents (a required file missing, a refused or
+  rejected file, files waiting for review after submission), payout (on file or not) and
+  submission (draft, submitted or under review, changes requested, decided). The first task the
+  provider can act on is outlined with Start; in review is peach; needs attention is red.
+- **Completion and position.** The purple card's bar counts tasks done (`aria-valuemin` 0); a
+  task screen shows "Step n of N" as text. The old position bar presented as progress is gone.
+- **Behaviour kept.** Identity still leaves for the partner's consent page (no Aadhaar entry);
+  documents, payout (with the fresh code) and submission call the same endpoints; the submit
+  button stays disabled while anything is missing; a submitted application is read only.
+- **Phones.** The overview (title, status card, checklist, status note, Continue in the bottom
+  action area) or one task with All steps, Back and Continue; never both.
+- **Desktop.** The checklist is a sticky step rail beside the task; its state words are kept
+  for screen readers while the markers show the state.
+
+Evidence: `onboarding/tasks.test.ts` (every state rule), `onboarding.test.tsx` (overview,
+completion apart from position, Continue to the next task, All steps; titles through every task
+in or/en/hi; upload, payout, submission and the identity handoff unchanged). Browser:
+`site-pages.spec.ts` "Onboarding B" on three viewports in or/en/hi with axe, the focus marker and
+two reviewed baselines (overview and task); the API-backed `onboarding-journey.spec.ts` and
+`sign-in-setup.spec.ts` now open tasks from the checklist. Rendered with synthetic applications
+at 360, 768 and 1280 px: new draft, identity waiting with one document uploaded (Odia), a task
+open, and under review (Hindi), with no overflow or browser exceptions.

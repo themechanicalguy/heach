@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, ChoiceGroup, Notice, TextField } from '@heach/ui';
+import { Button, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { Application } from '@heach/types';
 import { useState } from 'react';
 import { api } from '../../lib/api';
@@ -51,7 +51,7 @@ export function PayoutForm({ application, onSaved }: Readonly<Props>) {
     });
 
   return (
-    <Card title={t('application.payoutTitle')}>
+    <div className="onboarding__body">
       <p className="flow__muted">{t('application.payoutIntro')}</p>
       {payout && (
         <Notice tone="success">
@@ -96,6 +96,6 @@ export function PayoutForm({ application, onSaved }: Readonly<Props>) {
         </div>
       )}
       {sheet}
-    </Card>
+    </div>
   );
 }

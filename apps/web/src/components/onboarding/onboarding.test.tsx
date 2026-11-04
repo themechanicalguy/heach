@@ -53,6 +53,8 @@ const application = (overrides: Partial<Application> = {}): Application => ({
   ...overrides,
 });
 
+const startsWith = (text: string) => new RegExp(`^${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`);
+
 function first<T>(items: readonly T[]): T {
   const [item] = items;
   if (item === undefined) throw new Error('Nothing found');
@@ -85,13 +87,9 @@ it.each(['or', 'en', 'hi'] as const)(
         <OnboardingView />
       </I18nProvider>,
     );
-    for (const [index, step] of (
-      ['identity', 'documents', 'payout', 'review'] as const
-    ).entries()) {
+    for (const step of ['identity', 'documents', 'payout', 'review'] as const) {
       const label = messages.application.steps[step];
-      fireEvent.click(
-        await screen.findByRole('button', { name: `${String(index + 1)}. ${label}` }),
-      );
+      fireEvent.click(await screen.findByRole('button', { name: startsWith(label) }));
       await waitFor(() => {
         expect(document.title).toBe(
           `${label} · ${messages.application.title} · ${messages.app.name}`,
@@ -101,21 +99,42 @@ it.each(['or', 'en', 'hi'] as const)(
   },
 );
 
-describe('OnboardingView (J1)', () => {
-  it('PO-01 shows the checklist, what is missing, and blocks submit until complete', async () => {
-    state.api.mockResolvedValueOnce(application());
-    inEnglish(<OnboardingView />);
-    fireEvent.click(await screen.findByRole('button', { name: /Certificates and registration/ }));
-    expect(await screen.findAllByText('Police verification certificate')).toHaveLength(1);
-    expect(screen.getByText('Upload a new file: the document is not clear')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Identity check/ })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /Review and submit/ }));
-    expect(screen.getAllByText('Police verification certificate')).toHaveLength(1);
-    expect(
-      screen.getByRole<HTMLButtonElement>('button', { name: 'Submit for review' }).disabled,
-    ).toBe(true);
-  });
+it('G06 opens on the checklist: completion apart from position, the next task offered', async () => {
+  state.api.mockResolvedValue(application({ identity: 'pending' }));
+  inEnglish(<OnboardingView />);
+  const bar = await screen.findByRole('progressbar', { name: '0 of 4 done' });
+  expect(bar.getAttribute('aria-valuenow')).toBe('0');
+  const identity = screen.getByRole('button', { name: /^Identity check/ });
+  expect(identity.getAttribute('data-state')).toBe('review');
+  expect(identity.textContent).toContain('In review');
+  const documents = screen.getByRole('button', { name: /^Certificates and registration/ });
+  expect(documents.getAttribute('data-state')).toBe('attention');
+  expect(documents.getAttribute('data-next')).toBe('true');
+  fireEvent.click(screen.getByRole('button', { name: 'Continue: Certificates and registration' }));
+  expect(await screen.findByText('Step 2 of 4')).toBeTruthy();
+  expect(
+    screen.getByRole('heading', { level: 2, name: 'Certificates and registration' }),
+  ).toBeTruthy();
+  expect(documents.getAttribute('aria-current')).toBe('step');
+  fireEvent.click(screen.getByRole('button', { name: 'All steps' }));
+  expect(screen.queryByText('Step 2 of 4')).toBeNull();
+});
 
+it('PO-01 shows the checklist, what is missing, and blocks submit until complete', async () => {
+  state.api.mockResolvedValueOnce(application());
+  inEnglish(<OnboardingView />);
+  fireEvent.click(await screen.findByRole('button', { name: /Certificates and registration/ }));
+  expect(await screen.findAllByText('Police verification certificate')).toHaveLength(1);
+  expect(screen.getByText('Upload a new file: the document is not clear')).toBeTruthy();
+  expect(screen.getByRole('button', { name: /Identity check/ })).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: /Review and submit/ }));
+  expect(screen.getAllByText('Police verification certificate')).toHaveLength(1);
+  expect(
+    screen.getByRole<HTMLButtonElement>('button', { name: 'Submit for review' }).disabled,
+  ).toBe(true);
+});
+
+describe('OnboardingView (J1)', () => {
   it('PO-02 uploads a document with its number and expiry as the upload content type', async () => {
     state.api
       .mockResolvedValueOnce(application())
@@ -164,7 +183,7 @@ describe('OnboardingView (J1)', () => {
       .mockResolvedValueOnce(complete)
       .mockResolvedValueOnce({ ...complete, status: 'submitted', editable: false });
     inEnglish(<OnboardingView />);
-    fireEvent.click(await screen.findByRole('button', { name: /4. Review and submit/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /^Review and submit/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Submit for review' }));
     expect(
       await screen.findByText('We have your application. We will tell you the result by SMS.'),
@@ -179,6 +198,7 @@ describe('OnboardingView (J1)', () => {
       .mockResolvedValueOnce(application())
       .mockResolvedValueOnce({ redirectUrl: 'https://partner.invalid/x' });
     inEnglish(<OnboardingView />);
+    fireEvent.click(await screen.findByRole('button', { name: /^Identity check/ }));
     fireEvent.click(
       await screen.findByRole('button', { name: 'Verify with Aadhaar or DigiLocker' }),
     );
