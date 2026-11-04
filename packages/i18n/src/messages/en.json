@@ -995,7 +995,15 @@
       "blood_group": "Blood group",
       "vaccination": "Vaccination",
       "family_history": "Family history"
-    }
+    },
+    "add": "Add record",
+    "encrypted": "Encrypted",
+    "recordsFor": "Records for",
+    "edit": "Edit",
+    "historyEmpty": "Nothing added yet.",
+    "shareRecord": "Share",
+    "hoursOption": "{hours, plural, one {# hour} other {# hours}}",
+    "typeFilter": "Record type"
   },
   "sharedPanel": {
     "title": "Shared records",

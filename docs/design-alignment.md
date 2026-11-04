@@ -77,10 +77,10 @@ Owner decisions of 4 November 2026, and the design choices from the alignment br
 | G07 | Date and time picker                 | Done (3)        | Day strip (a week; earlier and later arrows past a week) and the day's free times in morning, afternoon and evening; unavailable days shown and disabled; on the profile, chosen-provider and any-provider pages. Times only from the server. |
 | G08 | Mobile booking action area           | Done (3)        | Bottom action area above the navigation with the chosen time, the listed fee and Continue; fields scroll clear of it; the payment review's Pay sits there too. |
 | G09 | Desktop booking receipt              | Done (3)        | Numbered sections and a sticky receipt as siblings (no card in a card); receipt shows provider, time, listed fee and the server's policy; the payment review is the final receipt with the server's fee, travel, discount and total. |
-| G10 | Records browsing first               | Pending (4)     |                                                                                                  |
-| G11 | Records scanning cues                | Pending (4)     |                                                                                                  |
-| G12 | Health profile and sharing entry     | Pending (4)     |                                                                                                  |
-| G13 | Desktop layout widths                | Partial (1)     | Width tokens (form 40 rem, app 75 rem, site 76 rem) and `.page--app`; home uses the app width with a 20 rem side column; onboarding a 19 rem rail beside the task within 69 rem (part 2); booking a 20 rem receipt beside the sections within 69 rem (part 3). Records follow in part 4. |
+| G10 | Records browsing first               | Done (4)        | The upload and external-link editors are off the page; Add record and Share open them as sheets (native modal dialogs); the timeline is the page. |
+| G11 | Records scanning cues                | Done (4)        | Person and type chips and one search box instead of three stacked fields; rows with type icon wells, type and date, and an issued-by or added-by-you badge; details and actions open within the row. |
+| G12 | Health profile and sharing entry     | Done (4)        | Health profile as a short summary by kind with Edit (editor in a sheet); encryption note and storage use beside it; Share on each record opens the link task with that record chosen. Phones stay timeline first with the profile after. |
+| G13 | Desktop layout widths                | Done (1–4)      | Width tokens (form 40 rem, app 75 rem, site 76 rem) and `.page--app`; home uses the app width with a 20 rem side column; onboarding a 19 rem rail beside the task within 69 rem (part 2); booking a 20 rem receipt beside the sections within 69 rem (part 3); records a 20 rem profile column beside the timeline within 72 rem (part 4). |
 | G14 | Footer dominance                     | Done (1)        | Compact footer (help and legal links, company line) on task screens and once signed in; full directory on public pages while signed out; no second language switch. |
 | G15 | Typography and density               | Partial (1)     | Type scale (28 px phone, 32 px desktop titles), compact button and emergency button variants, brand-coloured plain links. Status, receipt, filter and admin variants follow. |
 | G16 | Programmatic focus styling           | Done (1)        | One branded focus ring for every control; script-focused headings show a peach marker, never the browser's blue. |
@@ -198,3 +198,33 @@ text) with reviewed baselines; the journey spec chooses the time in the picker. 
 and 1280 px: an empty address focused by validation stays between the header and the bar; the
 review shows ₹600 fee, ₹50 travel, −₹100 discount and the server's ₹550 total with Pay ₹550.
 A 200% text check caught the bar's button widening the phone page; the bar now wraps.
+
+### Part 4: records
+
+Files: `apps/web/src/components/vault/VaultView.tsx` (browsing composition, filters, task
+sheets), `RecordRow.tsx` (new), `HealthProfile.tsx` (new: summary and editor sheet),
+`UploadForm.tsx` and `LinkForm.tsx` (moved out of the view, now focused tasks),
+`record-types.ts` (new: types, kinds, icon wells), `VaultTimeline.tsx` (one row layout at every
+width), `RecordCard.tsx` (source badge), `RecordActions.tsx` (Share), `SharePanels.tsx` (import),
+`packages/ui` (`image` icon; sheets scroll within 92% of the viewport), `lib/client-messages.ts`
+(`ui.close`), `test/dialog.ts` (new: modal dialogs in jsdom), vault page wrapper (app width),
+`globals.css`. Eight new `vault.*` keys per locale (draft, FU-41).
+
+- **Unchanged.** Every read, upload, deletion, access history, history entry and link goes to
+  the same endpoints with the same bodies; the server still decides what may be opened, shared
+  or deleted. Links keep the server's 1–72 hour limit (now 24, 48 or 72 hour chips).
+- **Desktop table to rows.** The desktop table is replaced by the same rows as phones, so
+  authorship, type and date read the same everywhere; clinical details stay collapsed until the
+  row is opened.
+- **Scope difference.** Records C's consent screen with day-length choices (7 and 30 days) is not
+  copied: links last at most 72 hours. Booking shares keep their own panel on the booking page.
+
+Evidence: `vault.test.tsx` (browsing first with no upload or link form; type chips filter the
+search; who viewed and delete; Add record, save and the sheet closing with "Saved."; Edit and add
+history; Share on a record preselects it and creates a 72-hour link; authorship in the row
+summary with clinical details collapsed). Browser: `site-pages.spec.ts` "Records A" on three
+viewports in or/en/hi (no editors by default, row icons and badges, profile column left of the
+timeline on desktop, the upload sheet opening and closing with Escape, axe in both states, 200%
+text) with reviewed baselines. Rendered with synthetic records at 360, 768 and 1280 px: populated
+with four sources and a linked person (en, or), empty (hi), and each sheet. The 200% text check
+caught grids sized to their content widening the phone page; every records grid now shrinks.

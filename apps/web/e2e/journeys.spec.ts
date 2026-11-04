@@ -211,21 +211,30 @@ async function j9(lang: InLanguage): Promise<void> {
   await expect(page.getByText(lang.say(t.vault.issuedBy, { name: nurse.name }))).toBeVisible();
   await expectAccessible(page, 'records vault');
 
-  const upload = lang.card(t.vault.uploadTitle);
+  // G10/G12: adding, the history and sharing are focused tasks opened from the records page.
+  await page.getByRole('button', { name: t.vault.add }).click();
+  const upload = page.getByRole('dialog', { name: t.vault.uploadTitle });
   await upload.getByLabel(t.vault.type).selectOption('prescription');
   await upload.getByLabel(t.vault.recordTitle).fill('Synthetic old prescription');
   await upload.getByLabel(t.vault.recordDate).fill('2026-09-01');
   await upload.getByLabel(t.vault.file).setInputFiles(PDF);
   await upload.getByRole('button', { name: t.vault.save }).click();
-  await expect(upload.getByText(t.vault.saved)).toBeVisible();
+  await expect(page.getByText(t.vault.saved)).toBeVisible();
+  await expect(upload).toBeHidden();
 
-  const history = lang.card(t.vault.historyTitle);
+  await page.getByRole('button', { name: t.vault.edit }).click();
+  const history = page.getByRole('dialog', { name: t.vault.historyTitle });
   await history.getByLabel(t.vault.historyText).fill('Synthetic allergy to penicillin');
   await history.getByRole('button', { name: t.vault.addHistory }).click();
   await expect(history.getByText('Synthetic allergy to penicillin')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(history).toBeHidden();
 
-  const link = lang.card(t.vault.linkTitle);
-  await link.getByRole('checkbox', { name: /Synthetic old prescription/ }).check();
+  const row = page.locator('.record-row').filter({ hasText: 'Synthetic old prescription' });
+  await row.locator('summary').click();
+  await row.getByRole('button', { name: t.vault.shareRecord }).click();
+  const link = page.getByRole('dialog', { name: t.vault.linkTitle });
+  await expect(link.getByRole('checkbox', { name: /Synthetic old prescription/ })).toBeChecked();
   await link.getByRole('button', { name: t.vault.createLink }).click();
   await expect(link.getByText(t.vault.linkCreated)).toBeVisible();
 }

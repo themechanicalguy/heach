@@ -45,14 +45,15 @@ export function RecordDetails({
   );
 }
 
-/** Authorship stays visible even when a desktop row's clinical details are collapsed. */
+/** Authorship stays visible, as a small badge: issued by a provider or lab, or added by you. */
 export function RecordIssuer({ record }: Readonly<{ record: VaultRecord }>) {
   const { t } = useI18n();
+  const mine = record.source === 'patient';
   return (
-    <p className="flow__muted">
-      {record.source === 'patient'
+    <span className="source-badge" data-source={mine ? 'self' : 'provider'}>
+      {mine
         ? t('vault.addedByYou')
         : t('vault.issuedBy', { name: record.issuedBy ?? record.facility ?? '' })}
-    </p>
+    </span>
   );
 }
