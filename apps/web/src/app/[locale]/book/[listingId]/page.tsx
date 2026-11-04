@@ -12,5 +12,9 @@ export default async function Page({
   const { listingId } = await params;
   if (!serverFlags().isOn('accounts') || !PATTERN.test(listingId)) notFound();
   const page = <BookChosenPage listingId={listingId} />;
-  return <PageMessages>{<main className="page">{<Suspense>{page}</Suspense>}</main>}</PageMessages>;
+  return (
+    <PageMessages>
+      {<main className="page page--app">{<Suspense>{page}</Suspense>}</main>}
+    </PageMessages>
+  );
 }

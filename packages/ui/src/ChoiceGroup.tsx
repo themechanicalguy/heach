@@ -17,6 +17,8 @@ export interface ChoiceGroupProps {
   multiple?: boolean | undefined;
   error?: string | undefined;
   name?: string | undefined;
+  /** Large cards (default), or compact pills for short labels such as who a booking is for. */
+  variant?: 'cards' | 'chips';
 }
 
 /**
@@ -31,12 +33,18 @@ export function ChoiceGroup({
   multiple = false,
   error,
   name,
+  variant = 'cards',
 }: Readonly<ChoiceGroupProps>) {
   const id = useId();
   const errorId = error ? `${id}-error` : undefined;
   const selected = typeof value === 'string' ? [value] : value;
   return (
-    <fieldset className="heach-choice-group" aria-describedby={errorId}>
+    <fieldset
+      className={
+        variant === 'chips' ? 'heach-choice-group heach-choice-group--chips' : 'heach-choice-group'
+      }
+      aria-describedby={errorId}
+    >
       <legend>{legend}</legend>
       {choices.map((choice) => (
         <label key={choice.value} className="heach-choice">

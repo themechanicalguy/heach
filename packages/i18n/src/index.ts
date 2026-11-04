@@ -7,7 +7,16 @@ export {
   type Translator,
 } from './translator.js';
 export { formatIcu, IcuSyntaxError, type MessageValues } from './icu.js';
-export { formatCurrency, formatDate, formatDateTime, formatPaise } from './format.js';
+export {
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  formatDayOfMonth,
+  formatMonthYear,
+  formatPaise,
+  formatTime,
+  formatWeekday,
+} from './format.js';
 export { findCatalogueProblems, type CatalogueProblem } from './catalogues.js';
 
 export { PAGE_SLUGS } from './content-pages.js';

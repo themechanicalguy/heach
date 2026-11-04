@@ -1,4 +1,13 @@
-import { formatDateTime, formatPaise, formatCurrency, formatDate } from './format.js';
+import {
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  formatDayOfMonth,
+  formatMonthYear,
+  formatPaise,
+  formatTime,
+  formatWeekday,
+} from './format.js';
 
 describe('formatting', () => {
   it('I18N-03.1 formats rupees with Indian grouping', () => {
@@ -16,5 +25,14 @@ describe('formatting', () => {
     const time = new Date('2026-10-30T04:30:00Z'); // 10:00 in India
     expect(formatDateTime(time, 'en')).toMatch(/10:00/);
     expect(formatPaise(4_500_050)).toBe('₹45,000.50');
+  });
+
+  it('AV-04 formats the parts of the day picker in India time', () => {
+    const late = new Date('2026-10-31T19:00:00Z'); // 00:30 on 1 November in India
+    expect(formatDayOfMonth(late, 'en')).toBe('1');
+    expect(formatWeekday(late, 'en')).toBe('Sun');
+    expect(formatMonthYear(late, 'en')).toBe('November 2026');
+    expect(formatTime(late, 'en')).toMatch(/12:30/);
+    expect(formatMonthYear(late, 'hi')).toContain('2026');
   });
 });

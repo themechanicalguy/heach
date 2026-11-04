@@ -74,13 +74,13 @@ Owner decisions of 4 November 2026, and the design choices from the alignment br
 | G04 | Next-booking emphasis                | Done (1)        | Lavender panel; primary action by state (complete payment, show start code), Details secondary, status otherwise. |
 | G05 | Emergency and support cards          | Done (1)        | One emergency card (heading, explanation, Call 108) on home, services, contact and sign-in; help card. |
 | G06 | Onboarding visual system             | Done (2)        | Checklist overview with a purple completion card (tasks done, not step position) and done, in-review, needs-attention and next states; one focused task at a time with "Step n of N"; desktop step rail. |
-| G07 | Date and time picker                 | Pending (3)     |                                                                                                  |
-| G08 | Mobile booking action area           | Pending (3)     |                                                                                                  |
-| G09 | Desktop booking receipt              | Pending (3)     |                                                                                                  |
+| G07 | Date and time picker                 | Done (3)        | Day strip (a week; earlier and later arrows past a week) and the day's free times in morning, afternoon and evening; unavailable days shown and disabled; on the profile, chosen-provider and any-provider pages. Times only from the server. |
+| G08 | Mobile booking action area           | Done (3)        | Bottom action area above the navigation with the chosen time, the listed fee and Continue; fields scroll clear of it; the payment review's Pay sits there too. |
+| G09 | Desktop booking receipt              | Done (3)        | Numbered sections and a sticky receipt as siblings (no card in a card); receipt shows provider, time, listed fee and the server's policy; the payment review is the final receipt with the server's fee, travel, discount and total. |
 | G10 | Records browsing first               | Pending (4)     |                                                                                                  |
 | G11 | Records scanning cues                | Pending (4)     |                                                                                                  |
 | G12 | Health profile and sharing entry     | Pending (4)     |                                                                                                  |
-| G13 | Desktop layout widths                | Partial (1)     | Width tokens (form 40 rem, app 75 rem, site 76 rem) and `.page--app`; home uses the app width with a 20 rem side column; onboarding a 19 rem rail beside the task within 69 rem (part 2). Booking and records follow in parts 3–4. |
+| G13 | Desktop layout widths                | Partial (1)     | Width tokens (form 40 rem, app 75 rem, site 76 rem) and `.page--app`; home uses the app width with a 20 rem side column; onboarding a 19 rem rail beside the task within 69 rem (part 2); booking a 20 rem receipt beside the sections within 69 rem (part 3). Records follow in part 4. |
 | G14 | Footer dominance                     | Done (1)        | Compact footer (help and legal links, company line) on task screens and once signed in; full directory on public pages while signed out; no second language switch. |
 | G15 | Typography and density               | Partial (1)     | Type scale (28 px phone, 32 px desktop titles), compact button and emergency button variants, brand-coloured plain links. Status, receipt, filter and admin variants follow. |
 | G16 | Programmatic focus styling           | Done (1)        | One branded focus ring for every control; script-focused headings show a peach marker, never the browser's blue. |
@@ -165,3 +165,36 @@ two reviewed baselines (overview and task); the API-backed `onboarding-journey.s
 `sign-in-setup.spec.ts` now open tasks from the checklist. Rendered with synthetic applications
 at 360, 768 and 1280 px: new draft, identity waiting with one document uploaded (Odia), a task
 open, and under review (Hindi), with no overflow or browser exceptions.
+
+### Part 3: booking
+
+Files: `apps/web/src/components/booking/DayTimePicker.tsx` (new), `BookingReceipt.tsx` (new:
+receipt and `PolicyNote`), `BookingForm.tsx` (sections, receipt, bottom action area),
+`BookingReview.tsx` (final receipt), `BookPages.tsx`, `care/ProviderProfileView.tsx` (the
+picker on the profile), `lib/slots.ts` (new: India-day grouping), `packages/i18n/src/format.ts`
+(`formatTime`, `formatWeekday`, `formatDayOfMonth`, `formatMonthYear`),
+`packages/ui/src/ChoiceGroup.tsx` (`variant="chips"` for who, gender and collection),
+book page wrappers (app width), `globals.css`. Thirteen new `book.*` keys per locale (draft,
+FU-41).
+
+- **Server authority kept.** The picker shows only times the server returned (AV-02, 7 days, as
+  the "next 7 days" copy says; no API change) and the slot is still held and checked at
+  `POST /bookings`. Before booking, the receipt and bar show only the listing's fee (or, for any
+  provider, the quote as "up to"), and say the total comes before payment; the payment review
+  shows the fee, travel, discount and total the server froze on the booking. The cancellation
+  policy is the server's and is not shown until its numbers arrive.
+- **One form, two Continue buttons.** The receipt's button (desktop) and the bar's (phones and
+  tablets) both submit the same form through `form=`; CSS shows one at a time.
+- **Scope difference.** The board's month arrows page a 14-day horizon; the services return
+  7 days, so the arrows appear only when a horizon longer than a week is asked for.
+
+Evidence: `lib/slots.test.ts` (India day, parts of the day, month end), `booking/picker.test.tsx`
+(grouping, selection, disabled days, week paging, receipt without a total, no partial policy),
+`booking.test.tsx` and `care.test.tsx` (booking body, prescription, review and pay, any provider,
+lab cart, profile link after choosing a time), `format.test.ts` (new formatters). Browser:
+`site-pages.spec.ts` "Booking B" on three viewports in or/en/hi (pressed time, seven days, one
+visible Continue inside the viewport on phones, fee in the bar or receipt, no total, axe, 200%
+text) with reviewed baselines; the journey spec chooses the time in the picker. Probed at 360
+and 1280 px: an empty address focused by validation stays between the header and the bar; the
+review shows ₹600 fee, ₹50 travel, −₹100 discount and the server's ₹550 total with Pay ₹550.
+A 200% text check caught the bar's button widening the phone page; the bar now wraps.

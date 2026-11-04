@@ -113,6 +113,21 @@ function route(responses: Record<string, unknown>) {
   });
 }
 
+/**
+ * The phone action bar's Continue (G08). The desktop receipt has its own; CSS shows one at a
+ * time, and both submit the one booking form.
+ */
+function continueFromBar() {
+  const buttons = screen.getAllByRole<HTMLButtonElement>('button', { name: 'Continue to payment' });
+  expect(buttons).toHaveLength(2);
+  const forms = new Set(buttons.map((button) => button.getAttribute('form')));
+  expect(forms.size).toBe(1);
+  expect(document.getElementById([...forms][0] ?? '')?.tagName).toBe('FORM');
+  const bar = buttons.find((button) => button.closest('.booking-bar'));
+  if (!bar) throw new Error('No bottom action area');
+  fireEvent.click(bar);
+}
+
 const bodyOf = (path: string) => {
   const call = (state.api.mock.calls as [string, RequestInit | undefined][]).find(
     ([called, init]) => called === path && init?.body,
@@ -166,7 +181,7 @@ describe('Booking a chosen provider (J3; BK-01, BK-04, BK-05, PY-01)', () => {
     fireEvent.change(screen.getByLabelText("Doctor's prescription"), {
       target: { files: [new File(['%PDF'], 'rx.pdf', { type: 'application/pdf' })] },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue to payment' }));
+    continueFromBar();
     expect(await screen.findByText('Check and pay')).toBeTruthy();
     await waitFor(() => {
       expect(document.activeElement).toBe(screen.getByRole('region', { name: 'Check and pay' }));
@@ -205,7 +220,7 @@ describe('Booking a chosen provider (J3; BK-01, BK-04, BK-05, PY-01)', () => {
     });
     inEnglish(<BookAny itemCode="physio_neuro_rehab" />);
     expect(await screen.findByText(/You pay up to ₹700.00/)).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /Mon/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Mon, 2 Nov, 10:00/ }));
     expect(bodyOf('/search/any-slots')).toEqual({ item: 'physio_neuro_rehab', pin: '751001' });
     expect(await screen.findByText('Provider gender')).toBeTruthy();
   });
@@ -305,7 +320,7 @@ describe('A lab cart (LB-02, LB-03)', () => {
       target: { value: '12 Synthetic Lane' },
     });
     fireEvent.change(screen.getByLabelText('PIN code'), { target: { value: '751001' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Continue to payment' }));
+    continueFromBar();
     await waitFor(() => {
       expect(bodyOf('/bookings')).toMatchObject({ collection: 'walk_in', extraListingIds: [LAB] });
     });
