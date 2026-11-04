@@ -286,6 +286,11 @@ Linux Playwright container), at 360, 390, 768 and 1280 px:
 - **Translations.** All new Odia and Hindi strings are drafts awaiting native review (FU-41).
 - **Helpline and company details.** Still pending configuration (FU-43); the help card and footer
   say so.
-- **API-backed browser journeys** (`sign-in-setup`, `account-flows`, `journeys`,
-  `onboarding-journey`, admin `admin-verification`) need the API, database and Mailpit; they were
-  updated for the new layouts and run in CI's API E2E job.
+- **API-backed browser journeys.** Run locally on 4 November 2026 against this branch's API, web
+  and admin builds: web `sign-in-setup`, `account-flows`, `journeys` (J3, J4, J7, J8, J9) and
+  `onboarding-journey` 95 of 102 passed together; the 7 failures were the onboarding journey's
+  payout code step showing a rate-limit message after the earlier specs, with no 429 in the API's
+  log; the same journey passed alone in or, en and hi (and earlier in en and or). Admin J5
+  (`admin-verification`) passed on desktop and tablet; `admin-accounts` "super admin creates a
+  verifier" failed locally as already recorded in the implementation status. CI's API E2E job runs
+  all of them on a clean database.
