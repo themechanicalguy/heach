@@ -1,4 +1,4 @@
-import { Button } from '@heach/ui';
+import { Button, Icon, type IconName } from '@heach/ui';
 import type { ReactNode } from 'react';
 import { t } from '../i18n';
 import { useSession } from '../session';
@@ -22,6 +22,27 @@ export type Section =
   | 'users'
   | 'admins'
   | 'password';
+
+/** Each section's sidebar icon (G19, admin A). */
+const ICONS: Record<Section, IconName> = {
+  dashboard: 'home',
+  verification: 'shield',
+  bookings: 'calendar',
+  finance: 'wallet',
+  tickets: 'message',
+  reviews: 'note',
+  labs: 'lab',
+  vault: 'lock',
+  plans: 'file',
+  referrals: 'share',
+  catalogue: 'note',
+  settings: 'edit',
+  content: 'file',
+  security: 'shield',
+  users: 'users',
+  admins: 'user',
+  password: 'lock',
+};
 
 interface Props {
   sections: readonly Section[];
@@ -58,6 +79,7 @@ export function AdminLayout({ sections, current, onSection, children }: Readonly
                     onSection(section);
                   }}
                 >
+                  <Icon name={ICONS[section]} size={20} />
                   {t(`nav.${section}`)}
                 </button>
               </li>

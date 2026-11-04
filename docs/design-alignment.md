@@ -82,11 +82,11 @@ Owner decisions of 4 November 2026, and the design choices from the alignment br
 | G12 | Health profile and sharing entry     | Done (4)        | Health profile as a short summary by kind with Edit (editor in a sheet); encryption note and storage use beside it; Share on each record opens the link task with that record chosen. Phones stay timeline first with the profile after. |
 | G13 | Desktop layout widths                | Done (1–4)      | Width tokens (form 40 rem, app 75 rem, site 76 rem) and `.page--app`; home uses the app width with a 20 rem side column; onboarding a 19 rem rail beside the task within 69 rem (part 2); booking a 20 rem receipt beside the sections within 69 rem (part 3); records a 20 rem profile column beside the timeline within 72 rem (part 4). |
 | G14 | Footer dominance                     | Done (1)        | Compact footer (help and legal links, company line) on task screens and once signed in; full directory on public pages while signed out; no second language switch. |
-| G15 | Typography and density               | Partial (1)     | Type scale (28 px phone, 32 px desktop titles), compact button and emergency button variants, brand-coloured plain links. Status, receipt, filter and admin variants follow. |
+| G15 | Typography and density               | Done (1–5)      | Type scale (28 px phone, 32 px desktop titles), compact button and emergency button variants, brand-coloured plain links. Then status cards (2), receipts and chips (3), filters and record rows (4), admin toolbar, badges and decision (5). |
 | G16 | Programmatic focus styling           | Done (1)        | One branded focus ring for every control; script-focused headings show a peach marker, never the browser's blue. |
-| G17 | Admin verification queue             | Pending (5)     |                                                                                                  |
-| G18 | Admin review workspace               | Pending (5)     |                                                                                                  |
-| G19 | Admin typography, labels, statuses   | Pending (5)     |                                                                                                  |
+| G17 | Admin verification queue             | Done (5)        | Compact toolbar (name search, provider type, waiting or decided) filtered by the server through `POST /admin/v1/applications/search` (name in the body, never a URL); queue columns for type, waiting time and identity result as badges. District left out (no data). |
+| G18 | Admin review workspace               | Done (5)        | The panel scrolls inside itself with the decision pinned at its foot; reason as a compact list that must be chosen before asking for changes or rejecting; history folded; focused document review (Admin B) with the document large beside its checks and the decision, fetched through the audited endpoint. |
+| G19 | Admin typography, labels, statuses   | Done (5)        | Anek Latin in admin; sidebar icons; `Badge` in `@heach/ui` for statuses, identity, scans, reviews and waiting; provider types and document keys from the catalogue, never raw codes. |
 
 ### Part 1: shell, home, emergency and footer
 
@@ -228,3 +228,69 @@ timeline on desktop, the upload sheet opening and closing with Escape, axe in bo
 text) with reviewed baselines. Rendered with synthetic records at 360, 768 and 1280 px: populated
 with four sources and a linked person (en, or), empty (hi), and each sheet. The 200% text check
 caught grids sized to their content widening the phone page; every records grid now shrinks.
+
+### Part 5: admin verification
+
+Files: `apps/api/src/onboarding/` (`ApplicationSearchDto`, `identity` on `ApplicationSummaryDto`,
+role and name filters in `queue`, `POST applications/search`), `apps/api/test/onboarding.int-spec.ts`,
+`packages/types` (regenerated), `packages/ui/src/Badge.tsx` (new, story and axe test),
+`apps/admin/src/pages/` (`Applications.tsx`, `QueueToolbar.tsx`, `ApplicationPanel.tsx`,
+`DocumentRow.tsx`, `DocumentReview.tsx`, `DecisionForm.tsx`, `status-badges.tsx`, `waiting.ts`),
+`apps/admin/src/layout/` (icons, Anek Latin, styles), `apps/admin/messages/en.json` (15 keys),
+`apps/admin/e2e/` (`verification-layout.spec.ts` and an axe helper, new).
+
+- **Data.** The queue summary gains only the identity check's state (Confidential, already shown
+  to the same verifiers on the review); never its method or reference. The name search uses
+  `strpos`, so `%` and `_` are literal; it is limited to 60 characters and the roles to the
+  onboarding roles. Same `super_admin` and `verifier` guard; request logs carry the route only.
+- **Decisions.** Approve needs no reason; asking for changes or rejecting now needs a reason
+  chosen from the list (previously one was preselected). Per-document accept and reject are
+  unchanged; every document opened is still audited by the server.
+- **Font.** The admin bundles the web app's self-hosted, OFL-licensed basic Latin subset of Anek
+  Latin (one file in the repository; 45 kB in the admin build).
+- **Scope differences.** No district column or filter (applications record none). The board's
+  "check each item" ticks are not added: they would not be stored; the stored checks are the
+  per-document accept and reject.
+
+Evidence: API integration `onboarding.int-spec.ts` 9 passed (new: role and name filters, literal
+`%`, identity state, decided view, 400 for unknown role or long search, 403 for support).
+Admin unit tests 39 passed (new: search body and badges, labels instead of codes, reason required,
+document review through the API; `waiting.test.ts`). Admin browser `verification-layout.spec.ts`
+on desktop and tablet with a synthetic API: type, waiting and identity in the row, Anek Latin,
+the name only in the request body, Approve inside the viewport in the panel and in the review,
+Request changes disabled without a reason, switching documents, axe on the queue, panel and
+review. Rendered at 1280 and 768 px: no overflow, no browser exceptions, no raw codes on screen.
+
+## Verification record
+
+Rendered with synthetic data only, in Chromium (production builds; the web visual suite in the
+Linux Playwright container), at 360, 390, 768 and 1280 px:
+
+- **Patient and provider journeys** in or, en and hi: signed-out and signed-in shells; patient home
+  with and without a next booking; onboarding new, partly done with identity waiting, a task open,
+  and under review; booking day and time, form, validation, payment review and any provider;
+  records empty and populated with each sheet (upload, history, share).
+- **Admin**: queue, review panel and document review at 1280 and 768 px.
+- **Route families** at 360 and 1280 px: public home, services, legal, contact, provider join,
+  sign-in, welcome, account, people, bookings, booking detail, plans, referral, notifications,
+  records, provider application, services, requests, earnings, lab and team. No horizontal
+  overflow and no browser exceptions in any rendered state.
+- **Checks in the suites**: axe (WCAG 2.2 A and AA rules) on every changed screen and task sheet;
+  200% text and pseudo-localisation on changed pages; 48 px targets in the header, cards and
+  footer; ICU key parity across or, en and hi (`pnpm check`).
+- **Not rendered by hand** (covered by source review and the suites only): the lab cart's
+  walk-in variant, shared-record link pages and the team page's invitation states.
+
+## Remaining external dependencies
+
+- **Translations.** All new Odia and Hindi strings are drafts awaiting native review (FU-41).
+- **Helpline and company details.** Still pending configuration (FU-43); the help card and footer
+  say so.
+- **API-backed browser journeys.** Run locally on 4 November 2026 against this branch's API, web
+  and admin builds: web `sign-in-setup`, `account-flows`, `journeys` (J3, J4, J7, J8, J9) and
+  `onboarding-journey` 95 of 102 passed together; the 7 failures were the onboarding journey's
+  payout code step showing a rate-limit message after the earlier specs, with no 429 in the API's
+  log; the same journey passed alone in or, en and hi (and earlier in en and or). Admin J5
+  (`admin-verification`) passed on desktop and tablet; `admin-accounts` "super admin creates a
+  verifier" failed locally as already recorded in the implementation status. CI's API E2E job runs
+  all of them on a clean database.

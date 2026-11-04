@@ -248,7 +248,22 @@
       "qualification_not_recognised": "Qualification not recognised",
       "police_verification_failed": "Police verification not cleared",
       "other": "Other (support will explain)"
-    }
+    },
+    "count": "{count, plural, one {# application} other {# applications}}",
+    "search": "Search by name",
+    "allRoles": "All provider types",
+    "waiting": "Waiting",
+    "waitingToday": "Today",
+    "waitingDays": "{days, plural, one {# day} other {# days}}",
+    "reasonPlaceholder": "Choose a reason",
+    "reasonHint": "Needed to request changes or reject. The provider sees this reason in their language.",
+    "reviewDocuments": "Review documents",
+    "backToQueue": "Back to the queue",
+    "documentPosition": "Document {current} of {total}",
+    "auditNote": "Documents are encrypted. Opening one is recorded in the audit log.",
+    "noPreview": "This file cannot be shown here. Open it in a new tab.",
+    "openInTab": "Open in a new tab",
+    "more": "History and details"
   },
   "catalogue": {
     "title": "Service catalogue",

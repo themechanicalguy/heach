@@ -1,74 +1,110 @@
-import { Button, ChoiceGroup, EmptyState, ErrorState, Skeleton, Table } from '@heach/ui';
+import { EmptyState, ErrorState, Skeleton } from '@heach/ui';
 import type { ApplicationSummary } from '@heach/types';
 import { useCallback, useState } from 'react';
 import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
 import { ApplicationPanel } from './ApplicationPanel';
-import { label } from './labels';
+import { DocumentReview } from './DocumentReview';
+import { QueueToolbar, type QueueFilters } from './QueueToolbar';
+import { IdentityBadge, roleName, StatusBadge, WaitingBadge } from './status-badges';
 
-function columns(onOpen: (id: string) => void) {
-  return [
-    {
-      key: 'name',
-      header: t('verification.name'),
-      cell: (a: ApplicationSummary) => a.fullName ?? '—',
-    },
-    { key: 'role', header: t('verification.role'), cell: (a: ApplicationSummary) => a.role },
-    {
-      key: 'status',
-      header: t('verification.status'),
-      cell: (a: ApplicationSummary) => label('verification.statuses', a.status),
-    },
-    {
-      key: 'submitted',
-      header: t('verification.submitted'),
-      cell: (a: ApplicationSummary) =>
-        a.submittedAt ? new Date(a.submittedAt).toLocaleDateString('en-IN') : '—',
-    },
-    {
-      key: 'open',
-      header: t('verification.open'),
-      cell: (a: ApplicationSummary) => (
-        <Button
-          className="heach-button--secondary"
-          aria-label={`${t('verification.open')} ${a.fullName ?? ''}`}
-          onClick={() => {
-            onOpen(a.accountId);
-          }}
-        >
-          {t('verification.open')}
-        </Button>
-      ),
-    },
-  ];
+function QueueTable({
+  rows,
+  selected,
+  onOpen,
+}: Readonly<{
+  rows: readonly ApplicationSummary[];
+  selected: string | undefined;
+  onOpen: (id: string) => void;
+}>) {
+  return (
+    <div className="heach-table-wrap">
+      <table className="heach-table admin-queue">
+        <caption className="heach-visually-hidden">{t('verification.title')}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{t('verification.name')}</th>
+            <th scope="col">{t('verification.role')}</th>
+            <th scope="col">{t('verification.waiting')}</th>
+            <th scope="col">{t('verification.identity')}</th>
+            <th scope="col">{t('verification.status')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.accountId} data-selected={row.accountId === selected || undefined}>
+              <td>
+                <button
+                  type="button"
+                  className="admin-queue__open"
+                  aria-label={`${t('verification.open')} ${row.fullName ?? ''}`}
+                  onClick={() => {
+                    onOpen(row.accountId);
+                  }}
+                >
+                  {row.fullName ?? '—'}
+                </button>
+              </td>
+              <td>{roleName(row.role)}</td>
+              <td>
+                <WaitingBadge submittedAt={row.submittedAt} />
+              </td>
+              <td>
+                <IdentityBadge identity={row.identity} />
+              </td>
+              <td>
+                <StatusBadge status={row.status} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
-/** The verification queue (AD-02, J5): waiting applications oldest first, or decided ones. */
+/** The verification queue (AD-02, J5, G17): a compact toolbar and table beside the review. */
 export function Applications() {
-  const [view, setView] = useState<'open' | 'decided'>('open');
+  const [filters, setFilters] = useState<QueueFilters>({ view: 'open', role: '', q: '' });
   const [selected, setSelected] = useState<string | undefined>();
+  const [reviewing, setReviewing] = useState<{ accountId: string; documentId?: string }>();
   const fetcher = useCallback(
-    () => api<ApplicationSummary[]>(`/applications?view=${view}`),
-    [view],
+    () =>
+      api<ApplicationSummary[]>('/applications/search', {
+        method: 'POST',
+        body: JSON.stringify({
+          view: filters.view,
+          ...(filters.role ? { role: filters.role } : {}),
+          ...(filters.q ? { q: filters.q } : {}),
+        }),
+      }),
+    [filters],
   );
   const { loaded, reload } = useLoad(fetcher);
-  return (
-    <>
-      <h1>{t('verification.title')}</h1>
-      <p>{t('verification.intro')}</p>
-      <ChoiceGroup
-        legend={t('verification.status')}
-        name="application-view"
-        value={view}
-        choices={[
-          { value: 'open', label: t('verification.viewOpen') },
-          { value: 'decided', label: t('verification.viewDecided') },
-        ]}
-        onChange={(value) => {
-          setView(value === 'decided' ? 'decided' : 'open');
+  if (reviewing)
+    return (
+      <DocumentReview
+        accountId={reviewing.accountId}
+        documentId={reviewing.documentId}
+        onDecided={reload}
+        onBack={() => {
+          setReviewing(undefined);
         }}
       />
+    );
+  return (
+    <>
+      <header className="admin-page-head">
+        <div>
+          <h1>{t('verification.title')}</h1>
+          {loaded.state === 'ready' && (
+            <p className="admin-muted">{t('verification.count', { count: loaded.value.length })}</p>
+          )}
+          <p className="admin-muted">{t('verification.intro')}</p>
+        </div>
+        <QueueToolbar filters={filters} onChange={setFilters} />
+      </header>
       <div className="admin-split">
         <div className="admin-split__main">
           {loaded.state === 'loading' && <Skeleton label={t('state.loading')} />}
@@ -83,12 +119,7 @@ export function Applications() {
             <EmptyState message={t('verification.empty')} />
           )}
           {loaded.state === 'ready' && loaded.value.length > 0 && (
-            <Table
-              caption={t('verification.title')}
-              columns={columns(setSelected)}
-              rows={loaded.value}
-              rowKey={(a) => a.accountId}
-            />
+            <QueueTable rows={loaded.value} selected={selected} onOpen={setSelected} />
           )}
         </div>
         {selected && (
@@ -96,6 +127,9 @@ export function Applications() {
             key={selected}
             accountId={selected}
             onDecided={reload}
+            onReview={(documentId) => {
+              setReviewing({ accountId: selected, ...(documentId ? { documentId } : {}) });
+            }}
             onClose={() => {
               setSelected(undefined);
             }}

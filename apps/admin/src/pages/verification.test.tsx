@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ApplicationReview, ApplicationSummary } from '@heach/types';
 import { Applications } from './Applications';
+import { waitingDays } from './waiting';
 import en from '../../messages/en.json';
 
 const ACCOUNT = '00000000-0000-4000-8000-0000000000bb';
@@ -62,6 +63,7 @@ function stubApi(status: ApplicationReview['status'] = 'under_review') {
       status: 'submitted',
       fullName: 'Synthetic Nurse',
       submittedAt: '2026-10-30T00:00:00Z',
+      identity: 'verified',
     },
   ];
   vi.stubGlobal(
@@ -74,8 +76,12 @@ function stubApi(status: ApplicationReview['status'] = 'under_review') {
         path,
         body: typeof init.body === 'string' ? (JSON.parse(init.body) as unknown) : undefined,
       });
-      if (path.startsWith('/applications?'))
-        return Promise.resolve(new Response(JSON.stringify(path.includes('decided') ? [] : queue)));
+      if (path === '/applications/search') {
+        const filters = JSON.parse(init.body as string) as { view?: string };
+        return Promise.resolve(
+          new Response(JSON.stringify(filters.view === 'decided' ? [] : queue)),
+        );
+      }
       if (path.includes('/documents/')) {
         return Promise.resolve(
           new Response(
@@ -99,8 +105,35 @@ describe('Verification queue (AD-02)', () => {
     stubApi();
     render(<Applications />);
     expect(await screen.findByText('Synthetic Nurse')).toBeTruthy();
-    fireEvent.click(screen.getByLabelText(en.verification.viewDecided));
+    fireEvent.change(screen.getByLabelText(en.verification.status), {
+      target: { value: 'decided' },
+    });
     expect(await screen.findByText(en.verification.empty)).toBeTruthy();
+  });
+
+  it('G17 filters in the request body and shows the type, waiting time and identity result', async () => {
+    const calls = stubApi();
+    render(<Applications />);
+    expect(await screen.findByText('Synthetic Nurse')).toBeTruthy();
+    const row = screen.getByText('Synthetic Nurse').closest('tr');
+    expect(row?.textContent).toContain(en.checklists.roles.nurse);
+    expect(row?.textContent).not.toMatch(/\bnurse\b/);
+    expect(row?.textContent).toContain(en.verification.identityStates.verified);
+    const days = waitingDays('2026-10-30T00:00:00Z') ?? 0;
+    expect(row?.textContent).toContain(
+      days === 0 ? en.verification.waitingToday : `${String(days)} day`,
+    );
+    fireEvent.change(screen.getByLabelText(en.verification.role), { target: { value: 'nurse' } });
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: ' Synthetic ' } });
+    fireEvent.submit(screen.getByRole('search'));
+    await waitFor(() => {
+      expect(calls.at(-1)).toEqual({
+        method: 'POST',
+        path: '/applications/search',
+        body: { view: 'open', role: 'nurse', q: 'Synthetic' },
+      });
+    });
+    expect(calls.every((call) => !call.path.includes('Synthetic'))).toBe(true);
   });
 
   it('AD-02 opens an application, its document, reviews it and approves', async () => {
@@ -111,17 +144,26 @@ describe('Verification queue (AD-02)', () => {
       await screen.findByRole('button', { name: `${en.verification.open} Synthetic Nurse` }),
     );
     expect(await screen.findByText(/SYN-1/)).toBeTruthy();
-    expect(screen.getByText(/training_certificate/)).toBeTruthy();
+    expect(screen.getByText(new RegExp(en.checklists.items.training_certificate))).toBeTruthy();
+    expect(screen.queryByText(/police_verification|training_certificate/)).toBeNull();
+    // G18: opening a document goes to the focused review, the file fetched through the API.
     fireEvent.click(screen.getByRole('button', { name: en.verification.download }));
-    expect(await screen.findByRole('link', { name: en.verification.download })).toBeTruthy();
+    expect(await screen.findByTitle(en.checklists.items.police_verification)).toBeTruthy();
+    expect(calls.some((call) => call.path.includes('/documents/'))).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: en.verification.reject }));
     await waitFor(() => {
       expect(calls.some((call) => call.path.endsWith('/documents') && call.method === 'POST')).toBe(
         true,
       );
     });
-    fireEvent.click(await screen.findByLabelText(en.verification.reasons.documents_expired));
-    fireEvent.click(screen.getByRole('button', { name: en.verification.requestChanges }));
+    const requestChanges = await screen.findByRole<HTMLButtonElement>('button', {
+      name: en.verification.requestChanges,
+    });
+    expect(requestChanges.disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText(en.verification.reason), {
+      target: { value: 'documents_expired' },
+    });
+    fireEvent.click(requestChanges);
     expect(await screen.findByText(en.verification.decided)).toBeTruthy();
     expect(calls.find((call) => call.path.endsWith('/decision'))?.body).toEqual({
       decision: 'request_changes',

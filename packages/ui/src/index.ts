@@ -1,3 +1,4 @@
+export { Badge, type BadgeProps } from './Badge.js';
 export { Button, type ButtonProps } from './Button.js';
 export { TextField, type TextFieldProps } from './TextField.js';
 export { OtpField, type OtpFieldProps } from './OtpField.js';

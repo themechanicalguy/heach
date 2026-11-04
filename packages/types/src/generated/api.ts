@@ -804,6 +804,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/v1/applications/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VerificationController_search'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/admin/v1/applications/{accountId}': {
     parameters: {
       query?: never;
@@ -3650,6 +3666,16 @@ export interface components {
       fullName: string | null;
       /** Format: date-time */
       submittedAt: string | null;
+      /** @enum {string} */
+      identity: 'not_started' | 'pending' | 'verified' | 'failed';
+    };
+    ApplicationSearchDto: {
+      /** @enum {string} */
+      view?: 'open' | 'decided';
+      /** @enum {string} */
+      role?: 'physiotherapist' | 'nurse' | 'attendant' | 'lab' | 'sample_collector';
+      /** @description Part of the provider name */
+      q?: string;
     };
     ApplicationEventDto: {
       fromStatus: string;
@@ -6296,6 +6322,29 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationSummaryDto'][];
+        };
+      };
+    };
+  };
+  VerificationController_search: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ApplicationSearchDto'];
+      };
+    };
     responses: {
       200: {
         headers: {

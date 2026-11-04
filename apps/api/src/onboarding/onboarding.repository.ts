@@ -223,25 +223,35 @@ export class OnboardingRepository {
     return rows;
   }
 
-  /** Applications in the review queue, oldest first (AD-02). */
-  async queue(statuses: readonly ApplicationStatus[]) {
+  /**
+   * Applications in the review queue, oldest first (AD-02), optionally of one role or with a name
+   * containing `q` (G17). `strpos` keeps the search literal: no LIKE wildcards from the admin.
+   */
+  async queue(statuses: readonly ApplicationStatus[], filters: QueueFilters = {}) {
+    // An empty or blank search is no search.
+    const name = filters.q?.trim() ? filters.q.trim() : null;
     const { rows } = await this.pool.query<{
       accountId: string;
       role: string;
       status: ApplicationStatus;
       fullName: string | null;
       submittedAt: Date | null;
+      identity: 'not_started' | 'pending' | 'verified' | 'failed';
     }>(
       `SELECT r.account_id AS "accountId", r.role, r.application_status AS status,
               p.full_name AS "fullName",
               (SELECT max(e.created_at) FROM app.application_event e
-                WHERE e.account_id = r.account_id AND e.to_status = 'submitted') AS "submittedAt"
+                WHERE e.account_id = r.account_id AND e.to_status = 'submitted') AS "submittedAt",
+              coalesce(i.status, 'not_started') AS identity
          FROM app.role_assignment r
          LEFT JOIN app.account_profile p ON p.account_id = r.account_id
+         LEFT JOIN app.identity_check i ON i.account_id = r.account_id
         WHERE r.side = 'provider' AND r.application_status = ANY($1)
+          AND ($2::text IS NULL OR r.role = $2)
+          AND ($3::text IS NULL OR strpos(lower(p.full_name), lower($3)) > 0)
         ORDER BY "submittedAt" NULLS LAST, r.granted_at
         LIMIT 200`,
-      [statuses],
+      [statuses, filters.role ?? null, name],
     );
     return rows;
   }
@@ -253,4 +263,9 @@ export class OnboardingRepository {
     );
     return rows[0]?.full_name ?? null;
   }
+}
+
+export interface QueueFilters {
+  role?: string | undefined;
+  q?: string | undefined;
 }

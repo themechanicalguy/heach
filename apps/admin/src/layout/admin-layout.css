@@ -5,11 +5,24 @@
   box-sizing: border-box;
 }
 
+/*
+ * Anek Latin, as in the design reference (G19). The admin is English only, so it takes the one
+ * basic Latin subset from the web app's self-hosted, OFL-licensed fonts (apps/web/public/fonts),
+ * bundled by Vite: one copy of the file in the repository.
+ */
+@font-face {
+  font-family: 'Anek Latin';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('../../../web/public/fonts/c57421e1d9255fc5-s.p.1pv4tz9e8k6lo.woff2') format('woff2');
+}
+
 body {
   margin: 0;
   background: var(--heach-background);
   color: var(--heach-text);
-  font-family: system-ui, sans-serif;
+  font-family: 'Anek Latin', system-ui, sans-serif;
   line-height: 1.5;
 }
 
@@ -50,6 +63,9 @@ body {
 }
 
 .admin__nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   width: 100%;
   min-height: 44px;
   padding: 0 0.75rem;
@@ -202,4 +218,337 @@ body {
   display: grid;
   gap: 0.5rem;
   padding-left: 1.25rem;
+}
+
+/* Verification (G17–G19): page head with a compact toolbar, a dense queue and a review panel. */
+.admin-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.admin-page-head h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.admin-page-head p {
+  margin: 0.125rem 0 0;
+}
+
+.admin-muted {
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-toolbar__search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding-inline: 0.75rem;
+  border: 1.5px solid var(--heach-border);
+  border-radius: 0.75rem;
+  background: var(--heach-surface);
+  color: var(--heach-muted);
+}
+
+.admin-toolbar__search:focus-within {
+  outline: 3px solid var(--heach-focus);
+  outline-offset: 1px;
+}
+
+.admin-toolbar__search input {
+  width: 14rem;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--heach-text);
+  font: inherit;
+  outline: none;
+}
+
+.admin-toolbar__select select {
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border: 1.5px solid var(--heach-border);
+  border-radius: 0.75rem;
+  background: var(--heach-surface);
+  color: var(--heach-text);
+  font: inherit;
+}
+
+.admin-queue th {
+  color: var(--heach-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.admin-queue td {
+  vertical-align: middle;
+}
+
+.admin-queue tr[data-selected='true'] {
+  background: var(--heach-primary-soft);
+}
+
+.admin-queue__open {
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--heach-text);
+  font: inherit;
+  font-weight: 700;
+  text-align: start;
+  cursor: pointer;
+}
+
+.admin-queue__open:hover {
+  color: var(--heach-primary);
+  text-decoration: underline;
+}
+
+/* The review panel scrolls inside itself; the decision stays at its foot (G18). */
+.admin-panel--review {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  /* Fits below the page head and toolbar at the top of the page, decision included. */
+  max-height: calc(100vh - 12rem);
+  padding: 0;
+  overflow: hidden;
+}
+
+.admin-panel__scroll {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.125rem;
+  overflow-y: auto;
+}
+
+.admin-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-panel__head > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-panel__head h2 {
+  font-size: 1.125rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-panel__head p,
+.admin-panel h3 {
+  margin: 0;
+}
+
+.admin-panel h3 {
+  font-size: 1rem;
+}
+
+.admin-avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--heach-primary-soft);
+  color: var(--heach-primary);
+}
+
+.admin-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--heach-border);
+  border-radius: 50%;
+  background: var(--heach-surface);
+  color: var(--heach-text);
+  cursor: pointer;
+}
+
+.admin-note {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--heach-background);
+  color: var(--heach-muted);
+  font-size: 0.8125rem;
+}
+
+.admin-docs {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-doc {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--heach-border);
+  border-radius: 0.75rem;
+}
+
+.admin-doc > .heach-badge {
+  justify-self: start;
+}
+
+.admin-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.admin-doc .admin-actions {
+  gap: 0.5rem;
+}
+
+.admin-history summary {
+  min-height: 44px;
+  padding-block: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-decision {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.875rem 1.125rem 1.125rem;
+  border-top: 1px solid var(--heach-border);
+  background: var(--heach-surface);
+}
+
+.admin-decision h3,
+.admin-decision p {
+  margin: 0;
+}
+
+.admin-decision__buttons {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.admin-decision__buttons .heach-button {
+  min-height: 44px;
+  border-radius: 0.75rem;
+}
+
+/* Admin B: the document large, the checks and decision beside it (G18). */
+.admin-review {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-review__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.admin-review__bar h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.admin-review__bar .heach-button--link {
+  text-decoration: none;
+}
+
+.admin-review__body {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+.admin-review__viewer,
+.admin-review__side {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.admin-review__side {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--heach-border);
+  border-radius: 1rem;
+  background: var(--heach-surface);
+}
+
+.admin-review__checks {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.admin-review__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-chip {
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid var(--heach-border);
+  border-radius: 999px;
+  background: var(--heach-surface);
+  color: var(--heach-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-chip[aria-pressed='true'] {
+  border-color: var(--heach-primary);
+  background: var(--heach-primary);
+  color: var(--heach-on-primary);
+}
+
+.admin-review__document {
+  width: 100%;
+  height: min(70vh, 48rem);
+  border: 1px solid var(--heach-border);
+  border-radius: 1rem;
+  background: var(--heach-primary-soft);
+  object-fit: contain;
+}
+
+@media (min-width: 1024px) {
+  .admin-review__body {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+  }
+
+  .admin-review__side {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 7rem);
+  }
 }

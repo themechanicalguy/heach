@@ -1575,6 +1575,43 @@
         "tags": ["admin"]
       }
     },
+    "/admin/v1/applications/search": {
+      "post": {
+        "operationId": "VerificationController_search",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationSearchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/admin/v1/applications/{accountId}": {
       "get": {
         "operationId": "VerificationController_review",
@@ -8025,9 +8062,31 @@
             "format": "date-time",
             "type": "string",
             "nullable": true
+          },
+          "identity": {
+            "type": "string",
+            "enum": ["not_started", "pending", "verified", "failed"]
           }
         },
-        "required": ["accountId", "role", "status", "fullName", "submittedAt"]
+        "required": ["accountId", "role", "status", "fullName", "submittedAt", "identity"]
+      },
+      "ApplicationSearchDto": {
+        "type": "object",
+        "properties": {
+          "view": {
+            "type": "string",
+            "enum": ["open", "decided"]
+          },
+          "role": {
+            "type": "string",
+            "enum": ["physiotherapist", "nurse", "attendant", "lab", "sample_collector"]
+          },
+          "q": {
+            "type": "string",
+            "maxLength": 60,
+            "description": "Part of the provider name"
+          }
+        }
       },
       "ApplicationEventDto": {
         "type": "object",

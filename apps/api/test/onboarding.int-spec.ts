@@ -215,3 +215,44 @@ describe('Provider verification by an admin (J5; AD-02, NT-01)', () => {
       .expect(404);
   });
 });
+
+describe('The verification queue search (G17; AD-02)', () => {
+  const { app, db, server } = useApp();
+  const search = (login: Parameters<typeof bearer>[0], body: object) =>
+    server().post('/admin/v1/applications/search').set(bearer(login)).send(body);
+  const ids = (rows: unknown) => (rows as { accountId: string }[]).map((row) => row.accountId);
+
+  it('G17 filters by role and part of a name, literally, and shows the identity state', async () => {
+    const nurse = await submittedProvider(app(), 'nurse');
+    const { rows } = await db().query<{ full_name: string }>(
+      'SELECT full_name FROM app.account_profile WHERE account_id = $1',
+      [nurse.accountId],
+    );
+    const name = rows[0]?.full_name ?? '';
+    const verifier = await adminSignIn(app(), 'verifier');
+    const byName = await search(verifier, { q: name.slice(1, -1).toUpperCase() }).expect(200);
+    expect(ids(byName.body)).toContain(nurse.accountId);
+    const row = (byName.body as { accountId: string; identity: string }[]).find(
+      (entry) => entry.accountId === nurse.accountId,
+    );
+    expect(row?.identity).toBe('verified');
+    expect(ids((await search(verifier, { role: 'nurse' }).expect(200)).body)).toContain(
+      nurse.accountId,
+    );
+    expect(ids((await search(verifier, { role: 'attendant' }).expect(200)).body)).not.toContain(
+      nurse.accountId,
+    );
+    expect((await search(verifier, { q: '%' }).expect(200)).body).toEqual([]);
+    expect(ids((await search(verifier, { view: 'decided' }).expect(200)).body)).not.toContain(
+      nurse.accountId,
+    );
+  });
+
+  it('G17 refuses unknown roles and long searches, and admins who do not verify', async () => {
+    const verifier = await adminSignIn(app(), 'verifier');
+    await search(verifier, { role: 'doctor' }).expect(400);
+    await search(verifier, { q: 'x'.repeat(61) }).expect(400);
+    const support = await adminSignIn(app(), 'support');
+    await search(support, {}).expect(403);
+  });
+});

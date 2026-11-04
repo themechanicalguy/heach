@@ -494,6 +494,44 @@
   cursor: pointer;
 }
 
+/* Badge: a compact status pill; the text always says the state (G19). */
+.heach-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.heach-badge--neutral {
+  background: var(--heach-background);
+  color: var(--heach-muted);
+}
+
+.heach-badge--info {
+  background: var(--heach-primary-soft);
+  color: var(--heach-primary);
+}
+
+.heach-badge--success {
+  background: var(--heach-success-soft);
+  color: var(--heach-success);
+}
+
+.heach-badge--warning {
+  background: var(--heach-accent-soft);
+  color: var(--heach-on-accent);
+}
+
+.heach-badge--danger {
+  background: var(--heach-danger-soft);
+  color: var(--heach-danger);
+}
+
 /* Notice: information beside a form (design reference: the shield note) */
 .heach-notice {
   display: flex;

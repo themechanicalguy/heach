@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { NAME_PATTERN } from '../accounts/setup-rules.js';
 import { UPLOAD_TYPES, type UploadType } from '../uploads/upload-rules.js';
+import { ONBOARDING_ROLES, type OnboardingRole } from './checklists.js';
 
 const APPLICATION_STATUSES = [
   'draft',
@@ -199,6 +200,10 @@ export class ApplicationSummaryDto {
 
   @ApiProperty({ type: Date, nullable: true })
   submittedAt!: Date | null;
+
+  /** The identity check's state only, never its method or reference (G17 scanning cue). */
+  @ApiProperty({ enum: ['not_started', 'pending', 'verified', 'failed'] })
+  identity!: 'not_started' | 'pending' | 'verified' | 'failed';
 }
 
 export class ApplicationEventDto {
@@ -234,6 +239,23 @@ export class ApplicationQueryDto {
   @IsOptional()
   @IsIn(['open', 'decided'])
   view?: 'open' | 'decided';
+}
+
+/**
+ * Queue filters (G17). A POST body, not query parameters, because a provider's name is
+ * Confidential and never goes in a URL.
+ */
+export class ApplicationSearchDto extends ApplicationQueryDto {
+  @ApiPropertyOptional({ enum: ONBOARDING_ROLES })
+  @IsOptional()
+  @IsIn(ONBOARDING_ROLES)
+  role?: OnboardingRole;
+
+  @ApiPropertyOptional({ maxLength: 60, description: 'Part of the provider name' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  q?: string;
 }
 
 export class DocumentReviewDto {
