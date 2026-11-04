@@ -2,36 +2,33 @@ import { translatorFor } from '../../i18n/messages';
 import type { SiteConfig } from '../../lib/site-config';
 import { ServiceTiles } from '../care/ServiceTiles';
 import { CareFinder } from './CareFinder';
-import { ContactAction } from './ContactAction';
 import { EmergencyBanner } from './EmergencyBanner';
 import { NearbyProviders } from './NearbyProviders';
 import { HowItWorks } from './HowItWorks';
 import { NextBooking } from './NextBooking';
+import { SupportCard } from './SupportCard';
 
+/**
+ * Signed-in patient home (G02): service-first on phones, with a compact search above the tiles;
+ * from desktop width the next booking, emergency and help cards form the companion column.
+ */
 export function PatientHome({ config, locale }: Readonly<{ config: SiteConfig; locale: string }>) {
   const { t } = translatorFor(locale);
   return (
-    <main className="page site-home">
-      <section className="site-hero">
-        <h1>{t('site.need')}</h1>
-        <CareFinder textSearch stayOnHome />
-      </section>
+    <main className="page page--app patient-home">
       <div className="patient-home-grid">
-        <div>
-          <NextBooking />
-          <ServiceTiles locale={locale} t={t} />
-          <a className="service-tile site-records" href={`/${locale}/vault`}>
-            <strong className="service-tile__title">{t('vault.title')}</strong>
-            <span>{t('site.vaultBody')}</span>
-          </a>
+        <div className="patient-home-main">
+          <h1 className="page-title">{t('site.need')}</h1>
+          <CareFinder textSearch stayOnHome compact />
+          <ServiceTiles locale={locale} t={t} records />
+          <NearbyProviders onlyAfterSearch />
         </div>
-        <aside className="patient-home-help">
+        <div className="patient-home-side">
+          <NextBooking />
           <EmergencyBanner locale={locale} />
-          <h2>{t('site.help')}</h2>
-          <ContactAction locale={locale} config={config} />
-        </aside>
+          <SupportCard locale={locale} config={config} />
+        </div>
       </div>
-      <NearbyProviders />
       <HowItWorks locale={locale} />
     </main>
   );

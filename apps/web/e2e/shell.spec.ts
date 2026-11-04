@@ -22,6 +22,10 @@ for (const locale of LOCALES) {
       await expect(page.getByRole('link', { name: CATALOGUES[locale].nav.signIn })).toBeVisible();
       const after = await page.getByRole('banner').boundingBox();
       expect(after?.height).toBe(before?.height);
+      // G01: on phones and desktops brand, services, language and sign-in fit one compact row;
+      // tablets move two or more navigation links to a second row by design.
+      const width = page.viewportSize()?.width ?? 0;
+      if (width < 600 || width >= 1024) expect(after && after.height <= 72).toBe(true);
     } finally {
       release();
     }

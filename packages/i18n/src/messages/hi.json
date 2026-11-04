@@ -1132,7 +1132,14 @@
     "reviewAttribution": "{name} · {service}",
     "checkCoverage": "सेवा क्षेत्र जाँचें",
     "coverageServed": "इस पिन में ये सेवाएँ उपलब्ध हैं।",
-    "coverageUnserved": "इस पिन में अभी कोई प्रकाशित सेवा नहीं है।"
+    "coverageUnserved": "इस पिन में अभी कोई प्रकाशित सेवा नहीं है।",
+    "emergencyBody": "ऑनलाइन बुकिंग का इंतज़ार न करें।",
+    "emergencyCall": "108 पर फ़ोन करें",
+    "helpTitle": "समझ नहीं आ रहा क्या चाहिए?",
+    "helpBody": "हमारी हेल्पलाइन पर फ़ोन करें।",
+    "payNow": "भुगतान पूरा करें",
+    "search": "सेवा खोजें",
+    "recordsHint": "पर्चे, रिपोर्ट और इतिहास"
   },
   "sitePages": {
     "about": {

@@ -158,6 +158,9 @@ test.describe('Roles and sessions', () => {
     await expect(page).toHaveURL(/\/en$/);
     await expect(header.getByRole('link', { name: t.nav.signIn })).toHaveCount(0);
     await expect(page.getByRole('link', { name: t.site.profile })).toBeVisible();
+    // Signing out sits in the header's account menu (G01), beside the alerts bell.
+    await expect(header.getByRole('link', { name: t.nav.notifications })).toBeVisible();
+    await header.getByRole('button', { name: t.site.more }).click();
     await header.getByRole('button', { name: t.nav.signOut }).click();
     await expect(header.getByRole('link', { name: t.nav.signIn })).toBeVisible();
     await expect(page).toHaveURL(/\/en$/);

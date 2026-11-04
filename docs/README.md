@@ -8,6 +8,7 @@
 | [Requirements traceability](requirements-traceability.md) | Draft: every requirement ID and journeys J1 to J9 mapped to a slice, step, dependency and proof |
 | [Archive](archive/README.md) | Retired step and feature specs (spec-driven development ended by ADR 0013); historical record only |
 | [Implementation status](implementation-status.md) | What is built, partial or not started, per step and requirement ID |
+| [Design alignment](design-alignment.md) | The design reference's 17 boards, the selected designs, and findings G01–G19 with changes and evidence |
 | [Step 2 log](step-2-progress.md) | Dated evidence for every Step 2 criterion, PR plan, deploy and rollback record |
 | [Step 2 acceptance matrix](step-2-acceptance-matrix.md) | Every Step 2 criterion, corrective spec, decision and exit criterion with its evidence and what still blocks completion |
 | [Step 1 and Step 2 audit](step-1-2-audit.md) | Independent audit of 25 October 2026: every Step 1 and Step 2 item and criterion, its evidence, its gap, and the Step 3 verdict |

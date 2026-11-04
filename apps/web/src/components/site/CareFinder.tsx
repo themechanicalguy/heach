@@ -11,7 +11,14 @@ import { useI18n } from '../../lib/i18n-context';
 import { Select } from '../care/SearchView';
 import { isService, PIN_PATTERN, SERVICES } from '../care/services';
 
-export function CareFinder(props: Readonly<{ textSearch?: boolean; stayOnHome?: boolean }>) {
+interface FinderProps {
+  textSearch?: boolean;
+  stayOnHome?: boolean;
+  /** The home screen's one-row search (G02): small labels, no surrounding hero. */
+  compact?: boolean;
+}
+
+export function CareFinder(props: Readonly<FinderProps>) {
   const { person } = useCareSearch();
   return <CareFinderForm key={person} {...props} />;
 }
@@ -20,7 +27,8 @@ export function CareFinder(props: Readonly<{ textSearch?: boolean; stayOnHome?: 
 function CareFinderForm({
   textSearch = false,
   stayOnHome = false,
-}: Readonly<{ textSearch?: boolean; stayOnHome?: boolean }>) {
+  compact = false,
+}: Readonly<FinderProps>) {
   const { locale, t } = useI18n();
   const { search, setSearch, person } = useCareSearch();
   const [draft, setDraft] = useState(search);
@@ -54,21 +62,25 @@ function CareFinderForm({
   };
   return (
     <form
-      className="care-finder"
+      className={compact ? 'care-finder care-finder--compact' : 'care-finder'}
+      role={compact ? 'search' : undefined}
+      aria-label={compact ? t('site.search') : undefined}
       onSubmit={(event) => {
         event.preventDefault();
         submit();
       }}
     >
       {textSearch && (
-        <TextField
-          label={t('search.text')}
-          value={draft.q}
-          maxLength={60}
-          onChange={(event) => {
-            update({ q: event.currentTarget.value });
-          }}
-        />
+        <div className="care-finder__text">
+          <TextField
+            label={t('search.text')}
+            value={draft.q}
+            maxLength={60}
+            onChange={(event) => {
+              update({ q: event.currentTarget.value });
+            }}
+          />
+        </div>
       )}
       <TextField
         label={t('search.pin')}

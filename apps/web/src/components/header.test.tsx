@@ -3,7 +3,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../lib/i18n-context';
-import { HeaderAccount } from './HeaderAccount';
+import { HeaderAccount, SignOutButton } from './HeaderAccount';
+import { HeaderCare } from './site/HeaderCare';
 import { LanguageSwitch } from './LanguageSwitch';
 import { ShellNav } from './ShellNav';
 
@@ -11,7 +12,7 @@ interface HeaderState {
   pathname: string;
   query: string;
   status: 'checking' | 'signed-in' | 'signed-out';
-  account: { state: string };
+  account: { state: string; me?: { activeRole: string } };
 }
 
 const state = vi.hoisted(() => {
@@ -39,6 +40,12 @@ vi.mock('../lib/session', () => ({
 }));
 vi.mock('../lib/account', () => ({ useAccount: () => ({ account: state.account }) }));
 vi.mock('../lib/api', () => ({ api: state.api }));
+vi.mock('../lib/care-search', () => ({
+  useCareSearch: () => ({ person: '', setPerson: vi.fn() }),
+}));
+vi.mock('../lib/use-resource', () => ({
+  useResource: () => ({ resource: { state: 'ready', data: [] }, reload: vi.fn() }),
+}));
 
 const inEnglish = (node: ReactNode) =>
   render(
@@ -141,10 +148,17 @@ describe('HeaderAccount', () => {
     expect(slot?.textContent).toContain(CATALOGUES.en.nav.signIn);
   });
 
-  it('SE-07.10 signed in, signs this device out and goes home', async () => {
+  it('shows nothing once signed in: signing out is in the account menu (G01)', () => {
     state.status = 'signed-in';
-    inEnglish(<HeaderAccount />);
-    expect(screen.queryByRole('link')).toBeNull();
+    const { container } = inEnglish(<HeaderAccount />);
+    expect(container.childElementCount).toBe(0);
+  });
+});
+
+describe('SignOutButton', () => {
+  it('SE-07.10 signs this device out and goes home', async () => {
+    state.status = 'signed-in';
+    inEnglish(<SignOutButton />);
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
     await waitFor(() => {
       expect(state.replace).toHaveBeenCalledWith('/en');
@@ -155,11 +169,62 @@ describe('HeaderAccount', () => {
   it('goes home even when the logout call fails, as the session has ended here', async () => {
     state.status = 'signed-in';
     state.signOut.mockRejectedValue(new Error('network'));
-    inEnglish(<HeaderAccount />);
+    inEnglish(<SignOutButton />);
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
     await waitFor(() => {
       expect(state.replace).toHaveBeenCalledWith('/en');
     });
+  });
+});
+
+describe('HeaderCare (G01 compact header)', () => {
+  const controls = (container: HTMLElement) =>
+    Array.from(
+      container.querySelectorAll(':scope > * > button, :scope > a, :scope > nav > button'),
+    ).map((node) => node.getAttribute('aria-label') ?? node.textContent);
+
+  it('signed out: language first, then a services menu with help', () => {
+    const { container } = inEnglish(<HeaderCare language={<LanguageSwitch />} />);
+    expect(controls(container)).toEqual(['English', 'Services']);
+    fireEvent.click(screen.getByRole('button', { name: 'Services' }));
+    const menu = screen.getByRole('navigation', { name: 'Services' });
+    expect(Array.from(menu.querySelectorAll('a')).map((link) => link.getAttribute('href'))).toEqual(
+      [
+        '/en/services/physiotherapy',
+        '/en/services/nursing',
+        '/en/services/attendant',
+        '/en/services/lab',
+        '/en/pages/contact',
+      ],
+    );
+  });
+
+  it('signed in for care: who for, language, the bell, then the account menu', () => {
+    state.status = 'signed-in';
+    state.account = { state: 'ready', me: { activeRole: 'patient' } };
+    const { container } = inEnglish(<HeaderCare language={<LanguageSwitch />} />);
+    expect(controls(container)).toEqual(['For me', 'English', 'Alerts', 'More']);
+    expect(screen.getByRole('link', { name: 'Alerts' }).getAttribute('href')).toBe(
+      '/en/notifications',
+    );
+    const more = screen.getByRole('button', { name: 'More' });
+    fireEvent.click(more);
+    const menu = screen.getByRole('navigation', { name: 'More' });
+    expect(menu.textContent).toContain('Plans');
+    expect(menu.textContent).toContain('Help');
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(more.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(more);
+  });
+
+  it('signed in as a provider: no person picker and no plans', () => {
+    state.status = 'signed-in';
+    state.account = { state: 'ready', me: { activeRole: 'nurse' } };
+    const { container } = inEnglish(<HeaderCare language={<LanguageSwitch />} />);
+    expect(controls(container)).toEqual(['English', 'Alerts', 'More']);
+    fireEvent.click(screen.getByRole('button', { name: 'More' }));
+    expect(screen.getByRole('navigation', { name: 'More' }).textContent).not.toContain('Plans');
   });
 });
 

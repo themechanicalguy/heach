@@ -3,36 +3,11 @@
 import { type Locale, LOCALES } from '@heach/i18n';
 import { Icon } from '@heach/ui';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { type RefObject, useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useId, useRef, useState } from 'react';
 import { useAccount } from '../lib/account';
 import { api } from '../lib/api';
 import { useI18n } from '../lib/i18n-context';
-
-/** Closes an open disclosure on Escape (focus back to its button) or a press outside it. */
-function useDismiss(
-  open: boolean,
-  close: () => void,
-  root: RefObject<HTMLElement | null>,
-  button: RefObject<HTMLButtonElement | null>,
-) {
-  useEffect(() => {
-    if (!open) return;
-    const onPointer = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) close();
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      close();
-      button.current?.focus();
-    };
-    document.addEventListener('pointerdown', onPointer);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onPointer);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open, close, root, button]);
-}
+import { useDismiss } from '../lib/use-dismiss';
 
 /**
  * The language in a compact pill that opens the three choices, each labelled in its own language
@@ -78,7 +53,9 @@ export function LanguageSwitch() {
         <span lang={locale} className="language-switch__name">
           {t(`locale.${locale}`)}
         </span>
-        <Icon name="chevron-down" size={16} />
+        <span className="header-pill__chevron">
+          <Icon name="chevron-down" size={16} />
+        </span>
       </button>
       <ul id={listId} className="language-switch__list" hidden={!open}>
         {LOCALES.map((code) => (

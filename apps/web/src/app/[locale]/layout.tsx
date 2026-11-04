@@ -19,8 +19,8 @@ import { criticalFontFiles } from '../fonts';
 import { translatorFor } from '../../i18n/messages';
 import { CareSearchProvider } from '../../lib/care-search';
 import { HeaderCare } from '../../components/site/HeaderCare';
-import { ContactAction } from '../../components/site/ContactAction';
-import { SiteFooter } from '../../components/site/SiteFooter';
+import { FooterSwitch } from '../../components/site/FooterSwitch';
+import { AppFooter, SiteFooter } from '../../components/site/SiteFooter';
 import { shellMessages } from '../../lib/client-messages';
 import { siteConfig } from '../../lib/site-config';
 import '@heach/ui/ui.css';
@@ -83,15 +83,16 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
                   </Link>
                   <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
                   <div className="shell-header__actions">
-                    <HeaderCare />
-                    <LanguageSwitch />
-                    <ContactAction locale={locale} config={siteConfig()} compact />
+                    <HeaderCare language={<LanguageSwitch />} />
                     <HeaderAccount />
                   </div>
                 </header>
                 <OfflineStatus />
                 {children}
-                <SiteFooter config={siteConfig()} locale={locale} />
+                <FooterSwitch
+                  full={<SiteFooter config={siteConfig()} locale={locale} />}
+                  compact={<AppFooter config={siteConfig()} locale={locale} />}
+                />
                 <ErrorTracking />
               </CareSearchProvider>
             </AccountProvider>

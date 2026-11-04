@@ -1132,7 +1132,14 @@
     "reviewAttribution": "{name} · {service}",
     "checkCoverage": "Check coverage",
     "coverageServed": "These services cover this PIN.",
-    "coverageUnserved": "No published services cover this PIN yet."
+    "coverageUnserved": "No published services cover this PIN yet.",
+    "emergencyBody": "Do not wait for an online booking.",
+    "emergencyCall": "Call 108",
+    "helpTitle": "Not sure what you need?",
+    "helpBody": "Call our helpline.",
+    "payNow": "Complete payment",
+    "search": "Search care",
+    "recordsHint": "Prescriptions, reports and history"
   },
   "sitePages": {
     "about": {
