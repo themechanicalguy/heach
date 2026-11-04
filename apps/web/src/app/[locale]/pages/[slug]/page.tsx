@@ -2,9 +2,12 @@ import { PageMessages } from '../../../../components/PageMessages';
 import { notFound } from 'next/navigation';
 import { PAGE_SLUGS } from '@heach/i18n';
 import { CoverageCheck } from '../../../../components/site/CoverageCheck';
+import { ContactPage } from '../../../../components/site/ContactPage';
+import { EmergencyBanner } from '../../../../components/site/EmergencyBanner';
 import { ContentPageView } from '../../../../components/content/ContentPageView';
 import { translatorFor } from '../../../../i18n/messages';
 import { publicContent } from '../../../../lib/public-content';
+import { siteConfig } from '../../../../lib/site-config';
 
 export default async function Page({
   params,
@@ -16,8 +19,10 @@ export default async function Page({
   return (
     <PageMessages page={slug === 'areas' ? 'areas' : 'pages'}>
       <main className="page">
+        {slug === 'contact' && <EmergencyBanner locale={locale} />}
         <ContentPageView slug={slug} initial={initial} />
         {slug === 'areas' && <CoverageCheck />}
+        {slug === 'contact' && <ContactPage config={siteConfig()} locale={locale} />}
       </main>
     </PageMessages>
   );

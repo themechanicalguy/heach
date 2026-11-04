@@ -11,8 +11,8 @@ with desktop health profile; Onboarding A with desktop step sidebar. Use home vi
 
 | Field or state | Class | Handling |
 | --- | --- | --- |
-| Approved helpline/support email, legal company name/address | Public | Explicit `SITE_*` allowlist; no secrets; absent values visibly pending |
-| Grievance officer business contact and response promise | Public after approval | Draft admin-editable content, pending owner/lawyer confirmation |
+| Approved helpline, hours, staffed languages, reply days, support email, legal company name/address, CIN | Public | Explicit `SITE_*` allowlist; validated; no secrets; absent or invalid values visibly pending |
+| Grievance officer business contact, response deadlines and data-protection contact | Public after approval | `SITE_GRIEVANCE_*` and `SITE_DATA_CONTACT_EMAIL`; the officer shows only when all five fields are set; pending owner/lawyer confirmation |
 | Approved service descriptions, catalogue prices, qualifications, coverage | Public | Published provider/catalogue data only; never invent availability or prices |
 | Published counts and reference date | Public after approval | Hidden until real data exists; no synthetic business claims |
 | Published review first name, service, text | Public only after approval/consent | Hidden until real reviews exist; never include condition or other health details |
@@ -237,3 +237,32 @@ Devanagari and Latin, because no Odia is shown there. The Odia face still loads 
 unicode-range, for example for "ଓଡ଼ିଆ" in the open language menu. Guards: a unit test renders the
 public home, patient home, join page and every service page in en and hi with no Odia script, and an
 E2E test (`shell.spec.ts`, I18N-01) checks the rendered `main` text and loaded fonts in a browser.
+
+## Contact page (4 November 2026)
+
+Built from a study of NHS.uk, Portea, Tata 1mg and Practo contact pages and the Indian disclosure
+rules (IT Rules 2021 r. 3(2), Consumer Protection (E-Commerce) Rules 2020 r. 4, DPDP Rules 2025
+r. 9). `/{locale}/pages/contact` shows, in order: the emergency banner; the admin-edited intro
+(AD-09); "What do you need help with?" with six routes; talk to us (call button with a copy-number button for desktops, where `tel:` often does nothing, hours, staffed
+languages, email, reply time, and a note not to email prescriptions or reports); the grievance
+officer with deadlines, three complaint steps and a link to the grievance page; the
+data-protection contact; company details with a plain maps link (no embedded map: no third-party
+script and nothing sent until tapped); and the FAQ preview.
+
+Decisions: booking problems and safety concerns route to the signed-in booking flow (RF-03), so
+the page has no public free-text form and health details never travel by email; WhatsApp stays
+unoffered. Every value is public configuration (`.env.example` lists the new `SITE_*` names);
+malformed hours, counts or languages count as unset, and each unset group shows a marked pending
+notice. The Odia and Hindi `contact.*` keys are drafts for native review (FU-41); the deadlines
+and the grievance and data contacts wait for the lawyer (FU-42) and the owner (FU-43).
+
+Verification: unit tests for config parsing and the pending and confirmed page states with axe;
+`site-pages.spec.ts` checks the banner, six routes returning 200, pending notices, axe, 200% text
+and pseudo-localisation on mobile, tablet and desktop in or, en and hi.
+
+Visual baselines: `contact-{or,en,hi}-{mobile,tablet,desktop}.png` (pending state, as deployed
+until FU-43), rendered in `mcr.microsoft.com/playwright:v1.63.0-noble` against a local
+`next start` with `APP_ENV=test FEATURE_FLAGS=accounts,sample-patient-note`; the contact tests
+pass there (9 passed). In that ad-hoc container setup, tests that intercept the app's own API
+calls fail under the `host.docker.internal` origin; they pass on the host and no other baseline
+changed.

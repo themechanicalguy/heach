@@ -171,6 +171,26 @@ for (const locale of LOCALES) {
       expect((await request.get(`/${locale}/services/${service}`)).status()).toBe(404);
     }
   });
+  test(`Contact ${locale}: routes by need, pending details marked, axe and visual snapshot`, async ({
+    page,
+    request,
+  }) => {
+    await page.route('**/api/v1/auth/refresh', (route) => route.fulfill({ status: 401, json: {} }));
+    await page.goto(`/${locale}/pages/contact`);
+    await expect(page.getByRole('link', { name: t.site.emergency })).toBeVisible();
+    const routes = page.getByRole('region', { name: t.contact.needTitle }).getByRole('link');
+    await expect(routes).toHaveCount(6);
+    const targets = await routes.evaluateAll((nodes) =>
+      nodes.map((node) => node.getAttribute('href') ?? '').filter((href) => href.startsWith('/')),
+    );
+    for (const href of new Set(targets)) expect((await request.get(href)).status(), href).toBe(200);
+    await expect(page.getByText(t.contact.grievancePending)).toBeVisible();
+    await expect(page.getByText(t.contact.dataPending)).toBeVisible();
+    await expectAccessible(page, `contact ${locale}`);
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page).toHaveScreenshot(`contact-${locale}.png`, { fullPage: true });
+    await expectResilientLayout(page);
+  });
   test(`Areas ${locale}: coverage uses a private POST body and names published services`, async ({
     page,
   }) => {
