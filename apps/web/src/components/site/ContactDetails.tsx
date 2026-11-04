@@ -3,8 +3,16 @@ import type { ReactNode } from 'react';
 import { translatorFor } from '../../i18n/messages';
 import type { SiteConfig } from '../../lib/site-config';
 import { ContactAction } from './ContactAction';
+import { CopyValue } from './CopyValue';
 
 type Props = Readonly<{ config: SiteConfig; locale: string }>;
+
+function CopyNumber({ value, locale }: Readonly<{ value: string; locale: string }>) {
+  const { t } = translatorFor(locale);
+  return (
+    <CopyValue value={value} label={t('contact.copyNumber')} copiedLabel={t('contact.copied')} />
+  );
+}
 
 /** One labelled value; contact values stay visible as text beside any tel: or mailto: link. */
 function Detail({ label, children }: Readonly<{ label: string; children: ReactNode }>) {
@@ -34,7 +42,12 @@ export function ContactChannels({ config, locale }: Props) {
   const { helpline, helplineHours, helplineLanguages, replyDays, supportEmail } = config;
   return (
     <Block id="contact-channels" title={t('contact.talkTitle')}>
-      {helpline && <ContactAction config={config} locale={locale} />}
+      {helpline && (
+        <div className="contact-actions">
+          <ContactAction config={config} locale={locale} />
+          <CopyNumber value={helpline} locale={locale} />
+        </div>
+      )}
       {!helpline && !supportEmail && <Notice tone="warning">{t('contact.channelsPending')}</Notice>}
       <dl className="contact-details">
         {helpline && helplineHours && (
@@ -73,7 +86,8 @@ export function GrievanceContact({ config, locale }: Props) {
               <a href={`mailto:${officer.email}`}>{officer.email}</a>
             </Detail>
             <Detail label={t('contact.phone')}>
-              <a href={`tel:${officer.phone}`}>{officer.phone}</a>
+              <a href={`tel:${officer.phone}`}>{officer.phone}</a>{' '}
+              <CopyNumber value={officer.phone} locale={locale} />
             </Detail>
           </dl>
           <p>

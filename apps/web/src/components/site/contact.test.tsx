@@ -1,5 +1,5 @@
 import { CATALOGUES } from '@heach/i18n';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { expectNoAxeViolations } from '../../../../../packages/ui/src/test/axe';
 import { ContactPage } from './ContactPage';
 import { SYNTHETIC_CONTACT } from './contact-fixture';
@@ -58,4 +58,22 @@ it('hides hours and reply time that have nothing to attach to', () => {
   expect(screen.queryByText(en.contact.hours)).toBeNull();
   expect(screen.queryByText('We reply within 1 working day.')).toBeNull();
   expect(screen.getByText(en.contact.channelsPending)).toBeTruthy();
+});
+
+it.each([
+  ['copies the helpline number and says so', true, en.contact.copied],
+  ['says nothing when the browser refuses to copy', false, ''],
+])('%s', async (_name, allowed, message) => {
+  const writeText = vi.fn(() =>
+    allowed ? Promise.resolve() : Promise.reject(new Error('denied')),
+  );
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+  render(<ContactPage locale="en" config={SYNTHETIC_CONTACT} />);
+  const channels = within(screen.getByRole('region', { name: en.contact.talkTitle }));
+  await act(async () => {
+    fireEvent.click(channels.getByRole('button', { name: en.contact.copyNumber }));
+    await Promise.resolve();
+  });
+  expect(writeText).toHaveBeenCalledWith('1800-000-0000');
+  expect(channels.getByRole('status').textContent).toBe(message);
 });

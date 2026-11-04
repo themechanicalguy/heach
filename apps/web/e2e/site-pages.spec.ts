@@ -171,7 +171,7 @@ for (const locale of LOCALES) {
       expect((await request.get(`/${locale}/services/${service}`)).status()).toBe(404);
     }
   });
-  test(`Contact ${locale}: routes by need, pending details marked, axe and resilient layout`, async ({
+  test(`Contact ${locale}: routes by need, pending details marked, axe and visual snapshot`, async ({
     page,
     request,
   }) => {
@@ -187,6 +187,8 @@ for (const locale of LOCALES) {
     await expect(page.getByText(t.contact.grievancePending)).toBeVisible();
     await expect(page.getByText(t.contact.dataPending)).toBeVisible();
     await expectAccessible(page, `contact ${locale}`);
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page).toHaveScreenshot(`contact-${locale}.png`, { fullPage: true });
     await expectResilientLayout(page);
   });
   test(`Areas ${locale}: coverage uses a private POST body and names published services`, async ({

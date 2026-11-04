@@ -1209,6 +1209,8 @@
       }
     },
     "talkTitle": "हमसे बात करें",
+    "copyNumber": "नंबर कॉपी करें",
+    "copied": "नंबर कॉपी हो गया।",
     "hours": "समय",
     "hoursValue": "{open} से {close} तक, हर दिन",
     "languages": "हम ये भाषाएँ बोलते हैं",

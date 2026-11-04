@@ -940,3 +940,16 @@ body {
   gap: 0.5rem;
   margin: 0;
 }
+.contact-actions,
+.copy-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.contact-details .copy-value {
+  display: inline-flex;
+}
+.copy-value [role='status'] {
+  color: var(--heach-success);
+}

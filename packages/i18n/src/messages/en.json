@@ -1209,6 +1209,8 @@
       }
     },
     "talkTitle": "Talk to us",
+    "copyNumber": "Copy number",
+    "copied": "Number copied.",
     "hours": "Hours",
     "hoursValue": "{open} to {close}, every day",
     "languages": "We speak",

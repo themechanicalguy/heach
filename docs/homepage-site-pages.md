@@ -243,7 +243,7 @@ E2E test (`shell.spec.ts`, I18N-01) checks the rendered `main` text and loaded f
 Built from a study of NHS.uk, Portea, Tata 1mg and Practo contact pages and the Indian disclosure
 rules (IT Rules 2021 r. 3(2), Consumer Protection (E-Commerce) Rules 2020 r. 4, DPDP Rules 2025
 r. 9). `/{locale}/pages/contact` shows, in order: the emergency banner; the admin-edited intro
-(AD-09); "What do you need help with?" with six routes; talk to us (call button, hours, staffed
+(AD-09); "What do you need help with?" with six routes; talk to us (call button with a copy-number button for desktops, where `tel:` often does nothing, hours, staffed
 languages, email, reply time, and a note not to email prescriptions or reports); the grievance
 officer with deadlines, three complaint steps and a link to the grievance page; the
 data-protection contact; company details with a plain maps link (no embedded map: no third-party
@@ -259,3 +259,10 @@ and the grievance and data contacts wait for the lawyer (FU-42) and the owner (F
 Verification: unit tests for config parsing and the pending and confirmed page states with axe;
 `site-pages.spec.ts` checks the banner, six routes returning 200, pending notices, axe, 200% text
 and pseudo-localisation on mobile, tablet and desktop in or, en and hi.
+
+Visual baselines: `contact-{or,en,hi}-{mobile,tablet,desktop}.png` (pending state, as deployed
+until FU-43), rendered in `mcr.microsoft.com/playwright:v1.63.0-noble` against a local
+`next start` with `APP_ENV=test FEATURE_FLAGS=accounts,sample-patient-note`; the contact tests
+pass there (9 passed). In that ad-hoc container setup, tests that intercept the app's own API
+calls fail under the `host.docker.internal` origin; they pass on the host and no other baseline
+changed.
