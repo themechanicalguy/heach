@@ -55,7 +55,7 @@ function ShowCode({ bookingId }: Readonly<{ bookingId: string }>) {
   const [code, setCode] = useState<VisitCode | undefined>();
   const { pending, error, run } = usePending();
   return (
-    <Card title={t('visit.showCode')}>
+    <Card id="start-code" title={t('visit.showCode')}>
       {code ? (
         <>
           <p className="visit-code">{t('visit.code', { code: code.code })}</p>

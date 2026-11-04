@@ -19,3 +19,17 @@ export const CareServices: StoryObj<typeof meta> = {
     </div>
   ),
 };
+
+export const Contact: StoryObj<typeof meta> = {
+  render: () => (
+    <div>
+      <Icon name="calendar" />
+      <Icon name="shield" />
+      <Icon name="wallet" />
+      <Icon name="lock" />
+      <Icon name="message" />
+      <Icon name="phone" />
+      <Icon name="mail" />
+    </div>
+  ),
+};

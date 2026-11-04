@@ -9,7 +9,10 @@ import { ResourceView } from '../account/ResourceView';
 import { ProviderCard } from '../care/ProviderCard';
 import { PIN_PATTERN } from '../care/services';
 
-export function NearbyProviders() {
+/** Providers for the current search; on the patient home only once a PIN code is known. */
+export function NearbyProviders({
+  onlyAfterSearch = false,
+}: Readonly<{ onlyAfterSearch?: boolean }>) {
   const { locale, t } = useI18n();
   const { search } = useCareSearch();
   const { resource, reload } = useResource<SearchResult[]>(
@@ -17,6 +20,7 @@ export function NearbyProviders() {
     JSON.stringify({ ...search, q: search.q || undefined, locale }),
     PIN_PATTERN.test(search.pin),
   );
+  if (onlyAfterSearch && !PIN_PATTERN.test(search.pin)) return null;
   return (
     <section className="site-section">
       <h2>{t('site.near')}</h2>

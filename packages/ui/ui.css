@@ -29,6 +29,46 @@
   --heach-radius-pill: 1.625rem;
   --heach-space: 1rem;
   --heach-bottom-nav-height: 4.75rem;
+  /* Type scale (design reference: 28 px phone and 32 px desktop page titles). */
+  --heach-text-title: 1.75rem;
+  --heach-text-section: 1.25rem;
+  --heach-text-body: 1rem;
+  --heach-text-small: 0.875rem;
+  /* Layout widths: a one-column form, an app workspace with a side column, the public site. */
+  --heach-width-form: 40rem;
+  --heach-width-app: 75rem;
+  --heach-width-site: 76rem;
+  --heach-gutter: 1rem;
+  /* Emergency: peach card with a dark call button on every screen (owner decision). */
+  --heach-emergency-bg: var(--heach-accent-soft);
+  --heach-emergency-text: var(--heach-on-accent);
+  --heach-emergency-action: var(--heach-text);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --heach-text-title: 2rem;
+    --heach-gutter: 1.75rem;
+  }
+}
+
+/* One branded focus ring for everything keyboard-focusable; never the browser default blue. */
+:focus-visible {
+  outline: 3px solid var(--heach-focus);
+  outline-offset: 2px;
+}
+
+/*
+ * Headings and regions focused by script after navigation (tabindex="-1") are not controls: a
+ * peach bar beside them shows where reading continues without drawing a control's ring.
+ */
+[tabindex='-1']:focus {
+  outline: none;
+}
+
+[tabindex='-1']:focus-visible {
+  outline: none;
+  box-shadow: -0.5rem 0 0 -0.125rem var(--heach-accent);
 }
 
 .heach-visually-hidden {
@@ -57,6 +97,19 @@
   font-size: 1.0625rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.heach-button--compact {
+  min-height: var(--heach-touch);
+  padding-inline: 1.125rem;
+  font-size: 0.9375rem;
+}
+
+/* The dark call button of the emergency card (design reference, desktop home) */
+.heach-button--emergency {
+  border-color: var(--heach-emergency-action);
+  background: var(--heach-emergency-action);
+  color: var(--heach-on-primary);
 }
 
 .heach-button--ghost {

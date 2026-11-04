@@ -82,6 +82,10 @@ const SITE_CLIENT_KEYS = [
   'maxFee',
   'rating',
   'earliest',
+  'helpLink',
+  'payNow',
+  'search',
+  'emergencyCall',
 ] as const;
 
 /** Only shell-island copy crosses the layout boundary; legal and marketing prose stay server-side. */
@@ -103,6 +107,7 @@ export function shellMessages(locale: Locale) {
     signIn: { codeLabel: catalogue.signIn.codeLabel, mobileHint: catalogue.signIn.mobileHint },
     people: { title: catalogue.people.title },
     vault: { person: catalogue.vault.person },
+    visit: { showCode: catalogue.visit.showCode },
   };
 }
 

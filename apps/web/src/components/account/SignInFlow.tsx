@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useAccount } from '../../lib/account';
 import { useI18n } from '../../lib/i18n-context';
 import { destinationFor } from '../../lib/routing';
+import { EmergencyCard } from '../site/EmergencyCard';
 import { useSession } from '../../lib/session';
 import { CodeStep } from './CodeStep';
 import { MobileStep } from './MobileStep';
@@ -56,7 +57,7 @@ export function SignInFlow({ next }: Readonly<{ next?: string | undefined }>) {
           />
         )}
         <Notice>{t('signIn.privacy')}</Notice>
-        <p className="emergency-note">{t('signIn.emergency')}</p>
+        <EmergencyCard body={t('signIn.emergency')} call={t('site.emergencyCall')} />
       </div>
     </section>
   );

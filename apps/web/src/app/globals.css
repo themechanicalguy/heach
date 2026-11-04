@@ -21,13 +21,36 @@ body {
   width: 100%;
   max-width: 64rem;
   margin-inline: auto;
-  padding: 1rem;
+  padding: var(--heach-gutter);
 }
 
+/* Layout widths (G13): a workspace with a side column, and the public site. */
+.page--app {
+  max-width: var(--heach-width-app);
+}
+
+.page--site {
+  max-width: var(--heach-width-site);
+}
+
+/* Titles follow the type scale: 28 px on phones, 32 px from desktop width (G15). */
 h1 {
-  font-size: clamp(1.5rem, 6vw, 2.5rem);
-  line-height: 1.2;
+  font-size: var(--heach-text-title);
+  line-height: 1.3;
   overflow-wrap: anywhere;
+}
+
+h2 {
+  line-height: 1.35;
+}
+
+/* Plain text links take the brand purple, never the browser's default blue (G15). */
+:where(main, footer, dialog) a:not([class]) {
+  color: var(--heach-primary);
+}
+
+.page-title {
+  margin: 0.25rem 0 1rem;
 }
 
 body {
@@ -43,11 +66,11 @@ body {
   top: 0;
   z-index: 20;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
-  padding: 0.5rem 1rem;
+  gap: 0.5rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   background: var(--heach-surface);
   border-bottom: 1px solid var(--heach-border);
 }
@@ -73,8 +96,11 @@ body {
 
 .shell-header__actions {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-end;
+  gap: 0.375rem;
+  min-width: 0;
   margin-inline-start: auto;
 }
 
@@ -90,9 +116,13 @@ body {
   }
 }
 
-/* Narrow phones: the language pill keeps its globe and sign-in its words, so both fit one row. */
+/*
+ * Narrow phones (G01): pills keep their icons and drop chevrons, the language pill its name and
+ * menus their labels (kept for screen readers), so the header stays one 64 px row.
+ */
 @media (max-width: 419px) {
-  .language-switch__name {
+  .language-switch__name,
+  .header-pill__label--phone {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -101,8 +131,28 @@ body {
     white-space: nowrap;
   }
 
+  .header-pill__chevron,
   .header-sign-in .heach-icon {
     display: none;
+  }
+
+  .header-pill {
+    padding-inline: 0.75rem;
+  }
+
+  .header-sign-in {
+    padding-inline: 0.875rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .header-pill__label--tablet {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
@@ -121,6 +171,95 @@ body {
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.header-pill {
+  text-decoration: none;
+}
+
+/* Icon-only pills (the bell): a 48 px circle */
+.header-pill--icon {
+  justify-content: center;
+  width: var(--heach-touch);
+  padding: 0;
+}
+
+/* The person pill gives way first when space is short; long names end in an ellipsis. */
+.header-person {
+  min-width: 0;
+}
+
+.header-person .header-pill {
+  max-width: 100%;
+}
+
+.header-person .header-pill__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-person {
+  margin-inline-end: auto;
+}
+
+.header-menu {
+  position: relative;
+}
+
+.header-menu__panel {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 0.375rem);
+  z-index: 30;
+  display: grid;
+  width: min(18rem, calc(100vw - 1.5rem));
+  padding: 0.375rem;
+  border: 1px solid var(--heach-border);
+  border-radius: 1rem;
+  background: var(--heach-surface);
+  box-shadow: 0 12px 32px -12px rgb(36 26 56 / 0.25);
+}
+
+.header-person .header-menu__panel {
+  inset-inline: 0 auto;
+  padding: 0.75rem;
+}
+
+.header-menu__panel[hidden] {
+  display: none;
+}
+
+.header-menu__panel nav {
+  display: grid;
+}
+
+.header-menu__panel .heach-field {
+  margin-block: 0 0.5rem;
+}
+
+.header-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--heach-touch);
+  padding-inline: 0.75rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: var(--heach-text);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.header-menu__item .heach-icon {
+  color: var(--heach-primary);
+}
+
+.header-menu__item:hover {
+  background: var(--heach-background);
 }
 
 .header-pill:hover,
@@ -213,10 +352,38 @@ body {
     padding-bottom: 0;
   }
 
+  .shell-header {
+    flex-wrap: wrap;
+    padding-inline: 1rem;
+  }
+
   /* Never narrower than its links: with many links the actions wrap to the next row instead of
      covering them (WCAG 2.2 target size, 2.5.8). */
   .shell-header .heach-bottom-nav {
     flex: 1 0 auto;
+  }
+}
+
+/* Tablets: the name and actions on the first row, the navigation pills on the second (G01). */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .shell-header:has(.heach-bottom-nav li:nth-child(2)) .heach-bottom-nav {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell-header {
+    flex-wrap: nowrap;
+    padding-inline: var(--heach-gutter);
+  }
+
+  .shell-header__actions {
+    flex: 0 1 auto;
+  }
+
+  .header-person {
+    margin-inline-end: 0;
   }
 }
 
@@ -488,12 +655,135 @@ body {
   font-size: 0.9375rem;
 }
 
-.emergency-note {
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.75rem;
-  background: #fceae8;
-  color: #8c1d18;
-  font-size: 0.875rem;
+/*
+ * Emergency card (G05): peach with a dark Call 108 button everywhere, sign-in included. A row in
+ * wide containers; stacked with a full-width button in narrow ones (the home side column).
+ */
+.emergency {
+  container-type: inline-size;
+}
+
+.emergency__card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--heach-radius-card);
+  background: var(--heach-emergency-bg);
+  color: var(--heach-emergency-text);
+}
+
+.emergency__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.emergency__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.emergency__text p,
+.emergency__title {
+  margin: 0;
+  font-size: var(--heach-text-small);
+}
+
+.emergency__title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.emergency__call {
+  flex: none;
+  min-height: var(--heach-touch);
+  padding-inline: 1.125rem;
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+@container (max-width: 26rem) {
+  .emergency__card {
+    flex-wrap: wrap;
+    padding: 1rem 1.125rem 1.125rem;
+  }
+
+  .emergency__icon {
+    display: none;
+  }
+
+  .emergency__text p {
+    font-size: 0.9375rem;
+  }
+
+  .emergency__call {
+    flex: 1 0 100%;
+  }
+}
+
+/* Help as its own white card (design reference, desktop home) */
+.support-card {
+  padding: 1.125rem;
+  border: 1px solid var(--heach-border);
+  border-radius: var(--heach-radius-card);
+  background: var(--heach-surface);
+}
+
+.support-card h2 {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+.support-card p {
+  margin: 0.25rem 0 0.5rem;
+  color: var(--heach-muted);
+}
+
+/* Next booking: the lavender panel with its main step and a secondary Details (G04) */
+.next-booking {
+  display: grid;
+  gap: 0.125rem;
+  padding: 1.125rem;
+  border-radius: var(--heach-radius-card);
+  background: var(--heach-primary-soft);
+}
+
+.next-booking p {
+  margin: 0;
+}
+
+.next-booking__label {
+  margin: 0;
+  color: var(--heach-muted);
+  font-size: var(--heach-text-small);
+  font-weight: 600;
+}
+
+.next-booking__time {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.next-booking__meta,
+.next-booking__status {
+  color: var(--heach-muted);
+  font-size: 0.9375rem;
+}
+
+.next-booking__status {
+  color: var(--heach-primary);
+  font-weight: 600;
+}
+
+.next-booking__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+}
+
+.next-booking__actions .heach-button {
+  text-decoration: none;
 }
 
 @media (min-width: 600px) {
@@ -529,30 +819,72 @@ body {
   }
 }
 
-/* Home screen service tiles (SD-01): two columns on phones, four from tablet width. */
+/*
+ * Home screen service tiles (SD-01, G03): white tiles with a lavender icon well, two columns on
+ * phones, four from desktop width; the records tile takes the peach well.
+ */
 .service-tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   list-style: none;
-  margin: 1.5rem 0 0;
+  margin: 0;
   padding: 0;
 }
 
 .service-tile {
-  display: grid;
-  gap: 0.25rem;
-  min-height: 7rem;
-  padding: 1rem;
-  border: 1px solid var(--heach-border, #d0d5dd);
-  border-radius: 0.75rem;
-  background: var(--heach-surface, #fff);
-  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.875rem;
+  height: 100%;
+  min-height: 7.75rem;
+  padding: 0.875rem;
+  border: 1px solid var(--heach-border);
+  border-radius: var(--heach-radius-card);
+  background: var(--heach-surface);
+  color: var(--heach-text);
   text-decoration: none;
 }
 
-.service-tile span {
-  font-size: 0.875rem;
+.service-tile:hover {
+  border-color: var(--heach-border-strong);
+}
+
+.service-tile__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--heach-radius);
+}
+
+.service-tile__icon--lavender {
+  background: var(--heach-primary-soft);
+  color: var(--heach-primary);
+}
+
+.service-tile__icon--peach {
+  background: var(--heach-accent-soft);
+  color: var(--heach-on-accent);
+}
+
+.service-tile__text {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.service-tile__title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.service-tile__hint,
+.service-tile .flow__muted {
+  color: var(--heach-muted);
+  font-size: 0.8125rem;
 }
 
 @media (min-width: 1024px) {
@@ -577,7 +909,7 @@ body {
 
 /* Shared public sections and the approved home boards. */
 .site-home {
-  max-width: 76rem;
+  max-width: var(--heach-width-site);
 }
 .site-home > * + * {
   margin-top: 1.5rem;
@@ -603,8 +935,58 @@ body {
   margin-block: 1rem;
 }
 .care-finder > *,
+.care-finder__text > .heach-field,
 .patient-home-grid > * {
   min-width: 0;
+}
+
+/* The home screen's compact search (G02): small labels, no hero, the tiles right below. */
+.care-finder--compact {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0.5rem 0.625rem;
+  margin: 0 0 1rem;
+}
+
+.care-finder--compact .heach-field {
+  margin: 0;
+  gap: 0.125rem;
+}
+
+.care-finder--compact .heach-field__label {
+  font-size: var(--heach-text-small);
+}
+
+.care-finder--compact .heach-input {
+  min-height: var(--heach-touch);
+}
+
+.care-finder--compact > .care-finder__text,
+.care-finder--compact > .heach-button,
+.care-finder--compact > .heach-notice {
+  grid-column: 1 / -1;
+}
+
+.care-finder--compact > .heach-button {
+  min-height: var(--heach-touch);
+}
+
+.patient-home-main,
+.patient-home-side {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.patient-home-main {
+  gap: 0;
+}
+
+.patient-home-main > .site-section {
+  margin-top: 1rem;
+}
+
+.patient-home > .site-section {
+  margin-top: 1.5rem;
 }
 .site-link,
 .site-contact-pending {
@@ -652,6 +1034,22 @@ body {
   min-width: var(--heach-touch);
   color: var(--heach-primary);
 }
+.site-footer--app {
+  display: grid;
+  gap: 0.25rem;
+  padding-block: 1rem;
+  font-size: 0.875rem;
+  color: var(--heach-muted);
+}
+.site-footer--app ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  margin: 0;
+}
+.site-footer--app p {
+  margin: 0;
+}
 .site-footer__strip {
   border-top: 1px solid var(--heach-border);
   margin-top: 1.5rem;
@@ -668,27 +1066,9 @@ body {
   display: grid;
   gap: 1rem;
 }
-.site-records {
-  margin-block: 1rem;
-}
 .site-badge {
   color: var(--heach-success);
   font-weight: 600;
-}
-.header-care {
-  position: relative;
-}
-.header-care__menu {
-  position: absolute;
-  inset-inline-end: 0;
-  top: 100%;
-  z-index: 30;
-  background: var(--heach-surface);
-  padding: 1rem;
-  border: 1px solid var(--heach-border);
-  border-radius: var(--heach-radius-card);
-  width: min(20rem, 85vw);
-  list-style: none;
 }
 @media (min-width: 600px) {
   .care-finder,
@@ -705,8 +1085,24 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .patient-home-grid {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: 1.5rem;
     align-items: start;
+  }
+  .patient-home-side {
+    position: sticky;
+    top: 5.5rem;
+  }
+  .care-finder--compact {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.5fr) auto;
+    align-items: end;
+  }
+  .care-finder--compact > .care-finder__text,
+  .care-finder--compact > .heach-button {
+    grid-column: auto;
+  }
+  .care-finder--compact > .heach-notice {
+    grid-column: 1 / -1;
   }
   .site-footer__columns,
   .site-steps {
@@ -732,9 +1128,6 @@ body {
 .onboarding-steps [aria-current='step'] {
   border-color: var(--heach-primary);
   background: var(--heach-primary-soft);
-}
-.service-tile {
-  border-radius: var(--heach-radius-tile);
 }
 .vault-profile {
   order: 2;
@@ -770,20 +1163,10 @@ body {
   }
 }
 
-.shell-header__actions {
-  flex-wrap: wrap;
-}
 .site-home a:focus-visible,
-.site-footer a:focus-visible,
-.header-care summary:focus-visible {
+.site-footer a:focus-visible {
   outline: 3px solid var(--heach-focus);
   outline-offset: 3px;
-}
-.site-emergency a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--heach-touch);
-  color: var(--heach-on-accent);
 }
 
 .vault-layout > *,
@@ -813,32 +1196,126 @@ body {
   border-color: var(--heach-primary);
 }
 
-.service-tile__icon {
-  color: var(--heach-primary);
-}
-.service-tiles li:nth-child(2n) .service-tile {
-  background: var(--heach-primary-soft);
-}
-.service-tiles li:nth-child(3n) .service-tile {
-  background: var(--heach-accent-soft);
-}
-
-.service-tile__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: var(--heach-radius);
-  background: var(--heach-primary-soft);
-}
-.service-tile__title {
-  font-size: 1.125rem;
-}
 .patient-home-grid .service-tiles {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 768px) {
+  .patient-home-grid .service-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .shell-header__name {
   min-width: var(--heach-touch);
+}
+
+/* Contact page: route by need, then channels and published details (site pages). */
+.contact-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: start;
+}
+.contact-page > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.contact-page .contact-routes,
+.contact-page .site-section:last-child {
+  grid-column: 1 / -1;
+}
+.contact-page h2 {
+  font-size: 1.25rem;
+}
+.contact-page h3 {
+  font-size: 1.0625rem;
+}
+.contact-block {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+.contact-routes ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.contact-routes a {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  min-height: 4rem;
+  padding: 0.75rem;
+  border: 1px solid var(--heach-border);
+  border-radius: var(--heach-radius-card);
+  color: var(--heach-text);
+  text-decoration: none;
+}
+.contact-routes a:hover {
+  background: var(--heach-background);
+}
+.contact-routes__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--heach-radius);
+  background: var(--heach-primary-soft);
+  color: var(--heach-primary);
+}
+.contact-routes li:nth-child(2) .contact-routes__icon {
+  background: var(--heach-danger-soft);
+  color: var(--heach-danger);
+}
+.contact-routes__body {
+  display: block;
+  color: var(--heach-muted);
+  font-size: 0.9375rem;
+}
+.contact-details {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+.contact-details dt {
+  color: var(--heach-muted);
+  font-size: 0.875rem;
+}
+.contact-details dd {
+  margin: 0;
+  font-weight: 500;
+}
+.contact-details a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--heach-touch);
+  color: var(--heach-primary);
+}
+.contact-page a:focus-visible {
+  outline: 3px solid var(--heach-focus);
+  outline-offset: 3px;
+}
+.contact-block .site-steps {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  margin: 0;
+}
+.contact-actions,
+.copy-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.contact-details .copy-value {
+  display: inline-flex;
+}
+.copy-value [role='status'] {
+  color: var(--heach-success);
 }

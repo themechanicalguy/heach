@@ -67,8 +67,10 @@ it('renders the public home signed out, including when accounts are off', () => 
   expect(screen.getByRole('heading', { level: 1 }).textContent).toContain(
     CATALOGUES.en.site.promise,
   );
+  const emergency = screen.getByRole('region', { name: CATALOGUES.en.site.emergencyTitle });
+  expect(emergency.textContent).toContain(CATALOGUES.en.site.emergencyBody);
   expect(
-    screen.getByRole('link', { name: CATALOGUES.en.site.emergency }).getAttribute('href'),
+    screen.getByRole('link', { name: CATALOGUES.en.site.emergencyCall }).getAttribute('href'),
   ).toBe('tel:108');
 });
 it('shows a neutral shell while restoring the session, with marketing hidden', () => {
@@ -92,6 +94,29 @@ it('mounts the patient home only after sign-in', () => {
   );
   expect(screen.getByRole('heading', { level: 1 }).textContent).toContain(CATALOGUES.en.site.need);
   expect(screen.getByRole('link', { name: /My records/ }).getAttribute('href')).toBe('/en/vault');
+});
+it('G02 puts the search and service tiles first, help and emergency in the side column', () => {
+  state.status = 'signed-in';
+  const { container } = show(<PatientHome config={{}} locale="en" />);
+  const main = container.querySelector('.patient-home-main');
+  const side = container.querySelector('.patient-home-side');
+  expect(main?.querySelector('h1 + form[role="search"] + .service-tiles')).toBeTruthy();
+  expect(side?.querySelector('.emergency + .support-card')).toBeTruthy();
+  expect(main?.querySelector('.emergency, .next-booking')).toBeNull();
+});
+it('G03 colours tiles by meaning, not position: lavender services, a peach records well', () => {
+  state.status = 'signed-in';
+  const { container } = show(<PatientHome config={{}} locale="en" />);
+  const wells = Array.from(container.querySelectorAll('.service-tile__icon')).map((well) =>
+    well.className.replace('service-tile__icon ', ''),
+  );
+  expect(wells).toEqual([
+    'service-tile__icon--lavender',
+    'service-tile__icon--lavender',
+    'service-tile__icon--lavender',
+    'service-tile__icon--lavender',
+    'service-tile__icon--peach',
+  ]);
 });
 it('keeps doctor and clinic tiles absent with the flag off, and marketing numbers/reviews hidden', () => {
   show(<PublicHome config={{}} locale="en" />);
@@ -153,6 +178,49 @@ it('shows no next-booking card without a booking, then the earliest future activ
   expect(screen.getByRole('link', { name: CATALOGUES.en.site.details }).getAttribute('href')).toBe(
     '/en/bookings/next',
   );
+});
+it.each([
+  ['pending_payment', 'visit', CATALOGUES.en.site.payNow, '/en/bookings/next'],
+  ['confirmed', 'visit', CATALOGUES.en.visit.showCode, '/en/bookings/next#start-code'],
+  ['in_progress', 'shift', CATALOGUES.en.visit.showCode, '/en/bookings/next#start-code'],
+])('G04 a %s %s booking leads with its next step, Details second', (status, kind, label, href) => {
+  state.rows = [
+    {
+      id: 'next',
+      startsAt: '2099-12-01T04:30:00Z',
+      endsAt: '2099-12-01T05:30:00Z',
+      status,
+      kind,
+      itemName: 'Synthetic visit',
+      provider: { name: 'Synthetic Nurse' },
+    },
+  ];
+  show(<NextBooking />);
+  const links = screen.getAllByRole('link');
+  expect(links.map((link) => link.textContent)).toEqual([label, CATALOGUES.en.site.details]);
+  expect(links[0]?.getAttribute('href')).toBe(href);
+  expect(screen.queryByText(/join|video/i)).toBeNull();
+});
+it.each([
+  ['requested', 'visit'],
+  ['confirmed', 'lab_test'],
+])('G04 a %s %s booking states its status and offers only Details', (status, kind) => {
+  state.rows = [
+    {
+      id: 'next',
+      startsAt: '2099-12-01T04:30:00Z',
+      endsAt: '2099-12-01T05:30:00Z',
+      status,
+      kind,
+      itemName: 'Synthetic visit',
+      provider: null,
+    },
+  ];
+  show(<NextBooking />);
+  expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+    CATALOGUES.en.site.details,
+  ]);
+  expect(screen.getByText(CATALOGUES.en.bookings.status[status as 'requested'])).toBeTruthy();
 });
 it('uses only the configured helpline and otherwise explains that it is pending', () => {
   const empty = show(<ContactAction locale="en" config={{}} />);
