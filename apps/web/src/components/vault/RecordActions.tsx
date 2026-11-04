@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDateTime } from '@heach/i18n';
-import { Button, Notice } from '@heach/ui';
+import { Button, Icon, Notice } from '@heach/ui';
 import type { RecordAccess, StoredFile, VaultRecord } from '@heach/types';
 import { useState } from 'react';
 import { api } from '../../lib/api';
@@ -14,6 +14,8 @@ export interface RecordActionProps {
   /** Where the file comes from: the owner's vault or a provider's share. */
   filePath?: string | undefined;
   onDelete?: (() => Promise<void>) | undefined;
+  /** Opens sharing with this record chosen (G12); only in the owner's vault. */
+  onShare?: (() => void) | undefined;
   showAccess?: boolean;
 }
 
@@ -21,6 +23,7 @@ export function RecordActions({
   record,
   filePath,
   onDelete,
+  onShare,
   showAccess = false,
 }: Readonly<RecordActionProps>) {
   const { locale, t } = useI18n();
@@ -33,12 +36,18 @@ export function RecordActions({
     });
   return (
     <div className="actions">
+      {onShare && (
+        <Button className="heach-button--secondary heach-button--compact" onClick={onShare}>
+          <Icon name="share" size={18} />
+          {t('vault.shareRecord')}
+        </Button>
+      )}
       {record.hasFile &&
         (file ? (
           <FileDownload file={file} filename={`${record.title}.pdf`} label={t('vault.download')} />
         ) : (
           <Button
-            className="heach-button--secondary"
+            className="heach-button--secondary heach-button--compact"
             onClick={() => void open()}
             disabled={pending}
           >
@@ -47,7 +56,7 @@ export function RecordActions({
         ))}
       {showAccess && (
         <Button
-          className="heach-button--secondary"
+          className="heach-button--secondary heach-button--compact"
           onClick={() =>
             void run(async () => {
               setAccess(await api<RecordAccess[]>(`/vault/records/${record.id}/access`));
@@ -74,7 +83,7 @@ export function RecordActions({
       )}
       {onDelete && record.source === 'patient' && (
         <Button
-          className="heach-button--danger"
+          className="heach-button--danger heach-button--compact"
           onClick={() => void run(onDelete)}
           disabled={pending}
         >

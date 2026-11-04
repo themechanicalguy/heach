@@ -347,22 +347,33 @@ for (const locale of LOCALES) {
     await expectAccessible(page, `check and pay ${locale}`);
     await expectFooterTargets(page);
   });
-  test(`Records A ${locale}: timeline and desktop profile match visual snapshot`, async ({
+  test(`Records A ${locale}: browsing first, profile column, focused upload and visual snapshot`, async ({
     page,
   }) => {
     await signedIn(page, locale);
     await page.goto(`/${locale}/vault`);
     await expect(page.getByText('Synthetic report').first()).toBeVisible();
     await expect(page.getByRole('heading', { name: t.vault.historyTitle })).toBeVisible();
+    // G10: no upload or link form until asked for; G11: a type icon and a source badge per row.
+    await expect(page.getByRole('button', { name: t.vault.save })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: t.vault.createLink })).toHaveCount(0);
+    await expect(page.locator('.record-row .record-row__icon').first()).toBeVisible();
+    await expect(page.locator('.record-row .source-badge').first()).toBeVisible();
     if ((page.viewportSize()?.width ?? 0) >= 1024) {
-      const table = page.locator('.vault-layout .heach-table-wrap');
-      expect(await table.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
-        true,
-      );
+      const side = await page.locator('.vault__side').boundingBox();
+      const main = await page.locator('.vault__main').boundingBox();
+      expect(side && main && side.x + side.width <= main.x).toBe(true);
     }
     await expectAccessible(page, `records ${locale}`);
     await page.evaluate(() => document.fonts.ready);
     await expect(page).toHaveScreenshot(`records-${locale}.png`, { fullPage: true });
+    const add = page.getByRole('button', { name: t.vault.add });
+    await add.click();
+    const sheet = page.getByRole('dialog', { name: t.vault.uploadTitle });
+    await expect(sheet.getByRole('button', { name: t.vault.save })).toBeVisible();
+    await expectAccessible(page, `records upload ${locale}`);
+    await page.keyboard.press('Escape');
+    await expect(sheet).toBeHidden();
     await expectResilientLayout(page);
   });
   test(`Onboarding B ${locale}: checklist overview, focused task and visual snapshot`, async ({

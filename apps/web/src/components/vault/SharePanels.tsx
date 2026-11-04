@@ -12,7 +12,7 @@ import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { FileDownload } from '../files/FileDownload';
 import { RecordCard } from './RecordCard';
-import { RecordPicker } from './VaultView';
+import { RecordPicker } from './LinkForm';
 
 /** The patient shares chosen records with this booking's provider, and can revoke (MV-07). */
 export function ShareWithBooking({ bookingId }: Readonly<{ bookingId: string }>) {

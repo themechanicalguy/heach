@@ -995,7 +995,15 @@
       "blood_group": "ରକ୍ତ ଗ୍ରୁପ୍",
       "vaccination": "ଟିକାକରଣ",
       "family_history": "ପାରିବାରିକ ଇତିହାସ"
-    }
+    },
+    "add": "ରେକର୍ଡ ଯୋଡ଼ନ୍ତୁ",
+    "encrypted": "ଏନକ୍ରିପ୍ଟେଡ୍",
+    "recordsFor": "କାହାର ରେକର୍ଡ",
+    "edit": "ସମ୍ପାଦନ",
+    "historyEmpty": "ଏପର୍ଯ୍ୟନ୍ତ କିଛି ଯୋଡ଼ାଯାଇନାହିଁ।",
+    "shareRecord": "ସେୟାର୍ କରନ୍ତୁ",
+    "hoursOption": "{hours} ଘଣ୍ଟା",
+    "typeFilter": "ରେକର୍ଡ ପ୍ରକାର"
   },
   "sharedPanel": {
     "title": "ଶେୟାର୍ ହୋଇଥିବା ରେକର୍ଡ",

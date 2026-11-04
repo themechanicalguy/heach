@@ -253,6 +253,12 @@
   border-radius: var(--heach-radius) var(--heach-radius) 0 0;
 }
 
+.heach-sheet {
+  max-height: 92dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .heach-sheet::backdrop {
   background: rgb(0 0 0 / 40%);
 }

@@ -1,5 +1,6 @@
 import { VaultTimeline } from './VaultTimeline';
 import { mockBlobUrls } from '../../test/blob-urls';
+import { mockDialogs } from '../../test/dialog';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { VaultRecord } from '@heach/types';
 import type { ReactNode } from 'react';
@@ -70,6 +71,7 @@ const call = (method: string, path: string) =>
 
 beforeEach(() => {
   mockBlobUrls();
+  mockDialogs();
   state.api.mockReset();
 });
 
@@ -110,10 +112,13 @@ describe('The vault on the web (MV-03 to MV-12)', () => {
     });
     inEnglish(<VaultView />);
     expect((await screen.findAllByText('Synthetic knee scan')).length).toBeGreaterThan(0);
+    // G10: browsing first; adding and sharing are not on the page until asked for.
+    expect(screen.queryByRole('button', { name: 'Save record' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Create link' })).toBeNull();
     expect(screen.getByText('Issued by Synthetic Nurse')).toBeTruthy();
     expect(screen.getByText('Your storage is nearly full.')).toBeTruthy();
     expect(await screen.findByText(/Synthetic allergy/)).toBeTruthy();
-    fireEvent.change(first(screen.getAllByLabelText('Type')), { target: { value: 'scan' } });
+    fireEvent.click(screen.getByRole('radio', { name: 'Scan' }));
     await waitFor(() => {
       expect(state.api).toHaveBeenCalledWith('/vault/search', {
         method: 'POST',
@@ -127,7 +132,9 @@ describe('The vault on the web (MV-03 to MV-12)', () => {
       expect(call('DELETE', '/vault/records/r1')).toBeTruthy();
     });
   });
+});
 
+describe('Focused vault tasks (G10, G12; MV-03, MV-05, MV-09)', () => {
   it('MV-03 uploads a record with tags and a file; MV-05 adds history; MV-09 creates a link', async () => {
     route({
       '/vault': [record()],
@@ -140,6 +147,7 @@ describe('The vault on the web (MV-03 to MV-12)', () => {
       },
     });
     inEnglish(<VaultView />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Add record' }));
     fireEvent.change(await screen.findByLabelText('Title'), {
       target: { value: 'Synthetic discharge' },
     });
@@ -160,6 +168,9 @@ describe('The vault on the web (MV-03 to MV-12)', () => {
         file: { contentType: 'application/pdf' },
       });
     });
+    expect(await screen.findByText('Saved.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Save record' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     fireEvent.change(screen.getByLabelText('Details'), { target: { value: 'Synthetic asthma' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
     await waitFor(() => {
@@ -168,9 +179,18 @@ describe('The vault on the web (MV-03 to MV-12)', () => {
         text: 'Synthetic asthma',
       });
     });
-    const pickers = screen.getAllByLabelText('Synthetic knee scan');
-    fireEvent.click(first([...pickers].reverse()));
+    // G12: Share on a record opens the link task with that record already chosen.
+    fireEvent.click(first(screen.getAllByRole('button', { name: 'Share' })));
+    const chosen = screen.getByRole<HTMLInputElement>('checkbox', { name: 'Synthetic knee scan' });
+    expect(chosen.checked).toBe(true);
+    fireEvent.click(screen.getByRole('radio', { name: '72 hours' }));
     fireEvent.click(screen.getByRole('button', { name: 'Create link' }));
+    await waitFor(() => {
+      expect(JSON.parse(call('POST', '/vault/links')?.[1]?.body as string)).toEqual({
+        recordIds: ['r1'],
+        hours: 72,
+      });
+    });
     expect(await screen.findByText(/Code: 654321/)).toBeTruthy();
   });
 });
@@ -255,12 +275,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-it('keeps desktop authorship visible outside collapsed clinical details', () => {
-  vi.stubGlobal('matchMedia', () => ({
-    matches: true,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-  }));
+it('G11 keeps authorship and type visible in the row while clinical details stay collapsed', () => {
   inEnglish(
     <VaultTimeline
       records={[
@@ -275,8 +290,13 @@ it('keeps desktop authorship visible outside collapsed clinical details', () => 
         }),
       ]}
       onRefresh={() => Promise.resolve()}
+      onShare={vi.fn()}
     />,
   );
-  expect(screen.getByText('Issued by Synthetic Nurse').closest('details')).toBeNull();
-  expect(screen.getByText('Synthetic dressing').closest('details')?.open).toBe(false);
+  const badge = screen.getByText('Issued by Synthetic Nurse');
+  expect(badge.closest('summary')).toBeTruthy();
+  expect(badge.getAttribute('data-source')).toBe('provider');
+  const notes = screen.getByText('Synthetic dressing');
+  expect(notes.closest('summary')).toBeNull();
+  expect(notes.closest('details')?.open).toBe(false);
 });

@@ -108,6 +108,7 @@ export function shellMessages(locale: Locale) {
     people: { title: catalogue.people.title },
     vault: { person: catalogue.vault.person },
     visit: { showCode: catalogue.visit.showCode },
+    ui: { close: catalogue.ui.close },
   };
 }
 

@@ -1,396 +1,220 @@
 'use client';
 
-import { Button, Card, Notice, TextField } from '@heach/ui';
-import type {
-  HistoryEntry,
-  LinkCreated,
-  LinkedPatient,
-  VaultRecord,
-  VaultUsage,
-} from '@heach/types';
+import { Button, ChoiceGroup, Icon, Notice, Sheet, TextField } from '@heach/ui';
+import type { LinkedPatient, VaultRecord, VaultUsage } from '@heach/types';
 import { useEffect, useState } from 'react';
 import { useCareSearch } from '../../lib/care-search';
-import { api, UPLOAD_CONTENT_TYPE } from '../../lib/api';
-import { readAsBase64 } from '../../lib/files';
 import { useI18n } from '../../lib/i18n-context';
-import { keyFor } from '../../lib/message-keys';
-import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
-import { Select } from '../care/SearchView';
+import { HealthProfile } from './HealthProfile';
+import { LinkForm } from './LinkForm';
+import { RECORD_TYPES } from './record-types';
+import { UploadForm } from './UploadForm';
 import { VaultTimeline } from './VaultTimeline';
 
-const TYPES = [
-  'prescription',
-  'lab_report',
-  'scan',
-  'discharge_summary',
-  'vaccination',
-  'visit_note',
-  'other',
-] as const;
-const KINDS = [
-  'allergy',
-  'condition',
-  'medicine',
-  'surgery',
-  'blood_group',
-  'vaccination',
-  'family_history',
-] as const;
+type Task = { kind: 'upload' } | { kind: 'share'; recordIds: string[] } | undefined;
 
-/** The vault (J9; MV-01 to MV-12, MV-15): timeline with filters, uploads, history, external links. */
+/**
+ * The vault (J9; MV-01 to MV-12, MV-15), browsing first (G10): whose records, type chips and
+ * search, then the timeline. Adding, sharing and editing the history open as focused tasks.
+ */
 export function VaultView() {
   const { t } = useI18n();
-  const { person, setPerson } = useCareSearch();
-  const [filters, setFilters] = useState({ person: person || 'self', type: '', q: '' });
-  useEffect(() => {
-    setFilters((current) => ({ ...current, person: person || 'self' }));
-  }, [person]);
-  const body = JSON.stringify(
-    Object.fromEntries(Object.entries(filters).filter(([, value]) => value)),
-  );
+  const { filters, set, body } = useVaultFilters();
+  const [task, setTask] = useState<Task>();
+  const [saved, setSaved] = useState(false);
   const records = useResource<VaultRecord[]>('/vault/search', body);
   const people = useResource<LinkedPatient[]>('/me/linked-patients');
   const usage = useResource<VaultUsage>('/vault/usage');
   const linked = people.resource.state === 'ready' ? people.resource.data : [];
-  const set = (key: keyof typeof filters) => (value: string) => {
-    if (key === 'person') setPerson(value === 'self' ? '' : value);
-    setFilters((current) => ({ ...current, [key]: value }));
-  };
   const refresh = async () => {
     await records.reload();
     await usage.reload();
   };
+  const close = () => {
+    setTask(undefined);
+  };
+  const rows = records.resource.state === 'ready' ? records.resource.data : [];
   return (
-    <section className="flow vault-layout" aria-labelledby="vault-title">
-      <aside className="vault-profile">
-        <HistorySection person={filters.person} />
-      </aside>
-      <div className="flow__card">
-        <h1 id="vault-title" className="flow__title">
-          {t('vault.title')}
-        </h1>
-        <p>{t('vault.intro')}</p>
-        {usage.resource.state === 'ready' && <Usage usage={usage.resource.data} />}
-        <Select
-          label={t('vault.person')}
+    <section className="vault" aria-labelledby="vault-title">
+      <header className="vault__head">
+        <div>
+          <h1 id="vault-title" className="flow__title">
+            {t('vault.title')}
+          </h1>
+          <span className="vault__lock">
+            <Icon name="lock" size={16} />
+            {t('vault.encrypted')}
+          </span>
+        </div>
+        <Button
+          className="heach-button--compact vault__add"
+          onClick={() => {
+            setSaved(false);
+            setTask({ kind: 'upload' });
+          }}
+        >
+          <Icon name="plus" size={20} />
+          {t('vault.add')}
+        </Button>
+      </header>
+      <div className="vault__people vault-card">
+        <ChoiceGroup
+          legend={t('vault.recordsFor')}
+          variant="chips"
+          name="vault-person"
           value={filters.person}
           onChange={set('person')}
-          options={[
-            ['', t('vault.everyone')],
-            ['self', t('vault.myself')],
-            ...linked.map((person): [string, string] => [person.id, person.fullName]),
+          choices={[
+            { value: 'self', label: t('vault.myself') },
+            ...linked.map((entry) => ({ value: entry.id, label: entry.fullName })),
+            { value: '', label: t('vault.everyone') },
           ]}
         />
-        <Select
-          label={t('vault.type')}
-          value={filters.type}
-          onChange={set('type')}
-          options={[
-            ['', t('vault.anyType')],
-            ...TYPES.map((type): [string, string] => [type, t(`vault.types.${type}`)]),
-          ]}
-        />
-        <TextField
-          label={t('vault.search')}
-          value={filters.q}
-          onChange={(event) => {
-            set('q')(event.currentTarget.value);
-          }}
-        />
-        <ResourceView resource={records.resource} reload={records.reload}>
-          {(rows) => <VaultTimeline records={rows} onRefresh={refresh} />}
-        </ResourceView>
-        <UploadForm people={linked} onSaved={refresh} />
-
-        {records.resource.state === 'ready' && <LinkForm records={records.resource.data} />}
       </div>
+      <div className="vault__main">
+        <VaultFilters type={filters.type} q={filters.q} set={set} />
+        {saved && (
+          <Notice tone="success" live>
+            {t('vault.saved')}
+          </Notice>
+        )}
+        <ResourceView resource={records.resource} reload={records.reload}>
+          {(found) => (
+            <VaultTimeline
+              records={found}
+              onRefresh={refresh}
+              onShare={(id) => {
+                setTask({ kind: 'share', recordIds: [id] });
+              }}
+            />
+          )}
+        </ResourceView>
+      </div>
+      <div className="vault__side">
+        <HealthProfile person={filters.person} />
+        <VaultSafety usage={usage.resource.state === 'ready' ? usage.resource.data : undefined} />
+      </div>
+      <VaultTasks
+        task={task}
+        onClose={close}
+        people={linked}
+        person={filters.person}
+        records={rows}
+        onSaved={async () => {
+          close();
+          setSaved(true);
+          await refresh();
+        }}
+      />
     </section>
   );
 }
 
-function Usage({ usage }: Readonly<{ usage: VaultUsage }>) {
+type Filters = Record<'person' | 'type' | 'q', string>;
+
+/** Whose records, the type and the search; the person follows the header's picker. */
+function useVaultFilters() {
+  const { person, setPerson } = useCareSearch();
+  const [filters, setFilters] = useState<Filters>({ person: person || 'self', type: '', q: '' });
+  useEffect(() => {
+    setFilters((current) => ({ ...current, person: person || 'self' }));
+  }, [person]);
+  const set = (key: keyof Filters) => (value: string) => {
+    if (key === 'person') setPerson(value === 'self' ? '' : value);
+    setFilters((current) => ({ ...current, [key]: value }));
+  };
+  const body = JSON.stringify(
+    Object.fromEntries(Object.entries(filters).filter(([, value]) => value)),
+  );
+  return { filters, set, body };
+}
+
+/** Type chips and search in one compact row (G11), not stacked full-width fields. */
+function VaultFilters({
+  type,
+  q,
+  set,
+}: Readonly<{ type: string; q: string; set: (key: keyof Filters) => (value: string) => void }>) {
   const { t } = useI18n();
-  const mb = (bytes: number) => `${(bytes / 1_048_576).toFixed(1)} MB`;
+  return (
+    <div className="vault__filters">
+      <ChoiceGroup
+        legend={t('vault.typeFilter')}
+        variant="chips"
+        name="vault-type"
+        value={type}
+        onChange={set('type')}
+        choices={[
+          { value: '', label: t('vault.anyType') },
+          ...RECORD_TYPES.map((entry) => ({ value: entry, label: t(`vault.types.${entry}`) })),
+        ]}
+      />
+      <TextField
+        label={t('vault.search')}
+        type="search"
+        value={q}
+        onChange={(event) => {
+          set('q')(event.currentTarget.value);
+        }}
+      />
+    </div>
+  );
+}
+
+interface TasksProps {
+  task: Task;
+  onClose: () => void;
+  people: readonly LinkedPatient[];
+  person: string;
+  records: readonly VaultRecord[];
+  onSaved: () => Promise<void>;
+}
+
+/** Adding a record and sharing records as focused tasks in sheets (G10, G12). */
+function VaultTasks({ task, onClose, people, person, records, onSaved }: Readonly<TasksProps>) {
+  const { t } = useI18n();
   return (
     <>
-      <p className="flow__muted">
-        {t('vault.usage', { used: mb(usage.usedBytes), quota: mb(usage.quotaBytes) })}
-      </p>
-      {usage.nearlyFull && <Notice tone="warning">{t('vault.nearlyFull')}</Notice>}
+      <Sheet
+        open={task?.kind === 'upload'}
+        title={t('vault.uploadTitle')}
+        closeLabel={t('ui.close')}
+        onClose={onClose}
+      >
+        {task?.kind === 'upload' && (
+          <UploadForm people={people} person={person} onSaved={onSaved} />
+        )}
+      </Sheet>
+      <Sheet
+        open={task?.kind === 'share'}
+        title={t('vault.linkTitle')}
+        closeLabel={t('ui.close')}
+        onClose={onClose}
+      >
+        {task?.kind === 'share' && <LinkForm records={records} initial={task.recordIds} />}
+      </Sheet>
     </>
   );
 }
 
-type UploadFields = Record<
-  'personId' | 'recordType' | 'recordDate' | 'title' | 'facility' | 'tags' | 'notes',
-  string
->;
-
-/** The upload's JSON body: only the fields the patient filled in, and the file as base64. */
-async function uploadBody(form: UploadFields, file: File | undefined) {
-  const tags = form.tags
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-  return {
-    recordType: form.recordType,
-    recordDate: form.recordDate,
-    title: form.title,
-    ...(form.personId ? { personId: form.personId } : {}),
-    ...(form.facility ? { facility: form.facility } : {}),
-    ...(tags.length > 0 ? { tags } : {}),
-    ...(form.notes ? { notes: form.notes } : {}),
-    ...(file ? { file: { contentType: file.type, contentBase64: await readAsBase64(file) } } : {}),
-  };
-}
-
-function UploadForm({
-  people,
-  onSaved,
-}: Readonly<{ people: readonly LinkedPatient[]; onSaved: () => Promise<void> }>) {
+/** The encryption reassurance and storage use (design reference: "All records are encrypted"). */
+function VaultSafety({ usage }: Readonly<{ usage: VaultUsage | undefined }>) {
   const { t } = useI18n();
-  const [form, setForm] = useState<UploadFields>({
-    personId: '',
-    recordType: 'prescription',
-    recordDate: '',
-    title: '',
-    facility: '',
-    tags: '',
-    notes: '',
-  });
-  const [file, setFile] = useState<File | undefined>();
-  const [saved, setSaved] = useState(false);
-  const { pending, error, run } = usePending();
-  const field = (key: keyof typeof form, label: string, extra: Record<string, unknown> = {}) => (
-    <TextField
-      label={label}
-      value={form[key]}
-      {...extra}
-      onChange={(event) => {
-        const value = event.currentTarget.value;
-        setForm((current) => ({ ...current, [key]: value }));
-        setSaved(false);
-      }}
-    />
-  );
-  const save = () =>
-    run(async () => {
-      const body = await uploadBody(form, file);
-      await api('/vault/records', {
-        method: 'POST',
-        headers: { 'content-type': UPLOAD_CONTENT_TYPE },
-        body: JSON.stringify(body),
-      });
-      setSaved(true);
-      setFile(undefined);
-      await onSaved();
-    });
+  const mb = (bytes: number) => `${(bytes / 1_048_576).toFixed(1)} MB`;
   return (
-    <Card title={t('vault.uploadTitle')}>
-      <Select
-        label={t('vault.person')}
-        value={form.personId}
-        onChange={(value) => {
-          setForm((current) => ({ ...current, personId: value }));
-        }}
-        options={[
-          ['', t('vault.myself')],
-          ...people.map((person): [string, string] => [person.id, person.fullName]),
-        ]}
-      />
-      <Select
-        label={t('vault.type')}
-        value={form.recordType}
-        onChange={(value) => {
-          setForm((current) => ({ ...current, recordType: value }));
-        }}
-        options={TYPES.map((type): [string, string] => [type, t(`vault.types.${type}`)])}
-      />
-      {field('title', t('vault.recordTitle'))}
-      {field('recordDate', t('vault.recordDate'), { type: 'date' })}
-      {field('facility', t('vault.facility'))}
-      {field('tags', t('vault.tags'))}
-      {field('notes', t('vault.notes'))}
-      <TextField
-        label={t('vault.file')}
-        type="file"
-        accept="application/pdf,image/jpeg,image/png"
-        capture="environment"
-        onChange={(event) => {
-          setFile(event.currentTarget.files?.[0]);
-        }}
-      />
-      {error && (
-        <Notice tone="danger" live>
-          {t(error)}
-        </Notice>
+    <div className="vault-safety">
+      <p className="vault-safety__note">
+        <Icon name="lock" size={18} />
+        {t('vault.intro')}
+      </p>
+      {usage && (
+        <p className="flow__muted">
+          {t('vault.usage', { used: mb(usage.usedBytes), quota: mb(usage.quotaBytes) })}
+        </p>
       )}
-      {saved && (
-        <Notice tone="success" live>
-          {t('vault.saved')}
-        </Notice>
-      )}
-      <Button onClick={() => void save()} disabled={pending || !form.title || !form.recordDate}>
-        {t('vault.save')}
-      </Button>
-    </Card>
-  );
-}
-
-function HistorySection({ person }: Readonly<{ person: string }>) {
-  const { t } = useI18n();
-  const { resource, reload } = useResource<HistoryEntry[]>('/vault/history');
-  const [kind, setKind] = useState<string>('allergy');
-  const [text, setText] = useState('');
-  const { pending, error, run } = usePending();
-  const entries =
-    resource.state === 'ready'
-      ? resource.data.filter(
-          (entry) =>
-            !person || (person === 'self' ? entry.personId == null : entry.personId === person),
-        )
-      : [];
-  return (
-    <Card title={t('vault.historyTitle')}>
-      <ul>
-        {entries.map((entry) => (
-          <li key={entry.id}>
-            <strong>{t(keyFor('vault.kinds', entry.kind, 'vault.historyTitle'))}</strong>:{' '}
-            {entry.text}{' '}
-            <Button
-              className="heach-button--secondary"
-              disabled={pending}
-              onClick={() =>
-                void run(async () => {
-                  await api(`/vault/history/${entry.id}`, { method: 'DELETE' });
-                  await reload();
-                })
-              }
-            >
-              {t('vault.remove')}
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <Select
-        label={t('vault.historyKind')}
-        value={kind}
-        onChange={setKind}
-        options={KINDS.map((value): [string, string] => [value, t(`vault.kinds.${value}`)])}
-      />
-      <TextField
-        label={t('vault.historyText')}
-        value={text}
-        onChange={(event) => {
-          setText(event.currentTarget.value);
-        }}
-      />
-      {error && (
-        <Notice tone="danger" live>
-          {t(error)}
-        </Notice>
-      )}
-      <Button
-        disabled={pending || !text}
-        onClick={() =>
-          void run(async () => {
-            await api('/vault/history', {
-              method: 'POST',
-              body: JSON.stringify({
-                kind,
-                text,
-                ...(person && person !== 'self' ? { personId: person } : {}),
-              }),
-            });
-            setText('');
-            await reload();
-          })
-        }
-      >
-        {t('vault.addHistory')}
-      </Button>
-    </Card>
-  );
-}
-
-/** A link for a doctor outside HEACH (MV-09): the link and code are shown once. */
-function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
-  const { locale, t } = useI18n();
-  const [chosen, setChosen] = useState<string[]>([]);
-  const [hours, setHours] = useState('24');
-  const [created, setCreated] = useState<LinkCreated | undefined>();
-  const { pending, error, run } = usePending();
-  if (records.length === 0) return null;
-  return (
-    <Card title={t('vault.linkTitle')}>
-      <RecordPicker records={records} chosen={chosen} onChange={setChosen} />
-      <TextField
-        label={t('vault.linkHours')}
-        type="number"
-        min={1}
-        max={72}
-        value={hours}
-        onChange={(event) => {
-          setHours(event.currentTarget.value);
-        }}
-      />
-      {error && (
-        <Notice tone="danger" live>
-          {t(error)}
-        </Notice>
-      )}
-      {created ? (
-        <Notice tone="success" live>
-          {t('vault.linkCreated')} {`${window.location.origin}/${locale}/shared/${created.token}`} ·{' '}
-          {t('vault.linkCode', { code: created.code })}
-        </Notice>
-      ) : (
-        <Button
-          disabled={pending || chosen.length === 0}
-          onClick={() =>
-            void run(async () => {
-              setCreated(
-                await api<LinkCreated>('/vault/links', {
-                  method: 'POST',
-                  body: JSON.stringify({ recordIds: chosen, hours: Number(hours) }),
-                }),
-              );
-            })
-          }
-        >
-          {t('vault.createLink')}
-        </Button>
-      )}
-    </Card>
-  );
-}
-
-export function RecordPicker({
-  records,
-  chosen,
-  onChange,
-}: Readonly<{
-  records: readonly VaultRecord[];
-  chosen: readonly string[];
-  onChange: (ids: string[]) => void;
-}>) {
-  return (
-    <fieldset>
-      {records.map((record) => (
-        <label key={record.id} className="heach-checkbox">
-          <input
-            type="checkbox"
-            checked={chosen.includes(record.id)}
-            onChange={(event) => {
-              const checked = event.currentTarget.checked;
-              onChange(checked ? [...chosen, record.id] : chosen.filter((id) => id !== record.id));
-            }}
-          />
-          <span>{record.title}</span>
-        </label>
-      ))}
-    </fieldset>
+      {usage?.nearlyFull && <Notice tone="warning">{t('vault.nearlyFull')}</Notice>}
+    </div>
   );
 }

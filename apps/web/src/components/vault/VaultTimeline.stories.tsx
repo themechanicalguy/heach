@@ -6,7 +6,7 @@ export default { title: 'Vault/Timeline', component: VaultTimeline };
 export const Empty = {
   render: () => (
     <StoryEnvironment>
-      <VaultTimeline records={[]} onRefresh={() => Promise.resolve()} />
+      <VaultTimeline records={[]} onShare={() => undefined} onRefresh={() => Promise.resolve()} />
     </StoryEnvironment>
   ),
 };
@@ -14,7 +14,11 @@ export const Empty = {
 export const Populated = {
   render: () => (
     <StoryEnvironment>
-      <VaultTimeline records={[SYNTHETIC_RECORD]} onRefresh={() => Promise.resolve()} />
+      <VaultTimeline
+        records={[SYNTHETIC_RECORD]}
+        onShare={() => undefined}
+        onRefresh={() => Promise.resolve()}
+      />
     </StoryEnvironment>
   ),
 };

@@ -995,7 +995,15 @@
       "blood_group": "ब्लड ग्रुप",
       "vaccination": "टीकाकरण",
       "family_history": "पारिवारिक इतिहास"
-    }
+    },
+    "add": "रिकॉर्ड जोड़ें",
+    "encrypted": "एन्क्रिप्टेड",
+    "recordsFor": "किसके रिकॉर्ड",
+    "edit": "बदलें",
+    "historyEmpty": "अभी कुछ नहीं जोड़ा गया।",
+    "shareRecord": "साझा करें",
+    "hoursOption": "{hours} घंटे",
+    "typeFilter": "रिकॉर्ड का प्रकार"
   },
   "sharedPanel": {
     "title": "साझा रिकॉर्ड",
