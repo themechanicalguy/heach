@@ -157,6 +157,22 @@ it('uses a memory-only search and validates PIN codes before navigation', async 
     service: 'physiotherapy',
   });
 });
+
+it('searches the service picked in the bar', async () => {
+  show(<CareFinder textSearch />);
+  fireEvent.change(screen.getByLabelText(CATALOGUES.en.search.pin), {
+    target: { value: '753001' },
+  });
+  fireEvent.change(screen.getByLabelText(CATALOGUES.en.site.services), {
+    target: { value: 'lab' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: CATALOGUES.en.site.find }));
+  await waitFor(() => {
+    expect(state.push).toHaveBeenCalledWith('/en/services/lab#find-care');
+  });
+  expect(state.setSearch).toHaveBeenCalledWith({ pin: '753001', q: '', service: 'lab' });
+});
+
 it('shows no next-booking card without a booking, then the earliest future active booking', () => {
   const empty = show(<NextBooking />);
   expect(screen.queryByText(CATALOGUES.en.site.next)).toBeNull();
