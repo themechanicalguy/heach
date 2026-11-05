@@ -64,6 +64,7 @@ const ROUTES: Record<string, Namespace[]> = {
 const SITE_CLIENT_KEYS = [
   'services',
   'find',
+  'searchPlaceholder',
   'forMe',
   'more',
   'profile',

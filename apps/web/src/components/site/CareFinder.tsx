@@ -1,7 +1,7 @@
 'use client';
 
 import { normalizeDigits } from '@heach/i18n';
-import { Button, Notice, TextField } from '@heach/ui';
+import { Button, Icon, Notice, TextField } from '@heach/ui';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
@@ -14,7 +14,7 @@ import { isService, PIN_PATTERN, SERVICES } from '../care/services';
 interface FinderProps {
   textSearch?: boolean;
   stayOnHome?: boolean;
-  /** The home screen's one-row search (G02): small labels, no surrounding hero. */
+  /** The home screen's search (G02): small labels on phones, one pill bar from desktop width. */
   compact?: boolean;
 }
 
@@ -70,38 +70,47 @@ function CareFinderForm({
         submit();
       }}
     >
-      {textSearch && (
-        <div className="care-finder__text">
-          <TextField
-            label={t('search.text')}
-            value={draft.q}
-            maxLength={60}
-            onChange={(event) => {
-              update({ q: event.currentTarget.value });
-            }}
-          />
-        </div>
-      )}
-      <TextField
-        label={t('search.pin')}
-        inputMode="numeric"
-        autoComplete="postal-code"
-        maxLength={6}
-        value={draft.pin}
-        error={invalid ? t('search.pinInvalid') : undefined}
-        onChange={(event) => {
-          update({ pin: normalizeDigits(event.currentTarget.value.trim()) });
-        }}
-      />
-      <Select
-        label={t('site.services')}
-        value={draft.service}
-        options={SERVICES.map((service) => [service, t(`services.${service}`)])}
-        onChange={(service) => {
-          if (isService(service)) update({ service });
-        }}
-      />
-      <Button type="submit">{t('site.find')}</Button>
+      <div className="care-finder__bar">
+        {compact && (
+          <span className="care-finder__icon">
+            <Icon name="search" />
+          </span>
+        )}
+        {textSearch && (
+          <div className="care-finder__text">
+            <TextField
+              label={t('search.text')}
+              placeholder={compact ? t('site.searchPlaceholder') : undefined}
+              value={draft.q}
+              maxLength={60}
+              onChange={(event) => {
+                update({ q: event.currentTarget.value });
+              }}
+            />
+          </div>
+        )}
+        <TextField
+          label={t('search.pin')}
+          placeholder={compact ? t('search.pin') : undefined}
+          inputMode="numeric"
+          autoComplete="postal-code"
+          maxLength={6}
+          value={draft.pin}
+          error={invalid ? t('search.pinInvalid') : undefined}
+          onChange={(event) => {
+            update({ pin: normalizeDigits(event.currentTarget.value.trim()) });
+          }}
+        />
+        <Select
+          label={t('site.services')}
+          value={draft.service}
+          options={SERVICES.map((service) => [service, t(`services.${service}`)])}
+          onChange={(service) => {
+            if (isService(service)) update({ service });
+          }}
+        />
+        <Button type="submit">{t('site.find')}</Button>
+      </div>
       {error && (
         <Notice tone="danger" live>
           {t(error)}

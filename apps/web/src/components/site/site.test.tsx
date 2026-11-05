@@ -104,6 +104,17 @@ it('G02 puts the search and service tiles first, help and emergency in the side 
   expect(side?.querySelector('.emergency + .support-card')).toBeTruthy();
   expect(main?.querySelector('.emergency, .next-booking')).toBeNull();
 });
+it('desktop home board: one search bar with labelled fields, and no How it works once signed in', () => {
+  state.status = 'signed-in';
+  const { container } = show(<PatientHome config={{}} locale="en" />);
+  const bar = container.querySelector('form[role="search"] > .care-finder__bar');
+  expect(bar?.querySelector('.care-finder__icon svg[aria-hidden="true"]')).toBeTruthy();
+  const text = screen.getByLabelText(CATALOGUES.en.search.text);
+  expect(text.getAttribute('placeholder')).toBe(CATALOGUES.en.site.searchPlaceholder);
+  expect(screen.getByLabelText(CATALOGUES.en.search.pin).closest('.care-finder__bar')).toBe(bar);
+  expect(bar?.querySelector('button[type="submit"]')?.textContent).toBe(CATALOGUES.en.site.find);
+  expect(screen.queryByRole('heading', { name: CATALOGUES.en.site.how })).toBeNull();
+});
 it('G03 colours tiles by meaning, not position: lavender services, a peach records well', () => {
   state.status = 'signed-in';
   const { container } = show(<PatientHome config={{}} locale="en" />);
@@ -146,6 +157,22 @@ it('uses a memory-only search and validates PIN codes before navigation', async 
     service: 'physiotherapy',
   });
 });
+
+it('searches the service picked in the bar', async () => {
+  show(<CareFinder textSearch />);
+  fireEvent.change(screen.getByLabelText(CATALOGUES.en.search.pin), {
+    target: { value: '753001' },
+  });
+  fireEvent.change(screen.getByLabelText(CATALOGUES.en.site.services), {
+    target: { value: 'lab' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: CATALOGUES.en.site.find }));
+  await waitFor(() => {
+    expect(state.push).toHaveBeenCalledWith('/en/services/lab#find-care');
+  });
+  expect(state.setSearch).toHaveBeenCalledWith({ pin: '753001', q: '', service: 'lab' });
+});
+
 it('shows no next-booking card without a booking, then the earliest future active booking', () => {
   const empty = show(<NextBooking />);
   expect(screen.queryByText(CATALOGUES.en.site.next)).toBeNull();
