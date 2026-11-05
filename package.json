@@ -14,6 +14,8 @@
     "dev:up": "node scripts/dev-up.mjs",
     "dev:down": "docker compose --profile init down",
     "services:up": "node scripts/dev-up.mjs --services-only",
+    "demo:seed": "pnpm --filter @heach/api build && pnpm --filter @heach/api demo:seed",
+    "demo:totp": "pnpm --silent --filter @heach/api demo:totp",
     "services:reset": "docker compose --profile init down --volumes",
     "build": "turbo run build",
     "lint": "turbo run lint && pnpm lint:scripts",

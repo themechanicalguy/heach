@@ -20,6 +20,8 @@ blob-report/
 .env
 .env.*
 !.env.example
+# Local demo admins' passwords and TOTP secrets (pnpm demo:seed)
+.demo-credentials.json
 
 # OpenTofu: state holds generated passwords; backend.hcl holds the account's bucket name.
 # .terraform.lock.hcl (provider checksums) IS committed.
