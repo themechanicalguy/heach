@@ -125,6 +125,7 @@ pnpm check            # lint + typecheck + unit tests + build: what CI runs; run
 pnpm lint | typecheck | test | build   # each step of check on its own (Turborepo, cached)
 pnpm format           # Prettier write; format:check to verify only
 pnpm secrets:scan     # gitleaks over the whole git history (also runs in CI)
+pnpm demo:seed        # local only: lived-in demo data through the API (docs/demo-data.md)
 pnpm --filter <pkg> <script>   # run one workspace's script
 pnpm --filter @heach/types generate   # after changing API routes or DTOs; CI runs `check`
 ```
