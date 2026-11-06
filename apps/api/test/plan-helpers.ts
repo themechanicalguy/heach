@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
-import { adminSignIn } from './account-helpers.js';
+import { reverifiedAdmin } from './account-helpers.js';
 import { bearer, type Login } from './auth-helpers.js';
 import { pay } from './booking-helpers.js';
 
@@ -18,7 +18,7 @@ export async function packagePlan(
   discountPercent = 0,
   familyMembers = 0,
 ) {
-  const admin = await adminSignIn(app, 'super_admin');
+  const admin = await reverifiedAdmin(app, 'super_admin');
   const created = await request(app.getHttpServer())
     .post('/admin/v1/plans')
     .set(bearer(admin))
@@ -71,7 +71,7 @@ export async function subscriptionPlan(
   units: number,
   pricePaise: number,
 ) {
-  const admin = await adminSignIn(app, 'super_admin');
+  const admin = await reverifiedAdmin(app, 'super_admin');
   const created = await request(app.getHttpServer())
     .post('/admin/v1/plans')
     .set(bearer(admin))

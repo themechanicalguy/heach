@@ -48,13 +48,36 @@ async function errorFrom(response: Response): Promise<ApiError> {
   return new ApiError(response.status, typeof body.code === 'string' ? body.code : undefined);
 }
 
-export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+/** Sends with the access token; on 401 refreshes once and retries once. */
+async function authorised(path: string, init: RequestInit): Promise<Response> {
   let response = await send(path, init);
   if (response.status === 401 && !path.startsWith('/auth/') && (await refresh())) {
     response = await send(path, init);
   }
   if (!response.ok) throw await errorFrom(response);
+  return response;
+}
+
+export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await authorised(path, init);
   return (response.status === 204 ? undefined : await response.json()) as T;
+}
+
+/**
+ * Saves a file the API serves to signed-in admins. A plain link cannot send the in-memory access
+ * token, so the file is fetched and handed to the browser as a Blob.
+ */
+export async function download(path: string, fileName: string): Promise<void> {
+  const blob = await (await authorised(path, {})).blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  // Revoked a moment later: some browsers start the download after click() returns.
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1_000);
 }
 
 /** The reason for a failure, as a key of `errors` in the catalogue; never the response body. */

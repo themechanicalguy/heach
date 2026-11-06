@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { usePending } from '../use-pending';
+import { useReverified } from '../use-reverified';
 import { Choice } from './Tickets';
 
 const LANGUAGES = ['or', 'en', 'hi'] as const;
@@ -29,6 +30,7 @@ export function PlanForm({ onCreated }: Readonly<{ onCreated: () => void }>) {
   const [texts, setTexts] = useState({ or: EMPTY_TEXT, en: EMPTY_TEXT, hi: EMPTY_TEXT });
   const [created, setCreated] = useState(false);
   const { pending, error, run } = usePending();
+  const { attempt, sheet } = useReverified(run);
   const body = (): PlanInput => ({
     kind: kind as PlanInput['kind'],
     ...(kind === 'package'
@@ -45,7 +47,7 @@ export function PlanForm({ onCreated }: Readonly<{ onCreated: () => void }>) {
     texts,
   });
   const submit = () =>
-    run(async () => {
+    attempt(async () => {
       setCreated(false);
       await api('/plans', { method: 'POST', body: JSON.stringify(body()) });
       setCreated(true);
@@ -102,6 +104,7 @@ export function PlanForm({ onCreated }: Readonly<{ onCreated: () => void }>) {
       <Button type="submit" disabled={pending}>
         {t('plans.save')}
       </Button>
+      {sheet}
     </form>
   );
 }
