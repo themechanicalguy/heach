@@ -11,6 +11,7 @@ import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { Select } from '../care/SearchView';
 import { money } from '../booking/money';
+import { FileDownload } from '../files/FileDownload';
 
 const DECLINE_REASONS = ['unavailable', 'too_far', 'prescription_invalid', 'other'] as const;
 
@@ -53,7 +54,7 @@ function RequestCard({
 }: Readonly<{ request: ProviderRequest; onDone: () => Promise<void> }>) {
   const { locale, t } = useI18n();
   const [why, setWhy] = useState<string>('unavailable');
-  const [file, setFile] = useState<string | undefined>();
+  const [file, setFile] = useState<StoredFile | undefined>();
   const { pending, error, run } = usePending();
   const answer = (path: string, body?: object) =>
     run(async () => {
@@ -66,7 +67,7 @@ function RequestCard({
   const viewPrescription = () =>
     run(async () => {
       const stored = await api<StoredFile>(`/provider/requests/${request.bookingId}/prescription`);
-      setFile(`data:${stored.contentType};base64,${stored.contentBase64}`);
+      setFile(stored);
     });
   return (
     <Card title={request.itemName}>
@@ -81,9 +82,11 @@ function RequestCard({
       {request.notes && <p>{t('requests.notes', { notes: request.notes })}</p>}
       {request.hasPrescription &&
         (file ? (
-          <a href={file} target="_blank" rel="noreferrer">
-            {t('requests.prescription')}
-          </a>
+          <FileDownload
+            file={file}
+            name={`prescription-${request.bookingId}`}
+            label={t('requests.prescription')}
+          />
         ) : (
           <Button
             className="heach-button--secondary"

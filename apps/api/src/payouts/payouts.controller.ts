@@ -69,8 +69,8 @@ export class FinanceController {
   @ApiOkResponse({ type: FinanceDto })
   async view(): Promise<FinanceDto> {
     const { rows } = await this.pool.query<{ paid: number; refunded: number; commission: number }>(
-      `SELECT coalesce(sum(paid_paise), 0)::int AS paid, coalesce(sum(refunded_paise), 0)::int AS refunded,
-              coalesce(sum(commission_paise) FILTER (WHERE status = 'completed'), 0)::int AS commission
+      `SELECT coalesce(sum(paid_paise), 0)::float8 AS paid, coalesce(sum(refunded_paise), 0)::float8 AS refunded,
+              coalesce(sum(commission_paise) FILTER (WHERE status = 'completed'), 0)::float8 AS commission
          FROM app.booking`,
     );
     const totals = rows[0];

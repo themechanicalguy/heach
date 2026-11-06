@@ -175,7 +175,7 @@ export function SharedLinkView({ token }: Readonly<{ token: string }>) {
                     {file && (
                       <FileDownload
                         file={file}
-                        filename={`${record.title}.pdf`}
+                        name={record.title}
                         label={t('sharedLink.download')}
                       />
                     )}

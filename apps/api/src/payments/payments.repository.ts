@@ -32,7 +32,7 @@ export interface RefundRow {
 
 const PAYMENT_COLUMNS = `p.id, p.booking_id AS "bookingId", p.purchase_id AS "purchaseId", p.purpose, p.gateway_order_id AS "orderId",
   p.gateway_payment_id AS "gatewayPaymentId", p.amount_paise AS "amountPaise", p.status,
-  coalesce((SELECT sum(r.amount_paise) FROM app.refund r WHERE r.payment_id = p.id AND r.status <> 'failed'), 0)::int AS "refundedPaise"`;
+  coalesce((SELECT sum(r.amount_paise) FROM app.refund r WHERE r.payment_id = p.id AND r.status <> 'failed'), 0)::float8 AS "refundedPaise"`;
 
 /** Gateway payments, webhook events and refunds (PY-01, PY-02). */
 @Injectable()

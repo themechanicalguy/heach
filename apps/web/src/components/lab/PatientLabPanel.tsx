@@ -63,11 +63,7 @@ export function PatientLabPanel({ bookingId }: Readonly<{ bookingId: string }>) 
         ))}
       {order.reports.length > 0 &&
         (report ? (
-          <FileDownload
-            file={report}
-            filename={`report-${bookingId}.pdf`}
-            label={t('lab.report')}
-          />
+          <FileDownload file={report} name={`report-${bookingId}`} label={t('lab.report')} />
         ) : (
           <Button
             onClick={() =>
