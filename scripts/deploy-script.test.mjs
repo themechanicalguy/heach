@@ -66,6 +66,16 @@ test('SE-07.23: the public entry refuses test sign-in and drops a client-sent ke
   assert.doesNotMatch(publicSite, /header_up X-Test-Login-Key/);
 });
 
+test('SE-04: the public entry refuses the admin API; only the admin entry serves it', () => {
+  const site = caddyfile.slice(caddyfile.indexOf('https://{$PUBLIC_HOST}:443'));
+  const publicSite = site.slice(0, site.indexOf('\n}\n'));
+  assert.match(publicSite, /@admin_api path_regexp admin_api \(\?i\)\^\/\+admin\(\/\|\$\)/);
+  assert.match(publicSite, /respond @admin_api 404/);
+  assert.ok(publicSite.indexOf('respond @admin_api') < publicSite.indexOf('reverse_proxy api'));
+  const admin = caddyfile.slice(caddyfile.indexOf('https://{$PUBLIC_HOST}:8443'));
+  assert.match(admin, /@not_admin not path \/admin\/\*/);
+});
+
 test('SE-07.23: only the loopback entry adds the key, and it is published on loopback only', () => {
   const trusted = caddyfile.slice(caddyfile.indexOf('https://{$PUBLIC_HOST}:9443'));
   assert.match(trusted, /header_up X-Test-Login-Key \{env\.TEST_LOGIN_KEY\}/);
