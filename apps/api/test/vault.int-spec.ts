@@ -366,8 +366,11 @@ describe('External links and admin counts (MV-09, AD-15)', () => {
         .send({ recordIds: [record.id], hours: 24 })
         .expect(201)
     ).body as { id: string; token: string; code: string };
-    const open = (code: string) => server().post(`/v1/shared-records/${link.token}`).send({ code });
+    const open = (code: string) =>
+      server().post('/v1/shared-records/open').send({ token: link.token, code });
     await open(link.code === '000000' ? '111111' : '000000').expect(400);
+    // MV-11: the token never travels in a path, where request logs and spans would keep it.
+    await server().post(`/v1/shared-records/${link.token}`).send({ code: link.code }).expect(404);
     const opened = (await open(link.code).expect(200)).body as {
       records: VaultRecord[];
       files: { contentType: string }[];
@@ -425,7 +428,8 @@ describe('Breach containment (SO-09)', () => {
         .send({ recordIds: [record.id], hours: 24 })
         .expect(201)
     ).body as { token: string; code: string };
-    const open = () => server().post(`/v1/shared-records/${link.token}`).send({ code: link.code });
+    const open = () =>
+      server().post('/v1/shared-records/open').send({ token: link.token, code: link.code });
     const support = await adminSignIn(app(), 'support');
     await server()
       .post('/admin/v1/auth/reverify')

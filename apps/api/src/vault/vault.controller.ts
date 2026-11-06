@@ -263,13 +263,13 @@ export class ProviderVaultController {
 export class SharedLinkController {
   constructor(private readonly vault: VaultService) {}
 
-  @Post(':token')
+  @Post('open')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-store')
   @Public('The link and its one-time code are the authorisation (MV-09)')
   @ApiOkResponse({ type: SharedRecordsDto })
-  async open(@Param('token') token: string, @Body() body: LinkOpenDto): Promise<SharedRecordsDto> {
-    return this.vault.openLink(token, body.code);
+  async open(@Body() body: LinkOpenDto): Promise<SharedRecordsDto> {
+    return this.vault.openLink(body.token, body.code);
   }
 }
 

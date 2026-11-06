@@ -1956,7 +1956,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/v1/shared-records/{token}': {
+  '/v1/shared-records/open': {
     parameters: {
       query?: never;
       header?: never;
@@ -4565,6 +4565,8 @@ export interface components {
       file?: components['schemas']['UploadDto'];
     };
     LinkOpenDto: {
+      /** @description From the link fragment */
+      token: string;
       code: string;
     };
     RevokedSharesDto: {
@@ -8102,9 +8104,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        token: string;
-      };
+      path?: never;
       cookie?: never;
     };
     requestBody: {

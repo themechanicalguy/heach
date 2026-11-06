@@ -346,7 +346,7 @@ function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
       )}
       {created ? (
         <Notice tone="success" live>
-          {t('vault.linkCreated')} {`${window.location.origin}/${locale}/shared/${created.token}`} ·{' '}
+          {t('vault.linkCreated')} {`${window.location.origin}/${locale}/shared#${created.token}`} ·{' '}
           {t('vault.linkCode', { code: created.code })}
         </Notice>
       ) : (

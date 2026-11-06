@@ -274,18 +274,23 @@ describe('Sharing on the web (MV-07 to MV-09, MV-14)', () => {
 
   it('MV-09 a doctor opens a link with its code and sees the files', async () => {
     route({
-      'POST /shared-records/token-1234567890abcdefghij': {
+      'POST /shared-records/open': {
         records: [record()],
         history: [],
         files: [{ recordId: 'r1', contentType: 'application/pdf', contentBase64: 'JVBERg==' }],
       },
     });
-    inEnglish(<SharedLinkView token="token-1234567890abcdefghij" />);
+    window.location.hash = '#token-1234567890abcdefghij';
+    inEnglish(<SharedLinkView />);
     fireEvent.change(screen.getByLabelText('Code'), { target: { value: '654321' } });
     fireEvent.click(screen.getByRole('button', { name: 'Open records' }));
     expect((await screen.findByRole('link', { name: 'Open file' })).getAttribute('href')).toBe(
       'blob:http://localhost/synthetic-file',
     );
+    expect(JSON.parse(call('POST', '/shared-records/open')?.[1]?.body as string)).toEqual({
+      token: 'token-1234567890abcdefghij',
+      code: '654321',
+    });
   });
 });
 
