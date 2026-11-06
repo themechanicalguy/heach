@@ -202,9 +202,14 @@ export class BookingRepository {
   }
 
   /** Moves a booking to another provider (AD-05 reassign, A13 replacement), recorded as an event. */
+  /**
+   * Hands a confirmed booking to another provider (AD-05): the booking, its unstarted shifts and
+   * the event log move to them, and the previous provider's view of the patient's shared vault
+   * records ends at once (the patient can share again with the new provider).
+   */
   async reassign(
     client: TransactionClient,
-    booking: Pick<BookingRow, 'id' | 'status'>,
+    booking: Pick<BookingRow, 'id' | 'status' | 'providerId'>,
     to: { providerId: string; listingId: string },
     actor: { id: string | null; role: string },
   ): Promise<void> {
@@ -213,13 +218,22 @@ export class BookingRepository {
       [booking.id, to.providerId, to.listingId],
     );
     await client.query(
+      `UPDATE app.shift SET attendant_account_id = $2 WHERE booking_id = $1 AND status = 'scheduled'`,
+      [booking.id, to.providerId],
+    );
+    if (booking.providerId)
+      await client.query(
+        `UPDATE app.record_share SET revoked_at = now()
+          WHERE booking_id = $1 AND provider_account_id = $2 AND revoked_at IS NULL`,
+        [booking.id, booking.providerId],
+      );
+    await client.query(
       `INSERT INTO app.booking_event (id, booking_id, from_status, to_status, reason, actor_id, actor_role)
        VALUES ($1, $2, $3, $3, 'reassigned', $4, $5)`,
       [randomUUID(), booking.id, booking.status, actor.id, actor.role],
     );
   }
 
-  /** One shift row per day of an attendant booking, created when it is confirmed (HS-05). */
   async createShifts(
     client: TransactionClient,
     booking: BookingRow,
@@ -237,13 +251,22 @@ export class BookingRepository {
     }
   }
 
-  /** Whether the provider has another live booking overlapping this time. */
+  /**
+   * Whether the provider has another live booking overlapping this time. Takes the provider's
+   * schedule lock first (held to the end of the caller's transaction), so two transactions that
+   * would each make an overlapping booking live run one after the other: the second sees the
+   * first. Only call it inside the transaction that then makes the booking live.
+   */
   async providerBusy(
-    client: Queryable,
+    client: TransactionClient,
     providerId: string,
     interval: { start: Date; end: Date },
     exceptId?: string,
   ): Promise<boolean> {
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtextextended('provider-schedule:' || $1, 0))",
+      [providerId],
+    );
     const { rows } = await client.query<{ busy: boolean }>(
       `SELECT EXISTS (SELECT 1 FROM app.booking WHERE provider_account_id = $1 AND id <> coalesce($4, '00000000-0000-4000-8000-000000000000'::uuid)
          AND status IN ('requested', 'confirmed', 'in_progress') AND starts_at < $3 AND ends_at > $2) AS busy`,

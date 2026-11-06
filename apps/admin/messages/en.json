@@ -76,6 +76,7 @@
     "refund_exceeds_paid": "The refund is more than what is left to refund.",
     "provider_busy": "That provider is busy at this time.",
     "listing_not_eligible": "That listing cannot take this booking.",
+    "reassign_price_differs": "That provider charges a different price for this service. Cancel and rebook instead.",
     "break_glass_required": "Open the private details first (break-glass).",
     "plan_invalid": "Those plan details do not fit together. Check the kind, item and period.",
     "plan_item_required": "Choose the catalogue item or service the plan covers.",
