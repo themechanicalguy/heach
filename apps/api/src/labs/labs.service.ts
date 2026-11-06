@@ -28,6 +28,7 @@ import type { TransactionClient } from '../data-stores/transaction.js';
 import { LedgerService } from '../payouts/ledger.service.js';
 import { type StoredFile, UploadsService } from '../uploads/uploads.service.js';
 import { VaultFiling } from '../vault/vault-filing.js';
+import { CodeGate } from '../visits/code-gate.js';
 import { VisitCodes } from '../visits/visit-codes.js';
 import type { CollectorDto, LabDashboardDto, LabOrderDto, ReportUploadDto } from './labs.dto.js';
 
@@ -57,6 +58,7 @@ export class LabsService {
     private readonly ledger: LedgerService,
     private readonly uploads: UploadsService,
     private readonly codes: VisitCodes,
+    private readonly gate: CodeGate,
     private readonly filing: VaultFiling,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
   ) {}
@@ -77,16 +79,19 @@ export class LabsService {
 
   /** The patient's code confirms the sample is taken (LB-06), by the collector or at the lab. */
   async collect(actor: Principal, bookingId: string, code: string): Promise<string> {
-    if (!this.codes.matches(bookingId, COLLECT, code))
-      throw reason(BadRequestException, 'code_incorrect');
+    // Who may collect is checked before the code, so no one else can use this to guess codes;
+    // the code then counts towards the booking's five attempts like a visit code.
+    const [current, currentOrder] = await Promise.all([
+      this.bookings.find(bookingId),
+      this.orders.find(bookingId),
+    ]);
+    if (!current || !currentOrder || !collectsFor(current, currentOrder, actor))
+      throw new NotFoundException();
+    await this.gate.check(bookingId, COLLECT, code);
     const sampleId = newSampleId();
     const effects = await this.bookings.transaction(async (client) => {
       const { booking, order } = await this.locked(client, bookingId);
-      const collector =
-        order.collection === 'home'
-          ? order.collectorId === actor.userId
-          : booking.providerId === actor.userId;
-      if (!collector) throw new NotFoundException();
+      if (!collectsFor(booking, order, actor)) throw new NotFoundException();
       const ready =
         order.collection === 'home'
           ? order.stage === 'collector_assigned'
@@ -358,4 +363,15 @@ export class LabsService {
     effects.messages.push({ to: booking.bookerId, template, bookingId: booking.id });
     return effects;
   }
+}
+
+/** The assigned collector for home collection, the lab itself for a walk-in. */
+function collectsFor(
+  booking: Pick<BookingRow, 'providerId'>,
+  order: Pick<LabOrderRow, 'collection' | 'collectorId'>,
+  actor: Principal,
+): boolean {
+  return order.collection === 'home'
+    ? order.collectorId === actor.userId
+    : booking.providerId === actor.userId;
 }

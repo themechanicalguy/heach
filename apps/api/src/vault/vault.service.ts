@@ -322,11 +322,12 @@ export class VaultService {
     // A suspended owner's links stop too, so suspending an account contains a leak (SO-09).
     if (!link || link.revokedAt || link.ownerSuspended || link.expiresAt < new Date())
       throw new NotFoundException();
-    if (link.attempts >= MAX_LINK_ATTEMPTS) throw reason(ForbiddenException, 'code_locked');
-    if (!this.keys.matches(code, link.codeHash)) {
-      await this.vault.failLink(link.id);
+    // The attempt is taken before the code is compared, so parallel guesses never pass five.
+    if (!(await this.vault.takeLinkAttempt(link.id, MAX_LINK_ATTEMPTS)))
+      throw reason(ForbiddenException, 'code_locked');
+    if (!this.keys.matches(code, link.codeHash))
       throw reason(BadRequestException, 'code_incorrect');
-    }
+    await this.vault.returnLinkAttempt(link.id);
     const rows = (await this.vault.byIds(link.recordIds)).filter(
       (row) => row.ownerId === link.ownerId,
     );
