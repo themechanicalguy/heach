@@ -59,8 +59,14 @@ export class LinkedPatientsService {
     });
   }
 
+  /**
+   * Removes a person who has no health records or history in the vault. Their records are never
+   * deleted with them (MV-12): the owner deletes their own uploads first; issued records stay.
+   */
   async remove(principal: Principal, id: string): Promise<void> {
     await this.linked.transaction(async (client) => {
+      if (await this.linked.hasHealthData(client, principal.userId, id))
+        throw reason(ConflictException, 'linked_patient_has_records');
       if (!(await this.linked.remove(client, principal.userId, id))) throw new NotFoundException();
       await this.audit.record(
         { action: 'linked_patient.removed', entity: ENTITY, entityId: id },
