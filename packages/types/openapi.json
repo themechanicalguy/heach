@@ -4226,19 +4226,10 @@
         "tags": ["provider"]
       }
     },
-    "/v1/shared-records/{token}": {
+    "/v1/shared-records/open": {
       "post": {
         "operationId": "SharedLinkController_open",
-        "parameters": [
-          {
-            "name": "token",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -10415,11 +10406,15 @@
       "LinkOpenDto": {
         "type": "object",
         "properties": {
+          "token": {
+            "type": "string",
+            "description": "From the link fragment"
+          },
           "code": {
             "type": "string"
           }
         },
-        "required": ["code"]
+        "required": ["token", "code"]
       },
       "RevokedSharesDto": {
         "type": "object",

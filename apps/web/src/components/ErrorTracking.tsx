@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useSession } from '../lib/session';
+import { withoutQueryOrFragment } from '../lib/telemetry-urls';
 
 const DSN = process.env.NEXT_PUBLIC_GLITCHTIP_DSN;
 const RELEASE = process.env.NEXT_PUBLIC_BUILD_VERSION ?? 'dev';
@@ -35,10 +36,17 @@ export function ErrorTracking() {
               delete event.request.cookies;
               delete event.request.headers;
               delete event.request.query_string;
-              const url = event.request.url?.split('?')[0];
-              if (url) event.request.url = url;
+              if (event.request.url) event.request.url = withoutQueryOrFragment(event.request.url);
             }
             return event;
+          },
+          // Navigation and fetch breadcrumbs carry full URLs; a share link's token is its fragment.
+          beforeBreadcrumb(breadcrumb) {
+            const data = breadcrumb.data;
+            for (const key of ['url', 'from', 'to'])
+              if (data && typeof data[key] === 'string')
+                data[key] = withoutQueryOrFragment(data[key]);
+            return breadcrumb;
           },
         });
       }
