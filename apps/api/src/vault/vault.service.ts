@@ -35,7 +35,7 @@ import type {
   UsageDto,
   VaultQueryDto,
 } from './vault.dto.js';
-import { type RecordRow, VaultRepository } from './vault.repository.js';
+import { type RecordRow, type ShareRow, VaultRepository } from './vault.repository.js';
 
 const SHARE_AFTER_END_MS = 24 * 3_600_000;
 const MAX_LINK_ATTEMPTS = 5;
@@ -226,8 +226,19 @@ export class VaultService {
         role: provider.role,
         shareId: share.id,
       });
-    const history = share.includeHistory ? await this.history(share.ownerId) : [];
+    const history = share.includeHistory ? await this.historyOfRecipient(share) : [];
     return { records: await Promise.all(rows.map((row) => this.view(row))), history, files: [] };
+  }
+
+  /**
+   * Only the history of the person the booking is for: the account also holds its other
+   * linked patients' allergies and conditions, which this provider has no reason to see (MV-07).
+   */
+  private async historyOfRecipient(share: ShareRow): Promise<Plain<HistoryEntryDto>[]> {
+    const booking = await this.bookings.find(share.bookingId);
+    if (!booking) return [];
+    const recipient = booking.linkedPatientId ?? null;
+    return (await this.history(share.ownerId)).filter((entry) => entry.personId === recipient);
   }
 
   async sharedFile(provider: Principal, bookingId: string, recordId: string): Promise<StoredFile> {

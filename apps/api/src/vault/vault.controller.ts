@@ -14,7 +14,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import type pg from 'pg';
 import { AuditService } from '../audit/audit.service.js';
@@ -176,11 +182,14 @@ export class VaultController {
     return this.records.links(owner(request));
   }
 
+  /** A link opens records to anyone holding it and its code: a fresh OTP first (AC-05). */
   @Post('links')
   @HttpCode(HttpStatus.CREATED)
   @Header('Cache-Control', 'no-store')
   @Roles(...CARE_ROLES)
+  @UseGuards(RequireReverification)
   @ApiOkResponse({ type: LinkCreatedDto })
+  @ApiForbiddenResponse({ description: 'reverification_required' })
   async link(@Body() body: LinkInputDto, @Req() request: Request): Promise<LinkCreatedDto> {
     return this.vault.createLink(owner(request), body);
   }
@@ -193,11 +202,14 @@ export class VaultController {
     await this.vault.revokeLink(owner(request), id);
   }
 
+  /** Every record and history entry, decrypted: a fresh OTP first, as for /me/export (AC-05). */
   @Get('export')
   @Header('Cache-Control', 'no-store')
   @Header('Content-Disposition', 'attachment; filename="heach-vault.json"')
   @Roles(...CARE_ROLES)
+  @UseGuards(RequireReverification)
   @ApiOkResponse()
+  @ApiForbiddenResponse({ description: 'reverification_required' })
   async export(@Req() request: Request) {
     return this.vault.export(owner(request));
   }

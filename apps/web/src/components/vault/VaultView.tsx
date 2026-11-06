@@ -17,6 +17,7 @@ import { keyFor } from '../../lib/message-keys';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
+import { useReverified } from '../account/use-reverified';
 import { Select } from '../care/SearchView';
 import { VaultTimeline } from './VaultTimeline';
 
@@ -322,6 +323,8 @@ function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
   const [hours, setHours] = useState('24');
   const [created, setCreated] = useState<LinkCreated | undefined>();
   const { pending, error, run } = usePending();
+  // A link opens records to anyone holding it and its code: a fresh OTP first (AC-05).
+  const { attempt, sheet } = useReverified(run);
   if (records.length === 0) return null;
   return (
     <Card title={t('vault.linkTitle')}>
@@ -350,7 +353,7 @@ function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
         <Button
           disabled={pending || chosen.length === 0}
           onClick={() =>
-            void run(async () => {
+            void attempt(async () => {
               setCreated(
                 await api<LinkCreated>('/vault/links', {
                   method: 'POST',
@@ -363,6 +366,7 @@ function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
           {t('vault.createLink')}
         </Button>
       )}
+      {sheet}
     </Card>
   );
 }

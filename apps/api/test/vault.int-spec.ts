@@ -4,7 +4,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { UPLOAD_CONTENT_TYPE } from '../src/app.factory.js';
 import { Settings } from '../src/settings/settings.service.js';
-import { adminSignIn, nextTotp, signedUp, useApp } from './account-helpers.js';
+import { adminSignIn, nextTotp, reverify, signedUp, useApp } from './account-helpers.js';
 import { bearer, type Login } from './auth-helpers.js';
 import { firstSlot, paidBooking } from './booking-helpers.js';
 import { accountIdOf, listedProvider, SYNTHETIC_PDF } from './provider-helpers.js';
@@ -18,6 +18,38 @@ interface VaultRecord {
   tags: string[];
   visitNotes: { advice: string } | null;
   hasFile: boolean;
+}
+
+/** A sensitive call answers 403 until the session proves a fresh OTP; then it is re-verified. */
+async function afterFreshOtp(
+  app: INestApplication<App>,
+  user: { mobile: string; login: Login },
+  call: () => request.Test,
+): Promise<void> {
+  await call().set(bearer(user.login)).expect(403);
+  await reverify(app, user.mobile, user.login);
+}
+
+/** A linked child with an allergy in the vault: family history that a share must not carry. */
+async function childWithAllergy(app: INestApplication<App>, login: Login): Promise<void> {
+  const server = () => request(app.getHttpServer());
+  const child = (
+    await server()
+      .post('/v1/me/linked-patients')
+      .set(bearer(login))
+      .send({
+        fullName: 'Synthetic Child',
+        birthYear: 2018,
+        gender: 'female',
+        relationship: 'child',
+      })
+      .expect(201)
+  ).body as { id: string };
+  await server()
+    .post('/v1/vault/history')
+    .set(bearer(login))
+    .send({ kind: 'allergy', text: 'Synthetic peanut allergy', personId: child.id })
+    .expect(204);
 }
 
 async function completedVisit(app: INestApplication<App>, db: pg.Client) {
@@ -113,7 +145,7 @@ describe('The vault: filing, uploads and history (J9; MV-01 to MV-06, MV-12, MV-
   });
 
   it('MV-03 MV-04 MV-06 uploads with person, type and tags; filters and search; delete own uploads', async () => {
-    const { login } = await signedUp(app());
+    const { login, mobile } = await signedUp(app());
     const person = (
       await server()
         .post('/v1/me/linked-patients')
@@ -160,6 +192,7 @@ describe('The vault: filing, uploads and history (J9; MV-01 to MV-06, MV-12, MV-
     expect(usage.usedBytes).toBeGreaterThan(0);
     await server().delete(`/v1/vault/records/${scan.id}`).set(bearer(login)).expect(204);
     expect(await vault(login, '?type=scan')).toHaveLength(0);
+    await afterFreshOtp(app(), { mobile, login }, () => server().get('/v1/vault/export'));
     const exported = (await server().get('/v1/vault/export').set(bearer(login)).expect(200))
       .body as { records: unknown[] };
     expect(exported.records).toHaveLength(1);
@@ -220,6 +253,7 @@ describe('Sharing (MV-07 to MV-10, MV-14, AD-15)', () => {
       .set(bearer(patient.login))
       .send({ kind: 'condition', text: 'Synthetic diabetes' })
       .expect(204);
+    await childWithAllergy(app(), patient.login);
     const share = (
       await server()
         .post('/v1/vault/shares')
@@ -235,6 +269,7 @@ describe('Sharing (MV-07 to MV-10, MV-14, AD-15)', () => {
     ).body as { records: VaultRecord[]; history: { text: string }[] };
     expect(panel.records.map((row) => row.id)).toEqual([shared.id]);
     expect(JSON.stringify(panel)).not.toContain(privateRecord.title);
+    // Only the history of the person the booking is for, never the family's.
     expect(panel.history.map((entry) => entry.text)).toEqual(['Synthetic diabetes']);
     await server()
       .get(`/v1/provider/bookings/${booking.id}/shared/${shared.id}/file`)
@@ -316,8 +351,14 @@ describe('External links and admin counts (MV-09, AD-15)', () => {
   const { app, db, server } = useApp();
 
   it('MV-09 an external link needs its code, can be revoked, and its reads are listed', async () => {
-    const { login } = await signedUp(app());
+    const { login, mobile } = await signedUp(app());
     const record = (await upload(app(), login, OLD_SCAN).expect(201)).body as VaultRecord;
+    await server()
+      .post('/v1/vault/links')
+      .set(bearer(login))
+      .send({ recordIds: [record.id], hours: 24 })
+      .expect(403);
+    await reverify(app(), mobile, login);
     const link = (
       await server()
         .post('/v1/vault/links')
@@ -368,9 +409,15 @@ describe('Breach containment (SO-09)', () => {
   const { app, server } = useApp();
 
   it('SO-09 suspending the owner stops their links; an admin revokes every share and link at once', async () => {
-    const { login } = await signedUp(app());
+    const { login, mobile } = await signedUp(app());
     const accountId = await accountIdOf(app(), login);
     const record = (await upload(app(), login, OLD_SCAN).expect(201)).body as VaultRecord;
+    await server()
+      .post('/v1/vault/links')
+      .set(bearer(login))
+      .send({ recordIds: [record.id], hours: 24 })
+      .expect(403);
+    await reverify(app(), mobile, login);
     const link = (
       await server()
         .post('/v1/vault/links')
