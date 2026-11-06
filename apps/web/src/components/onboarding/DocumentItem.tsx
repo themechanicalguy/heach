@@ -68,7 +68,6 @@ export function DocumentItem({ entry, editable, onSaved }: Readonly<Props>) {
             label={t('application.chooseFile')}
             type="file"
             accept="application/pdf,image/jpeg,image/png"
-            capture="environment"
             onChange={(event) => {
               setFile(event.currentTarget.files?.[0]);
             }}

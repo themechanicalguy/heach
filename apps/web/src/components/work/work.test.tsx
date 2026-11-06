@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type * as ApiModule from '../../lib/api';
 import { I18nProvider } from '../../lib/i18n-context';
+import { mockBlobUrls } from '../../test/blob-urls';
 import { EarningsView } from './EarningsView';
 import { NotificationsView } from './NotificationsView';
 import { RequestsView } from './RequestsView';
@@ -37,6 +38,7 @@ function route(responses: Record<string, unknown>) {
 }
 
 beforeEach(() => {
+  mockBlobUrls();
   state.api.mockReset();
 });
 
@@ -67,9 +69,10 @@ describe('Provider work (BK-03, HS-02, PY-04, NT-02)', () => {
     expect(await screen.findByText('You earn ₹255.00')).toBeTruthy();
     expect(screen.getByText("Patient's note: Synthetic note")).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'View prescription' }));
-    expect(
-      (await screen.findByRole('link', { name: 'View prescription' })).getAttribute('href'),
-    ).toBe('data:application/pdf;base64,JVBERg==');
+    // A blob URL, never a data: URL (browsers refuse to open those in a new tab).
+    const prescription = await screen.findByRole('link', { name: 'View prescription' });
+    expect(prescription.getAttribute('href')).toBe('blob:http://localhost/synthetic-file');
+    expect(prescription.getAttribute('download')).toBe('prescription-b1.pdf');
     fireEvent.change(screen.getByLabelText('Why are you declining?'), {
       target: { value: 'prescription_invalid' },
     });

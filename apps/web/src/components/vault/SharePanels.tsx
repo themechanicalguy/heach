@@ -180,7 +180,7 @@ export function SharedLinkView() {
                     {file && (
                       <FileDownload
                         file={file}
-                        filename={`${record.title}.pdf`}
+                        name={record.title}
                         label={t('sharedLink.download')}
                       />
                     )}

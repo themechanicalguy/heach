@@ -312,7 +312,6 @@ function PrescriptionField({ onFile }: Readonly<Pick<FieldsProps, 'onFile'>>) {
       hint={t('book.prescriptionHint')}
       type="file"
       accept="application/pdf,image/jpeg,image/png"
-      capture="environment"
       onChange={(event) => {
         onFile(event.currentTarget.files?.[0]);
       }}
