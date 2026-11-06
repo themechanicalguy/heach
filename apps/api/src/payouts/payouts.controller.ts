@@ -34,20 +34,14 @@ export class EarningsController {
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: EarningsDto })
   async view(@Req() request: Request): Promise<EarningsDto> {
-    const lines = await this.ledger.lines(principalOf(request).userId);
+    const providerId = principalOf(request).userId;
     const now = new Date();
-    const open = lines.filter((line) => !line.paidOut);
-    return {
-      balancePaise: open.reduce((sum, line) => sum + line.amountPaise, 0),
-      heldPaise: open
-        .filter((line) => line.availableAt > now)
-        .reduce((sum, line) => sum + line.amountPaise, 0),
-      paidOutPaise: -lines
-        .filter((line) => line.kind === 'payout')
-        .reduce((sum, line) => sum + line.amountPaise, 0),
-      nextPayoutAt: nextPayoutRun(now),
-      lines,
-    };
+    // Totals over the whole ledger; the list shows only the latest lines.
+    const [lines, totals] = await Promise.all([
+      this.ledger.lines(providerId),
+      this.ledger.totals(providerId, now),
+    ]);
+    return { ...totals, nextPayoutAt: nextPayoutRun(now), lines };
   }
 }
 
