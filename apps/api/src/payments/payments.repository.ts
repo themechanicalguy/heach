@@ -19,6 +19,12 @@ export interface PaymentRow {
   refundedPaise: number;
 }
 
+/** Whose refunds to send: a booking's, or a plan purchase's. */
+export interface RefundOwner {
+  kind: 'booking' | 'purchase';
+  id: string;
+}
+
 export interface RefundRow {
   id: string;
   bookingId: string;
@@ -179,13 +185,33 @@ export class PaymentsRepository {
     return rows;
   }
 
-  async lockPendingRefunds(client: TransactionClient, bookingId: string): Promise<RefundRow[]> {
-    const { rows } = await client.query<{ id: string }>(
-      `SELECT id FROM app.refund WHERE booking_id = $1 AND status = 'pending' FOR UPDATE SKIP LOCKED`,
+  /**
+   * The oldest pending refund of one booking or plan purchase that this run has not tried yet,
+   * locked so that no other worker sends it at the same time.
+   */
+  async lockNextPendingRefund(
+    client: TransactionClient,
+    owner: RefundOwner,
+    skip: readonly string[],
+  ): Promise<RefundRow | undefined> {
+    const column = owner.kind === 'booking' ? 'booking_id' : 'purchase_id';
+    const { rows } = await client.query<RefundRow>(
+      `SELECT r.id, r.booking_id AS "bookingId", r.payment_id AS "paymentId", p.gateway_payment_id AS "gatewayPaymentId",
+              r.amount_paise AS "amountPaise", r.reason, r.status, r.created_at AS "createdAt"
+         FROM app.refund r JOIN app.payment p ON p.id = r.payment_id
+        WHERE r.${column} = $1 AND r.status = 'pending' AND NOT (r.id = ANY($2::uuid[]))
+        ORDER BY r.created_at, r.id LIMIT 1 FOR UPDATE OF r SKIP LOCKED`,
+      [owner.id, skip],
+    );
+    return rows[0];
+  }
+
+  async hasPendingRefunds(client: Queryable, bookingId: string): Promise<boolean> {
+    const { rows } = await client.query<{ pending: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM app.refund WHERE booking_id = $1 AND status = 'pending') AS pending`,
       [bookingId],
     );
-    const ids = new Set(rows.map((row) => row.id));
-    return (await this.refunds(bookingId, client)).filter((refund) => ids.has(refund.id));
+    return rows[0]?.pending === true;
   }
 
   async finishRefund(

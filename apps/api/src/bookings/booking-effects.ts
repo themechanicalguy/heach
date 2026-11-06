@@ -4,6 +4,7 @@ import { appLogger } from '../common/app-logger.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
 import { Notifier } from '../notifications/notifier.service.js';
 import { RefundsService } from '../payments/refunds.service.js';
+import { PaymentsRepository } from '../payments/payments.repository.js';
 import { LedgerService } from '../payouts/ledger.service.js';
 import { SlotLocks } from '../availability/slot-locks.js';
 import { SYSTEM } from './booking-actor.js';
@@ -39,6 +40,7 @@ export class BookingEffects {
     private readonly lifecycle: BookingLifecycle,
     private readonly ledger: LedgerService,
     private readonly locks: SlotLocks,
+    private readonly payments: PaymentsRepository,
   ) {}
 
   async run(effects: Effects): Promise<void> {
@@ -75,7 +77,9 @@ export class BookingEffects {
     const booking = await this.bookings.lock(client, bookingId);
     if (!booking) return;
     if (booking.status === 'completed') await this.ledger.reverse(client, bookingId, paise);
-    if (booking.status === 'cancelled' || booking.status === 'no_show') {
+    // Refunds now go out one at a time: Refunded only once the last pending one is sent.
+    const finished = !(await this.payments.hasPendingRefunds(client, bookingId));
+    if (finished && (booking.status === 'cancelled' || booking.status === 'no_show')) {
       await this.lifecycle.apply(client, booking, 'refund', SYSTEM, null);
     }
   }
