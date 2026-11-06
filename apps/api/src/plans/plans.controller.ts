@@ -12,6 +12,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { RequireReverification } from '../auth/reverification.js';
 import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { principalOf } from '../auth/auth.guard.js';
@@ -170,6 +171,7 @@ export class AdminPlansController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles('super_admin')
+  @UseGuards(RequireReverification)
   @ApiOkResponse()
   async define(@Body() body: PlanInputDto): Promise<{ id: string }> {
     return { id: await this.plans.define(body, null) };
@@ -178,6 +180,7 @@ export class AdminPlansController {
   @Post(':id/approve')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles('super_admin')
+  @UseGuards(RequireReverification)
   @ApiNoContentResponse()
   async approve(@Param('id', uuid) id: string): Promise<void> {
     await this.plans.setStatus(id, 'active');

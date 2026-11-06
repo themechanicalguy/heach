@@ -15,6 +15,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { RequireReverification } from '../auth/reverification.js';
 import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AuditService } from '../audit/audit.service.js';
@@ -121,6 +122,7 @@ export class AdminBookingsController {
   @Post(':id/refund')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles('super_admin', 'finance')
+  @UseGuards(RequireReverification)
   @ApiNoContentResponse()
   async refund(
     @Param('id', uuid) id: string,
