@@ -204,7 +204,17 @@ export async function listedProvider(
     { token: verifier },
   );
   const accountId = queue.find((row) => row.fullName === name)?.accountId ?? '';
-  await call(`/admin/v1/applications/${accountId}`, { token: verifier });
+  const review = await call<{ items: { document: { id: string } | null }[] }>(
+    `/admin/v1/applications/${accountId}`,
+    { token: verifier },
+  );
+  // AD-02: every document is reviewed before an approval.
+  for (const { document } of review.items)
+    if (document)
+      await call(`/admin/v1/applications/${accountId}/documents`, {
+        token: verifier,
+        body: { documentId: document.id, status: 'accepted' },
+      });
   await call(`/admin/v1/applications/${accountId}/decision`, {
     token: verifier,
     body: { decision: 'approve' },

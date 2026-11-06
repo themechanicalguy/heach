@@ -1,4 +1,5 @@
 import {
+  blockersToApprove,
   type ApplicationFacts,
   canSubmit,
   decide,
@@ -86,5 +87,32 @@ describe('Provider application rules (PO-01, PO-04)', () => {
     expect(decide('under_review', 'request_changes')).toBe('changes_requested');
     expect(decide('draft', 'approve')).toBeUndefined();
     expect(decide('approved', 'reject')).toBeUndefined();
+  });
+});
+
+describe('Approving an application (AD-02)', () => {
+  const item = (key: string, required: boolean, status?: 'pending' | 'accepted' | 'rejected') => ({
+    key,
+    required,
+    document: status ? { reviewStatus: status } : null,
+  });
+
+  it('AD-02 approves only with nothing missing and every document reviewed', () => {
+    expect(
+      blockersToApprove({
+        missing: [],
+        items: [item('a', true, 'accepted'), item('b', false, 'rejected'), item('c', false)],
+      }),
+    ).toEqual([]);
+    expect(
+      blockersToApprove({
+        missing: ['identity', 'a'],
+        items: [
+          item('a', true, 'rejected'),
+          item('b', false, 'pending'),
+          item('c', true, 'pending'),
+        ],
+      }),
+    ).toEqual(['identity', 'a', 'b', 'c']);
   });
 });
