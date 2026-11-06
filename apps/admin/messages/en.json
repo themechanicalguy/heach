@@ -81,7 +81,8 @@
     "plan_item_required": "Choose the catalogue item or service the plan covers.",
     "template_placeholders": "The wording must keep exactly the same placeholders as the default.",
     "template_invalid": "The wording has unmatched braces.",
-    "checklist_item_fixed": "Police verification stays required for everyone who visits a home."
+    "checklist_item_fixed": "Police verification stays required for everyone who visits a home.",
+    "application_incomplete": "This application cannot be approved yet: an item is missing or a document has not been reviewed. Accept or reject every document, or request changes."
   },
   "users": {
     "title": "Users",

@@ -58,3 +58,29 @@ export function decide(
   if (status !== 'submitted' && status !== 'under_review') return undefined;
   return DECIDED[decision];
 }
+
+/** What an application shows a reviewer: its checklist items and what is still missing. */
+export interface ReviewedApplication {
+  missing: readonly string[];
+  items: readonly {
+    key: string;
+    required: boolean;
+    document: { reviewStatus: 'pending' | 'accepted' | 'rejected' } | null;
+  }[];
+}
+
+/**
+ * What still stops an approval (AD-02, PO-04): anything missing today (a document may have
+ * expired, or the checklist changed, since submitting), a required document not accepted, or
+ * any document not yet reviewed.
+ */
+export function blockersToApprove(application: ReviewedApplication): string[] {
+  const unreviewed = application.items
+    .filter(({ required, document }) =>
+      document
+        ? document.reviewStatus === 'pending' || (required && document.reviewStatus !== 'accepted')
+        : false,
+    )
+    .map(({ key }) => key);
+  return [...new Set([...application.missing, ...unreviewed])];
+}
