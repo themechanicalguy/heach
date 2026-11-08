@@ -75,7 +75,7 @@ export async function run({ base, concurrency, seconds, mix = MIX }) {
   return summarise(latencies, errors, seconds);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.main) {
   const { values } = parseArgs({
     options: {
       base: { type: 'string', default: 'http://localhost:3001' },

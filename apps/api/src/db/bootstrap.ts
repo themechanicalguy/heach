@@ -39,7 +39,7 @@ async function setPassword(client: pg.Client, role: string, password: string): P
   );
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   await loadSecrets(process.env, ['POSTGRES_PASSWORD', 'DB_MIGRATOR_PASSWORD', 'DB_APP_PASSWORD']);
   await bootstrapDatabase(process.env);
   createLogger({ name: 'db' }).info('Database roles and audit schema are in place');

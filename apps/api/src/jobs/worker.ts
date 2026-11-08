@@ -27,4 +27,4 @@ async function main(): Promise<void> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) await main();
+if (import.meta.main) await main();

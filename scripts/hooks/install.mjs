@@ -14,4 +14,4 @@ export function installHooks() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) installHooks();
+if (import.meta.main) installHooks();

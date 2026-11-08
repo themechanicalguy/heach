@@ -150,7 +150,7 @@ export async function main(env: NodeJS.ProcessEnv = process.env): Promise<number
   }
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   process.exitCode = await main().catch((error: unknown) => {
     logger.error(
       { error: error instanceof Error ? error.name : 'unknown' },

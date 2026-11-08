@@ -57,7 +57,7 @@ async function readStdin(): Promise<string> {
     .replace(/\r?\n$/, '');
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   const { values } = parseArgs({
     options: { email: { type: 'string' }, role: { type: 'string' } },
   });

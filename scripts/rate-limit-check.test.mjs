@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -6,7 +7,7 @@ import { URL } from 'node:url';
 import { promisify } from 'node:util';
 
 const run = promisify(execFile);
-const script = new URL('./rate-limit-check.sh', import.meta.url).pathname;
+const script = fileURLToPath(new URL('./rate-limit-check.sh', import.meta.url));
 
 /** A stand-in for the proxy and API: `answer(n)` gives the nth response as [status, body]. */
 async function serve(answer) {

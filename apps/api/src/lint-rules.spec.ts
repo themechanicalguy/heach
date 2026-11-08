@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { ESLint } from 'eslint';
 
 // Type-aware linting is slow on a busy CI runner; one lint run, generous timeout.
@@ -12,7 +13,7 @@ describe('Lint rules for app code', () => {
   it(
     'LM-02.2 TS-06.1 fails on console.* and on importing adapter implementations in app code',
     async () => {
-      const eslint = new ESLint({ cwd: new URL('..', import.meta.url).pathname });
+      const eslint = new ESLint({ cwd: fileURLToPath(new URL('..', import.meta.url)) });
       const [result] = await eslint.lintText(FIXTURE, { filePath: 'src/main.ts' });
       const errors = (result?.messages ?? []).filter((m) => m.severity === 2);
       const linesFor = (rule: string) => errors.filter((m) => m.ruleId === rule).map((m) => m.line);

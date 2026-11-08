@@ -157,7 +157,7 @@ async function main([release, dir = 'apps/web/.next/static']) {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.main) {
   main(process.argv.slice(2)).catch((error) => {
     process.stderr.write(`${error.message}\n`);
     process.exit(1);

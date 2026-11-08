@@ -102,7 +102,7 @@ function lcovFiles(root) {
   return found;
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   const base = process.argv[2] ?? 'origin/main';
   const root = process.cwd();
   // eslint-disable-next-line sonarjs/no-os-command-from-path -- CI and developer git

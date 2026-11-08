@@ -27,7 +27,7 @@ export async function migrate(env: Record<string, string | undefined>): Promise<
   return applied.map((migration) => migration.name);
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   await loadSecrets(process.env, ['DB_MIGRATOR_PASSWORD']);
   const applied = await migrate(process.env);
   createLogger({ name: 'db' }).info({ applied }, 'Migrations applied');

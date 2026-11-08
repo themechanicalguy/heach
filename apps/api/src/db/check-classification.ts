@@ -51,7 +51,7 @@ function problemsFor(
   return [];
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   const client = new pg.Client(
     pgClientConfig(
       requireEnv(process.env, 'DATABASE_MIGRATOR_URL'),

@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { type ChildProcess, spawn } from 'node:child_process';
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -16,7 +17,7 @@ import { connectAs } from './db.js';
 
 // Drives deploy/dev/restore-check.sh end to end against the local PostgreSQL (spec 006): real
 // pg_dump and pg_restore, the built job, a local folder in place of S3 and a fake alert command.
-const ROOT = new URL('../../../', import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const SCRIPT = join(ROOT, 'deploy/dev/restore-check.sh');
 const BASH = '/bin/bash';
 const JOB = join(ROOT, 'apps/api/dist/jobs/restore-check.js');
@@ -148,7 +149,7 @@ const fresh = () => `pg/${stamp(new Date())}.dump`;
 
 async function runCheck(
   dumpDir: string,
-  job = `node ${JOB}`,
+  job = `node "${JOB}"`,
   onStart?: (pid: number) => void,
 ): Promise<Run> {
   const started = Date.now();

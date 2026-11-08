@@ -65,7 +65,7 @@ export async function purgeExpired(client: Client): Promise<PurgeCounts> {
   };
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   await loadSecrets(process.env, ['DB_APP_PASSWORD']);
   const client = new pg.Client(
     pgClientConfig(

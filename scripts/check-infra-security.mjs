@@ -91,7 +91,7 @@ export function apiParameterNames(text) {
   return [...list.matchAll(/"([A-Z0-9_]+)"/g)].map((match) => match[1]);
 }
 
-if (import.meta.url === `file://${process.argv[1] ?? ''}`) {
+if (import.meta.main) {
   const problems = tfFiles('infra').flatMap((file) => problemsIn(file, readFileSync(file, 'utf8')));
   if (problems.length > 0) {
     process.stderr.write(`${problems.join('\n')}\n`);
