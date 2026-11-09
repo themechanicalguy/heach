@@ -61,6 +61,9 @@ export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }
   const set = (key: keyof FormState) => (value: string) => {
     if (key === 'recipient') setPerson(value);
     setForm((current) => ({ ...current, [key]: value }));
+  useEffect(() => {
+    if (search.pin) setForm((current) => (current.pin ? current : { ...current, pin: search.pin }));
+  }, [search.pin]);
   };
   const submit = () =>
     run(async () => {

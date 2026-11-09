@@ -10,7 +10,7 @@ import { useI18n } from '../../lib/i18n-context';
 export function ProviderCard({ result }: Readonly<{ result: SearchResult }>) {
   const { locale, t } = useI18n();
   return (
-    <Card title={result.name}>
+    <Card className="provider-card" title={result.name}>
       <p>{result.itemName}</p>
       <p className="site-badge">{t('site.verified')}</p>
       <p>{t('site.servesPin')}</p>

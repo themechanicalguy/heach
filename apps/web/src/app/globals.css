@@ -615,6 +615,24 @@ body {
   list-style: none;
 }
 
+.provider-results {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+
+.provider-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.provider-card > .heach-button {
+  margin-top: auto;
+}
+
+#find-care {
+  scroll-margin-top: 5rem;
+}
+
 .language-choices a {
   width: 100%;
   min-height: 60px;
@@ -871,8 +889,14 @@ body {
 }
 
 .service-tile__text {
-  display: grid;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   gap: 0.125rem;
+}
+
+.service-tile__text > :nth-child(3) {
+  margin-top: auto;
 }
 
 .service-tile__title {

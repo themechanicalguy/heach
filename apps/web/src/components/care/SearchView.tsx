@@ -26,7 +26,7 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
   const { search, setSearch } = useCareSearch();
   const [filters, setFilters] = useState<Filters>({
     pin: search.pin,
-    q: search.q,
+    q: search.service === service ? search.q : '',
     item: '',
     language: '',
     gender: '',
@@ -34,6 +34,11 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
     minRating: '',
     availableBy: '',
   });
+  useEffect(() => {
+    // A saved PIN is read after the form has mounted; it must not replace what was typed.
+    if (search.pin)
+      setFilters((current) => (current.pin ? current : { ...current, pin: search.pin }));
+  }, [search.pin]);
   const [items, setItems] = useState<CatalogueItem[]>([]);
   const [results, setResults] = useState<Results>({ state: 'idle' });
   const [pinError, setPinError] = useState(false);
@@ -252,7 +257,7 @@ function ResultList({ results, onRetry }: Readonly<{ results: Results; onRetry: 
       <Notice tone="info" live>
         {t('search.results', { count: results.items.length })}
       </Notice>
-      <ul className="role-list">
+      <ul className="role-list provider-results">
         {results.items.map((result) => (
           <li key={result.listingId}>
             <ProviderCard result={result} />
