@@ -18,6 +18,9 @@ import { SessionProvider } from '../../lib/session';
 import { criticalFontFiles } from '../fonts';
 import { translatorFor } from '../../i18n/messages';
 import { CareSearchProvider } from '../../lib/care-search';
+import { LocationProvider } from '../../lib/location';
+import { LocationBanner } from '../../components/location/LocationBanner';
+import { LocationDialog } from '../../components/location/LocationDialog';
 import { HeaderCare } from '../../components/site/HeaderCare';
 import { FooterSwitch } from '../../components/site/FooterSwitch';
 import { AppFooter, SiteFooter } from '../../components/site/SiteFooter';
@@ -76,24 +79,28 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
           <SessionProvider>
             <AccountProvider enabled={accounts}>
               <CareSearchProvider>
-                <header className="shell-header">
-                  <Link href={`/${locale}`} className="shell-header__name">
-                    <span className="shell-header__mark" aria-hidden="true" />
-                    <span className="shell-header__label">{t('app.name')}</span>
-                  </Link>
-                  <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
-                  <div className="shell-header__actions">
-                    <HeaderCare language={<LanguageSwitch />} />
-                    <HeaderAccount />
-                  </div>
-                </header>
-                <OfflineStatus />
-                {children}
-                <FooterSwitch
-                  full={<SiteFooter config={siteConfig()} locale={locale} />}
-                  compact={<AppFooter config={siteConfig()} locale={locale} />}
-                />
-                <ErrorTracking />
+                <LocationProvider>
+                  <header className="shell-header">
+                    <Link href={`/${locale}`} className="shell-header__name">
+                      <span className="shell-header__mark" aria-hidden="true" />
+                      <span className="shell-header__label">{t('app.name')}</span>
+                    </Link>
+                    <ShellNav accounts={accounts} sample={flags.isOn('sample-patient-note')} />
+                    <div className="shell-header__actions">
+                      <HeaderCare language={<LanguageSwitch />} />
+                      <HeaderAccount />
+                    </div>
+                  </header>
+                  <LocationBanner />
+                  <OfflineStatus />
+                  {children}
+                  <FooterSwitch
+                    full={<SiteFooter config={siteConfig()} locale={locale} />}
+                    compact={<AppFooter config={siteConfig()} locale={locale} />}
+                  />
+                  <LocationDialog />
+                  <ErrorTracking />
+                </LocationProvider>
               </CareSearchProvider>
             </AccountProvider>
           </SessionProvider>

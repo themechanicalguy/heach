@@ -102,6 +102,7 @@ export function shellMessages(locale: Locale) {
       'errors',
       'guard',
       'services',
+      'location',
     ]),
     site: Object.fromEntries(SITE_CLIENT_KEYS.map((key) => [key, catalogue.site[key]])),
     signIn: { codeLabel: catalogue.signIn.codeLabel, mobileHint: catalogue.signIn.mobileHint },

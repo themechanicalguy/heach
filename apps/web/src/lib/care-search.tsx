@@ -26,6 +26,8 @@ interface Context {
   setSearch: (value: CareSearch) => void;
   person: string;
   setPerson: (value: string) => void;
+  /** The session and any saved PIN have been read, so an empty PIN is really empty. */
+  ready: boolean;
 }
 const CareContext = createContext<Context | undefined>(undefined);
 
@@ -47,6 +49,13 @@ export function CareSearchProvider({ children }: Readonly<{ children: ReactNode 
     status === 'signed-in' &&
     account.state === 'ready' &&
     isCareRole(account.me.activeRole);
+  const [savedRead, setSavedRead] = useState(false);
+  const ready =
+    status !== 'checking' &&
+    (!enabled ||
+      status === 'signed-out' ||
+      account.state === 'error' ||
+      (account.state === 'ready' && (!care || savedRead)));
   const search = useMemo(
     () =>
       intent.person === person && (status === 'signed-in' || !intent.authenticated)
@@ -63,6 +72,7 @@ export function CareSearchProvider({ children }: Readonly<{ children: ReactNode 
   useEffect(() => {
     if (!care) return;
     let active = true;
+    setSavedRead(false);
     void api<{ pin: string | null }>('/me/care-pin/read', {
       method: 'POST',
       body: JSON.stringify({ person: person || undefined }),
@@ -79,7 +89,10 @@ export function CareSearchProvider({ children }: Readonly<{ children: ReactNode 
                 },
           );
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setSavedRead(true);
+      });
     return () => {
       active = false;
     };
@@ -95,8 +108,8 @@ export function CareSearchProvider({ children }: Readonly<{ children: ReactNode 
     }
   }, [status]);
   const value = useMemo(
-    () => ({ search, setSearch, person, setPerson }),
-    [search, person, setSearch],
+    () => ({ search, setSearch, person, setPerson, ready }),
+    [search, person, setSearch, ready],
   );
   return <CareContext value={value}>{children}</CareContext>;
 }

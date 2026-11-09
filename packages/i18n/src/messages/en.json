@@ -1392,5 +1392,28 @@
     "useLabel": "Use PIN {pin} in the search form",
     "nobody": "No PIN code can book this service yet.",
     "unserved": "{count, plural, one {# PIN code is not served yet} other {# PIN codes are not served yet}}"
+  },
+  "location": {
+    "title": "Where do you need care?",
+    "intro": "Enter your PIN code and the service you need. We will tell you right away if we visit your area.",
+    "pin": "PIN code",
+    "pinHint": "6 digits",
+    "pinInvalid": "Enter a 6-digit PIN code. It cannot start with 0.",
+    "service": "Service",
+    "check": "Check my area",
+    "checking": "Checking your area…",
+    "served": "We visit {pin} for {service}.",
+    "servedHint": "You can search for providers now.",
+    "unserved": "We do not offer {service} at {pin} yet.",
+    "unservedHint": "Try another PIN code, or ask our help desk about your area.",
+    "error": "We could not check this area. Check your connection and try again.",
+    "continue": "Continue",
+    "continueAnyway": "Continue anyway",
+    "skip": "Skip for now",
+    "help": "Contact help desk",
+    "bannerLabel": "Service area",
+    "bannerTitle": "{service} is not available at PIN code {pin}.",
+    "bannerHint": "Update your location or contact our help desk.",
+    "update": "Update location"
   }
 }
