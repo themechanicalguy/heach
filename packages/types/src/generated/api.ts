@@ -1156,6 +1156,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/coverage/pins': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['CoverageController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/provider/earnings': {
     parameters: {
       query?: never;
@@ -3936,6 +3952,19 @@ export interface components {
       served: boolean;
       /** @description Public services with published listings serving the requested area */
       services: ('physiotherapy' | 'nursing' | 'attendant' | 'lab')[];
+    };
+    PinCoverageDto: {
+      pin: string;
+      district: string;
+      /** @description Approved providers with an active listing serving this PIN */
+      providers: number;
+      /** @enum {string} */
+      band: 'available' | 'limited' | 'none';
+      /**
+       * Format: date-time
+       * @description Soonest free time in the next 7 days; a guide, confirmed when booking
+       */
+      nextAvailable: string | null;
     };
     LedgerLineDto: {
       bookingId: string | null;
@@ -6859,6 +6888,27 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['CoverageDto'];
+        };
+      };
+    };
+  };
+  CoverageController_list: {
+    parameters: {
+      query: {
+        service: 'physiotherapy' | 'nursing' | 'attendant' | 'lab';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PinCoverageDto'][];
         };
       };
     };

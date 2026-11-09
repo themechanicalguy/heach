@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CoverageCacheModule } from '../search/coverage-cache.module.js';
 import { ApplicationView } from './application-view.js';
 import { ChecklistSettings } from './checklist-settings.js';
 import { AdminChecklistsController } from './checklists.controller.js';
@@ -11,6 +12,7 @@ import { VerificationService } from './verification.service.js';
 
 /** Provider onboarding and the admin verification queue (Step 3: J1, J5). */
 @Module({
+  imports: [CoverageCacheModule],
   controllers: [OnboardingController, VerificationController, AdminChecklistsController],
   providers: [
     OnboardingRepository,

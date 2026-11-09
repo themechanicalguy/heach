@@ -1,3 +1,4 @@
+import { CoveragePinsCache } from '../search/coverage-pins.cache.js';
 import type { BlindIndexer, FieldEncryptor } from '@heach/crypto';
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service.js';
@@ -25,6 +26,7 @@ export class AdminUsersService {
     private readonly availability: RoleAvailability,
     @Inject(FIELD_ENCRYPTOR) private readonly encryptor: FieldEncryptor,
     @Inject(BLIND_INDEXER) private readonly indexer: BlindIndexer,
+    private readonly coverage: CoveragePinsCache,
   ) {}
 
   async list(query: {
@@ -81,6 +83,7 @@ export class AdminUsersService {
       await this.audit.record({ action, entity: ENTITY, entityId: id }, client);
       return true;
     });
+    if (changed) await this.coverage.invalidate();
     if (!changed) {
       throw new ConflictException({
         error: 'Conflict',

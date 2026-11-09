@@ -3,6 +3,7 @@ import type pg from 'pg';
 import { SERVICES, type Service } from '../catalogue/services.js';
 import { searchPatterns } from './search-patterns.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
+import type { PinProviderRow } from './coverage-pins.js';
 import type {
   ProfileListingDto,
   SearchQueryDto,
@@ -14,11 +15,13 @@ export type SearchRow = Omit<SearchResultDto, 'earliestSlot'>;
 
 // Approved, active providers only (scope: verification before any listing). A lab is shown by
 // its organisation's name, a person by their own.
-const PUBLISHED = `
+const ELIGIBLE = `
   JOIN app.role_assignment r ON r.account_id = l.provider_account_id AND r.side = 'provider'
        AND r.application_status = 'approved'
   JOIN app.account a ON a.id = l.provider_account_id AND a.status = 'active'
-  JOIN app.account_profile p ON p.account_id = l.provider_account_id
+  JOIN app.account_profile p ON p.account_id = l.provider_account_id`;
+
+const PUBLISHED = `${ELIGIBLE}
   LEFT JOIN app.organisation o ON o.owner_account_id = l.provider_account_id
   LEFT JOIN app.provider_schedule s ON s.account_id = l.provider_account_id
   LEFT JOIN LATERAL (SELECT round(avg(v.stars)::numeric, 1)::float AS rating, count(*)::int AS n
@@ -48,6 +51,26 @@ export class SearchRepository {
       [pin, SERVICES],
     );
     return rows.map((row) => row.service);
+  }
+
+  /** Every serviceable PIN with the listings of eligible providers serving it, if any. */
+  async pinProviders(service: Service): Promise<PinProviderRow[]> {
+    const { rows } = await this.pool.query<PinProviderRow>(
+      `SELECT pc.pin, pc.district, x."providerId", x."itemCode", x."durationMinutes"
+         FROM app.pin_code pc
+         LEFT JOIN LATERAL (
+           SELECT l.provider_account_id AS "providerId", i.code AS "itemCode",
+                  l.duration_minutes AS "durationMinutes"
+             FROM app.service_area sa
+             JOIN app.listing l ON l.provider_account_id = sa.account_id AND l.active
+             JOIN app.catalogue_item i ON i.id = l.item_id AND i.active AND i.service = $1
+             ${ELIGIBLE}
+            WHERE sa.pin = pc.pin) x ON true
+        WHERE pc.serviceable
+        ORDER BY pc.pin`,
+      [service],
+    );
+    return rows;
   }
 
   async startingPrices(): Promise<ServicePriceDto[]> {

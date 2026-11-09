@@ -51,6 +51,6 @@ describe('Site stories in three languages', () => {
     });
   });
   it('covers all new site components', () => {
-    expect(stories).toHaveLength(58);
+    expect(stories).toHaveLength(60);
   });
 });

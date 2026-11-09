@@ -1,4 +1,4 @@
-import type { ContentPage, ServicePrice } from '@heach/types';
+import type { ContentPage, PinCoverage, ServicePrice } from '@heach/types';
 import { CATALOGUES, type Locale } from '@heach/i18n';
 
 /** Server-side public content only. No cookies, account identifiers or secrets are forwarded. */
@@ -31,6 +31,23 @@ export async function publicPrices(): Promise<ServicePrice[]> {
       signal: AbortSignal.timeout(3000),
     });
     return response.ok ? ((await response.json()) as ServicePrice[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Serviceable PINs of one service with provider counts and the next free time. Public aggregates,
+ * so Next may reuse the answer for as long as the API's own cache does (SD-04).
+ */
+export async function publicServiceablePins(service: string): Promise<PinCoverage[]> {
+  if (!process.env.API_ORIGIN) return [];
+  try {
+    const response = await fetch(
+      `${process.env.API_ORIGIN}/v1/coverage/pins?service=${encodeURIComponent(service)}`,
+      { next: { revalidate: 300 }, signal: AbortSignal.timeout(3000) },
+    );
+    return response.ok ? ((await response.json()) as PinCoverage[]) : [];
   } catch {
     return [];
   }

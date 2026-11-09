@@ -1,3 +1,4 @@
+import { CoveragePinsCache } from '../search/coverage-pins.cache.js';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { ApplicationStatus } from '../accounts/account.repository.js';
 import type { SmsTemplate } from '../adapters/sms.port.js';
@@ -41,6 +42,7 @@ export class VerificationService {
     private readonly uploads: UploadsService,
     private readonly audit: AuditService,
     private readonly notifier: Notifier,
+    private readonly coverage: CoveragePinsCache,
   ) {}
 
   queue(view: 'open' | 'decided' = 'open'): Promise<ApplicationSummaryDto[]> {
@@ -107,6 +109,7 @@ export class VerificationService {
       await this.record(input.decision, accountId, client);
       return next;
     });
+    await this.coverage.invalidate();
     const template = OUTCOME_SMS[to];
     if (template) await this.notifier.smsAccount(accountId, template);
   }

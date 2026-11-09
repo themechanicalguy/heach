@@ -2458,6 +2458,38 @@
         "tags": ["search"]
       }
     },
+    "/v1/coverage/pins": {
+      "get": {
+        "operationId": "CoverageController_list",
+        "parameters": [
+          {
+            "name": "service",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["physiotherapy", "nursing", "attendant", "lab"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PinCoverageDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
     "/v1/provider/earnings": {
       "get": {
         "operationId": "EarningsController_view",
@@ -8894,6 +8926,32 @@
           }
         },
         "required": ["served", "services"]
+      },
+      "PinCoverageDto": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "providers": {
+            "type": "number",
+            "description": "Approved providers with an active listing serving this PIN"
+          },
+          "band": {
+            "type": "string",
+            "enum": ["available", "limited", "none"]
+          },
+          "nextAvailable": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Soonest free time in the next 7 days; a guide, confirmed when booking"
+          }
+        },
+        "required": ["pin", "district", "providers", "band", "nextAvailable"]
       },
       "LedgerLineDto": {
         "type": "object",

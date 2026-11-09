@@ -63,6 +63,7 @@ export type Booking = components['schemas']['BookingDto'];
 export type BookingSummary = components['schemas']['BookingSummaryDto'];
 export type CreateBooking = components['schemas']['CreateBookingDto'];
 export type Checkout = components['schemas']['CheckoutDto'];
+export type PinCoverage = components['schemas']['PinCoverageDto'];
 export type ProviderRequest = components['schemas']['ProviderRequestDto'];
 export type ProviderBooking = components['schemas']['ProviderBookingDto'];
 export type AnySlots = components['schemas']['AnySlotsDto'];

@@ -1,3 +1,4 @@
+import { CoveragePinsCache } from '../search/coverage-pins.cache.js';
 import {
   BadRequestException,
   Body,
@@ -40,6 +41,7 @@ export class ListingsController {
     private readonly catalogue: CatalogueRepository,
     private readonly access: ProviderAccess,
     private readonly audit: AuditService,
+    private readonly coverage: CoveragePinsCache,
   ) {}
 
   @Get('listings')
@@ -89,6 +91,7 @@ export class ListingsController {
       const id = await this.listings.save(client, providerId, item.id, body);
       await this.audit.record({ action: `${ENTITY}.saved`, entity: ENTITY, entityId: id }, client);
     });
+    await this.coverage.invalidate();
     return this.view(request);
   }
 
@@ -109,6 +112,7 @@ export class ListingsController {
         client,
       );
     });
+    await this.coverage.invalidate();
     return this.view(request);
   }
 }

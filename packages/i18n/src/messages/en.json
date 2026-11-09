@@ -1374,5 +1374,23 @@
     "or": "Odia",
     "en": "English",
     "hi": "Hindi"
+  },
+  "pins": {
+    "title": "PIN codes we serve",
+    "intro": "Home visits are available only in these areas. Availability is a guide; the exact times are confirmed when you book.",
+    "caption": "PIN codes and availability for {service}",
+    "pin": "PIN code",
+    "district": "District",
+    "availability": "Availability",
+    "next": "Next free time",
+    "available": "Available",
+    "limited": "Limited",
+    "none": "Not yet available",
+    "providers": "{count, plural, one {# provider} other {# providers}}",
+    "noSlot": "None in the next 7 days",
+    "use": "Search here",
+    "useLabel": "Use PIN {pin} in the search form",
+    "nobody": "No PIN code can book this service yet.",
+    "unserved": "{count, plural, one {# PIN code is not served yet} other {# PIN codes are not served yet}}"
   }
 }

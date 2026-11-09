@@ -1,3 +1,4 @@
+import { CoverageCacheModule } from '../search/coverage-cache.module.js';
 import { Module } from '@nestjs/common';
 import { AdminAccountRepository } from './admin-account.repository.js';
 import { AdminAuthController } from './admin-auth.controller.js';
@@ -13,6 +14,7 @@ import { AdminUsersService } from './admin-users.service.js';
  * management (AD-01, AD-03).
  */
 @Module({
+  imports: [CoverageCacheModule],
   controllers: [AdminAuthController, AdminManagementController, AdminUsersController],
   providers: [
     AdminAccountRepository,

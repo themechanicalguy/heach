@@ -35,9 +35,13 @@ export function SearchView({ service }: Readonly<{ service: Service }>) {
     availableBy: '',
   });
   useEffect(() => {
-    // A saved PIN is read after the form has mounted; it must not replace what was typed.
-    if (search.pin)
-      setFilters((current) => (current.pin ? current : { ...current, pin: search.pin }));
+    // A PIN picked elsewhere, such as the serviceable list above, fills the form.
+    if (search.pin) {
+      setFilters((current) =>
+        current.pin === search.pin ? current : { ...current, pin: search.pin },
+      );
+      setPinError(false);
+    }
   }, [search.pin]);
   const [items, setItems] = useState<CatalogueItem[]>([]);
   const [results, setResults] = useState<Results>({ state: 'idle' });
