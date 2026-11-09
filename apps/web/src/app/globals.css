@@ -615,6 +615,33 @@ body {
   list-style: none;
 }
 
+.booking-intake {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--heach-border);
+  border-radius: var(--heach-radius-card);
+}
+
+.booking-intake__title {
+  padding: 0 0.375rem;
+  font-weight: 600;
+}
+
+.booking-intake__contact {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 40rem) {
+  .booking-intake__contact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .provider-results {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
 }

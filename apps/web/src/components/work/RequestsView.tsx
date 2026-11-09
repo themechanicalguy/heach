@@ -11,6 +11,7 @@ import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { Select } from '../care/SearchView';
 import { money } from '../booking/money';
+import { IntakeSummary } from './IntakeSummary';
 
 const DECLINE_REASONS = ['unavailable', 'too_far', 'prescription_invalid', 'other'] as const;
 
@@ -78,6 +79,7 @@ function RequestCard({
           {t('requests.acceptBy', { time: formatDateTime(new Date(request.acceptBy), locale) })}
         </p>
       )}
+      {request.intake && <IntakeSummary intake={request.intake} />}
       {request.notes && <p>{t('requests.notes', { notes: request.notes })}</p>}
       {request.hasPrescription &&
         (file ? (

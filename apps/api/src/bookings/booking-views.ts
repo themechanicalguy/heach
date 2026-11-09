@@ -10,6 +10,7 @@ import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { PaymentsRepository } from '../payments/payments.repository.js';
 import { Settings } from '../settings/settings.service.js';
 import { BookingRepository, type BookingRow } from './booking.repository.js';
+import { type Intake, parseIntake } from './intake.js';
 import type {
   BookingDto,
   BookingSummaryDto,
@@ -45,13 +46,14 @@ export class BookingViews {
   async forBooker(bookerId: string, bookingId: string, locale: string): Promise<BookingDto> {
     const booking = await this.bookings.find(bookingId);
     if (booking?.bookerId !== bookerId) throw new NotFoundException();
-    const [summary, events, refunds, payments, address, notes] = await Promise.all([
+    const [summary, events, refunds, payments, address, notes, intake] = await Promise.all([
       this.summary(booking, locale),
       this.bookings.events(bookingId),
       this.payments.refunds(bookingId),
       this.payments.forBooking(bookingId),
       this.encryptor.decrypt(booking.address),
       booking.notes ? this.encryptor.decrypt(booking.notes) : Promise.resolve(null),
+      this.intakeOf(booking),
     ]);
     await this.audit.record({ action: 'booking.read', entity: 'booking', entityId: bookingId });
     const unpaid = payments.find((payment) => payment.status === 'created');
@@ -59,6 +61,7 @@ export class BookingViews {
       ...summary,
       address,
       notes,
+      intake,
       events,
       refunds: refunds.map(({ amountPaise, reason, status }) => ({ amountPaise, reason, status })),
       canCancel: CANCELLABLE.has(booking.status),
@@ -179,7 +182,8 @@ export class BookingViews {
     if (!booking || !listing) return undefined;
     const summary = await this.summary(booking, locale);
     const notes = booking.notes ? await this.encryptor.decrypt(booking.notes) : null;
-    if (notes)
+    const intake = await this.intakeOf(booking);
+    if (notes || intake)
       await this.audit.record({
         action: 'booking.notes.read',
         entity: 'booking',
@@ -200,6 +204,7 @@ export class BookingViews {
       shiftDays: booking.shiftDays,
       pin: booking.pin,
       notes,
+      intake,
       hasPrescription: booking.prescriptionObjectId !== null,
       earningPaise: providerEarning({
         feePaise: fee,
@@ -214,13 +219,14 @@ export class BookingViews {
   private async providerView(booking: BookingRow, locale: string): Promise<ProviderBookingDto> {
     const summary = await this.summary(booking, locale);
     const visible = PROVIDER_SEES_ADDRESS.has(booking.status);
-    const [address, notes, contactMobile] = visible
+    const [address, notes, intake, contactMobile] = visible
       ? await Promise.all([
           this.encryptor.decrypt(booking.address),
           booking.notes ? this.encryptor.decrypt(booking.notes) : Promise.resolve(null),
+          this.intakeOf(booking),
           this.bookerMobile(booking.bookerId),
         ])
-      : [null, null, null];
+      : [null, null, null, null];
     if (visible)
       await this.audit.record({
         action: 'booking.provider_read',
@@ -231,10 +237,15 @@ export class BookingViews {
       ...summary,
       address,
       notes,
+      intake,
       contactMobile,
       hasPrescription: booking.prescriptionObjectId !== null,
       earningPaise: providerEarning(booking),
     };
+  }
+
+  private async intakeOf(booking: BookingRow): Promise<Intake | null> {
+    return booking.intake ? parseIntake(await this.encryptor.decrypt(booking.intake)) : null;
   }
 
   private async bookerMobile(bookerId: string): Promise<string | null> {

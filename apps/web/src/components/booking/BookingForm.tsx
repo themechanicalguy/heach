@@ -10,6 +10,13 @@ import { useCareSearch } from '../../lib/care-search';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
+import {
+  EMPTY_INTAKE,
+  type IntakeState,
+  intakeBody,
+  PhysioIntakeFields,
+} from './PhysioIntakeFields';
+import { type Service } from '../care/services';
 import { BookingReview } from './BookingReview';
 import { money } from './money';
 import { PaymentOptions } from './PaymentOptions';
@@ -21,6 +28,7 @@ export interface ItemFacts {
   itemName: string;
   kind: 'visit' | 'shift' | 'lab_test';
   prescriptionRequired: boolean;
+  service?: Service | undefined;
   feePaise?: number;
 }
 
@@ -48,10 +56,14 @@ export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }
     collection: 'home',
     purchaseId: '',
     couponId: '',
+    ...EMPTY_INTAKE,
   });
   useEffect(() => {
     setForm((current) => ({ ...current, recipient: person }));
   }, [person]);
+  useEffect(() => {
+    if (search.pin) setForm((current) => (current.pin ? current : { ...current, pin: search.pin }));
+  }, [search.pin]);
   const [file, setFile] = useState<File | undefined>();
   const [extras, setExtras] = useState<string[]>([]);
   const [booking, setBooking] = useState<Booking | undefined>();
@@ -61,9 +73,6 @@ export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }
   const set = (key: keyof FormState) => (value: string) => {
     if (key === 'recipient') setPerson(value);
     setForm((current) => ({ ...current, [key]: value }));
-  useEffect(() => {
-    if (search.pin) setForm((current) => (current.pin ? current : { ...current, pin: search.pin }));
-  }, [search.pin]);
   };
   const submit = () =>
     run(async () => {
@@ -129,14 +138,21 @@ export function BookingForm({ target, facts, startsAt, labTests = [], onBooked }
           </Button>
         </form>
       </Card>
-      <aside className="booking-summary site-section">
-        <h2>{t('site.bookingSummary')}</h2>
-        <p>{facts.itemName}</p>
-        <p>{formatDateTime(new Date(startsAt), locale)}</p>
-        {facts.feePaise !== undefined && <p>{t('search.fee', { fee: money(facts.feePaise) })}</p>}
-        <p>{t('site.clearPrices')}</p>
-      </aside>
+      <BookingSummary facts={facts} startsAt={startsAt} />
     </div>
+  );
+}
+
+function BookingSummary({ facts, startsAt }: Readonly<{ facts: ItemFacts; startsAt: string }>) {
+  const { locale, t } = useI18n();
+  return (
+    <aside className="booking-summary site-section">
+      <h2>{t('site.bookingSummary')}</h2>
+      <p>{facts.itemName}</p>
+      <p>{formatDateTime(new Date(startsAt), locale)}</p>
+      {facts.feePaise !== undefined && <p>{t('search.fee', { fee: money(facts.feePaise) })}</p>}
+      <p>{t('site.clearPrices')}</p>
+    </aside>
   );
 }
 
@@ -159,6 +175,7 @@ async function bookingBody({ target, facts, startsAt, locale, form, extras, file
     address: form.address,
     locale,
     ...(form.notes ? { notes: form.notes } : {}),
+    ...(facts.service === 'physiotherapy' ? { intake: intakeBody(form) } : {}),
     ...(form.recipient ? { recipientId: form.recipient } : {}),
     ...(form.gender ? { genderPreference: form.gender } : {}),
     ...(form.purchaseId ? { purchaseId: form.purchaseId } : {}),
@@ -171,18 +188,19 @@ async function bookingBody({ target, facts, startsAt, locale, form, extras, file
   };
 }
 
-type FormState = Record<
-  | 'recipient'
-  | 'address'
-  | 'pin'
-  | 'notes'
-  | 'days'
-  | 'gender'
-  | 'collection'
-  | 'purchaseId'
-  | 'couponId',
-  string
->;
+type FormState = IntakeState &
+  Record<
+    | 'recipient'
+    | 'address'
+    | 'pin'
+    | 'notes'
+    | 'days'
+    | 'gender'
+    | 'collection'
+    | 'purchaseId'
+    | 'couponId',
+    string
+  >;
 
 interface FieldsProps {
   form: FormState;
@@ -238,6 +256,14 @@ function BookingFields({
           }}
         />
       )}
+      {facts.service === 'physiotherapy' && (
+        <PhysioIntakeFields
+          value={form}
+          onChange={(key, next) => {
+            set(key)(next);
+          }}
+        />
+      )}
       <TextField
         label={t('book.notes')}
         hint={t('book.notesHint')}
@@ -273,19 +299,24 @@ function BookingFields({
           onChange={set('gender')}
         />
       )}
-      {needsPrescription && (
-        <TextField
-          label={t('book.prescription')}
-          hint={t('book.prescriptionHint')}
-          type="file"
-          accept="application/pdf,image/jpeg,image/png"
-          capture="environment"
-          onChange={(event) => {
-            onFile(event.currentTarget.files?.[0]);
-          }}
-        />
-      )}
+      {needsPrescription && <PrescriptionField onFile={onFile} />}
     </>
+  );
+}
+
+function PrescriptionField({ onFile }: Readonly<Pick<FieldsProps, 'onFile'>>) {
+  const { t } = useI18n();
+  return (
+    <TextField
+      label={t('book.prescription')}
+      hint={t('book.prescriptionHint')}
+      type="file"
+      accept="application/pdf,image/jpeg,image/png"
+      capture="environment"
+      onChange={(event) => {
+        onFile(event.currentTarget.files?.[0]);
+      }}
+    />
   );
 }
 

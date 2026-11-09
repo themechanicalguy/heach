@@ -31,6 +31,7 @@ export interface BookingRow {
   pin: string;
   address: EncryptedField;
   notes: EncryptedField | null;
+  intake: EncryptedField | null;
   genderPreference: 'female' | 'male' | null;
   feePaise: number;
   travelPaise: number;
@@ -60,6 +61,7 @@ export interface NewBooking {
   pin: string;
   address: EncryptedField;
   notes: EncryptedField | null;
+  intake: EncryptedField | null;
   genderPreference: 'female' | 'male' | null;
   fees: FeeBreakdown;
   prescriptionObjectId: string | null;
@@ -69,7 +71,7 @@ export const BOOKING_COLUMNS = `b.id, b.booker_account_id AS "bookerId", b.linke
   b.provider_account_id AS "providerId", b.item_id AS "itemId", i.code AS "itemCode", i.service, i.kind,
   i.prescription_required AS "prescriptionRequired", b.listing_id AS "listingId", b.matching, b.status,
   b.cancelled_by AS "cancelledBy", b.no_show_party AS "noShowParty", b.status_reason AS "statusReason",
-  b.starts_at AS "startsAt", b.ends_at AS "endsAt", b.shift_days AS "shiftDays", b.pin, b.address, b.notes,
+  b.starts_at AS "startsAt", b.ends_at AS "endsAt", b.shift_days AS "shiftDays", b.pin, b.address, b.notes, b.intake,
   b.gender_preference AS "genderPreference", b.fee_paise AS "feePaise", b.travel_paise AS "travelPaise",
   b.discount_paise AS "discountPaise", b.total_paise AS "totalPaise", b.commission_paise AS "commissionPaise",
   b.advance_paise AS "advancePaise", b.paid_paise AS "paidPaise", b.refunded_paise AS "refundedPaise",
@@ -92,10 +94,10 @@ export class BookingRepository {
     await client.query(
       `INSERT INTO app.booking (id, booker_account_id, linked_patient_id, provider_account_id, item_id,
          listing_id, matching, status, starts_at, ends_at, shift_days, pin, address, notes,
-         gender_preference, fee_paise, travel_paise, discount_paise, total_paise, commission_paise,
-         advance_paise, prescription_object_id)
+         intake, gender_preference, fee_paise, travel_paise, discount_paise, total_paise,
+         commission_paise, advance_paise, prescription_object_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending_payment', $8, $9, $10, $11, $12, $13, $14, $15,
-         $16, $17, $18, $19, $20, $21)`,
+         $16, $17, $18, $19, $20, $21, $22)`,
       [
         id,
         booking.bookerId,
@@ -110,6 +112,7 @@ export class BookingRepository {
         booking.pin,
         booking.address,
         booking.notes,
+        booking.intake,
         booking.genderPreference,
         f.feePaise,
         f.travelPaise,

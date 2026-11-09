@@ -10,7 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { useI18n } from '../../lib/i18n-context';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
-import { PIN_PATTERN } from '../care/services';
+import { PIN_PATTERN, type Service } from '../care/services';
 import { SlotPicker } from '../care/ProviderProfileView';
 import { BookingForm } from './BookingForm';
 
@@ -22,6 +22,7 @@ export function BookChosen({ listingId }: Readonly<{ listingId: string }>) {
   const [start, setStart] = useState(params.get('start') ?? '');
   const [review, setReview] = useState(false);
   const profile = useResource<ProviderProfile>(`/providers/${providerId}?locale=${locale}`);
+  const catalogue = useResource<CatalogueItem[]>(`/catalogue?locale=${locale}`);
   return (
     <section className="flow booking-flow" aria-labelledby="book-title">
       <div className="flow__card">
@@ -48,7 +49,10 @@ export function BookChosen({ listingId }: Readonly<{ listingId: string }>) {
                       setReview(true);
                     }}
                     target={{ kind: 'chosen', listingId }}
-                    facts={listing}
+                    facts={{
+                      ...listing,
+                      service: serviceOf(catalogue.resource, listing.itemCode),
+                    }}
                     startsAt={start}
                     labTests={data.listings.filter(
                       (entry) => entry.kind === 'lab_test' && entry.listingId !== listingId,
@@ -105,6 +109,15 @@ export function BookAny({ itemCode }: Readonly<{ itemCode: string }>) {
   );
 }
 
+function serviceOf(
+  resource: ReturnType<typeof useResource<CatalogueItem[]>>['resource'],
+  itemCode: string,
+): Service | undefined {
+  return resource.state === 'ready'
+    ? resource.data.find((entry) => entry.code === itemCode)?.service
+    : undefined;
+}
+
 interface AnyBodyProps {
   onSelect: (slot: string) => void;
   itemCode: string;
@@ -119,6 +132,7 @@ function AnyBody({ itemCode, pin, start, item, slots, onSelect }: Readonly<AnyBo
   if (!item) return <Skeleton label={t('state.loading')} />;
   if (start) {
     const facts = {
+      service: item.service,
       itemName: item.name,
       kind: item.kind,
       prescriptionRequired: item.prescriptionRequired,

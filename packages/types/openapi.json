@@ -9154,6 +9154,35 @@
         },
         "required": ["description", "notes", "grantExpiresAt"]
       },
+      "IntakeDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Why care is needed, in the patient’s words"
+          },
+          "area": {
+            "type": "string",
+            "enum": ["back", "neck", "shoulder", "knee", "hip", "ankle_foot", "other"]
+          },
+          "ageYears": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 120,
+            "description": "Age of the care recipient"
+          },
+          "contactName": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Who will be at the address on the day"
+          },
+          "contactPhone": {
+            "type": "string",
+            "description": "Mobile number of that person"
+          }
+        }
+      },
       "UploadDto": {
         "type": "object",
         "properties": {
@@ -9197,6 +9226,14 @@
             "type": "string",
             "maxLength": 500,
             "description": "The patient's needs, for the provider"
+          },
+          "intake": {
+            "description": "Visit details for the provider (BK-01)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntakeDto"
+              }
+            ]
           },
           "recipientId": {
             "type": "string",
@@ -9455,6 +9492,15 @@
             "type": "string",
             "nullable": true
           },
+          "intake": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntakeDto"
+              }
+            ]
+          },
           "events": {
             "type": "array",
             "items": {
@@ -9511,6 +9557,7 @@
           "acceptBy",
           "address",
           "notes",
+          "intake",
           "events",
           "refunds",
           "canCancel",
@@ -9744,6 +9791,15 @@
             "type": "string",
             "nullable": true
           },
+          "intake": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntakeDto"
+              }
+            ]
+          },
           "hasPrescription": {
             "type": "boolean",
             "description": "A prescription is attached to review (A14)"
@@ -9767,6 +9823,7 @@
           "shiftDays",
           "pin",
           "notes",
+          "intake",
           "hasPrescription",
           "earningPaise",
           "acceptBy"
@@ -9885,6 +9942,15 @@
             "type": "string",
             "nullable": true
           },
+          "intake": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntakeDto"
+              }
+            ]
+          },
           "hasPrescription": {
             "type": "boolean"
           },
@@ -9915,6 +9981,7 @@
           "address",
           "contactMobile",
           "notes",
+          "intake",
           "hasPrescription",
           "earningPaise"
         ]

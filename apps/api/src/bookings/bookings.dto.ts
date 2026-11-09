@@ -1,3 +1,4 @@
+import { BODY_AREAS } from './intake.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -19,6 +20,40 @@ import { UploadDto } from '../onboarding/onboarding.dto.js';
 import { BOOKING_STATUSES, type BookingStatus } from './booking-transitions.js';
 
 const LOCALES = ['or', 'en', 'hi'] as const;
+
+export class IntakeDto {
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Why care is needed, in the patient’s words',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(1, 200)
+  reason?: string;
+
+  @ApiPropertyOptional({ enum: BODY_AREAS })
+  @IsOptional()
+  @IsIn(BODY_AREAS)
+  area?: (typeof BODY_AREAS)[number];
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 120, description: 'Age of the care recipient' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  ageYears?: number;
+
+  @ApiPropertyOptional({ maxLength: 80, description: 'Who will be at the address on the day' })
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  contactName?: string;
+
+  @ApiPropertyOptional({ description: 'Mobile number of that person' })
+  @IsOptional()
+  @Matches(/^[6-9]\d{9}$/)
+  contactPhone?: string;
+}
 
 export class CreateBookingDto {
   @ApiPropertyOptional({ format: 'uuid', description: 'The chosen provider listing' })
@@ -54,6 +89,12 @@ export class CreateBookingDto {
   @IsString()
   @Length(1, 500)
   notes?: string;
+
+  @ApiPropertyOptional({ type: IntakeDto, description: 'Visit details for the provider (BK-01)' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => IntakeDto)
+  intake?: IntakeDto;
 
   @ApiPropertyOptional({ format: 'uuid', description: 'A linked patient; the booker when absent' })
   @IsOptional()
@@ -261,6 +302,9 @@ export class BookingDto extends BookingSummaryDto {
   @ApiProperty({ type: String, nullable: true })
   notes!: string | null;
 
+  @ApiProperty({ type: IntakeDto, nullable: true })
+  intake!: IntakeDto | null;
+
   @ApiProperty({ type: [BookingEventDto] })
   events!: BookingEventDto[];
 
@@ -334,6 +378,9 @@ export class ProviderRequestDto {
   @ApiProperty({ type: String, nullable: true })
   notes!: string | null;
 
+  @ApiProperty({ type: IntakeDto, nullable: true })
+  intake!: IntakeDto | null;
+
   @ApiProperty({ description: 'A prescription is attached to review (A14)' })
   hasPrescription!: boolean;
 
@@ -354,6 +401,9 @@ export class ProviderBookingDto extends BookingSummaryDto {
 
   @ApiProperty({ type: String, nullable: true })
   notes!: string | null;
+
+  @ApiProperty({ type: IntakeDto, nullable: true })
+  intake!: IntakeDto | null;
 
   @ApiProperty()
   hasPrescription!: boolean;

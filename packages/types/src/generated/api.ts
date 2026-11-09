@@ -4036,6 +4036,18 @@ export interface components {
       /** Format: date-time */
       grantExpiresAt: string;
     };
+    IntakeDto: {
+      /** @description Why care is needed, in the patient’s words */
+      reason?: string;
+      /** @enum {string} */
+      area?: 'back' | 'neck' | 'shoulder' | 'knee' | 'hip' | 'ankle_foot' | 'other';
+      /** @description Age of the care recipient */
+      ageYears?: number;
+      /** @description Who will be at the address on the day */
+      contactName?: string;
+      /** @description Mobile number of that person */
+      contactPhone?: string;
+    };
     UploadDto: {
       /** @enum {string} */
       contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
@@ -4057,6 +4069,8 @@ export interface components {
       address: string;
       /** @description The patient's needs, for the provider */
       notes?: string;
+      /** @description Visit details for the provider (BK-01) */
+      intake?: components['schemas']['IntakeDto'];
       /**
        * Format: uuid
        * @description A linked patient; the booker when absent
@@ -4164,6 +4178,7 @@ export interface components {
       acceptBy: string | null;
       address: string;
       notes: string | null;
+      intake: components['schemas']['IntakeDto'] | null;
       events: components['schemas']['BookingEventDto'][];
       refunds: components['schemas']['RefundDto'][];
       /** @description The patient may cancel now */
@@ -4255,6 +4270,7 @@ export interface components {
       shiftDays: number;
       pin: string;
       notes: string | null;
+      intake: components['schemas']['IntakeDto'] | null;
       /** @description A prescription is attached to review (A14) */
       hasPrescription: boolean;
       /** @description What the provider would earn, in paise */
@@ -4308,6 +4324,7 @@ export interface components {
       /** @description The booker's number, once confirmed */
       contactMobile: string | null;
       notes: string | null;
+      intake: components['schemas']['IntakeDto'] | null;
       hasPrescription: boolean;
       earningPaise: number;
     };

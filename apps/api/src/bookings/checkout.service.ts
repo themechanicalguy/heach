@@ -20,6 +20,7 @@ import { JobRunner } from '../jobs/runner/job-runner.js';
 import { PaymentsRepository } from '../payments/payments.repository.js';
 import { Settings } from '../settings/settings.service.js';
 import { type PreparedUpload, UploadsService } from '../uploads/uploads.service.js';
+import { isEmptyIntake } from './intake.js';
 import { BookingRepository } from './booking.repository.js';
 import { LabOrdersRepository } from './lab-orders.repository.js';
 import { type Discount, DiscountsService } from './discounts.service.js';
@@ -102,9 +103,12 @@ export class CheckoutService {
     ) {
       throw reason(ConflictException, 'slot_taken');
     }
-    const [address, notes, prescription] = await Promise.all([
+    const [address, notes, intake, prescription] = await Promise.all([
       this.encryptor.encrypt(input.address, 'identity'),
       input.notes ? this.encryptor.encrypt(input.notes, 'health') : Promise.resolve(null),
+      isEmptyIntake(input.intake)
+        ? Promise.resolve(null)
+        : this.encryptor.encrypt(JSON.stringify(input.intake), 'health'),
       input.prescription
         ? this.uploads.prepare(principal.userId, 'booking_attachment', input.prescription)
         : Promise.resolve(undefined),
@@ -125,6 +129,7 @@ export class CheckoutService {
       fees,
       address,
       notes,
+      intake,
       prescription,
       orderId,
       cart,
@@ -302,6 +307,7 @@ export class CheckoutService {
       fees: FeeBreakdown;
       address: Awaited<ReturnType<FieldEncryptor['encrypt']>>;
       notes: Awaited<ReturnType<FieldEncryptor['encrypt']>> | null;
+      intake: Awaited<ReturnType<FieldEncryptor['encrypt']>> | null;
       prescription: PreparedUpload | undefined;
       orderId: string | null;
       cart: LabCart | undefined;
@@ -324,6 +330,7 @@ export class CheckoutService {
         pin: input.pin,
         address: draft.address,
         notes: draft.notes,
+        intake: draft.intake,
         genderPreference: input.genderPreference ?? null,
         fees: draft.fees,
         prescriptionObjectId: draft.prescription?.id ?? null,

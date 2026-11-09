@@ -54,6 +54,7 @@ const base = {
   acceptBy: null,
   hasPrescription: false,
   notes: null,
+  intake: null,
 };
 const patientBooking = (status: Booking['status'], kind: Booking['kind'] = 'visit'): Booking => ({
   ...base,

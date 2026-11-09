@@ -27,6 +27,7 @@ describe('Booking a chosen provider, to confirmation (J3; BK-01 to BK-03, BK-06,
         listingId: nurse.listingId,
         startsAt,
         notes: 'Synthetic note',
+        intake: { reason: 'Synthetic fall', area: 'back', ageYears: 67 },
       }).expect(201)
     ).body as Booking;
     expect(created).toMatchObject({
@@ -50,7 +51,11 @@ describe('Booking a chosen provider, to confirmation (J3; BK-01 to BK-03, BK-06,
     const offer = (
       requests.body as { bookingId: string; notes: string | null; earningPaise: number }[]
     ).find((row) => row.bookingId === created.id);
-    expect(offer).toMatchObject({ notes: 'Synthetic note', earningPaise: 47_500 });
+    expect(offer).toMatchObject({
+      notes: 'Synthetic note',
+      intake: { reason: 'Synthetic fall', area: 'back', ageYears: 67 },
+      earningPaise: 47_500,
+    });
     expect(JSON.stringify(requests.body)).not.toContain('Synthetic Lane');
     await server().get(`/v1/provider/bookings/${created.id}`).set(bearer(nurse.login)).expect(404);
 
@@ -79,6 +84,23 @@ describe('Booking a chosen provider, to confirmation (J3; BK-01 to BK-03, BK-06,
       [created.id],
     );
     expect(stored.rows[0]?.address).not.toContain('Synthetic Lane');
+    const intake = await db().query<{ intake: string }>(
+      'SELECT intake::text FROM app.booking WHERE id = $1',
+      [created.id],
+    );
+    expect(intake.rows[0]?.intake).not.toContain('Synthetic fall');
+    expect(confirmed).toMatchObject({ intake: { reason: 'Synthetic fall', ageYears: 67 } });
+    await server()
+      .post('/v1/bookings')
+      .set(bearer(patient.login))
+      .send({
+        listingId: nurse.listingId,
+        startsAt,
+        pin: '751001',
+        address: '12 Synthetic Lane',
+        intake: { ageYears: 200 },
+      })
+      .expect(400);
   });
 
   it('AV-02 a second patient cannot take a slot another is paying for', async () => {

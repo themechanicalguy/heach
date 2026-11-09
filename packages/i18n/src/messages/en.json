@@ -689,7 +689,28 @@
     "pay": "Pay {amount}",
     "sandbox": "Test payment: no money moves.",
     "paid": "Payment received. We have sent your request.",
-    "signInFirst": "Sign in to book."
+    "signInFirst": "Sign in to book.",
+    "intake": {
+      "title": "About the visit",
+      "reason": "Why do you need physiotherapy?",
+      "reasonHint": "For example: back pain after a fall, or rehabilitation after knee surgery.",
+      "area": "Affected area",
+      "areaChoose": "Choose an area",
+      "areas": {
+        "back": "Back",
+        "neck": "Neck",
+        "shoulder": "Shoulder",
+        "knee": "Knee",
+        "hip": "Hip",
+        "ankle_foot": "Ankle or foot",
+        "other": "Somewhere else"
+      },
+      "age": "Age of the person receiving care",
+      "ageHint": "In years.",
+      "contactName": "Person at home (optional)",
+      "contactPhone": "Their mobile number (optional)",
+      "contactHint": "10 digits. Shared with the provider only after they accept."
+    }
   },
   "bookings": {
     "title": "My bookings",
@@ -763,7 +784,12 @@
     "accepted": "Accepted. The patient has been told.",
     "declined": "Declined.",
     "notes": "Patient's note: {notes}",
-    "area": "PIN code {pin}"
+    "area": "PIN code {pin}",
+    "intake": {
+      "reason": "Reason: {reason}",
+      "area": "Affected area: {area}",
+      "age": "Age: {age}"
+    }
   },
   "work": {
     "title": "My bookings",

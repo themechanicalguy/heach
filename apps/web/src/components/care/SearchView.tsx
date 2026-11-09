@@ -211,18 +211,20 @@ function SearchForm({ filters, items, pinError, onChange, onSubmit }: Readonly<F
 
 interface SelectProps {
   label: string;
+  required?: boolean;
   value: string;
   options: readonly (readonly [string, string])[];
   onChange: (value: string) => void;
 }
 
 /** A labelled native select: works with every keyboard and screen reader. */
-export function Select({ label, value, options, onChange }: Readonly<SelectProps>) {
+export function Select({ label, value, options, onChange, required }: Readonly<SelectProps>) {
   return (
     <label className="heach-field">
       <span className="heach-field__label">{label}</span>
       <select
         className="heach-input"
+        required={required}
         value={value}
         onChange={(event) => {
           onChange(event.currentTarget.value);

@@ -82,6 +82,7 @@ const booking = (overrides: Partial<Booking> = {}): Booking => ({
   ...summary,
   address: '12 Synthetic Lane',
   notes: null,
+  intake: null,
   events: [
     {
       fromStatus: 'pending_payment',
@@ -328,5 +329,58 @@ it('A10 can re-enter a PIN after reloading without making invalid availability r
       q: '',
       service: 'physiotherapy',
     });
+  });
+});
+
+describe('Physiotherapy visit details (BK-01)', () => {
+  const catalogue = (service: 'physiotherapy' | 'nursing') => [
+    {
+      code: 'visit_item',
+      name: 'Home visit',
+      service,
+      kind: 'visit',
+      prescriptionRequired: false,
+    },
+  ];
+  const open = (service: 'physiotherapy' | 'nursing') => {
+    state.params = new URLSearchParams(`start=${START}`);
+    route({
+      '/search/any-slots': { slots: [START], quotePaise: 50_000, providers: 1 },
+      '/me/linked-patients': [],
+      '/catalogue': catalogue(service),
+    });
+    inEnglish(<BookAny itemCode="visit_item" />);
+  };
+
+  it('asks for reason, area and age, and sends them with the booking', async () => {
+    open('physiotherapy');
+    fireEvent.change(await screen.findByLabelText('Why do you need physiotherapy?'), {
+      target: { value: 'Back pain after a fall' },
+    });
+    fireEvent.change(screen.getByLabelText('Affected area'), { target: { value: 'back' } });
+    fireEvent.change(screen.getByLabelText('Age of the person receiving care'), {
+      target: { value: '67' },
+    });
+    fireEvent.change(screen.getByLabelText(/Their mobile number/), {
+      target: { value: '9876543210' },
+    });
+    fireEvent.change(screen.getByLabelText('Full address'), {
+      target: { value: '12 Synthetic Lane' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to payment' }));
+    await waitFor(() => {
+      expect(bodyOf('/bookings')?.intake).toEqual({
+        reason: 'Back pain after a fall',
+        area: 'back',
+        ageYears: 67,
+        contactPhone: '9876543210',
+      });
+    });
+  });
+
+  it('does not ask for them on other services', async () => {
+    open('nursing');
+    expect(await screen.findByLabelText('Full address')).toBeTruthy();
+    expect(screen.queryByLabelText('Why do you need physiotherapy?')).toBeNull();
   });
 });
