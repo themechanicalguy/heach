@@ -2,6 +2,7 @@
 
 import { Button, Notice, Progress } from '@heach/ui';
 import type { Application } from '@heach/types';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
 import { useI18n } from '../../lib/i18n-context';
@@ -12,6 +13,8 @@ import { ResourceView } from '../account/ResourceView';
 import { DocumentItem } from './DocumentItem';
 import { IdentityStep } from './IdentityStep';
 import { PayoutForm } from './PayoutForm';
+import { type EditableStep, ReviewStep } from './ReviewStep';
+import { rememberSubmitted } from './submitted-notice';
 
 const TONE: Record<Application['status'], 'info' | 'warning' | 'danger' | 'success'> = {
   draft: 'info',
@@ -23,7 +26,7 @@ const TONE: Record<Application['status'], 'info' | 'warning' | 'danger' | 'succe
   suspended: 'danger',
 };
 
-type Step = 'identity' | 'documents' | 'payout' | 'review';
+type Step = EditableStep | 'review';
 
 /** The provider's guided application (J1, PO-01 to PO-06): identity, documents, payout, submit. */
 export function OnboardingView() {
@@ -36,9 +39,10 @@ export function OnboardingView() {
 }
 
 function Hub({ initial }: Readonly<{ initial: Application }>) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
+  const router = useRouter();
   const [application, setApplication] = useState(initial);
-  const [step, setStep] = useState<Step>('identity');
+  const [step, setStep] = useState<Step>(initial.editable ? 'identity' : 'review');
   const heading = useRef<HTMLHeadingElement>(null);
   const steps: Step[] = initial.needsPayout
     ? ['identity', 'documents', 'payout', 'review']
@@ -56,6 +60,8 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
   const submit = () =>
     run(async () => {
       setApplication(await api<Application>('/provider/application/submit', { method: 'POST' }));
+      rememberSubmitted();
+      router.push(`/${locale}`);
     });
 
   return (
@@ -89,8 +95,13 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
         {step === 'payout' && application.needsPayout && (
           <PayoutForm application={application} onSaved={setApplication} />
         )}
-        {step === 'review' && application.editable && (
-          <Submit application={application} pending={pending} onSubmit={submit} />
+        {step === 'review' && (
+          <ReviewStep
+            application={application}
+            pending={pending}
+            onEdit={setStep}
+            onSubmit={submit}
+          />
         )}
         <StepActions steps={steps} step={step} onSelect={setStep} />
         <p>{t('application.progressHint')}</p>
@@ -101,38 +112,6 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
         )}
       </div>
     </section>
-  );
-}
-
-interface SubmitProps {
-  application: Application;
-  pending: boolean;
-  onSubmit: () => Promise<void>;
-}
-
-function Submit({ application, pending, onSubmit }: Readonly<SubmitProps>) {
-  const { t } = useI18n();
-  const missingLabel = (key: string) =>
-    key === 'identity' || key === 'payout'
-      ? t(`application.missing.${key}`)
-      : t(keyFor('application.items', key, 'application.steps.documents'));
-  return (
-    <>
-      {application.missing.length > 0 && (
-        <>
-          <h2 className="flow__subtitle">{t('application.missingTitle')}</h2>
-          <ul>
-            {application.missing.map((key) => (
-              <li key={key}>{missingLabel(key)}</li>
-            ))}
-          </ul>
-        </>
-      )}
-      <Button onClick={() => void onSubmit()} disabled={pending || application.missing.length > 0}>
-        {t('application.submit')}
-      </Button>
-      <p className="flow__muted">{t('application.reviewTime')}</p>
-    </>
   );
 }
 

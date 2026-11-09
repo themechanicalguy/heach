@@ -1,7 +1,8 @@
 'use client';
 
 import { ErrorState, Skeleton } from '@heach/ui';
-import { isCareRole } from '../../lib/routing';
+import { isCareRole, isProviderRole } from '../../lib/routing';
+import { ApplicationSubmittedNotice } from '../onboarding/submitted-notice';
 import { useI18n } from '../../lib/i18n-context';
 import { errorMessageKey } from '../../lib/errors';
 import { useAccount } from '../../lib/account';
@@ -43,6 +44,13 @@ export function HomeView({
         </main>
       );
     if (isCareRole(account.me.activeRole)) return <>{patientHome}</>;
+    if (isProviderRole(account.me.activeRole))
+      return (
+        <>
+          <ApplicationSubmittedNotice />
+          {publicHome}
+        </>
+      );
   }
   return <>{publicHome}</>;
 }

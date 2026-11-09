@@ -418,7 +418,18 @@
       "identity": "Identity check",
       "payout": "Payout account"
     },
-    "submit": "Submit for review",
+    "submit": "Submit application",
+    "submittedNotice": "Application submitted. We will tell you the result by SMS.",
+    "review": {
+      "intro": "Check your details below. You can change any section before you submit.",
+      "readOnly": "Your application is submitted. These details cannot be changed while we review it.",
+      "applyingAs": "Applying as",
+      "edit": "Edit",
+      "editSection": "Edit {section}",
+      "notProvided": "Not provided yet",
+      "number": "Number {value}",
+      "validUntil": "Valid until {date}"
+    },
     "reasons": {
       "documents_unclear": "the document is not clear",
       "documents_expired": "the document has expired",

@@ -105,6 +105,7 @@ export function shellMessages(locale: Locale) {
     ]),
     site: Object.fromEntries(SITE_CLIENT_KEYS.map((key) => [key, catalogue.site[key]])),
     signIn: { codeLabel: catalogue.signIn.codeLabel, mobileHint: catalogue.signIn.mobileHint },
+    application: { submittedNotice: catalogue.application.submittedNotice },
     people: { title: catalogue.people.title },
     vault: { person: catalogue.vault.person },
     visit: { showCode: catalogue.visit.showCode },

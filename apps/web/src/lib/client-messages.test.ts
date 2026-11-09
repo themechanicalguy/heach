@@ -21,3 +21,10 @@ it.each(LOCALES)('resolves notification templates from the actual %s client bund
   expect(t('sms.booking_confirmed', { time: '10:00' })).not.toBe(t('notifications.title'));
   expect(keyFor('sms', 'unknown_template', 'notifications.title')).toBe('notifications.title');
 });
+
+it.each(LOCALES)('has the one-time application notice on the home page in %s', (locale) => {
+  const home = { ...shellMessages(locale), ...clientMessages(locale, 'home') };
+  const t = createTranslator(home as Messages, locale);
+  expect(t('application.submittedNotice')).not.toBe('');
+  expect(Object.keys(home.application)).toEqual(['submittedNotice']);
+});

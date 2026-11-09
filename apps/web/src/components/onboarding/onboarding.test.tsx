@@ -1,5 +1,5 @@
 import { CATALOGUES } from '@heach/i18n';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Application } from '@heach/types';
 import type { ReactNode } from 'react';
 import type * as ApiModule from '../../lib/api';
@@ -7,15 +7,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { I18nProvider } from '../../lib/i18n-context';
 import { IdentityReturn } from './IdentityReturn';
 import { OnboardingView } from './OnboardingView';
+import { ApplicationSubmittedNotice } from './submitted-notice';
 
 const state = vi.hoisted(() => ({
   api: vi.fn(),
   replace: vi.fn(),
+  push: vi.fn(),
   params: new URLSearchParams('code=approved&ref=ref-12345678'),
 }));
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ replace: state.replace }),
+  useRouter: () => ({ replace: state.replace, push: state.push }),
   useSearchParams: () => state.params,
 }));
 vi.mock('../../lib/api', async (original) => ({
@@ -73,6 +75,8 @@ beforeEach(() => {
     .mockClear();
   state.api.mockReset();
   state.replace.mockReset();
+  state.push.mockReset();
+  window.sessionStorage.clear();
 });
 
 it.each(['or', 'en', 'hi'] as const)(
@@ -110,9 +114,10 @@ describe('OnboardingView (J1)', () => {
     expect(screen.getByText('Upload a new file: the document is not clear')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Identity check/ })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Review and submit/ }));
-    expect(screen.getAllByText('Police verification certificate')).toHaveLength(1);
+    expect(screen.getAllByText('Police verification certificate')).toHaveLength(2);
+    expect(screen.getByText('Still needed before you can submit')).toBeTruthy();
     expect(
-      screen.getByRole<HTMLButtonElement>('button', { name: 'Submit for review' }).disabled,
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Submit application' }).disabled,
     ).toBe(true);
   });
 
@@ -158,20 +163,6 @@ describe('OnboardingView (J1)', () => {
     expect(screen.getByLabelText('IFSC')).toBeTruthy();
   });
 
-  it('PO-04 submits a complete application; a submitted one is read only', async () => {
-    const complete = application({ missing: [], identity: 'verified' });
-    state.api
-      .mockResolvedValueOnce(complete)
-      .mockResolvedValueOnce({ ...complete, status: 'submitted', editable: false });
-    inEnglish(<OnboardingView />);
-    fireEvent.click(await screen.findByRole('button', { name: /4. Review and submit/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Submit for review' }));
-    expect(
-      await screen.findByText('We have your application. We will tell you the result by SMS.'),
-    ).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Upload' })).toBeNull();
-  });
-
   it('KY-01 starts the identity check at the partner, and the return page completes it', async () => {
     const assign = vi.fn();
     vi.stubGlobal('location', { href: window.location.href, assign });
@@ -205,5 +196,74 @@ describe('OnboardingView (J1)', () => {
     state.api.mockRejectedValueOnce(new ApiError(409, 'identity_not_pending'));
     inEnglish(<IdentityReturn />);
     expect(await screen.findByText('This identity check has ended. Start it again.')).toBeTruthy();
+  });
+});
+
+describe('OnboardingView review and submit (J1)', () => {
+  it('PO-03 reviews every step read-only, with masked values and a way back to edit', async () => {
+    const filled = application({
+      missing: [],
+      identity: 'verified',
+      payout: { method: 'bank', holderName: 'Synthetic', hint: '4321' },
+    });
+    const withNumber = {
+      ...filled,
+      items: filled.items.map((entry) =>
+        entry.document
+          ? {
+              ...entry,
+              document: { ...entry.document, reference: 'SYN-REG-98765', expiresOn: '2030-01-01' },
+            }
+          : entry,
+      ),
+    };
+    state.api.mockResolvedValueOnce(withNumber);
+    inEnglish(<OnboardingView />);
+    fireEvent.click(await screen.findByRole('button', { name: /4. Review and submit/ }));
+    expect(screen.getAllByText('Nurse or paramedic')).toHaveLength(2);
+    expect(screen.getByText('Verified')).toBeTruthy();
+    expect(screen.getByText('Number ••••8765 · Valid until 1 Jan 2030')).toBeTruthy();
+    expect(screen.queryByText(/SYN-REG-98765/)).toBeNull();
+    expect(screen.getByText('Bank account ending 4321, in the name of Synthetic')).toBeTruthy();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Payout account' }));
+    expect(await screen.findByRole('button', { name: 'Save payout account' })).toBeTruthy();
+  });
+
+  it('PO-04 submits a complete application and goes home with a one-time notice', async () => {
+    const complete = application({ missing: [], identity: 'verified' });
+    state.api
+      .mockResolvedValueOnce(complete)
+      .mockResolvedValueOnce({ ...complete, status: 'submitted', editable: false });
+    inEnglish(<OnboardingView />);
+    fireEvent.click(await screen.findByRole('button', { name: /4. Review and submit/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit application' }));
+    await waitFor(() => {
+      expect(state.push).toHaveBeenCalledWith('/en');
+    });
+    expect(state.api.mock.calls[1]?.[0]).toBe('/provider/application/submit');
+    expect(window.location.search).toBe('');
+
+    inEnglish(<ApplicationSubmittedNotice />);
+    expect(
+      await screen.findByText('Application submitted. We will tell you the result by SMS.'),
+    ).toBeTruthy();
+    cleanup();
+    inEnglish(<ApplicationSubmittedNotice />);
+    expect(screen.queryByText(/Application submitted/)).toBeNull();
+  });
+
+  it('PO-04 shows a submitted application read-only, without submit or edit', async () => {
+    state.api.mockResolvedValueOnce(
+      application({ status: 'submitted', editable: false, missing: [], identity: 'verified' }),
+    );
+    inEnglish(<OnboardingView />);
+    expect(
+      await screen.findByText('We have your application. We will tell you the result by SMS.'),
+    ).toBeTruthy();
+    expect(screen.getByText(/These details cannot be changed/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Submit application' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Edit/ })).toBeNull();
+    expect(state.push).not.toHaveBeenCalled();
   });
 });
