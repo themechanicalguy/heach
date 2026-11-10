@@ -61,6 +61,12 @@ Nothing leaves your machine. Email goes to Mailpit over SMTP (`localhost:1025`).
 `SMS_PROVIDER=local`, the SMS adapter (Step 2) delivers each message to Mailpit as an email, so
 OTPs and notifications can be read in the inbox.
 
+## Demo data
+
+`pnpm demo:seed` fills an empty local database with providers across six Odisha cities, patients
+and a booking history in every state, through the real API. Accounts, sources and limits:
+[demo data](demo-data.md).
+
 ## Commands
 
 | Command | What it does |
