@@ -4,13 +4,13 @@ import { ServiceTiles } from '../care/ServiceTiles';
 import { CareFinder } from './CareFinder';
 import { EmergencyBanner } from './EmergencyBanner';
 import { NearbyProviders } from './NearbyProviders';
-import { HowItWorks } from './HowItWorks';
 import { NextBooking } from './NextBooking';
 import { SupportCard } from './SupportCard';
 
 /**
  * Signed-in patient home (G02): service-first on phones, with a compact search above the tiles;
- * from desktop width the next booking, emergency and help cards form the companion column.
+ * from desktop width the search is one pill bar and the next booking, emergency and help cards
+ * form the companion column (desktop home board). How it works stays on the signed-out home.
  */
 export function PatientHome({ config, locale }: Readonly<{ config: SiteConfig; locale: string }>) {
   const { t } = translatorFor(locale);
@@ -29,7 +29,6 @@ export function PatientHome({ config, locale }: Readonly<{ config: SiteConfig; l
           <SupportCard locale={locale} config={config} />
         </div>
       </div>
-      <HowItWorks locale={locale} />
     </main>
   );
 }

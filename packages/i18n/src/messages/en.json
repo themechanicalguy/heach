@@ -1104,7 +1104,8 @@
   "site": {
     "promise": "Verified care, at your home.",
     "intro": "Find physiotherapy, nurses, attendants and lab tests in Odisha.",
-    "need": "Which service do you need?",
+    "need": "What care do you need?",
+    "searchPlaceholder": "Search a provider, test or service",
     "services": "Services",
     "find": "Find care",
     "call": "Call us",

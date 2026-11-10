@@ -15,6 +15,7 @@ The work ships as stacked pull requests, each passing `pnpm check`:
 | 3    | `feat/design-booking`         | G07–G09; G13 for booking                  |
 | 4    | `feat/design-records`         | G10–G12; G13 for records                  |
 | 5    | `feat/design-admin`           | G17–G19; coverage closed                  |
+| —    | `feat/design-desktop-home`    | Desktop home pass (board 13 values)       |
 
 ## Decisions
 
@@ -59,7 +60,7 @@ Owner decisions of 4 November 2026, and the design choices from the alignment br
 | 10    | Records C: share with consent     | Selected task  | The selected-record share task (part 4).                                           |
 | 11    | Admin A: queue and side panel     | Selected       | Part 5; district column and filter left out (no data).                             |
 | 12    | Admin B: focused split review     | Selected task  | Document review mode (part 5).                                                     |
-| 13    | Desktop home                      | Selected       | Part 1. Search icon and voice microphone not added (no voice feature).             |
+| 13    | Desktop home                      | Selected       | Part 1; values matched in the desktop home pass (search pill with icon). Voice microphone not added (no voice feature). |
 | 14    | Desktop onboarding                | Selected       | Part 2, with the identity-partner handoff in place of direct Aadhaar entry.        |
 | 15    | Desktop booking                   | Selected       | Part 3.                                                                            |
 | 16    | Desktop records                   | Selected       | Part 4.                                                                            |
@@ -260,6 +261,41 @@ on desktop and tablet with a synthetic API: type, waiting and identity in the ro
 the name only in the request body, Approve inside the viewport in the panel and in the review,
 Request changes disabled without a reason, switching documents, axe on the queue, panel and
 review. Rendered at 1280 and 768 px: no overflow, no browser exceptions, no raw codes on screen.
+
+### Desktop home pass (board 13)
+
+A second pass against the exported desktop-home board (`Desktop-Home.dc.html`, 4 November
+2026), on `feat/design-desktop-home`, to match its values. The doctor hero tile, the dental and
+skin tile, the video Join action (ADR 0015) and the voice microphone are still left out, as are
+the board's Odia subtitles (I18N-01).
+
+- **Search.** From 1024 px the compact search is one pill bar: 2 px brand border, search icon,
+  the name box (placeholder "Search a provider, test or service"), PIN code and service without
+  borders and with dividers between them, and Find care at the end. Labels stay for screen readers. PIN and
+  service stay because home-visit results need a PIN code (SD-04). The PIN error shows under the
+  bar. The bar is 56 px tall, not the board's 52 px, so Find care keeps its 48 px target
+  (A11Y-03). Phones and tablets keep the labelled fields; the PIN placeholder is hidden there
+  because the label already says it.
+- **Title.** "What care do you need?" in English, "आपको कौन-सी देखभाल चाहिए?" in Hindi; the Odia
+  title already matched. One new key, `site.searchPlaceholder` (draft Odia and Hindi, FU-41).
+- **Values on the desktop home.** 20 px corners on cards (scoped token), a 300 px side column (was
+  320 px), 20 px between the title, search and tiles, tiles with 18 px padding, 16 px gaps and
+  14 px descriptions; next-booking label 15 px; brand name 20 px beside a 36 px mark.
+- **Emergency card, narrow layout** (home side column and phones): 18 px padding, 17 px
+  title, 16 px Call 108 text.
+- **How it works** is no longer on the signed-in home; it stays on the signed-out home and in the
+  footer directory.
+
+Files: `apps/web/src/components/site/CareFinder.tsx` (field bar and icon),
+`site/PatientHome.tsx`, `apps/web/src/app/globals.css`, `apps/web/src/lib/client-messages.ts`,
+`packages/i18n/src/messages/{or,en,hi}.json`, `site/site.test.tsx` (bar and placeholder, no How
+it works once signed in).
+
+Evidence: web unit tests 297 passed; `shell.spec.ts` and `site-pages.spec.ts` 126 passed and 3
+skipped in the Playwright Linux container. Baselines were regenerated and reviewed: patient home
+(or, en and hi on all three viewports), and the phone shell and contact page in or, en and hi
+(for the narrow emergency card). Checked by hand at 390, 768 and 1280 px with a synthetic patient,
+including the PIN error: no horizontal overflow.
 
 ## Verification record
 
