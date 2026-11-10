@@ -1,5 +1,5 @@
 import { CATALOGUES, LOCALES } from '@heach/i18n';
-import { expect, test } from '@playwright/test';
+import { expect, newContext, test } from './test';
 import {
   codeFor,
   completePatientSetup,
@@ -74,7 +74,7 @@ test.describe('Sign-up and account setup', () => {
   }) => {
     const t = CATALOGUES.en;
     const mobile = syntheticMobile();
-    const first = await (await browser.newContext()).newPage();
+    const first = await (await newContext(browser)).newPage();
     await signInByOtp(first, 'en', mobile);
     await first.getByRole('radio', { name: t.roles.nurse.label }).check();
     await first.getByRole('button', { name: t.setup.continue, exact: true }).click();
@@ -82,7 +82,7 @@ test.describe('Sign-up and account setup', () => {
     await first.getByRole('button', { name: t.setup.saveLater }).click();
     await expect(first.getByText(t.setup.saved)).toBeVisible();
 
-    const second = await (await browser.newContext()).newPage();
+    const second = await (await newContext(browser)).newPage();
     await signInByOtp(second, 'en', mobile);
     await expect(second).toHaveURL(/\/en\/setup\/details$/);
     await expect(second.getByLabel(t.setup.details.fullName)).toHaveValue('Synthetic Nurse');
@@ -172,10 +172,10 @@ test.describe('Roles and sessions', () => {
   test('SE-07.3 signing out of all devices ends the other browser too', async ({ browser }) => {
     const t = CATALOGUES.en;
     const mobile = syntheticMobile();
-    const phone = await (await browser.newContext()).newPage();
+    const phone = await (await newContext(browser)).newPage();
     await signInByOtp(phone, 'en', mobile);
     await completePatientSetup(phone, 'en', 'Synthetic Person');
-    const laptop = await (await browser.newContext()).newPage();
+    const laptop = await (await newContext(browser)).newPage();
     await signInByOtp(laptop, 'en', mobile);
     await expect(laptop).toHaveURL(/\/en$/);
     await laptop.goto('/en/account');

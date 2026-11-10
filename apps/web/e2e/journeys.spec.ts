@@ -1,5 +1,5 @@
 import { CATALOGUES, formatIcu, LOCALES, type Locale, type MessageValues } from '@heach/i18n';
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Page, test } from './test';
 import { expectAccessible } from './accessibility';
 import { completePatientSetup, signInByOtp, syntheticMobile } from './otp-helpers';
 import {
