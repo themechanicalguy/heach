@@ -84,7 +84,7 @@ export class ConsoleController {
       ),
       this.pool.query<{ paise: number }>(
         `SELECT (coalesce((SELECT sum(commission_paise) FROM app.booking WHERE status = 'completed'), 0)
-               + coalesce((SELECT sum(paid_paise - refunded_paise) FROM app.plan_purchase), 0))::int AS paise`,
+               + coalesce((SELECT sum(paid_paise - refunded_paise) FROM app.plan_purchase), 0))::float8 AS paise`,
       ),
     ]);
     const total = byStatus.reduce((sum, row) => sum + row.count, 0);

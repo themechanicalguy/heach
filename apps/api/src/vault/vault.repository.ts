@@ -113,7 +113,7 @@ export class VaultRepository {
 
   async usedBytes(ownerId: string): Promise<number> {
     const { rows } = await this.pool.query<{ n: number }>(
-      `SELECT coalesce(sum(o.size_bytes), 0)::int AS n FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id
+      `SELECT coalesce(sum(o.size_bytes), 0)::float8 AS n FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id
         WHERE r.owner_account_id = $1`,
       [ownerId],
     );

@@ -218,7 +218,6 @@ function UploadForm({
         label={t('vault.file')}
         type="file"
         accept="application/pdf,image/jpeg,image/png"
-        capture="environment"
         onChange={(event) => {
           setFile(event.currentTarget.files?.[0]);
         }}

@@ -13,7 +13,7 @@ it('EN-11 creates an opaque download URL and revokes it when leaving the record'
   const view = render(
     <FileDownload
       file={{ contentType: 'application/pdf', contentBase64: 'JVBERg==' }}
-      filename="synthetic.pdf"
+      name="synthetic"
       label="Synthetic download"
     />,
   );
@@ -26,4 +26,16 @@ it('EN-11 creates an opaque download URL and revokes it when leaving the record'
   await expectNoAxeViolations(view.container);
   view.unmount();
   expect(blobUrls.revoke).toHaveBeenCalledExactlyOnceWith('blob:http://localhost/synthetic-file');
+});
+
+it('names the download after the file’s real type: an image is never saved as .pdf', async () => {
+  render(
+    <FileDownload
+      file={{ contentType: 'image/png', contentBase64: 'iVBORw==' }}
+      name="Synthetic scan"
+      label="Synthetic image"
+    />,
+  );
+  const link = await screen.findByRole('link', { name: 'Synthetic image' });
+  expect(link.getAttribute('download')).toBe('Synthetic scan.png');
 });

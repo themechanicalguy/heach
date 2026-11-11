@@ -311,7 +311,7 @@ export class AdminVaultController {
   async stats(): Promise<VaultStatsDto> {
     const { rows } = await this.pool.query<VaultStatsDto>(
       `SELECT (SELECT count(*)::int FROM app.vault_record) AS records,
-              (SELECT coalesce(sum(o.size_bytes), 0)::int FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id) AS "storageBytes",
+              (SELECT coalesce(sum(o.size_bytes), 0)::float8 FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id) AS "storageBytes",
               (SELECT count(*)::int FROM app.stored_object WHERE scan_status = 'infected') AS "infectedUploads",
               (SELECT count(*)::int FROM app.record_share WHERE revoked_at IS NULL AND expires_at > now()) AS "activeShares",
               (SELECT count(*)::int FROM app.external_share WHERE revoked_at IS NULL AND expires_at > now()) AS "activeLinks",
