@@ -3,6 +3,7 @@ import { SMS_SENDER } from '../src/adapters/sms.port.js';
 import { adminSignIn, reverify, signedUp, useApp } from './account-helpers.js';
 import { bearer } from './auth-helpers.js';
 import {
+  acceptEveryDocument,
   accountIdOf,
   submittedProvider,
   uploadDocument,
@@ -179,15 +180,15 @@ describe('Provider verification by an admin (J5; AD-02, NT-01)', () => {
       expiresOn: '2031-01-01',
     }).expect(200);
     await server().post('/v1/provider/application/submit').set(bearer(provider.login)).expect(200);
-    await server()
-      .get(`/admin/v1/applications/${provider.accountId}`)
-      .set(bearer(verifier))
-      .expect(200);
-    await server()
-      .post(`/admin/v1/applications/${provider.accountId}/decision`)
-      .set(bearer(verifier))
-      .send({ decision: 'approve' })
-      .expect(204);
+    const approve = () =>
+      server()
+        .post(`/admin/v1/applications/${provider.accountId}/decision`)
+        .set(bearer(verifier))
+        .send({ decision: 'approve' });
+    // AD-02: never approved with a document no one has reviewed, even straight from Submitted.
+    expect((await approve().expect(409)).body).toMatchObject({ code: 'application_incomplete' });
+    await acceptEveryDocument(app(), verifier, provider.accountId);
+    await approve().expect(204);
     expect((await application(provider.login)).status).toBe('approved');
     const sms = app()
       .get<FakeSmsSender>(SMS_SENDER)

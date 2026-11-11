@@ -88,7 +88,8 @@
     "not_an_organisation_owner": "Only an organisation owner can make this change.",
     "lab_named_at_setup": "The lab name is set during account setup.",
     "account_missing": "Your account could not be found. Please sign in again.",
-    "admin_suspended": "Your admin access is suspended. Contact your administrator."
+    "admin_suspended": "Your admin access is suspended. Contact your administrator.",
+    "application_incomplete": "This application cannot be approved yet: an item is missing or a document has not been reviewed. Accept or reject every document, or request changes."
   },
   "users": {
     "title": "Users",

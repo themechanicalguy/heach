@@ -75,15 +75,32 @@ export async function submittedProvider(app: INestApplication<App>, role: Onboar
   return { mobile, login, accountId: await accountIdOf(app, login) };
 }
 
+/** A verifier opens the application and accepts every document on it (AD-02). */
+export async function acceptEveryDocument(
+  app: INestApplication<App>,
+  verifier: Login,
+  accountId: string,
+) {
+  const review = await request(app.getHttpServer())
+    .get(`/admin/v1/applications/${accountId}`)
+    .set(bearer(verifier))
+    .expect(200);
+  const items = (review.body as { items: { document: { id: string } | null }[] }).items;
+  for (const { document } of items) {
+    if (!document) continue;
+    await request(app.getHttpServer())
+      .post(`/admin/v1/applications/${accountId}/documents`)
+      .set(bearer(verifier))
+      .send({ documentId: document.id, status: 'accepted' })
+      .expect(204);
+  }
+}
+
 /** A provider of this type, submitted and approved by a verifier (J1 then J5). */
 export async function approvedProvider(app: INestApplication<App>, role: OnboardingRole) {
   const provider = await submittedProvider(app, role);
   const verifier = await adminSignIn(app, 'verifier');
-  const server = request(app.getHttpServer());
-  await server
-    .get(`/admin/v1/applications/${provider.accountId}`)
-    .set(bearer(verifier))
-    .expect(200);
+  await acceptEveryDocument(app, verifier, provider.accountId);
   await request(app.getHttpServer())
     .post(`/admin/v1/applications/${provider.accountId}/decision`)
     .set(bearer(verifier))

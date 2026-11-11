@@ -8,7 +8,7 @@ import type { Principal } from '../common/request-context.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
 import { Notifier } from '../notifications/notifier.service.js';
 import { UploadsService } from '../uploads/uploads.service.js';
-import { decide, opensReview } from './application-rules.js';
+import { blockersToApprove, decide, opensReview } from './application-rules.js';
 import { ApplicationView } from './application-view.js';
 import { isOnboardingRole, type OnboardingRole } from './checklists.js';
 import type {
@@ -104,6 +104,7 @@ export class VerificationService {
       const grant = await this.grant(accountId, client);
       const next = decide(grant.status, input.decision);
       if (!next) throw reason(ConflictException, 'application_not_in_review');
+      if (input.decision === 'approve') await this.approvable(accountId, grant);
       const why = input.decision === 'approve' ? null : (input.reason ?? null);
       await this.change(client, admin, accountId, { from: grant.status, to: next, reason: why });
       await this.record(input.decision, accountId, client);
@@ -112,6 +113,15 @@ export class VerificationService {
     await this.coverage.invalidate();
     const template = OUTCOME_SMS[to];
     if (template) await this.notifier.smsAccount(accountId, template);
+  }
+
+  /** An approval needs nothing missing and every document reviewed (AD-02). */
+  private async approvable(
+    accountId: string,
+    grant: Awaited<ReturnType<VerificationService['grant']>>,
+  ): Promise<void> {
+    if (blockersToApprove(await this.view.build(accountId, grant)).length > 0)
+      throw reason(ConflictException, 'application_incomplete');
   }
 
   private async reviewing(accountId: string, client: TransactionClient): Promise<void> {
