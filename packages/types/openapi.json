@@ -4095,6 +4095,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "reverification_required"
           }
         },
         "security": [
@@ -4138,6 +4141,9 @@
         "responses": {
           "200": {
             "description": ""
+          },
+          "403": {
+            "description": "reverification_required"
           }
         },
         "security": [

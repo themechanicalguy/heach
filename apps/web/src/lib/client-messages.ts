@@ -44,7 +44,7 @@ const ROUTES: Record<string, Namespace[]> = {
   plans: ['plans', 'reverify', 'book', 'people', 'referral'],
   referral: ['referral'],
   notifications: ['notifications', 'sms', 'tickets', 'access', 'safety'],
-  vault: ['vault', 'sharedPanel', 'sharedLink', 'visit'],
+  vault: ['vault', 'sharedPanel', 'sharedLink', 'visit', 'reverify', 'signIn'],
   shared: ['vault', 'sharedLink'],
   services: ['search', 'book'],
   providers: ['search', 'book', 'profile', 'roles'],

@@ -7980,6 +7980,13 @@ export interface operations {
           'application/json': components['schemas']['LinkCreatedDto'];
         };
       };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   VaultController_revokeLink: {
@@ -8011,6 +8018,13 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description reverification_required */
+      403: {
         headers: {
           [name: string]: unknown;
         };

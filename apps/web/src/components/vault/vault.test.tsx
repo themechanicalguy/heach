@@ -175,6 +175,45 @@ describe('The vault on the web (MV-03 to MV-12)', () => {
   });
 });
 
+// jsdom has no <dialog>.showModal, so the re-verification sheet's contents are queried as hidden.
+describe('Re-verification before a link (AC-05)', () => {
+  it('AC-05 MV-09 a link needs a fresh OTP first, then is created', async () => {
+    const { ApiError } = await vi.importActual<typeof ApiModule>('../../lib/api');
+    let verified = false;
+    route({
+      '/vault': [record()],
+      '/vault/usage': { usedBytes: 0, quotaBytes: 1, nearlyFull: false },
+      'POST /auth/reverify': { challengeId: 'c1', expiresInSeconds: 300, resendInSeconds: 30 },
+    });
+    const routed = state.api.getMockImplementation() as
+      ((path: string, init?: RequestInit) => Promise<unknown>) | undefined;
+    state.api.mockImplementation((path: string, init?: RequestInit) => {
+      if (path === '/auth/reverify/verify') {
+        verified = true;
+        return Promise.resolve(undefined);
+      }
+      if (path === '/vault/links' && init?.method === 'POST')
+        return verified
+          ? Promise.resolve({
+              id: 'l1',
+              token: 'token-1234567890abcdefghij',
+              code: '654321',
+              expiresAt: START,
+            })
+          : Promise.reject(new ApiError(403, 'reverification_required'));
+      return routed ? routed(path, init) : Promise.resolve([]);
+    });
+    inEnglish(<VaultView />);
+    const pickers = await screen.findAllByLabelText('Synthetic knee scan');
+    fireEvent.click(first([...pickers].reverse()));
+    fireEvent.click(screen.getByRole('button', { name: 'Create link' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Send code', hidden: true }));
+    fireEvent.change(await screen.findByLabelText('6-digit code'), { target: { value: '123456' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm', hidden: true }));
+    expect(await screen.findByText(/Code: 654321/)).toBeTruthy();
+  });
+});
+
 describe('Sharing on the web (MV-07 to MV-09, MV-14)', () => {
   it('MV-07 the patient shares chosen records with the booking and can revoke', async () => {
     route({

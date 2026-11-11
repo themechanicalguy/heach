@@ -1,7 +1,7 @@
 import { CATALOGUES, formatIcu, LOCALES, type Locale, type MessageValues } from '@heach/i18n';
 import { expect, type Page, test } from './test';
 import { expectAccessible } from './accessibility';
-import { completePatientSetup, signInByOtp, syntheticMobile } from './otp-helpers';
+import { completePatientSetup, confirmItIsMe, signInByOtp, syntheticMobile } from './otp-helpers';
 import {
   acceptNewest,
   labCollectAndReport,
@@ -67,10 +67,13 @@ const PDF = {
   buffer: Buffer.from('%PDF-1.7\n% synthetic record\n'),
 };
 
-async function newPatient(lang: InLanguage): Promise<void> {
-  await signInByOtp(lang.page, lang.locale, syntheticMobile());
+/** Signs up a new synthetic patient; returns their number for later fresh-code steps. */
+async function newPatient(lang: InLanguage): Promise<string> {
+  const mobile = syntheticMobile();
+  await signInByOtp(lang.page, lang.locale, mobile);
   await completePatientSetup(lang.page, lang.locale, 'Synthetic Patient');
   await expect(lang.page).not.toHaveURL(/\/setup\//);
+  return mobile;
 }
 
 /** From search to the booking form: the provider's card, a free time, the address. */
@@ -203,7 +206,7 @@ async function j8(lang: InLanguage): Promise<void> {
 async function j9(lang: InLanguage): Promise<void> {
   const { page, t } = lang;
   const nurse = await listedProvider('nurse', 'nursing_vitals_check', 40_000);
-  await newPatient(lang);
+  const mobile = await newPatient(lang);
   await visitDone(lang, nurse);
   await lang.goto('/vault');
   await expect(page.getByText(lang.say(t.vault.issuedBy, { name: nurse.name }))).toBeVisible();
@@ -225,6 +228,8 @@ async function j9(lang: InLanguage): Promise<void> {
   const link = lang.card(t.vault.linkTitle);
   await link.getByRole('checkbox', { name: /Synthetic old prescription/ }).check();
   await link.getByRole('button', { name: t.vault.createLink }).click();
+  // Creating an outside link needs a fresh code (MV-09); the link is made once it is confirmed.
+  await confirmItIsMe(page, lang.locale, mobile);
   await expect(link.getByText(t.vault.linkCreated)).toBeVisible();
 }
 
