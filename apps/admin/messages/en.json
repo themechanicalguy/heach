@@ -58,6 +58,7 @@
   "errors": {
     "invalid_credentials": "Email or password is not right, or the account is locked. Try again later or ask a super admin.",
     "mfa_incorrect": "That code is not right. Wait for the next code and try again.",
+    "mfa_locked": "Too many wrong codes. You have been signed out; sign in again.",
     "mfa_expired": "Sign-in took too long. Start again.",
     "reverification_required": "Enter a fresh authenticator code first.",
     "status_unchanged": "The account already has that status.",
