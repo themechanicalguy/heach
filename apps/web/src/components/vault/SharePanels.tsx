@@ -148,8 +148,12 @@ export function SharedRecordsPanel({ bookingId }: Readonly<{ bookingId: string }
   );
 }
 
-/** A doctor outside HEACH opens a shared link with its code (MV-09). No account needed. */
-export function SharedLinkView({ token }: Readonly<{ token: string }>) {
+/**
+ * A doctor outside HEACH opens a shared link with its code (MV-09). No account needed. The token
+ * is the link's fragment, which browsers never send to a server, so no request log, span or
+ * Referer header carries it (MV-11); it goes to the API in the request body.
+ */
+export function SharedLinkView() {
   const { t } = useI18n();
   const [code, setCode] = useState('');
   const [shared, setShared] = useState<SharedRecords | undefined>();
@@ -207,9 +211,9 @@ export function SharedLinkView({ token }: Readonly<{ token: string }>) {
               onClick={() =>
                 void run(async () => {
                   setShared(
-                    await api<SharedRecords>(`/shared-records/${token}`, {
+                    await api<SharedRecords>('/shared-records/open', {
                       method: 'POST',
-                      body: JSON.stringify({ code }),
+                      body: JSON.stringify({ token: window.location.hash.slice(1), code }),
                     }),
                   );
                 })

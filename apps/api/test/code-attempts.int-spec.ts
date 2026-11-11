@@ -36,7 +36,8 @@ describe('Code attempt limits under parallel guessing (MV-09, HS-03, LB-06, SE-0
         .send({ recordIds: [record.id], hours: 24 })
         .expect(201)
     ).body as { id: string; token: string; code: string };
-    const open = (code: string) => server().post(`/v1/shared-records/${link.token}`).send({ code });
+    const open = (code: string) =>
+      server().post('/v1/shared-records/open').send({ token: link.token, code });
     const wrong = link.code === '000000' ? '111111' : '000000';
     await open(link.code).expect(200);
     await Promise.all(Array.from({ length: WRONG_IN_PARALLEL }, () => open(wrong)));

@@ -288,7 +288,12 @@ export class LinkDto {
   revokedAt!: Date | null;
 }
 
+/** The link's token travels in the body, never the path, so no URL log or span records it (MV-11). */
 export class LinkOpenDto {
+  @ApiProperty({ description: 'From the link fragment' })
+  @Matches(/^[\w-]{20,64}$/)
+  token!: string;
+
   @ApiProperty()
   @Matches(/^\d{6}$/)
   code!: string;
