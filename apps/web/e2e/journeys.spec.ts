@@ -1,5 +1,5 @@
 import { CATALOGUES, formatIcu, LOCALES, type Locale, type MessageValues } from '@heach/i18n';
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Page, test } from './test';
 import { expectAccessible } from './accessibility';
 import { completePatientSetup, signInByOtp, syntheticMobile } from './otp-helpers';
 import {
@@ -84,6 +84,11 @@ async function startBooking(lang: InLanguage, provider: Provider, service: strin
   await page.getByRole('button', { name: t.search.find, exact: true }).click();
   const card = page.getByRole('listitem').filter({ hasText: provider.name });
   await expect(card).toBeVisible();
+  // Checked as a person reads the results: centred, not wherever the Find click left the page,
+  // where the sticky header can sit over a filter field and fail target-size by position alone.
+  await card.evaluate((element) => {
+    element.scrollIntoView({ block: 'center' });
+  });
   await expectAccessible(page, 'search results');
   await card.getByRole('link', { name: t.search.view }).click();
   const slot = page.locator(`a[href*="/${lang.locale}/book/${provider.listingId}"]`).first();

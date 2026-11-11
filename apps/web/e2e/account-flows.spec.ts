@@ -1,5 +1,5 @@
 import { CATALOGUES, LOCALES } from '@heach/i18n';
-import { expect, test } from '@playwright/test';
+import { expect, newContext, test } from './test';
 import {
   codeFor,
   completePatientSetup,
@@ -67,7 +67,7 @@ test.describe('Staff invitation, membership and removal (O-1, D-7)', () => {
     const t = CATALOGUES.en;
     const ownerMobile = syntheticMobile();
     const collectorMobile = syntheticMobile();
-    const owner = await (await browser.newContext()).newPage();
+    const owner = await (await newContext(browser)).newPage();
     await signInByOtp(owner, 'en', ownerMobile);
     await completeProviderSetup(owner, 'lab', 'Synthetic Lab Owner');
     await owner.goto('/en/team');
@@ -77,7 +77,7 @@ test.describe('Staff invitation, membership and removal (O-1, D-7)', () => {
     await confirmItIsMe(owner, 'en', ownerMobile);
     await expect(owner.getByText(t.team.invited)).toBeVisible();
 
-    const collector = await (await browser.newContext()).newPage();
+    const collector = await (await newContext(browser)).newPage();
     await signInByOtp(collector, 'en', collectorMobile);
     await expect(collector).toHaveURL(/\/en\/setup\/role$/);
     await expect(

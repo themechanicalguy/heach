@@ -1,5 +1,5 @@
 import { CATALOGUES } from '@heach/i18n';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 test.describe('PWA (PF-07.1, EN-11)', () => {
   test.skip(

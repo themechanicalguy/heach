@@ -18,7 +18,7 @@ RUN pnpm --filter "@heach/admin..." build
 FROM --platform=$BUILDPLATFORM caddy:2.11.6-builder-alpine AS caddy
 ARG TARGETARCH
 ENV GOTOOLCHAIN=go1.26.10 GOOS=linux GOARCH=$TARGETARCH CGO_ENABLED=0
-RUN xcaddy build v2.11.6 --replace golang.org/x/net=golang.org/x/net@v0.60.0 \
+RUN xcaddy build v2.11.6 --replace golang.org/x/net=golang.org/x/net@v0.62.0 \
     --replace github.com/go-jose/go-jose/v4=github.com/go-jose/go-jose/v4@v4.1.6 \
     --with github.com/mholt/caddy-ratelimit@5625512f24f6f59d6f64fb3aafe5eecff0b286db \
     --output /usr/bin/caddy

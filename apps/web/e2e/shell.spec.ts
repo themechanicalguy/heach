@@ -1,5 +1,5 @@
 import { CATALOGUES, LOCALES } from '@heach/i18n';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 for (const locale of LOCALES) {
   test(`PF-03 the ${locale} header keeps its height after session restoration`, async ({
