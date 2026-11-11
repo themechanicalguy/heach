@@ -1,5 +1,5 @@
 import { BookingTimers } from '../src/bookings/booking-timers.js';
-import { adminSignIn, nextTotp, signedUp, useApp } from './account-helpers.js';
+import { adminSignIn, nextTotp, reverifiedAdmin, signedUp, useApp } from './account-helpers.js';
 import { bearer, type Login } from './auth-helpers.js';
 import {
   bookingOf,
@@ -92,7 +92,10 @@ describe('Packages and entitlements (J8; PK-01, PK-03, PK-04, PK-07, BK-08)', ()
         (plan) => plan.id === id,
       );
     expect(await visible()).toBe(false);
-    const admin = await adminSignIn(app(), 'super_admin');
+    const plain = await adminSignIn(app(), 'super_admin');
+    const blocked = await server().post(`/admin/v1/plans/${id}/approve`).set(bearer(plain));
+    expect(blocked.body).toMatchObject({ code: 'reverification_required' });
+    const admin = await reverifiedAdmin(app(), 'super_admin');
     await server().post(`/admin/v1/plans/${id}/approve`).set(bearer(admin)).expect(204);
     expect(await visible()).toBe(true);
   });

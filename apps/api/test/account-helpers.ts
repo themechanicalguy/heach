@@ -129,6 +129,20 @@ export async function adminSignIn(
 /** A TOTP code for a later step than any used yet (one step of drift is allowed). */
 export const nextTotp = (secret: string) => totpAt(secret, stepAt(Date.now()) + 1);
 
+/** An admin who has just proved a fresh TOTP code, for actions behind re-verification (L-11). */
+export async function reverifiedAdmin(
+  app: INestApplication<App>,
+  role: AdminRole,
+): Promise<AdminLogin> {
+  const admin = await adminSignIn(app, role);
+  await request(app.getHttpServer())
+    .post('/admin/v1/auth/reverify')
+    .set(bearer(admin))
+    .send({ code: nextTotp(admin.secret) })
+    .expect(204);
+  return admin;
+}
+
 /** Boots one app (and an admin database connection) for the calling describe block. */
 export function useApp(overrides: Record<string, string> = {}): {
   app: () => INestApplication<App>;

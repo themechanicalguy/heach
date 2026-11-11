@@ -9,6 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { RequireReverification } from '../auth/reverification.js';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import type pg from 'pg';
@@ -80,6 +81,7 @@ export class FinanceController {
   @Post('payout-runs')
   @HttpCode(HttpStatus.OK)
   @Roles('super_admin', 'finance')
+  @UseGuards(RequireReverification)
   @ApiOkResponse({ type: PayoutRunDto })
   async run(): Promise<PayoutRunDto> {
     const result = await this.ledger.runPayouts(new Date());

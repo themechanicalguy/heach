@@ -3,7 +3,7 @@ import { withTransaction } from '../src/data-stores/transaction.js';
 import { PG_POOL } from '../src/data-stores/data-stores.tokens.js';
 import { LedgerService } from '../src/payouts/ledger.service.js';
 import { Settings } from '../src/settings/settings.service.js';
-import { adminSignIn, signedUp, useApp } from './account-helpers.js';
+import { adminSignIn, reverifiedAdmin, signedUp, useApp } from './account-helpers.js';
 import { bearer } from './auth-helpers.js';
 import {
   type Booking,
@@ -229,7 +229,14 @@ describe('Reconciliation and the admin console (LM-06, AD-05, AD-07)', () => {
       .set(bearer(support))
       .send({ amountPaise: 100, reason: 'goodwill' })
       .expect(403);
-    const finance = await adminSignIn(app(), 'finance');
+    const unverified = await adminSignIn(app(), 'finance');
+    const blocked = await server()
+      .post(`/admin/v1/bookings/${booking.id}/refund`)
+      .set(bearer(unverified))
+      .send({ amountPaise: 1_000, reason: 'goodwill' });
+    expect(blocked.body).toMatchObject({ code: 'reverification_required' });
+    await server().post('/admin/v1/finance/payout-runs').set(bearer(unverified)).expect(403);
+    const finance = await reverifiedAdmin(app(), 'finance');
     await server()
       .post(`/admin/v1/bookings/${booking.id}/refund`)
       .set(bearer(finance))

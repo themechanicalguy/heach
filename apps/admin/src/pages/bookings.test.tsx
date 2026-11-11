@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Bookings } from './Bookings';
 import { Finance } from './Finance';
+import { setAccessToken } from '../api';
 import en from '../../messages/en.json';
 
 const ID = '00000000-0000-4000-8000-0000000000ee';
@@ -113,8 +114,49 @@ describe('Finance (AD-07, PY-05)', () => {
     expect(await screen.findByText('Commission rate: 15%')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: en.finance.runNow }));
     expect(await screen.findByText('Payout run finished: 2 providers.')).toBeTruthy();
-    expect(screen.getByRole('link', { name: en.finance.export }).getAttribute('href')).toBe(
-      '/api/admin/v1/finance/export.csv',
+  });
+
+  it('L-11 a payout run without a fresh code asks for one', async () => {
+    stub();
+    const fetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+    const answer = fetch.getMockImplementation() as (url: string, init?: RequestInit) => unknown;
+    fetch.mockImplementation((url: string, init?: RequestInit) =>
+      url.endsWith('/payout-runs')
+        ? Promise.resolve(
+            new Response(JSON.stringify({ code: 'reverification_required' }), { status: 403 }),
+          )
+        : answer(url, init),
     );
+    render(<Finance />);
+    fireEvent.click(await screen.findByRole('button', { name: en.finance.runNow }));
+    expect(await screen.findByText(en.reverify.intro)).toBeTruthy();
+  });
+
+  it('AD-07 the CSV export is fetched with the access token and saved as a file', async () => {
+    stub();
+    setAccessToken('synthetic-token');
+    const fetch = globalThis.fetch as ReturnType<typeof vi.fn>;
+    const answer = fetch.getMockImplementation() as (url: string, init?: RequestInit) => unknown;
+    fetch.mockImplementation((url: string, init?: RequestInit) =>
+      url.endsWith('/export.csv')
+        ? Promise.resolve(new Response('booking_id,status'))
+        : answer(url, init),
+    );
+    vi.stubGlobal('URL', { createObjectURL: () => 'blob:synthetic', revokeObjectURL: vi.fn() });
+    const saved = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    render(<Finance />);
+    fireEvent.click(await screen.findByRole('button', { name: en.finance.export }));
+    await waitFor(() => {
+      expect(saved).toHaveBeenCalled();
+    });
+    const exported = fetch.mock.calls.find(([url]) => String(url).endsWith('/export.csv'));
+    expect(new Headers((exported?.[1] as RequestInit).headers).get('authorization')).toBe(
+      'Bearer synthetic-token',
+    );
+    expect((saved.mock.contexts[0] as HTMLAnchorElement).download).toBe('bookings.csv');
+    saved.mockRestore();
+    setAccessToken(undefined);
   });
 });

@@ -6,6 +6,7 @@ import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
 import { usePending } from '../use-pending';
+import { useReverified } from '../use-reverified';
 import { label } from './labels';
 import { PlanForm } from './PlanForm';
 import { PlanPurchases } from './PlanPurchases';
@@ -14,8 +15,10 @@ import { PlanPurchases } from './PlanPurchases';
 export function Plans({ canChange }: Readonly<{ canChange: boolean }>) {
   const { loaded, reload } = useLoad(useCallback(() => api<Plan[]>('/plans'), []));
   const { pending, error, run } = usePending();
+  // Approving puts a price in front of patients; it needs a fresh TOTP code (L-11).
+  const { attempt, sheet } = useReverified(run);
   const act = (id: string, verb: 'approve' | 'retire') =>
-    run(async () => {
+    attempt(async () => {
       await api(`/plans/${id}/${verb}`, { method: 'POST' });
       reload();
     });
@@ -95,6 +98,7 @@ export function Plans({ canChange }: Readonly<{ canChange: boolean }>) {
       )}
       <PlanPurchases />
       {canChange && <PlanForm onCreated={reload} />}
+      {sheet}
     </>
   );
 }
