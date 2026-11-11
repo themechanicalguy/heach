@@ -48,7 +48,11 @@ async function payoutAndSubmit(page: Page, locale: Locale, mobile: string): Prom
   const submit = page.getByRole('button', { name: t.application.submit, exact: true });
   await expect(submit).toBeEnabled({ timeout: 15_000 });
   await submit.click();
-  await expect(page.getByText(t.application.statusText.submitted)).toBeVisible();
+  // A successful submit returns the provider home with a one-time notice (PO-04).
+  await expect(page).toHaveURL(new RegExp(`/${locale}$`));
+  await expect(
+    page.getByRole('status').filter({ hasText: t.application.submittedNotice }),
+  ).toBeVisible();
 }
 
 for (const locale of LOCALES) {
