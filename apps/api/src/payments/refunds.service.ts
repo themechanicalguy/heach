@@ -5,7 +5,7 @@ import { reason } from '../common/error-response.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
 import { withTransaction } from '../data-stores/transaction.js';
 import { JobRunner } from '../jobs/runner/job-runner.js';
-import { PaymentsRepository } from './payments.repository.js';
+import { PaymentsRepository, type RefundOwner } from './payments.repository.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import type pg from 'pg';
 
@@ -59,29 +59,44 @@ export class RefundsService {
     return refund.amountPaise;
   }
 
+  /** Sends a booking's pending refunds; see `drain`. */
+  process(bookingId: string, settled: Settled): Promise<number> {
+    return this.drain({ kind: 'booking', id: bookingId }, settled);
+  }
+
+  /** Sends a plan purchase's pending refunds; see `drain`. */
+  processPurchase(purchaseId: string, settled: Settled): Promise<number> {
+    return this.drain({ kind: 'purchase', id: purchaseId }, settled);
+  }
+
   /**
-   * Sends pending refunds of one booking to the gateway; returns the total now processed and
-   * calls `settled` inside the transaction that records them.
+   * Sends pending refunds one at a time, each in its own transaction under its row lock, with our
+   * refund ID as the gateway's idempotency key. A gateway failure rolls back only the refund it
+   * was sending: the ones already sent stay recorded and are never sent again (the job retries
+   * the rest). Returns the total sent; `settled` runs in each refund's transaction.
    */
-  async process(
-    bookingId: string,
-    settled: (client: TransactionClient, paise: number) => Promise<void>,
-  ): Promise<number> {
-    return withTransaction(this.pool, async (client) => {
-      const pending = await this.payments.lockPendingRefunds(client, bookingId);
-      let total = 0;
-      for (const refund of pending) {
-        if (!refund.gatewayPaymentId) continue;
-        // A network call inside the lock is deliberate: the row lock is what stops a double refund.
+  private async drain(owner: RefundOwner, settled: Settled): Promise<number> {
+    const tried: string[] = [];
+    let total = 0;
+    for (;;) {
+      const sent = await withTransaction(this.pool, async (client) => {
+        const refund = await this.payments.lockNextPendingRefund(client, owner, tried);
+        if (!refund) return undefined;
+        tried.push(refund.id);
+        if (!refund.gatewayPaymentId) return 0;
         const { refundId } = await this.gateway.refund({
           paymentId: refund.gatewayPaymentId,
           amountPaise: refund.amountPaise,
+          idempotencyKey: refund.id,
         });
         await this.payments.finishRefund(client, refund.id, refundId);
-        total += refund.amountPaise;
-      }
-      if (total > 0) await settled(client, total);
-      return total;
-    });
+        await settled(client, refund.amountPaise);
+        return refund.amountPaise;
+      });
+      if (sent === undefined) return total;
+      total += sent;
+    }
   }
 }
+
+type Settled = (client: TransactionClient, paise: number) => Promise<void>;

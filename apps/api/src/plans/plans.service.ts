@@ -12,6 +12,7 @@ import { AuditService } from '../audit/audit.service.js';
 import { PLAN_UNITS_LOW_JOB } from '../bookings/discounts.service.js';
 import { PaymentEventsService } from '../bookings/payment-events.service.js';
 import { RenewalsService } from './renewals.service.js';
+import { appLogger } from '../common/app-logger.js';
 import { reason } from '../common/error-response.js';
 import type { Plain } from '../common/plain.js';
 import type { Principal } from '../common/request-context.js';
@@ -20,6 +21,7 @@ import { type TransactionClient, withTransaction } from '../data-stores/transact
 import { JobRunner } from '../jobs/runner/job-runner.js';
 import { Notifier } from '../notifications/notifier.service.js';
 import { PaymentsRepository } from '../payments/payments.repository.js';
+import { RefundsService } from '../payments/refunds.service.js';
 import { Settings } from '../settings/settings.service.js';
 import type {
   AdminPurchaseDto,
@@ -30,6 +32,8 @@ import type {
 } from './plans.dto.js';
 
 export const PLAN_REMINDER_JOB = 'plan_reminder';
+/** Retries a cancelled plan's refund until the gateway accepts it (PK-07). */
+export const PURCHASE_REFUND_JOB = 'plan_refund';
 const DAY_MS = 86_400_000;
 
 const PLAN_COLUMNS = `p.id, p.kind, p.provider_account_id AS "providerId",
@@ -62,12 +66,16 @@ export class PlansService implements OnModuleInit {
     private readonly audit: AuditService,
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
     private readonly renewals: RenewalsService,
+    private readonly refunds: RefundsService,
   ) {}
 
   onModuleInit(): void {
     this.events.onPurchasePaid((client, purchaseId, paid) =>
       this.activate(client, purchaseId, paid),
     );
+    this.jobs.register(PURCHASE_REFUND_JOB, async (payload) => {
+      await this.sendRefunds(payload.purchaseId ?? '');
+    });
     this.jobs.register(PLAN_UNITS_LOW_JOB, async (payload) => {
       await this.notifier.notify(payload.buyer ?? '', 'plan_units_low');
     });
@@ -269,23 +277,15 @@ export class PlansService implements OnModuleInit {
         (row) => row.status === 'paid',
       );
       if (amount > 0 && payment) {
-        const refundId = await this.payments.insertPurchaseRefund(client, {
+        await this.payments.insertPurchaseRefund(client, {
           purchaseId,
           paymentId: payment.id,
           amountPaise: amount,
           reason: 'plan_cancelled',
           actorRole: buyer.role,
         });
-        await this.audit.record(
-          { action: 'plan_purchase.cancelled', entity: 'plan_purchase', entityId: purchaseId },
-          client,
-        );
-        return {
-          refundId,
-          amount,
-          gatewayPaymentId: payment.gatewayPaymentId,
-          mandateId: purchase.mandateId,
-        };
+        // Committed with the cancellation, so a refund the gateway refuses now is retried.
+        await this.jobs.enqueue(client, { kind: PURCHASE_REFUND_JOB, payload: { purchaseId } });
       }
       await this.audit.record(
         { action: 'plan_purchase.cancelled', entity: 'plan_purchase', entityId: purchaseId },
@@ -294,22 +294,17 @@ export class PlansService implements OnModuleInit {
       return { mandateId: purchase.mandateId };
     });
     await this.renewals.revoke(purchaseId, refund.mandateId);
-    if ('gatewayPaymentId' in refund && refund.gatewayPaymentId)
-      await this.sendRefund(purchaseId, refund.refundId, refund.gatewayPaymentId, refund.amount);
+    await this.sendRefunds(purchaseId).catch(() => {
+      appLogger.warn({ event: 'plan_refund_deferred' }, 'Plan refund left for retry');
+    });
   }
 
-  private async sendRefund(
-    purchaseId: string,
-    refundId: string,
-    paymentId: string,
-    amountPaise: number,
-  ): Promise<void> {
-    const sent = await this.gateway.refund({ paymentId, amountPaise });
-    await withTransaction(this.pool, async (client) => {
-      await this.payments.finishRefund(client, refundId, sent.refundId);
+  /** Sends the purchase's pending refunds; each one sent is added to its refunded total. */
+  private sendRefunds(purchaseId: string): Promise<number> {
+    return this.refunds.processPurchase(purchaseId, async (client, paise) => {
       await client.query(
         'UPDATE app.plan_purchase SET refunded_paise = refunded_paise + $2 WHERE id = $1',
-        [purchaseId, amountPaise],
+        [purchaseId, paise],
       );
     });
   }

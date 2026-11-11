@@ -36,6 +36,12 @@ export class FakePaymentGateway implements PaymentGateway {
   readonly mandates = new Map<string, { maxAmountPaise: number; active: boolean }>();
   /** Set by a test to make refunds fail, as a gateway outage would. */
   failingRefunds = false;
+  /** Set by a test: this many more refunds succeed, then every refund fails (a mid-run outage). */
+  refundsBeforeOutage: number | undefined;
+  /** Set by a test to make transfers fail, as a gateway outage would. */
+  failingTransfers = false;
+  private readonly refundsByKey = new Map<string, string>();
+  private readonly transfersByReference = new Map<string, string>();
 
   constructor(private readonly webhookSecret = 'fake-webhook-secret') {}
 
@@ -118,10 +124,21 @@ export class FakePaymentGateway implements PaymentGateway {
     return Promise.resolve();
   }
 
-  refund(payment: { paymentId: string; amountPaise: number }): Promise<{ refundId: string }> {
-    if (this.failingRefunds) return Promise.reject(new Error('Gateway unavailable'));
-    this.refunds.push(payment);
-    return Promise.resolve({ refundId: `rfnd_${randomUUID().slice(0, 14)}` });
+  /** Idempotent by key, as the gateway's idempotency header is: a repeat pays nothing more. */
+  refund(payment: {
+    paymentId: string;
+    amountPaise: number;
+    idempotencyKey: string;
+  }): Promise<{ refundId: string }> {
+    const known = this.refundsByKey.get(payment.idempotencyKey);
+    if (known) return Promise.resolve({ refundId: known });
+    if (this.failingRefunds || this.refundsBeforeOutage === 0)
+      return Promise.reject(new Error('Gateway unavailable'));
+    if (this.refundsBeforeOutage !== undefined) this.refundsBeforeOutage -= 1;
+    const refundId = `rfnd_${randomUUID().slice(0, 14)}`;
+    this.refundsByKey.set(payment.idempotencyKey, refundId);
+    this.refunds.push({ paymentId: payment.paymentId, amountPaise: payment.amountPaise });
+    return Promise.resolve({ refundId });
   }
 
   transfer(payout: {
@@ -129,8 +146,13 @@ export class FakePaymentGateway implements PaymentGateway {
     amountPaise: number;
     reference: string;
   }): Promise<{ transferId: string }> {
+    const known = this.transfersByReference.get(payout.reference);
+    if (known) return Promise.resolve({ transferId: known });
+    if (this.failingTransfers) return Promise.reject(new Error('Gateway unavailable'));
+    const transferId = `trf_${randomUUID().slice(0, 14)}`;
+    this.transfersByReference.set(payout.reference, transferId);
     this.transfers.push(payout);
-    return Promise.resolve({ transferId: `trf_${randomUUID().slice(0, 14)}` });
+    return Promise.resolve({ transferId });
   }
 
   orderStatus(orderId: string): Promise<{ paid: boolean; amountPaise: number } | undefined> {
