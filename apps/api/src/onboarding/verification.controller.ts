@@ -46,7 +46,7 @@ export class VerificationController {
     @Query() query: ApplicationQueryDto,
     @Req() request: Request,
   ): Promise<ApplicationSummaryDto[]> {
-    return this.verification.queue(principalOf(request), query.view);
+    return this.verification.queue(principalOf(request), query);
   }
 
   @Get(':accountId')

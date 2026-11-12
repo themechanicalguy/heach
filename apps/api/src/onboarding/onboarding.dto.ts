@@ -13,7 +13,9 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { NAME_PATTERN } from '../accounts/setup-rules.js';
+import { ONBOARDING_ROLES, type OnboardingRole } from './checklists.js';
 import { UPLOAD_TYPES, type UploadType } from '../uploads/upload-rules.js';
 
 const APPLICATION_STATUSES = [
@@ -312,6 +314,13 @@ export class ApplicationSummaryDto {
   @ApiProperty({ type: Date, nullable: true })
   submittedAt!: Date | null;
 
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    description: 'Whole days since the application was submitted (AD-02)',
+  })
+  ageDays!: number | null;
+
   @ApiProperty({ description: 'An admin set this application up with the provider (AD-12)' })
   assisted!: boolean;
 
@@ -356,11 +365,39 @@ export class ApplicationReviewDto extends ApplicationDto {
   providerConsentDue!: boolean;
 }
 
+export const AGE_BUCKETS = ['lt1', '1to3', 'gt3'] as const;
+export type AgeBucket = (typeof AGE_BUCKETS)[number];
+
+/** Whole digits only; anything else stays a string so validation refuses it. */
+const toWholeNumber = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' && /^\d{1,3}$/.test(value) ? Number(value) : value;
+
 export class ApplicationQueryDto {
   @ApiPropertyOptional({ enum: ['open', 'decided'] })
   @IsOptional()
   @IsIn(['open', 'decided'])
   view?: 'open' | 'decided';
+
+  @ApiPropertyOptional({ enum: ONBOARDING_ROLES, description: 'Only this provider type' })
+  @IsOptional()
+  @IsIn(ONBOARDING_ROLES)
+  role?: OnboardingRole;
+
+  @ApiPropertyOptional({
+    enum: AGE_BUCKETS,
+    description: 'Days since submission: under 1, from 1 to under 3, or 3 and more',
+  })
+  @IsOptional()
+  @IsIn(AGE_BUCKETS)
+  age?: AgeBucket;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 365, description: 'At least this many days old' })
+  @IsOptional()
+  @Transform(toWholeNumber)
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  minAgeDays?: number;
 }
 
 export class DocumentReviewDto {

@@ -4154,6 +4154,8 @@ export interface components {
       fullName: string | null;
       /** Format: date-time */
       submittedAt: string | null;
+      /** @description Whole days since the application was submitted (AD-02) */
+      ageDays: number | null;
       /** @description An admin set this application up with the provider (AD-12) */
       assisted: boolean;
       /** @description The calling admin assisted it and may not review it (AD-12) */
@@ -7210,6 +7212,12 @@ export interface operations {
     parameters: {
       query?: {
         view?: 'open' | 'decided';
+        /** @description Only this provider type */
+        role?: 'physiotherapist' | 'nurse' | 'attendant' | 'lab' | 'sample_collector';
+        /** @description Days since submission: under 1, from 1 to under 3, or 3 and more */
+        age?: 'lt1' | '1to3' | 'gt3';
+        /** @description At least this many days old */
+        minAgeDays?: number;
       };
       header?: never;
       path?: never;

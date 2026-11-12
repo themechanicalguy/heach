@@ -246,6 +246,26 @@
     "role": "Provider type",
     "status": "Status",
     "submitted": "Submitted",
+    "age": "Waiting",
+    "ageDays": "{days, plural, =0 {Today} one {# day} other {# days}}",
+    "filtersLegend": "Narrow the list",
+    "filterRole": "Provider type",
+    "filterRoleAll": "All provider types",
+    "filterAge": "Waiting time",
+    "filterAgeAll": "Any time",
+    "ages": {
+      "lt1": "Under 1 day",
+      "1to3": "1 to 3 days",
+      "gt3": "3 days or more"
+    },
+    "viewer": {
+      "imageAlt": "Image opened for review",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "rotateLeft": "Rotate left",
+      "rotateRight": "Rotate right",
+      "reset": "Reset view"
+    },
     "open": "Review",
     "detailTitle": "Application",
     "identity": "Identity check",

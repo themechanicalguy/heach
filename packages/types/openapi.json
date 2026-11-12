@@ -1922,6 +1922,37 @@
               "type": "string",
               "enum": ["open", "decided"]
             }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "Only this provider type",
+            "schema": {
+              "type": "string",
+              "enum": ["physiotherapist", "nurse", "attendant", "lab", "sample_collector"]
+            }
+          },
+          {
+            "name": "age",
+            "required": false,
+            "in": "query",
+            "description": "Days since submission: under 1, from 1 to under 3, or 3 and more",
+            "schema": {
+              "type": "string",
+              "enum": ["lt1", "1to3", "gt3"]
+            }
+          },
+          {
+            "name": "minAgeDays",
+            "required": false,
+            "in": "query",
+            "description": "At least this many days old",
+            "schema": {
+              "minimum": 0,
+              "maximum": 365,
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -9345,6 +9376,11 @@
             "type": "string",
             "nullable": true
           },
+          "ageDays": {
+            "type": "number",
+            "nullable": true,
+            "description": "Whole days since the application was submitted (AD-02)"
+          },
           "assisted": {
             "type": "boolean",
             "description": "An admin set this application up with the provider (AD-12)"
@@ -9360,6 +9396,7 @@
           "status",
           "fullName",
           "submittedAt",
+          "ageDays",
           "assisted",
           "assistedByYou"
         ]

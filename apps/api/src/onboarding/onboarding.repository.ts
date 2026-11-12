@@ -9,6 +9,13 @@ import { type TransactionClient, withTransaction } from '../data-stores/transact
 
 type Queryable = Pick<pg.Pool, 'query'>;
 
+/** Narrowing for the verification queue (AD-02); ages are whole days, the upper bound exclusive. */
+export interface QueueFilters {
+  role?: string | undefined;
+  minAgeDays?: number | undefined;
+  maxAgeDays?: number | undefined;
+}
+
 export interface ProviderGrant {
   role: string;
   status: ApplicationStatus;
@@ -351,21 +358,24 @@ export class OnboardingRepository {
     return rows;
   }
 
-  /** Applications in the review queue, oldest first (AD-02); flags show assisted onboarding (AD-12). */
-  async queue(statuses: readonly ApplicationStatus[], adminId: string) {
+  /**
+   * Applications in the review queue, oldest first (AD-02); flags show assisted onboarding (AD-12).
+   * Filters are bound parameters. Age counts whole days since the application last entered
+   * `submitted`; `maxAgeDays` is exclusive. An age filter leaves out rows with no submitted event.
+   */
+  async queue(statuses: readonly ApplicationStatus[], adminId: string, filters: QueueFilters = {}) {
     const { rows } = await this.pool.query<{
       accountId: string;
       role: string;
       status: ApplicationStatus;
       fullName: string | null;
       submittedAt: Date | null;
+      ageDays: number | null;
       assisted: boolean;
       assistedByYou: boolean;
     }>(
       `SELECT r.account_id AS "accountId", r.role, r.application_status AS status,
-              p.full_name AS "fullName",
-              (SELECT max(e.created_at) FROM app.application_event e
-                WHERE e.account_id = r.account_id AND e.to_status = 'submitted') AS "submittedAt",
+              p.full_name AS "fullName", sub.at AS "submittedAt", age.days AS "ageDays",
               EXISTS (SELECT 1 FROM app.assisted_session s
                        WHERE s.account_id = r.account_id AND s.consented_at IS NOT NULL) AS assisted,
               EXISTS (SELECT 1 FROM app.assisted_session s
@@ -373,10 +383,22 @@ export class OnboardingRepository {
                          AND s.consented_at IS NOT NULL) AS "assistedByYou"
          FROM app.role_assignment r
          LEFT JOIN app.account_profile p ON p.account_id = r.account_id
+         CROSS JOIN LATERAL (SELECT max(e.created_at) AS at FROM app.application_event e
+                              WHERE e.account_id = r.account_id AND e.to_status = 'submitted') sub
+         CROSS JOIN LATERAL (SELECT floor(extract(epoch FROM now() - sub.at) / 86400)::int AS days) age
         WHERE r.side = 'provider' AND r.application_status = ANY($1)
-        ORDER BY "submittedAt" NULLS LAST, r.granted_at
+          AND ($3::text IS NULL OR r.role = $3)
+          AND ($4::int IS NULL OR age.days >= $4)
+          AND ($5::int IS NULL OR age.days < $5)
+        ORDER BY sub.at NULLS LAST, r.granted_at
         LIMIT 200`,
-      [statuses, adminId],
+      [
+        statuses,
+        adminId,
+        filters.role ?? null,
+        filters.minAgeDays ?? null,
+        filters.maxAgeDays ?? null,
+      ],
     );
     return rows;
   }

@@ -18,6 +18,8 @@ import { decide, opensReview } from './application-rules.js';
 import { ApplicationView } from './application-view.js';
 import { isOnboardingRole, type OnboardingRole } from './checklists.js';
 import type {
+  AgeBucket,
+  ApplicationQueryDto,
   ApplicationReviewDto,
   ApplicationSummaryDto,
   DecisionDto,
@@ -25,12 +27,28 @@ import type {
   IdentityReviewDto,
   StoredFileDto,
 } from './onboarding.dto.js';
-import { OnboardingRepository } from './onboarding.repository.js';
+import { OnboardingRepository, type QueueFilters } from './onboarding.repository.js';
 import { ProfileService } from './profile.service.js';
 
 const ENTITY = 'provider_application';
 const OPEN: readonly ApplicationStatus[] = ['submitted', 'under_review'];
 const DECIDED: readonly ApplicationStatus[] = ['approved', 'rejected', 'changes_requested'];
+/** Day ranges of the age buckets: from (inclusive) to (exclusive). */
+const AGE_RANGES: Record<AgeBucket, { from: number; to?: number }> = {
+  lt1: { from: 0, to: 1 },
+  '1to3': { from: 1, to: 3 },
+  gt3: { from: 3 },
+};
+
+/** The bucket and the minimum age together keep only what both allow. */
+function queueFilters(query: ApplicationQueryDto): QueueFilters {
+  const bucket = query.age ? AGE_RANGES[query.age] : undefined;
+  const from = Math.max(bucket?.from ?? 0, query.minAgeDays ?? 0);
+  const filters: QueueFilters = { role: query.role, maxAgeDays: bucket?.to };
+  if (bucket || query.minAgeDays !== undefined) filters.minAgeDays = from;
+  return filters;
+}
+
 const OUTCOME_SMS: Partial<Record<ApplicationStatus, SmsTemplate>> = {
   approved: 'application_approved',
   rejected: 'application_rejected',
@@ -54,8 +72,9 @@ export class VerificationService {
     private readonly profiles: ProfileService,
   ) {}
 
-  queue(admin: Principal, view: 'open' | 'decided' = 'open'): Promise<ApplicationSummaryDto[]> {
-    return this.onboarding.queue(view === 'open' ? OPEN : DECIDED, admin.userId);
+  queue(admin: Principal, query: ApplicationQueryDto): Promise<ApplicationSummaryDto[]> {
+    const statuses = (query.view ?? 'open') === 'open' ? OPEN : DECIDED;
+    return this.onboarding.queue(statuses, admin.userId, queueFilters(query));
   }
 
   async review(admin: Principal, accountId: string): Promise<ApplicationReviewDto> {

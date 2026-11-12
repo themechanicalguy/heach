@@ -86,6 +86,7 @@ function stubApi(
       status: 'submitted',
       fullName: 'Synthetic Nurse',
       submittedAt: '2026-10-30T00:00:00Z',
+      ageDays: 4,
       assisted: false,
       assistedByYou: false,
       ...queued,
