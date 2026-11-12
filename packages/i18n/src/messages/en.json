@@ -413,6 +413,15 @@
       "ownPhotoAlt": "Your profile photo",
       "notGiven": "Not given"
     },
+    "voice": {
+      "listen": "Listen",
+      "stop": "Stop",
+      "identity": "This step checks who you are. Tick the box to agree, then press Verify with Aadhaar or DigiLocker. If you cannot do this, choose another identity document and upload its photo.",
+      "documents": "This step needs photos of your certificates. For each document, press Choose a file, take a clear photo, then press Upload. Some documents also ask for a number or an end date.",
+      "profile": "This step is optional. It tells patients about you. Write your qualification and the years you have worked, then press Save profile. You can also upload a photo of your face.",
+      "payout": "This step is for getting paid. Choose UPI or bank account, fill in the details, and press Save payout account. You will get a code on your phone to confirm.",
+      "review": "Check what you have entered. To change something, press Edit beside it. When everything is right, press Submit application."
+    },
     "issuedCopy": "Issued copy shared from DigiLocker · {issuer}",
     "verifiedDetails": {
       "title": "Details from your identity check",

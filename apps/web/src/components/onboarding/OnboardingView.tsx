@@ -12,6 +12,7 @@ import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { DocumentItem } from './DocumentItem';
 import { IdentityStep } from './IdentityStep';
+import { ListenButton } from './ListenButton';
 import { ProfileStep } from './ProfileStep';
 import { PayoutForm } from './PayoutForm';
 import { type EditableStep, ReviewStep } from './ReviewStep';
@@ -91,6 +92,7 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
           current={steps.indexOf(step) + 1}
           total={steps.length}
         />
+        <ListenButton step={step} />
         {step === 'identity' && <IdentityStep application={application} onSaved={setApplication} />}
         {step === 'documents' && <Documents application={application} onSaved={setApplication} />}
         {step === 'profile' && <ProfileStep application={application} onSaved={setApplication} />}
