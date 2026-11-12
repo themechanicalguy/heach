@@ -3,6 +3,7 @@ import { type ReactNode, useState } from 'react';
 import { t } from './i18n';
 import { AdminLayout, type Section } from './layout/AdminLayout';
 import { Admins } from './pages/Admins';
+import { AuditLog } from './pages/AuditLog';
 import { Applications } from './pages/Applications';
 import { Bookings } from './pages/Bookings';
 import { Catalogue } from './pages/Catalogue';
@@ -54,7 +55,7 @@ function sectionsFor(role: string): Section[] {
   if (role === 'super_admin' || role === 'support') sections.push('referrals', 'catalogue');
   if (['super_admin', 'support', 'finance'].includes(role)) sections.push('settings');
   if (role === 'super_admin' || role === 'support') sections.push('content');
-  if (role === 'super_admin') sections.push('security');
+  if (role === 'super_admin') sections.push('security', 'audit');
   if (USER_READERS.has(role)) sections.push('users');
   if (role === 'super_admin') sections.push('admins');
   sections.push('password');
@@ -80,6 +81,7 @@ const PAGES: Record<Section, (props: PageProps) => ReactNode> = {
   referrals: () => <Referrals />,
   settings: ({ role }) => <Settings canChange={role === 'super_admin'} />,
   security: () => <Security />,
+  audit: () => <AuditLog />,
   content: ({ role }) => <Content canChange={role === 'super_admin'} />,
   catalogue: ({ role }) => <Catalogue canChange={role === 'super_admin'} />,
   users: ({ role }) => <Users canChange={USER_CHANGERS.has(role)} />,

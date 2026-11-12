@@ -22,6 +22,7 @@
     "referrals": "Referrals",
     "settings": "Settings",
     "security": "Security",
+    "audit": "Audit log",
     "content": "Content"
   },
   "dashboard": {
@@ -141,6 +142,26 @@
     "verifier": "Verifier",
     "support": "Support",
     "finance": "Finance"
+  },
+  "audit": {
+    "title": "Audit log",
+    "intro": "Every admin action is recorded and cannot be changed. Searching and exporting are recorded too. Entries hold IDs only.",
+    "actorId": "Actor ID",
+    "actorRole": "Actor role",
+    "action": "Action starts with",
+    "entity": "Entity",
+    "entityId": "Entity ID",
+    "from": "From date",
+    "to": "To date",
+    "search": "Search",
+    "clear": "Clear",
+    "caption": "Audit log, newest first",
+    "time": "Time",
+    "correlationId": "Correlation ID",
+    "none": "No entries match these filters.",
+    "loadMore": "Load more",
+    "export": "Export CSV",
+    "exportNote": "The export has at most 5,000 rows and needs a fresh authenticator code."
   },
   "state": {
     "loading": "Loading",

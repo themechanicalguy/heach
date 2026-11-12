@@ -36,6 +36,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/v1/audit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AuditController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/audit/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AuditController_exportCsv'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/auth/refresh': {
     parameters: {
       query?: never;
@@ -3193,6 +3225,26 @@ export interface components {
       status: 'ok' | 'error';
       checks: components['schemas']['ReadinessChecksDto'];
     };
+    AuditEntryDto: {
+      /** @description Position in the log, a bigint as a string */
+      seq: string;
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      at: string;
+      actorId: string | null;
+      actorRole: string;
+      action: string;
+      entity: string;
+      entityId: string | null;
+      correlationId: string;
+    };
+    AuditPageDto: {
+      /** @description Newest first */
+      entries: components['schemas']['AuditEntryDto'][];
+      /** @description Pass as `before` for the next page; null on the last page */
+      nextBefore: string | null;
+    };
     AccessTokenDto: {
       accessToken: string;
       /** @description Seconds until the access token expires */
@@ -5401,6 +5453,85 @@ export interface operations {
         content: {
           'application/json': components['schemas']['ReadinessDto'];
         };
+      };
+    };
+  };
+  AuditController_list: {
+    parameters: {
+      query?: {
+        /** @description Actor ID, exact */
+        actorId?: string;
+        /** @description Actor role, exact, for example `verifier` */
+        actorRole?: string;
+        /** @description Action prefix, matched literally, for example `admin.` */
+        action?: string;
+        /** @description Entity type, exact */
+        entity?: string;
+        /** @description Entity ID, exact */
+        entityId?: string;
+        /** @description Earliest time, inclusive (ISO 8601 date-time) */
+        from?: string;
+        /** @description Latest time, inclusive (ISO 8601 date-time) */
+        to?: string;
+        /** @description Cursor: only entries with a lower seq (a `nextBefore`) */
+        before?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuditPageDto'];
+        };
+      };
+    };
+  };
+  AuditController_exportCsv: {
+    parameters: {
+      query?: {
+        /** @description Actor ID, exact */
+        actorId?: string;
+        /** @description Actor role, exact, for example `verifier` */
+        actorRole?: string;
+        /** @description Action prefix, matched literally, for example `admin.` */
+        action?: string;
+        /** @description Entity type, exact */
+        entity?: string;
+        /** @description Entity ID, exact */
+        entityId?: string;
+        /** @description Earliest time, inclusive (ISO 8601 date-time) */
+        from?: string;
+        /** @description Latest time, inclusive (ISO 8601 date-time) */
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV, newest first, at most 5000 rows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'text/csv': string;
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

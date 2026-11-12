@@ -48,13 +48,23 @@ async function errorFrom(response: Response): Promise<ApiError> {
   return new ApiError(response.status, typeof body.code === 'string' ? body.code : undefined);
 }
 
-export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request(path: string, init: RequestInit): Promise<Response> {
   let response = await send(path, init);
   if (response.status === 401 && !path.startsWith('/auth/') && (await refresh())) {
     response = await send(path, init);
   }
   if (!response.ok) throw await errorFrom(response);
+  return response;
+}
+
+export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await request(path, init);
   return (response.status === 204 ? undefined : await response.json()) as T;
+}
+
+/** A file answer (for example a CSV export) as a Blob, sent with the same Bearer token. */
+export async function apiBlob(path: string): Promise<Blob> {
+  return (await request(path, {})).blob();
 }
 
 /** The reason for a failure, as a key of `errors` in the catalogue; never the response body. */

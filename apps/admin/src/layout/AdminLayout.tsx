@@ -19,6 +19,7 @@ export type Section =
   | 'settings'
   | 'content'
   | 'security'
+  | 'audit'
   | 'users'
   | 'admins'
   | 'password';
