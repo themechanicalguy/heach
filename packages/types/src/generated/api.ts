@@ -3647,6 +3647,13 @@ export interface components {
       reviewReason: string | null;
       /** Format: date-time */
       uploadedAt: string;
+      /**
+       * @description An issued copy or an upload (KY-02)
+       * @enum {string}
+       */
+      source: 'upload' | 'digilocker';
+      /** @description Who issued a DigiLocker copy */
+      issuer: string | null;
     };
     ChecklistEntryDto: {
       key: string;

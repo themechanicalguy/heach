@@ -64,7 +64,17 @@ export class ApplicationView {
 function documentView(row: DocumentRow | undefined) {
   if (!row) return null;
   const { id, scanStatus, reference, expiresOn, reviewStatus, reviewReason, uploadedAt } = row;
-  return { id, scanStatus, reference, expiresOn, reviewStatus, reviewReason, uploadedAt };
+  const review = { reviewStatus, reviewReason };
+  return {
+    id,
+    scanStatus,
+    reference,
+    expiresOn,
+    ...review,
+    uploadedAt,
+    source: row.source,
+    issuer: row.issuer,
+  };
 }
 
 function cleanDocuments(rows: readonly DocumentRow[]) {

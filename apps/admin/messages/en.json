@@ -211,6 +211,7 @@
       "mismatch": "Differs from the verified name"
     },
     "nameMismatch": "The name typed at sign-up differed from the verified name, which is now on the profile. Check that the documents carry the verified name.",
+    "issuedCopy": "Issued copy from DigiLocker:",
     "identityDocument": "Identity document",
     "identityKinds": {
       "voter_id": "Voter ID card",

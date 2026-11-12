@@ -146,6 +146,7 @@ function DocumentRow({ accountId, entry, inReview, onReviewed }: Readonly<RowPro
     label('verification.review', document.reviewStatus),
     document.reference ? `${t('verification.reference')} ${document.reference}` : '',
     document.expiresOn ? `${t('verification.expires')} ${document.expiresOn}` : '',
+    document.issuer ? `${t('verification.issuedCopy')} ${document.issuer}` : '',
   ].filter(Boolean);
   return (
     <li>

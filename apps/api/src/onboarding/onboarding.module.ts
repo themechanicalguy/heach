@@ -9,6 +9,7 @@ import { OnboardingController } from './onboarding.controller.js';
 import { OnboardingRepository } from './onboarding.repository.js';
 import { OnboardingService } from './onboarding.service.js';
 import { ProviderAccess } from './provider-access.js';
+import { SharedDocumentsService } from './shared-documents.service.js';
 import { VerificationController } from './verification.controller.js';
 import { VerificationService } from './verification.service.js';
 
@@ -21,6 +22,7 @@ import { VerificationService } from './verification.service.js';
     ApplicationGate,
     ApplicationView,
     IdentityService,
+    SharedDocumentsService,
     ChecklistSettings,
     OnboardingService,
     VerificationService,

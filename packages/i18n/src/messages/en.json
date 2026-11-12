@@ -379,7 +379,7 @@
     "identityReturning": "Finishing your identity check…",
     "identityConsent": {
       "title": "Your consent",
-      "text": "To check who you are, HEACH asks an identity partner to confirm your identity through Aadhaar or DigiLocker, or our team checks the identity document you upload. We never receive or keep your Aadhaar number. We keep only the result, the method, the time and a reference. Draft wording, pending legal review.",
+      "text": "To check who you are, HEACH asks an identity partner to confirm your identity through Aadhaar or DigiLocker, or our team checks the identity document you upload. Certificates you choose to share from DigiLocker are saved to your application. We never receive or keep your Aadhaar number. We keep only the result, the method, the time and a reference. Draft wording, pending legal review.",
       "agree": "I agree to this identity check"
     },
     "identityFallback": {
@@ -397,6 +397,7 @@
       "onFile": "On file: {kind}"
     },
     "identityBack": "Back to your application",
+    "issuedCopy": "Issued copy shared from DigiLocker · {issuer}",
     "verifiedDetails": {
       "title": "Details from your identity check",
       "dateOfBirth": "Date of birth",

@@ -24,6 +24,8 @@ export interface DocumentRow {
   reviewStatus: 'pending' | 'accepted' | 'rejected';
   reviewReason: string | null;
   uploadedAt: Date;
+  source: 'upload' | 'digilocker';
+  issuer: string | null;
 }
 
 export interface IdentityRow {
@@ -48,6 +50,8 @@ export interface DocumentInput {
   objectId: string;
   reference: string | null;
   expiresOn: string | null;
+  /** Set for a copy shared from DigiLocker (KY-02); an upload has none. */
+  issuer?: string;
 }
 
 export interface PayoutInput {
@@ -68,7 +72,8 @@ export interface StatusChange {
 
 const DOCUMENT_COLUMNS = `d.id, d.item, d.object_id AS "objectId", o.scan_status AS "scanStatus",
   d.reference, to_char(d.expires_on, 'YYYY-MM-DD') AS "expiresOn",
-  d.review_status AS "reviewStatus", d.review_reason AS "reviewReason", d.uploaded_at AS "uploadedAt"`;
+  d.review_status AS "reviewStatus", d.review_reason AS "reviewReason", d.uploaded_at AS "uploadedAt",
+  d.source, d.issuer`;
 
 /**
  * Provider applications (PO-01 to PO-06). Every statement names the account it reads or
@@ -121,11 +126,31 @@ export class OnboardingRepository {
     );
     const id = randomUUID();
     await client.query(
-      `INSERT INTO app.provider_document (id, account_id, item, object_id, reference, expires_on)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, accountId, input.item, input.objectId, input.reference, input.expiresOn],
+      `INSERT INTO app.provider_document
+         (id, account_id, item, object_id, reference, expires_on, source, issuer)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        id,
+        accountId,
+        input.item,
+        input.objectId,
+        input.reference,
+        input.expiresOn,
+        input.issuer ? 'digilocker' : 'upload',
+        input.issuer ?? null,
+      ],
     );
     return { id, replacedObjectId: rows[0]?.object_id };
+  }
+
+  /** Checklist items whose document a verifier has accepted. */
+  async acceptedItems(client: TransactionClient, accountId: string): Promise<Set<string>> {
+    const { rows } = await client.query<{ item: string }>(
+      `SELECT item FROM app.provider_document
+        WHERE account_id = $1 AND review_status = 'accepted'`,
+      [accountId],
+    );
+    return new Set(rows.map((row) => row.item));
   }
 
   async reviewDocument(

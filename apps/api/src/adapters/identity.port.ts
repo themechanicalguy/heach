@@ -7,6 +7,19 @@ export interface VerifiedAttributes {
   address: string;
 }
 
+/** A document the person chose to share from DigiLocker, as its issuer published it (KY-02). */
+export interface SharedDocument {
+  type: 'degree_certificate' | 'registration_certificate' | 'pan_card' | 'driving_licence';
+  /** The body that issued it, for example a university or a council. */
+  issuer: string;
+  /** The registration or certificate number, when the document has one. */
+  reference?: string;
+  /** YYYY-MM-DD, when the document expires. */
+  expiresOn?: string;
+  contentType: string;
+  contentBase64: string;
+}
+
 /** What the partner tells us; it never sends the Aadhaar number itself (KY-05, PR-03). */
 export interface IdentityResult {
   verified: boolean;
@@ -17,6 +30,8 @@ export interface IdentityResult {
   transactionId: string;
   /** Present only when verified and the person agreed to share them. */
   attributes?: VerifiedAttributes;
+  /** Issued documents shared along with a verified DigiLocker result. */
+  documents?: SharedDocument[];
 }
 
 /** Aadhaar and DigiLocker identity proof (KY, Step 3): consent redirect, then the verified result. */

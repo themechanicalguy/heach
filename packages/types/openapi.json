@@ -7965,6 +7965,16 @@
           "uploadedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["upload", "digilocker"],
+            "description": "An issued copy or an upload (KY-02)"
+          },
+          "issuer": {
+            "type": "string",
+            "nullable": true,
+            "description": "Who issued a DigiLocker copy"
           }
         },
         "required": [
@@ -7974,7 +7984,9 @@
           "expiresOn",
           "reviewStatus",
           "reviewReason",
-          "uploadedAt"
+          "uploadedAt",
+          "source",
+          "issuer"
         ]
       },
       "ChecklistEntryDto": {

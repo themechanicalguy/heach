@@ -39,6 +39,8 @@ function review(
           reviewStatus: 'pending',
           reviewReason: null,
           uploadedAt: '2026-10-30T00:00:00Z',
+          source: 'digilocker',
+          issuer: 'Synthetic Police Office',
         },
       },
       {
@@ -148,6 +150,8 @@ describe('Verification queue (AD-02)', () => {
       await screen.findByRole('button', { name: `${en.verification.open} Synthetic Nurse` }),
     );
     expect(await screen.findByText(en.verification.identityMethods.digilocker)).toBeTruthy();
+    // KY-02: a copy shared from DigiLocker names its issuer.
+    expect(screen.getByText(/Issued copy from DigiLocker: Synthetic Police Office/)).toBeTruthy();
     expect(screen.queryByText(en.verification.identityDocument)).toBeNull();
   });
 

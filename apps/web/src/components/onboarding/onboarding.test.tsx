@@ -54,6 +54,8 @@ const application = (overrides: Partial<Application> = {}): Application => ({
         reviewStatus: 'rejected',
         reviewReason: 'documents_unclear',
         uploadedAt: '2026-10-30T00:00:00Z',
+        source: 'upload',
+        issuer: null,
       },
     },
   ],
@@ -245,6 +247,24 @@ describe('OnboardingView verified details and fallback (KY-03, KY-07)', () => {
     expect(screen.getByText(/1990/)).toBeTruthy();
     expect(screen.getByText(/cannot be edited/)).toBeTruthy();
     expect(state.api.mock.calls.at(-1)?.[0]).toBe('/provider/application/identity/details');
+  });
+
+  it('KY-02 a document shared from DigiLocker shows as an issued copy with its issuer', async () => {
+    const [police, qualification] = application().items;
+    if (!police || !qualification?.document) throw new Error('Fixture changed');
+    const shared = {
+      ...qualification.document,
+      source: 'digilocker' as const,
+      issuer: 'Synthetic University',
+    };
+    state.api.mockResolvedValueOnce(
+      application({ items: [police, { ...qualification, document: shared }] }),
+    );
+    inEnglish(<OnboardingView />);
+    fireEvent.click(await screen.findByRole('button', { name: /Certificates and registration/ }));
+    expect(
+      await screen.findByText('Issued copy shared from DigiLocker · Synthetic University'),
+    ).toBeTruthy();
   });
 
   it('KY-07 uploads another identity document as the fallback, with consent', async () => {

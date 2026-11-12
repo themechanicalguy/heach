@@ -86,6 +86,15 @@ export class DocumentDto {
 
   @ApiProperty()
   uploadedAt!: Date;
+
+  @ApiProperty({
+    enum: ['upload', 'digilocker'],
+    description: 'An issued copy or an upload (KY-02)',
+  })
+  source!: 'upload' | 'digilocker';
+
+  @ApiProperty({ type: String, nullable: true, description: 'Who issued a DigiLocker copy' })
+  issuer!: string | null;
 }
 
 export class ChecklistEntryDto {

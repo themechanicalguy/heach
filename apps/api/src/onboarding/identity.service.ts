@@ -32,6 +32,7 @@ import type {
 } from './onboarding.dto.js';
 import { namesMatch } from './name-match.js';
 import { OnboardingRepository } from './onboarding.repository.js';
+import { type PreparedShare, SharedDocumentsService } from './shared-documents.service.js';
 
 const ENTITY = 'provider_application';
 /** How long the partner may take before the provider is offered a retry or the fallback (KY-08). */
@@ -48,6 +49,7 @@ export class IdentityService {
     private readonly onboarding: OnboardingRepository,
     private readonly gate: ApplicationGate,
     private readonly uploads: UploadsService,
+    private readonly shared: SharedDocumentsService,
     private readonly audit: AuditService,
     private readonly env: EnvVars,
     @Inject(IDENTITY_VERIFIER) private readonly identity: IdentityVerifier,
@@ -72,7 +74,8 @@ export class IdentityService {
     const attributes = result.verified ? result.attributes : undefined;
     const detail = await this.encrypt(detailOf(result));
     const verifiedDetails = attributes ? await this.encrypt(restrictedOf(attributes)) : null;
-    await this.gate.editable(principal.userId, async (client) => {
+    const shares = await this.shares(principal.userId, result);
+    const discard = await this.gate.editable(principal.userId, async (client) => {
       const typed = await this.onboarding.fullName(principal.userId, client);
       const finished = await this.onboarding.finishIdentity(
         client,
@@ -91,7 +94,16 @@ export class IdentityService {
         await this.onboarding.prefillProfile(client, principal.userId, profileOf(attributes));
       const action = result.verified ? 'identity.verified' : 'identity.failed';
       await this.record(action, principal.userId, client);
+      return this.shared.save(client, principal.userId, shares);
     });
+    await this.shared.discard(discard);
+  }
+
+  /** Issued documents shared with a verified result, scanned and stored before the transaction. */
+  private async shares(accountId: string, result: IdentityResult): Promise<PreparedShare[]> {
+    if (!result.verified || !result.documents?.length) return [];
+    const { role } = await this.gate.grantOf(accountId);
+    return this.shared.prepare(accountId, role, result.documents);
   }
 
   /** The provider's own verified details (KY-03); admins never get them from here. */

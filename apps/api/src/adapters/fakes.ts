@@ -1,5 +1,10 @@
 import { createHmac, randomUUID } from 'node:crypto';
-import type { IdentityResult, IdentityVerifier, VerifiedAttributes } from './identity.port.js';
+import type {
+  IdentityResult,
+  IdentityVerifier,
+  SharedDocument,
+  VerifiedAttributes,
+} from './identity.port.js';
 import type { ObjectStore } from './object-store.port.js';
 import type { GatewayEvent, PaymentGateway } from './payments.port.js';
 import type { VirusScanner } from './scanner.port.js';
@@ -158,6 +163,8 @@ export class FakeIdentityVerifier implements IdentityVerifier {
   failing = false;
   /** Set by a test: the details the partner shares with a verified result (KY-03). */
   attributes: VerifiedAttributes | undefined;
+  /** Set by a test: the issued documents the person shares (KY-02). */
+  documents: SharedDocument[] | undefined;
 
   /** Sends the person straight back as if they had consented; the code `approved` verifies. */
   startConsent(reference: string, returnUrl: string): Promise<{ redirectUrl: string }> {
@@ -177,6 +184,7 @@ export class FakeIdentityVerifier implements IdentityVerifier {
       lastFour: '0000',
       transactionId: `fake-${randomUUID()}`,
       ...(verified && this.attributes ? { attributes: this.attributes } : {}),
+      ...(verified && this.documents ? { documents: this.documents } : {}),
     });
   }
 }
