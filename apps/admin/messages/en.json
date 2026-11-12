@@ -23,7 +23,8 @@
     "settings": "Settings",
     "security": "Security",
     "audit": "Audit log",
-    "content": "Content"
+    "content": "Content",
+    "assisted": "Assisted onboarding"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -89,7 +90,35 @@
     "not_an_organisation_owner": "Only an organisation owner can make this change.",
     "lab_named_at_setup": "The lab name is set during account setup.",
     "account_missing": "Your account could not be found. Please sign in again.",
-    "admin_suspended": "Your admin access is suspended. Contact your administrator."
+    "admin_suspended": "Your admin access is suspended. Contact your administrator.",
+    "mobile_invalid": "That is not a valid Indian mobile number.",
+    "assisted_session_open": "You, or another admin, already have an assisted session open for this person. End it first.",
+    "assisted_session_ended": "This session has ended. Start a new one.",
+    "account_suspended": "This account is suspended and cannot be helped here.",
+    "deletion_pending": "This account has a deletion request pending and cannot be helped here.",
+    "role_unavailable": "That provider type is not available yet.",
+    "role_not_assisted": "That provider type cannot be set up with assistance.",
+    "side_taken": "This person already has a provider profile of another type.",
+    "details_missing": "Fill in the name, gender, adult confirmation and a language first.",
+    "details_locked": "The name and gender are already set and cannot be changed here.",
+    "payout_code_required": "Send a payout code and enter the code the provider reads out.",
+    "payout_not_needed": "This provider type does not get payouts.",
+    "assisted_by_you": "You set up this application with the provider, so another verifier must review it.",
+    "provider_consent_due": "The provider has not yet accepted the terms and privacy notice in the app. Approval has to wait.",
+    "otp_incorrect": "That code is not right. Ask the provider to read it out again.",
+    "otp_expired": "That code has expired or was already used. Send a new one.",
+    "otp_rate_limited": "Too many tries or codes. Wait a while before trying again.",
+    "sms_unavailable": "The SMS could not be sent. Try again in a moment.",
+    "application_not_editable": "This application can no longer be changed.",
+    "application_incomplete": "Something is still missing. Check the review step.",
+    "consent_outdated": "The identity consent wording has changed. Reload and read it to the provider again.",
+    "reference_required": "Enter the number shown on the document.",
+    "expiry_required": "Enter the date the document is valid until.",
+    "upload_type": "Choose a PDF, JPG or PNG file.",
+    "upload_size": "The file must be smaller than 5 MB.",
+    "upload_mismatch": "This file does not look like a PDF, JPG or PNG. Choose another one.",
+    "upload_infected": "This file may contain a virus and was refused.",
+    "identity_locked": "The identity check is already done and cannot be changed."
   },
   "users": {
     "title": "Users",
@@ -299,7 +328,11 @@
       "qualification_not_recognised": "Qualification not recognised",
       "police_verification_failed": "Police verification not cleared",
       "other": "Other (support will explain)"
-    }
+    },
+    "assisted": "The provider did not onboard themselves: a support admin entered this application with them.",
+    "assistedConsent": "The identity consent was given through an assisted session, read out by an admin. Check the identity document with extra care.",
+    "consentDue": "The provider has not yet accepted the terms and privacy notice in the app, so this application cannot be approved yet.",
+    "assistedByYou": "You assisted this provider, so you cannot review it"
   },
   "catalogue": {
     "title": "Service catalogue",
@@ -660,6 +693,122 @@
       "attendant": "Attendant",
       "lab": "Lab",
       "sample_collector": "Sample collector"
+    }
+  },
+  "assisted": {
+    "title": "Assisted onboarding",
+    "intro": "Set up a provider's profile with them, on the phone or in person. They prove consent with a code sent to their own phone. Nothing here shows a stored document, photo or payout detail again.",
+    "mobile": "Provider's mobile number",
+    "locale": "Language of the SMS and the profile",
+    "locales": {
+      "or": "Odia",
+      "en": "English",
+      "hi": "Hindi"
+    },
+    "sendCode": "Send consent code",
+    "codeSent": "A code was sent to {mobile}. Ask the provider to read it out.",
+    "code": "Code the provider reads out",
+    "verify": "Verify code",
+    "resend": "Send the code again",
+    "resendIn": "You can send it again in {seconds} s",
+    "session": "Provider",
+    "endsAt": "Session ends at",
+    "accountCreated": "A new account was created for this number.",
+    "end": "End session",
+    "ended": "The session has ended. Nothing more can be changed through it.",
+    "stepsLabel": "Steps",
+    "stepOf": "Step {current} of {total}",
+    "saved": "Saved.",
+    "steps": {
+      "details": "Details",
+      "documents": "Documents",
+      "identity": "Identity",
+      "profile": "Profile and photo",
+      "payout": "Payout",
+      "review": "Review and submit"
+    },
+    "details": {
+      "role": "Provider type",
+      "roles": {
+        "physiotherapist": "Physiotherapist",
+        "nurse": "Nurse",
+        "attendant": "Attendant",
+        "lab": "Lab"
+      },
+      "fullName": "Full name, as on their identity document",
+      "gender": "Gender",
+      "genders": {
+        "female": "Female",
+        "male": "Male",
+        "other": "Other",
+        "undisclosed": "Prefers not to say"
+      },
+      "languages": "Languages the provider speaks",
+      "adult": "The provider confirmed they are 18 or older",
+      "organisation": "Lab name",
+      "locked": "This person already has a name and gender on their account. They stay as they are.",
+      "save": "Save details"
+    },
+    "documents": {
+      "number": "Number on the document",
+      "expires": "Valid until",
+      "upload": "Upload",
+      "replace": "Replace",
+      "none": "Not uploaded",
+      "file": "File (PDF, JPG or PNG)",
+      "optional": "optional",
+      "empty": "No documents are needed for this provider type."
+    },
+    "identity": {
+      "intro": "Read this out to the provider, in their language, before uploading an identity document. Aadhaar and DigiLocker are not available in assisted mode.",
+      "language": "Language the consent is read in",
+      "consentTitle": "Consent to read out",
+      "readAloud": "I read this to the provider and they agreed",
+      "kind": "Identity document",
+      "kinds": {
+        "voter_id": "Voter ID card",
+        "passport": "Passport",
+        "driving_licence": "Driving licence",
+        "pan_card": "PAN card"
+      },
+      "noAadhaar": "Do not upload an Aadhaar card.",
+      "file": "File (PDF, JPG or PNG)",
+      "upload": "Upload identity document",
+      "onFile": "An identity document is on file for a verifier to check."
+    },
+    "profile": {
+      "qualifications": "Qualifications",
+      "experience": "Years of experience",
+      "photo": "Profile photo (JPG or PNG)",
+      "photoOnFile": "A photo is on file.",
+      "save": "Save profile",
+      "uploadPhoto": "Upload photo"
+    },
+    "payout": {
+      "intro": "The provider's bank or UPI details. They are saved only with a code that is sent to the provider's phone, and after you confirm your own authenticator code.",
+      "sendCode": "Send payout code",
+      "resendCode": "Send the code again",
+      "codeSent": "A payout code was sent to {mobile}. Ask the provider to read it out.",
+      "method": "Payout method",
+      "methods": {
+        "upi": "UPI",
+        "bank": "Bank account"
+      },
+      "holderName": "Account holder name",
+      "accountNumber": "Account number",
+      "ifsc": "IFSC code",
+      "upiId": "UPI ID",
+      "code": "Code the provider reads out",
+      "save": "Save payout details",
+      "onFile": "Payout details are on file.",
+      "notNeeded": "This provider type does not get payouts."
+    },
+    "review": {
+      "status": "Application",
+      "missing": "Still missing",
+      "submit": "Submit application",
+      "submitted": "The application was submitted and the session has ended. The provider has been told by SMS to sign in and accept the terms.",
+      "ready": "Everything needed is in."
     }
   }
 }

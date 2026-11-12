@@ -109,6 +109,14 @@ export type Setting = components['schemas']['SettingDto'];
 export type ChecklistRole = components['schemas']['ChecklistRoleDto'];
 export type AdminDashboard = components['schemas']['DashboardDto'];
 export type SecurityConsole = components['schemas']['SecurityDto'];
+export type AssistedConsentRequest = components['schemas']['AssistedConsentRequestDto'];
+export type AssistedChallenge = components['schemas']['AssistedChallengeDto'];
+export type AssistedApplication = components['schemas']['AssistedApplicationDto'];
+export type AssistedSession = components['schemas']['AssistedSessionDto'];
+export type AssistedDetails = components['schemas']['AssistedDetailsDto'];
+export type AssistedIdentityDocument = components['schemas']['AssistedIdentityDocumentDto'];
+export type AssistedPayout = components['schemas']['AssistedPayoutDto'];
+export type AssistedPayoutChallenge = components['schemas']['AssistedPayoutChallengeDto'];
 
 /** The stable reason code in an API error body; the client translates it (never personal data). */
 export interface ApiErrorBody {

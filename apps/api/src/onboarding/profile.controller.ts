@@ -26,7 +26,7 @@ export class ProfileController {
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: ProviderProfileDetailsDto })
   async view(@Req() request: Request): Promise<ProviderProfileDetailsDto> {
-    return this.profile.own(principalOf(request));
+    return this.profile.own(principalOf(request).userId);
   }
 
   @Put()
@@ -36,7 +36,7 @@ export class ProfileController {
     @Body() body: ProviderProfileInputDto,
     @Req() request: Request,
   ): Promise<ProviderProfileDetailsDto> {
-    return this.profile.save(principalOf(request), body);
+    return this.profile.save(principalOf(request).userId, body);
   }
 
   @Get('photo')
@@ -45,7 +45,7 @@ export class ProfileController {
   @ApiOkResponse({ type: StoredFileDto })
   async photo(@Req() request: Request): Promise<StoredFileDto> {
     const principal = principalOf(request);
-    await this.profile.own(principal);
+    await this.profile.own(principal.userId);
     return this.profile.photo(principal.userId, { audit: false });
   }
 
@@ -57,6 +57,6 @@ export class ProfileController {
     @Body() body: UploadDto,
     @Req() request: Request,
   ): Promise<ProviderProfileDetailsDto> {
-    return this.profile.uploadPhoto(principalOf(request), body);
+    return this.profile.uploadPhoto(principalOf(request).userId, body);
   }
 }

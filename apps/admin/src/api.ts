@@ -9,6 +9,9 @@ export class ApiError extends Error {
   }
 }
 
+/** The content type of the upload routes (7 MB JSON with the file as base64). */
+export const UPLOAD_CONTENT_TYPE = 'application/vnd.heach.upload+json';
+
 let accessToken: string | undefined;
 let refreshing: Promise<boolean> | undefined;
 
@@ -20,7 +23,7 @@ function send(path: string, init: RequestInit): Promise<Response> {
   const headers = new Headers(init.headers);
   headers.set('x-correlation-id', crypto.randomUUID());
   if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
-  if (init.body) headers.set('content-type', 'application/json');
+  if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json');
   return fetch(`/api/admin/v1${path}`, {
     ...init,
     headers,

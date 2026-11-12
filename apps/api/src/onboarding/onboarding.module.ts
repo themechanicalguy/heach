@@ -38,6 +38,13 @@ import { VerificationService } from './verification.service.js';
     VerificationService,
     ProviderAccess,
   ],
-  exports: [OnboardingRepository, ProviderAccess, ProfileService],
+  exports: [
+    OnboardingRepository,
+    OnboardingService,
+    IdentityService,
+    ApplicationGate,
+    ProviderAccess,
+    ProfileService,
+  ],
 })
 export class OnboardingModule {}

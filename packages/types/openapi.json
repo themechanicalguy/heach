@@ -2266,6 +2266,573 @@
         "tags": ["admin"]
       }
     },
+    "/admin/v1/assisted-onboarding/consent": {
+      "post": {
+        "operationId": "AssistedSessionsController_request",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistedConsentRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedChallengeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/consent/resend": {
+      "post": {
+        "operationId": "AssistedSessionsController_resend",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedChallengeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/consent/verify": {
+      "post": {
+        "operationId": "AssistedSessionsController_verify",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistedCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/current": {
+      "get": {
+        "operationId": "AssistedSessionsController_current",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The admin has no running session"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}": {
+      "get": {
+        "operationId": "AssistedSessionsController_view",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/end": {
+      "post": {
+        "operationId": "AssistedSessionsController_end",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/details": {
+      "put": {
+        "operationId": "AssistedActionsController_details",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistedDetailsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/documents/{item}": {
+      "put": {
+        "operationId": "AssistedActionsController_document",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "item",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/identity-document": {
+      "put": {
+        "operationId": "AssistedActionsController_identityDocument",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistedIdentityDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/profile": {
+      "put": {
+        "operationId": "AssistedActionsController_profile",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderProfileInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/photo": {
+      "put": {
+        "operationId": "AssistedActionsController_photo",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/payout/code": {
+      "post": {
+        "operationId": "AssistedActionsController_payoutCode",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedPayoutChallengeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/payout/code/resend": {
+      "post": {
+        "operationId": "AssistedActionsController_resendPayoutCode",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedPayoutChallengeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/payout": {
+      "put": {
+        "operationId": "AssistedActionsController_savePayout",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistedPayoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/assisted-onboarding/sessions/{sessionId}/submit": {
+      "post": {
+        "operationId": "AssistedActionsController_submit",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistedSessionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
     "/v1/catalogue": {
       "get": {
         "operationId": "CatalogueController_list",
@@ -8777,9 +9344,25 @@
             "format": "date-time",
             "type": "string",
             "nullable": true
+          },
+          "assisted": {
+            "type": "boolean",
+            "description": "An admin set this application up with the provider (AD-12)"
+          },
+          "assistedByYou": {
+            "type": "boolean",
+            "description": "The calling admin assisted it and may not review it (AD-12)"
           }
         },
-        "required": ["accountId", "role", "status", "fullName", "submittedAt"]
+        "required": [
+          "accountId",
+          "role",
+          "status",
+          "fullName",
+          "submittedAt",
+          "assisted",
+          "assistedByYou"
+        ]
       },
       "ApplicationEventDto": {
         "type": "object",
@@ -8900,6 +9483,18 @@
             "items": {
               "$ref": "#/components/schemas/ApplicationEventDto"
             }
+          },
+          "assisted": {
+            "type": "boolean",
+            "description": "An admin set this application up with the provider (AD-12)"
+          },
+          "identityConsentAssisted": {
+            "type": "boolean",
+            "description": "Identity consent was read aloud in an assisted session (KY-01)"
+          },
+          "providerConsentDue": {
+            "type": "boolean",
+            "description": "The provider has not yet accepted the current terms or privacy"
           }
         },
         "required": [
@@ -8920,7 +9515,10 @@
           "editable",
           "accountId",
           "fullName",
-          "history"
+          "history",
+          "assisted",
+          "identityConsentAssisted",
+          "providerConsentDue"
         ]
       },
       "DocumentReviewDto": {
@@ -9019,6 +9617,366 @@
           }
         },
         "required": ["required"]
+      },
+      "AssistedConsentRequestDto": {
+        "type": "object",
+        "properties": {
+          "mobile": {
+            "type": "string",
+            "description": "The provider’s Indian mobile number, with or without +91"
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"],
+            "description": "Language of the SMS and of a new account"
+          }
+        },
+        "required": ["mobile", "locale"]
+      },
+      "AssistedChallengeDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mobile": {
+            "type": "string",
+            "description": "The provider’s number, last four digits only"
+          },
+          "expiresInSeconds": {
+            "type": "number",
+            "description": "Seconds until the code expires"
+          },
+          "resendInSeconds": {
+            "type": "number",
+            "description": "Seconds until a new code may be requested"
+          }
+        },
+        "required": ["sessionId", "mobile", "expiresInSeconds", "resendInSeconds"]
+      },
+      "AssistedCodeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "123456"
+          }
+        },
+        "required": ["code"]
+      },
+      "AssistedDocumentDto": {
+        "type": "object",
+        "properties": {
+          "scanStatus": {
+            "type": "string",
+            "enum": ["pending", "clean", "infected"]
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": ["pending", "accepted", "rejected"]
+          },
+          "reviewReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "uploadedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["upload", "digilocker"]
+          }
+        },
+        "required": ["scanStatus", "reviewStatus", "reviewReason", "uploadedAt", "source"]
+      },
+      "AssistedChecklistEntryDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "reference": {
+            "type": "boolean",
+            "description": "A registration or certificate number is needed"
+          },
+          "expiry": {
+            "type": "boolean",
+            "description": "The document has an expiry date"
+          },
+          "document": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssistedDocumentDto"
+              }
+            ]
+          }
+        },
+        "required": ["key", "required", "reference", "expiry", "document"]
+      },
+      "AssistedApplicationDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "under_review",
+              "changes_requested",
+              "approved",
+              "rejected",
+              "suspended"
+            ]
+          },
+          "statusReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "type": "string",
+            "enum": ["not_started", "pending", "in_review", "verified", "failed"]
+          },
+          "identityConsentVersion": {
+            "type": "string",
+            "description": "Version of the identity consent text in force (PR-01)"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ProviderProfileDetailsDto"
+          },
+          "needsPayout": {
+            "type": "boolean"
+          },
+          "payoutOnFile": {
+            "type": "boolean",
+            "description": "Payout details are on file; they are never shown"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistedChecklistEntryDto"
+            }
+          },
+          "missing": {
+            "description": "What still stops submission",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "The application may be changed now"
+          }
+        },
+        "required": [
+          "role",
+          "status",
+          "statusReason",
+          "identity",
+          "identityConsentVersion",
+          "profile",
+          "needsPayout",
+          "payoutOnFile",
+          "items",
+          "missing",
+          "editable"
+        ]
+      },
+      "AssistedSessionDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mobile": {
+            "type": "string",
+            "description": "The provider’s number, last four digits only"
+          },
+          "maskedName": {
+            "type": "string",
+            "nullable": true,
+            "description": "First letter of each name word"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ended": {
+            "type": "boolean"
+          },
+          "accountCreated": {
+            "type": "boolean",
+            "description": "The consent code created this account"
+          },
+          "setupComplete": {
+            "type": "boolean"
+          },
+          "basicDetailsLocked": {
+            "type": "boolean",
+            "description": "Name, gender and adult declaration are set and cannot be changed"
+          },
+          "payoutCodeSent": {
+            "type": "boolean",
+            "description": "A payout code is waiting to be used"
+          },
+          "application": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssistedApplicationDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "sessionId",
+          "mobile",
+          "maskedName",
+          "expiresAt",
+          "ended",
+          "accountCreated",
+          "setupComplete",
+          "basicDetailsLocked",
+          "payoutCodeSent",
+          "application"
+        ]
+      },
+      "AssistedDetailsDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["physiotherapist", "nurse", "attendant", "lab"]
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Not accepted once setup is complete"
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["female", "male", "other", "undisclosed"],
+            "description": "Not accepted once setup is complete"
+          },
+          "languages": {
+            "type": "array",
+            "description": "Languages the provider speaks",
+            "items": {
+              "type": "string",
+              "enum": ["or", "en", "hi"]
+            }
+          },
+          "organisationName": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "The lab's name (labs only)"
+          },
+          "adultDeclared": {
+            "type": "boolean",
+            "description": "The provider confirmed they are 18 or older"
+          }
+        },
+        "required": ["role", "languages"]
+      },
+      "AssistedIdentityDocumentDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string",
+            "description": "The file, base64 encoded; at most 5 MB decoded"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["voter_id", "passport", "driving_licence", "pan_card"]
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"],
+            "description": "Language the consent text was read in"
+          },
+          "consentVersion": {
+            "type": "string",
+            "description": "Version of the consent text the provider agreed to (PR-01)"
+          },
+          "consentReadAloud": {
+            "type": "boolean",
+            "enum": [true],
+            "description": "The consent text was read to the provider (PR-01)"
+          }
+        },
+        "required": [
+          "contentType",
+          "contentBase64",
+          "kind",
+          "locale",
+          "consentVersion",
+          "consentReadAloud"
+        ]
+      },
+      "AssistedPayoutChallengeDto": {
+        "type": "object",
+        "properties": {
+          "mobile": {
+            "type": "string",
+            "description": "The provider’s number, last four digits only"
+          },
+          "expiresInSeconds": {
+            "type": "number",
+            "description": "Seconds until the code expires"
+          },
+          "resendInSeconds": {
+            "type": "number",
+            "description": "Seconds until a new code may be requested"
+          }
+        },
+        "required": ["mobile", "expiresInSeconds", "resendInSeconds"]
+      },
+      "AssistedPayoutDto": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": ["bank", "upi"]
+          },
+          "holderName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "Bank account number, 9 to 18 digits"
+          },
+          "ifsc": {
+            "type": "string",
+            "description": "IFSC of the branch"
+          },
+          "upiId": {
+            "type": "string",
+            "description": "UPI ID, for example name@bank"
+          },
+          "code": {
+            "type": "string",
+            "example": "123456",
+            "description": "The code the provider read out for this save"
+          }
+        },
+        "required": ["method", "holderName", "code"]
       },
       "CatalogueItemDto": {
         "type": "object",

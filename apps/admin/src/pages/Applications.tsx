@@ -29,17 +29,20 @@ function columns(onOpen: (id: string) => void) {
     {
       key: 'open',
       header: t('verification.open'),
-      cell: (a: ApplicationSummary) => (
-        <Button
-          className="heach-button--secondary"
-          aria-label={`${t('verification.open')} ${a.fullName ?? ''}`}
-          onClick={() => {
-            onOpen(a.accountId);
-          }}
-        >
-          {t('verification.open')}
-        </Button>
-      ),
+      cell: (a: ApplicationSummary) =>
+        a.assistedByYou ? (
+          t('verification.assistedByYou')
+        ) : (
+          <Button
+            className="heach-button--secondary"
+            aria-label={`${t('verification.open')} ${a.fullName ?? ''}`}
+            onClick={() => {
+              onOpen(a.accountId);
+            }}
+          >
+            {t('verification.open')}
+          </Button>
+        ),
     },
   ];
 }

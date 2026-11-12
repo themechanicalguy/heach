@@ -42,8 +42,11 @@ export class VerificationController {
   @Header('Cache-Control', 'no-store')
   @Roles('super_admin', 'verifier')
   @ApiOkResponse({ type: [ApplicationSummaryDto] })
-  async queue(@Query() query: ApplicationQueryDto): Promise<ApplicationSummaryDto[]> {
-    return this.verification.queue(query.view);
+  async queue(
+    @Query() query: ApplicationQueryDto,
+    @Req() request: Request,
+  ): Promise<ApplicationSummaryDto[]> {
+    return this.verification.queue(principalOf(request), query.view);
   }
 
   @Get(':accountId')
@@ -64,8 +67,9 @@ export class VerificationController {
   async document(
     @Param('accountId', uuid) accountId: string,
     @Param('documentId', uuid) documentId: string,
+    @Req() request: Request,
   ): Promise<StoredFileDto> {
-    return this.verification.document(accountId, documentId);
+    return this.verification.document(principalOf(request), accountId, documentId);
   }
 
   @Post(':accountId/documents')
@@ -75,24 +79,31 @@ export class VerificationController {
   async reviewDocument(
     @Param('accountId', uuid) accountId: string,
     @Body() body: DocumentReviewDto,
+    @Req() request: Request,
   ): Promise<void> {
-    await this.verification.reviewDocument(accountId, body);
+    await this.verification.reviewDocument(principalOf(request), accountId, body);
   }
 
   @Get(':accountId/photo')
   @Header('Cache-Control', 'no-store')
   @Roles('super_admin', 'verifier')
   @ApiOkResponse({ type: StoredFileDto })
-  async photo(@Param('accountId', uuid) accountId: string): Promise<StoredFileDto> {
-    return this.verification.photo(accountId);
+  async photo(
+    @Param('accountId', uuid) accountId: string,
+    @Req() request: Request,
+  ): Promise<StoredFileDto> {
+    return this.verification.photo(principalOf(request), accountId);
   }
 
   @Get(':accountId/identity-document')
   @Header('Cache-Control', 'no-store')
   @Roles('super_admin', 'verifier')
   @ApiOkResponse({ type: StoredFileDto })
-  async identityDocument(@Param('accountId', uuid) accountId: string): Promise<StoredFileDto> {
-    return this.verification.identityDocument(accountId);
+  async identityDocument(
+    @Param('accountId', uuid) accountId: string,
+    @Req() request: Request,
+  ): Promise<StoredFileDto> {
+    return this.verification.identityDocument(principalOf(request), accountId);
   }
 
   @Post(':accountId/identity')
@@ -102,8 +113,9 @@ export class VerificationController {
   async reviewIdentity(
     @Param('accountId', uuid) accountId: string,
     @Body() body: IdentityReviewDto,
+    @Req() request: Request,
   ): Promise<void> {
-    await this.verification.reviewIdentity(accountId, body);
+    await this.verification.reviewIdentity(principalOf(request), accountId, body);
   }
 
   @Post(':accountId/decision')

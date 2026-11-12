@@ -67,6 +67,7 @@ export function ApplicationPanel({ accountId, onDecided, onClose }: Readonly<Pro
             : t('verification.payoutNone')}
         </dd>
       </dl>
+      <AssistedNotices application={application} />
       {application.identityNameMatch === 'mismatch' && (
         <Notice tone="warning">{t('verification.nameMismatch')}</Notice>
       )}
@@ -114,6 +115,21 @@ export function ApplicationPanel({ accountId, onDecided, onClose }: Readonly<Pro
         {t('verification.close')}
       </Button>
     </aside>
+  );
+}
+
+/** How the application came about, and what still blocks approval (AD-12). */
+function AssistedNotices({ application }: Readonly<{ application: ApplicationReview }>) {
+  return (
+    <>
+      {application.assisted && <Notice tone="info">{t('verification.assisted')}</Notice>}
+      {application.identityConsentAssisted && (
+        <Notice tone="warning">{t('verification.assistedConsent')}</Notice>
+      )}
+      {application.providerConsentDue && (
+        <Notice tone="warning">{t('verification.consentDue')}</Notice>
+      )}
+    </>
   );
 }
 

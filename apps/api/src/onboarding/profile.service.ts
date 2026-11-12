@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service.js';
 import { reason } from '../common/error-response.js';
-import type { Principal } from '../common/request-context.js';
 import type { TransactionClient } from '../data-stores/transaction.js';
 import {
   type PreparedUpload,
@@ -40,42 +39,42 @@ export class ProfileService {
     return toView(await this.profiles.find(accountId));
   }
 
-  async own(principal: Principal): Promise<ProviderProfileDetailsDto> {
-    await this.gate.grantOf(principal.userId);
-    return this.view(principal.userId);
+  async own(accountId: string): Promise<ProviderProfileDetailsDto> {
+    await this.gate.grantOf(accountId);
+    return this.view(accountId);
   }
 
   async save(
-    principal: Principal,
+    accountId: string,
     input: ProviderProfileInputDto,
   ): Promise<ProviderProfileDetailsDto> {
-    await this.gate.editable(principal.userId, async (client) => {
+    await this.gate.editable(accountId, async (client) => {
       const qualifications = input.qualifications?.trim();
-      await this.profiles.saveDetails(client, principal.userId, {
+      await this.profiles.saveDetails(client, accountId, {
         qualifications: qualifications === '' ? null : (qualifications ?? null),
         experienceYears: input.experienceYears ?? null,
       });
-      await this.record('saved', principal.userId, client);
+      await this.record('saved', accountId, client);
     });
-    return this.view(principal.userId);
+    return this.view(accountId);
   }
 
-  async uploadPhoto(principal: Principal, input: UploadInput): Promise<ProviderProfileDetailsDto> {
+  async uploadPhoto(accountId: string, input: UploadInput): Promise<ProviderProfileDetailsDto> {
     if (!PHOTO_TYPES.includes(input.contentType)) {
       throw reason(UnprocessableEntityException, 'upload_type');
     }
-    const prepared = await this.uploads.prepare(principal.userId, 'profile_photo', input);
-    const replaced = await this.gate.editable(principal.userId, async (client) => {
-      if ((await this.profiles.find(principal.userId, client)).photoVerified) {
+    const prepared = await this.uploads.prepare(accountId, 'profile_photo', input);
+    const replaced = await this.gate.editable(accountId, async (client) => {
+      if ((await this.profiles.find(accountId, client)).photoVerified) {
         throw reason(ConflictException, 'identity_locked');
       }
       await this.uploads.record(client, prepared);
       if (prepared.verdict === 'infected') return undefined;
-      return this.setPhoto(client, principal.userId, prepared, false);
+      return this.setPhoto(client, accountId, prepared, false);
     });
     if (replaced) await this.uploads.discard(replaced);
     if (prepared.verdict === 'infected') throw reason(BadRequestException, 'upload_infected');
-    return this.view(principal.userId);
+    return this.view(accountId);
   }
 
   /** The photo the identity partner verified (KY-03), prepared before the caller's transaction. */

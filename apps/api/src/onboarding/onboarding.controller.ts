@@ -53,7 +53,7 @@ export class OnboardingController {
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: ApplicationDto })
   async view(@Req() request: Request): Promise<ApplicationDto> {
-    return this.onboarding.application(principalOf(request));
+    return this.onboarding.application(principalOf(request).userId);
   }
 
   /** Sent with the content type `application/vnd.heach.upload+json`, which allows 7 MB. */
@@ -66,7 +66,7 @@ export class OnboardingController {
     @Body() body: DocumentUploadDto,
     @Req() request: Request,
   ): Promise<ApplicationDto> {
-    return this.onboarding.upload(principalOf(request), item, body);
+    return this.onboarding.upload(principalOf(request).userId, item, body);
   }
 
   @Post('identity/start')
@@ -89,8 +89,9 @@ export class OnboardingController {
     @Body() body: IdentityCompleteDto,
     @Req() request: Request,
   ): Promise<ApplicationDto> {
-    await this.identity.complete(principalOf(request), body);
-    return this.onboarding.application(principalOf(request));
+    const principal = principalOf(request);
+    await this.identity.complete(principal, body);
+    return this.onboarding.application(principal.userId);
   }
 
   /** Date of birth and address as verified, for the provider only (KY-03). */
@@ -111,8 +112,9 @@ export class OnboardingController {
     @Body() body: IdentityDocumentDto,
     @Req() request: Request,
   ): Promise<ApplicationDto> {
-    await this.identity.uploadDocument(principalOf(request), body);
-    return this.onboarding.application(principalOf(request));
+    const principal = principalOf(request);
+    await this.identity.uploadDocument(principal.userId, body);
+    return this.onboarding.application(principal.userId);
   }
 
   @Put('payout')
@@ -121,7 +123,7 @@ export class OnboardingController {
   @ApiOkResponse({ type: ApplicationDto })
   @ApiForbiddenResponse({ description: 'reverification_required' })
   async payout(@Body() body: PayoutDetailsDto, @Req() request: Request): Promise<ApplicationDto> {
-    return this.onboarding.savePayout(principalOf(request), body);
+    return this.onboarding.savePayout(principalOf(request).userId, body);
   }
 
   @Post('submit')
@@ -129,6 +131,7 @@ export class OnboardingController {
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: ApplicationDto })
   async submit(@Req() request: Request): Promise<ApplicationDto> {
-    return this.onboarding.submit(principalOf(request));
+    const principal = principalOf(request);
+    return this.onboarding.submit(principal.userId, principal);
   }
 }

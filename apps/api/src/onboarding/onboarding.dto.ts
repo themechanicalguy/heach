@@ -311,6 +311,12 @@ export class ApplicationSummaryDto {
 
   @ApiProperty({ type: Date, nullable: true })
   submittedAt!: Date | null;
+
+  @ApiProperty({ description: 'An admin set this application up with the provider (AD-12)' })
+  assisted!: boolean;
+
+  @ApiProperty({ description: 'The calling admin assisted it and may not review it (AD-12)' })
+  assistedByYou!: boolean;
 }
 
 export class ApplicationEventDto {
@@ -339,6 +345,15 @@ export class ApplicationReviewDto extends ApplicationDto {
 
   @ApiProperty({ type: [ApplicationEventDto] })
   history!: ApplicationEventDto[];
+
+  @ApiProperty({ description: 'An admin set this application up with the provider (AD-12)' })
+  assisted!: boolean;
+
+  @ApiProperty({ description: 'Identity consent was read aloud in an assisted session (KY-01)' })
+  identityConsentAssisted!: boolean;
+
+  @ApiProperty({ description: 'The provider has not yet accepted the current terms or privacy' })
+  providerConsentDue!: boolean;
 }
 
 export class ApplicationQueryDto {

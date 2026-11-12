@@ -3,6 +3,7 @@ import type { EncryptedField } from '@heach/crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type { ApplicationStatus } from '../accounts/account.repository.js';
+import { CONSENT_PURPOSES, type ConsentGiven } from '../accounts/consent-versions.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { type TransactionClient, withTransaction } from '../data-stores/transaction.js';
 
@@ -278,11 +279,12 @@ export class OnboardingRepository {
     accountId: string,
     consent: { purpose: string; version: string },
     locale: string,
+    assistedSessionId: string | null = null,
   ): Promise<void> {
     await client.query(
-      `INSERT INTO app.consent_record (id, account_id, purpose, version, locale)
-       VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`,
-      [randomUUID(), accountId, consent.purpose, consent.version, locale],
+      `INSERT INTO app.consent_record (id, account_id, purpose, version, locale, assisted_session_id)
+       VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`,
+      [randomUUID(), accountId, consent.purpose, consent.version, locale, assistedSessionId],
     );
   }
 
@@ -349,25 +351,62 @@ export class OnboardingRepository {
     return rows;
   }
 
-  /** Applications in the review queue, oldest first (AD-02). */
-  async queue(statuses: readonly ApplicationStatus[]) {
+  /** Applications in the review queue, oldest first (AD-02); flags show assisted onboarding (AD-12). */
+  async queue(statuses: readonly ApplicationStatus[], adminId: string) {
     const { rows } = await this.pool.query<{
       accountId: string;
       role: string;
       status: ApplicationStatus;
       fullName: string | null;
       submittedAt: Date | null;
+      assisted: boolean;
+      assistedByYou: boolean;
     }>(
       `SELECT r.account_id AS "accountId", r.role, r.application_status AS status,
               p.full_name AS "fullName",
               (SELECT max(e.created_at) FROM app.application_event e
-                WHERE e.account_id = r.account_id AND e.to_status = 'submitted') AS "submittedAt"
+                WHERE e.account_id = r.account_id AND e.to_status = 'submitted') AS "submittedAt",
+              EXISTS (SELECT 1 FROM app.assisted_session s
+                       WHERE s.account_id = r.account_id AND s.consented_at IS NOT NULL) AS assisted,
+              EXISTS (SELECT 1 FROM app.assisted_session s
+                       WHERE s.account_id = r.account_id AND s.admin_id = $2
+                         AND s.consented_at IS NOT NULL) AS "assistedByYou"
          FROM app.role_assignment r
          LEFT JOIN app.account_profile p ON p.account_id = r.account_id
         WHERE r.side = 'provider' AND r.application_status = ANY($1)
         ORDER BY "submittedAt" NULLS LAST, r.granted_at
         LIMIT 200`,
-      [statuses],
+      [statuses, adminId],
+    );
+    return rows;
+  }
+
+  /** Whether an admin set this application up with the provider (AD-12), and how identity consent came. */
+  async assistance(accountId: string, adminId: string, client: Queryable = this.pool) {
+    const { rows } = await client.query<{
+      assisted: boolean;
+      byAdmin: boolean;
+      identityConsentAssisted: boolean;
+    }>(
+      `SELECT EXISTS (SELECT 1 FROM app.assisted_session
+                       WHERE account_id = $1 AND consented_at IS NOT NULL) AS assisted,
+              EXISTS (SELECT 1 FROM app.assisted_session
+                       WHERE account_id = $1 AND admin_id = $2
+                         AND consented_at IS NOT NULL) AS "byAdmin",
+              EXISTS (SELECT 1 FROM app.consent_record
+                       WHERE account_id = $1 AND assisted_session_id IS NOT NULL
+                         AND withdrawn_at IS NULL) AS "identityConsentAssisted"`,
+      [accountId, adminId],
+    );
+    return rows[0] ?? { assisted: false, byAdmin: false, identityConsentAssisted: false };
+  }
+
+  /** The terms and privacy consents the account has given and not withdrawn (PR-01). */
+  async currentConsents(accountId: string, client: Queryable = this.pool): Promise<ConsentGiven[]> {
+    const { rows } = await client.query<ConsentGiven>(
+      `SELECT purpose, version FROM app.consent_record
+        WHERE account_id = $1 AND withdrawn_at IS NULL AND purpose = ANY($2)`,
+      [accountId, [...CONSENT_PURPOSES]],
     );
     return rows;
   }

@@ -1044,6 +1044,246 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/v1/assisted-onboarding/consent': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_request'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/consent/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_resend'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/consent/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/current': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AssistedSessionsController_current'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AssistedSessionsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/end': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_end'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/details': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_details'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/documents/{item}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_document'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/identity-document': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_identityDocument'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_profile'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_photo'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/payout/code': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedActionsController_payoutCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/payout/code/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedActionsController_resendPayoutCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/payout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_savePayout'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedActionsController_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/catalogue': {
     parameters: {
       query?: never;
@@ -3914,6 +4154,10 @@ export interface components {
       fullName: string | null;
       /** Format: date-time */
       submittedAt: string | null;
+      /** @description An admin set this application up with the provider (AD-12) */
+      assisted: boolean;
+      /** @description The calling admin assisted it and may not review it (AD-12) */
+      assistedByYou: boolean;
     };
     ApplicationEventDto: {
       fromStatus: string;
@@ -3965,6 +4209,12 @@ export interface components {
       accountId: string;
       fullName: string | null;
       history: components['schemas']['ApplicationEventDto'][];
+      /** @description An admin set this application up with the provider (AD-12) */
+      assisted: boolean;
+      /** @description Identity consent was read aloud in an assisted session (KY-01) */
+      identityConsentAssisted: boolean;
+      /** @description The provider has not yet accepted the current terms or privacy */
+      providerConsentDue: boolean;
     };
     DocumentReviewDto: {
       /** Format: uuid */
@@ -4008,6 +4258,155 @@ export interface components {
     };
     ChecklistInputDto: {
       required: boolean;
+    };
+    AssistedConsentRequestDto: {
+      /** @description The provider’s Indian mobile number, with or without +91 */
+      mobile: string;
+      /**
+       * @description Language of the SMS and of a new account
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+    };
+    AssistedChallengeDto: {
+      /** Format: uuid */
+      sessionId: string;
+      /** @description The provider’s number, last four digits only */
+      mobile: string;
+      /** @description Seconds until the code expires */
+      expiresInSeconds: number;
+      /** @description Seconds until a new code may be requested */
+      resendInSeconds: number;
+    };
+    AssistedCodeDto: {
+      /** @example 123456 */
+      code: string;
+    };
+    AssistedDocumentDto: {
+      /** @enum {string} */
+      scanStatus: 'pending' | 'clean' | 'infected';
+      /** @enum {string} */
+      reviewStatus: 'pending' | 'accepted' | 'rejected';
+      reviewReason: string | null;
+      /** Format: date-time */
+      uploadedAt: string;
+      /** @enum {string} */
+      source: 'upload' | 'digilocker';
+    };
+    AssistedChecklistEntryDto: {
+      key: string;
+      required: boolean;
+      /** @description A registration or certificate number is needed */
+      reference: boolean;
+      /** @description The document has an expiry date */
+      expiry: boolean;
+      document: components['schemas']['AssistedDocumentDto'] | null;
+    };
+    AssistedApplicationDto: {
+      role: string;
+      /** @enum {string} */
+      status:
+        | 'draft'
+        | 'submitted'
+        | 'under_review'
+        | 'changes_requested'
+        | 'approved'
+        | 'rejected'
+        | 'suspended';
+      statusReason: string | null;
+      /** @enum {string} */
+      identity: 'not_started' | 'pending' | 'in_review' | 'verified' | 'failed';
+      /** @description Version of the identity consent text in force (PR-01) */
+      identityConsentVersion: string;
+      profile: components['schemas']['ProviderProfileDetailsDto'];
+      needsPayout: boolean;
+      /** @description Payout details are on file; they are never shown */
+      payoutOnFile: boolean;
+      items: components['schemas']['AssistedChecklistEntryDto'][];
+      /** @description What still stops submission */
+      missing: string[];
+      /** @description The application may be changed now */
+      editable: boolean;
+    };
+    AssistedSessionDto: {
+      /** Format: uuid */
+      sessionId: string;
+      /** @description The provider’s number, last four digits only */
+      mobile: string;
+      /** @description First letter of each name word */
+      maskedName: string | null;
+      /** Format: date-time */
+      expiresAt: string;
+      ended: boolean;
+      /** @description The consent code created this account */
+      accountCreated: boolean;
+      setupComplete: boolean;
+      /** @description Name, gender and adult declaration are set and cannot be changed */
+      basicDetailsLocked: boolean;
+      /** @description A payout code is waiting to be used */
+      payoutCodeSent: boolean;
+      application: components['schemas']['AssistedApplicationDto'] | null;
+    };
+    AssistedDetailsDto: {
+      /** @enum {string} */
+      role: 'physiotherapist' | 'nurse' | 'attendant' | 'lab';
+      /** @description Not accepted once setup is complete */
+      fullName?: string;
+      /**
+       * @description Not accepted once setup is complete
+       * @enum {string}
+       */
+      gender?: 'female' | 'male' | 'other' | 'undisclosed';
+      /** @description Languages the provider speaks */
+      languages: ('or' | 'en' | 'hi')[];
+      /** @description The lab's name (labs only) */
+      organisationName?: string;
+      /** @description The provider confirmed they are 18 or older */
+      adultDeclared?: boolean;
+    };
+    AssistedIdentityDocumentDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+      /** @enum {string} */
+      kind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card';
+      /**
+       * @description Language the consent text was read in
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+      /** @description Version of the consent text the provider agreed to (PR-01) */
+      consentVersion: string;
+      /**
+       * @description The consent text was read to the provider (PR-01)
+       * @enum {boolean}
+       */
+      consentReadAloud: true;
+    };
+    AssistedPayoutChallengeDto: {
+      /** @description The provider’s number, last four digits only */
+      mobile: string;
+      /** @description Seconds until the code expires */
+      expiresInSeconds: number;
+      /** @description Seconds until a new code may be requested */
+      resendInSeconds: number;
+    };
+    AssistedPayoutDto: {
+      /** @enum {string} */
+      method: 'bank' | 'upi';
+      holderName: string;
+      /** @description Bank account number, 9 to 18 digits */
+      accountNumber?: string;
+      /** @description IFSC of the branch */
+      ifsc?: string;
+      /** @description UPI ID, for example name@bank */
+      upiId?: string;
+      /**
+       * @description The code the provider read out for this save
+       * @example 123456
+       */
+      code: string;
     };
     CatalogueItemDto: {
       code: string;
@@ -7022,6 +7421,369 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  AssistedSessionsController_request: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedConsentRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedChallengeDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedSessionsController_resend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedChallengeDto'];
+        };
+      };
+    };
+  };
+  AssistedSessionsController_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedCodeDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedSessionsController_current: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+      /** @description The admin has no running session */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedSessionsController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedSessionsController_end: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedActionsController_details: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedDetailsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_document: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+        item: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DocumentUploadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_identityDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedIdentityDocumentDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_profile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProviderProfileInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UploadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_payoutCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedPayoutChallengeDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_resendPayoutCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedPayoutChallengeDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_savePayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedPayoutDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedActionsController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
       };
     };
   };

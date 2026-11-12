@@ -131,16 +131,20 @@ export class IdentityService {
   }
 
   /** The fallback (KY-07): the document is stored encrypted and waits for a verifier. */
-  async uploadDocument(principal: Principal, input: IdentityDocumentDto): Promise<void> {
+  async uploadDocument(
+    accountId: string,
+    input: IdentityDocumentDto,
+    assistedSessionId?: string,
+  ): Promise<void> {
     assertConsent(input.consentVersion);
-    const prepared = await this.uploads.prepare(principal.userId, 'provider_document', input);
-    const replaced = await this.gate.editable(principal.userId, async (client) => {
+    const prepared = await this.uploads.prepare(accountId, 'provider_document', input);
+    const replaced = await this.gate.editable(accountId, async (client) => {
       await this.uploads.record(client, prepared);
       if (prepared.verdict === 'infected') return undefined;
-      await this.consent(client, principal.userId, input.locale);
-      await this.record('identity.document_uploaded', principal.userId, client);
-      await this.photos.unlockPhoto(client, principal.userId);
-      return this.onboarding.saveIdentityDocument(client, principal.userId, {
+      await this.consent(client, accountId, input.locale, assistedSessionId);
+      await this.record('identity.document_uploaded', accountId, client);
+      await this.photos.unlockPhoto(client, accountId);
+      return this.onboarding.saveIdentityDocument(client, accountId, {
         reference: randomUUID(),
         objectId: prepared.id,
         kind: input.kind,
@@ -163,8 +167,19 @@ export class IdentityService {
     return this.encryptor.encrypt(JSON.stringify(value), 'identity');
   }
 
-  private consent(client: TransactionClient, accountId: string, locale: string): Promise<void> {
-    return this.onboarding.recordIdentityConsent(client, accountId, IDENTITY_CONSENT, locale);
+  private consent(
+    client: TransactionClient,
+    accountId: string,
+    locale: string,
+    assistedSessionId?: string,
+  ): Promise<void> {
+    return this.onboarding.recordIdentityConsent(
+      client,
+      accountId,
+      IDENTITY_CONSENT,
+      locale,
+      assistedSessionId ?? null,
+    );
   }
 
   private record(action: string, accountId: string, client: TransactionClient): Promise<void> {

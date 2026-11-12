@@ -7,6 +7,7 @@ import './admin-layout.css';
 export type Section =
   | 'dashboard'
   | 'verification'
+  | 'assisted'
   | 'bookings'
   | 'finance'
   | 'tickets'

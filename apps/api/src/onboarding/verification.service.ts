@@ -1,6 +1,12 @@
 import { CoveragePinsCache } from '../search/coverage-pins.cache.js';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { ApplicationStatus } from '../accounts/account.repository.js';
+import { consentsDue } from '../accounts/consent-versions.js';
 import type { SmsTemplate } from '../adapters/sms.port.js';
 import { AuditService } from '../audit/audit.service.js';
 import { reason } from '../common/error-response.js';
@@ -48,11 +54,12 @@ export class VerificationService {
     private readonly profiles: ProfileService,
   ) {}
 
-  queue(view: 'open' | 'decided' = 'open'): Promise<ApplicationSummaryDto[]> {
-    return this.onboarding.queue(view === 'open' ? OPEN : DECIDED);
+  queue(admin: Principal, view: 'open' | 'decided' = 'open'): Promise<ApplicationSummaryDto[]> {
+    return this.onboarding.queue(view === 'open' ? OPEN : DECIDED, admin.userId);
   }
 
   async review(admin: Principal, accountId: string): Promise<ApplicationReviewDto> {
+    await this.assertIndependent(admin, accountId);
     await this.onboarding.transaction(async (client) => {
       const grant = await this.grant(accountId, client);
       if (opensReview(grant.status)) {
@@ -65,15 +72,25 @@ export class VerificationService {
       await this.record('viewed', accountId, client);
     });
     const grant = await this.grant(accountId);
-    const [application, fullName, history] = await Promise.all([
+    const [application, fullName, history, assistance, consents] = await Promise.all([
       this.view.build(accountId, grant),
       this.onboarding.fullName(accountId),
       this.onboarding.history(accountId),
+      this.onboarding.assistance(accountId, admin.userId),
+      this.onboarding.currentConsents(accountId),
     ]);
-    return Object.assign(application, { accountId, fullName, history });
+    return Object.assign(application, {
+      accountId,
+      fullName,
+      history,
+      assisted: assistance.assisted,
+      identityConsentAssisted: assistance.identityConsentAssisted,
+      providerConsentDue: consentsDue(consents).length > 0,
+    });
   }
 
-  async document(accountId: string, documentId: string): Promise<StoredFileDto> {
+  async document(admin: Principal, accountId: string, documentId: string): Promise<StoredFileDto> {
+    await this.assertIndependent(admin, accountId);
     const document = await this.onboarding.document(accountId, documentId);
     const file = document && (await this.uploads.read(document.objectId));
     if (!file) throw new NotFoundException();
@@ -85,7 +102,12 @@ export class VerificationService {
     return file;
   }
 
-  async reviewDocument(accountId: string, input: DocumentReviewDto): Promise<void> {
+  async reviewDocument(
+    admin: Principal,
+    accountId: string,
+    input: DocumentReviewDto,
+  ): Promise<void> {
+    await this.assertIndependent(admin, accountId);
     await this.onboarding.transaction(async (client) => {
       await this.reviewing(accountId, client);
       const review = {
@@ -103,13 +125,15 @@ export class VerificationService {
   }
 
   /** The profile photo as the provider will publish it (PO-05); the opening is audited. */
-  async photo(accountId: string): Promise<StoredFileDto> {
+  async photo(admin: Principal, accountId: string): Promise<StoredFileDto> {
+    await this.assertIndependent(admin, accountId);
     await this.grant(accountId);
     return this.profiles.photo(accountId, { audit: true });
   }
 
   /** The fallback identity document (KY-07); every opening is audited. */
-  async identityDocument(accountId: string): Promise<StoredFileDto> {
+  async identityDocument(admin: Principal, accountId: string): Promise<StoredFileDto> {
+    await this.assertIndependent(admin, accountId);
     const objectId = (await this.onboarding.identity(accountId))?.documentObjectId;
     const file = objectId && (await this.uploads.read(objectId));
     if (!file) throw new NotFoundException();
@@ -122,7 +146,12 @@ export class VerificationService {
   }
 
   /** A verifier accepts or rejects the fallback document, which settles the identity check. */
-  async reviewIdentity(accountId: string, input: IdentityReviewDto): Promise<void> {
+  async reviewIdentity(
+    admin: Principal,
+    accountId: string,
+    input: IdentityReviewDto,
+  ): Promise<void> {
+    await this.assertIndependent(admin, accountId);
     await this.onboarding.transaction(async (client) => {
       await this.reviewing(accountId, client);
       const accepted = input.status === 'accepted';
@@ -134,11 +163,15 @@ export class VerificationService {
   }
 
   async decide(admin: Principal, accountId: string, input: DecisionDto): Promise<void> {
+    await this.assertIndependent(admin, accountId);
     const to = await this.onboarding.transaction(async (client) => {
       const grant = await this.grant(accountId, client);
       const next = decide(grant.status, input.decision);
       if (!next) throw reason(ConflictException, 'application_not_in_review');
-      if (input.decision === 'approve') await this.identityVerified(accountId, client);
+      if (input.decision === 'approve') {
+        await this.identityVerified(accountId, client);
+        await this.providerAccepted(admin, accountId, client);
+      }
       const why = input.decision === 'approve' ? null : (input.reason ?? null);
       await this.change(client, admin, accountId, { from: grant.status, to: next, reason: why });
       await this.record(input.decision, accountId, client);
@@ -147,6 +180,30 @@ export class VerificationService {
     await this.coverage.invalidate();
     const template = OUTCOME_SMS[to];
     if (template) await this.notifier.smsAccount(accountId, template);
+  }
+
+  /** The admin who assisted an application never reviews or decides it (AD-12). */
+  private async assertIndependent(admin: Principal, accountId: string): Promise<void> {
+    const { byAdmin } = await this.onboarding.assistance(accountId, admin.userId);
+    if (!byAdmin) return;
+    await this.audit.record({
+      action: `${ENTITY}.review.refused_assisted`,
+      entity: ENTITY,
+      entityId: accountId,
+    });
+    throw reason(ForbiddenException, 'assisted_by_you');
+  }
+
+  /** A provider set up by an admin is approved only after accepting the terms and privacy themselves. */
+  private async providerAccepted(
+    admin: Principal,
+    accountId: string,
+    client: TransactionClient,
+  ): Promise<void> {
+    const { assisted } = await this.onboarding.assistance(accountId, admin.userId, client);
+    if (!assisted) return;
+    const given = await this.onboarding.currentConsents(accountId, client);
+    if (consentsDue(given).length > 0) throw reason(ConflictException, 'provider_consent_due');
   }
 
   /** Nobody is approved on an identity that is not verified (KY-06). */
