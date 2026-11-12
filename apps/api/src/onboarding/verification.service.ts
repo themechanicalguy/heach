@@ -16,6 +16,7 @@ import type {
   ApplicationSummaryDto,
   DecisionDto,
   DocumentReviewDto,
+  IdentityReviewDto,
   StoredFileDto,
 } from './onboarding.dto.js';
 import { OnboardingRepository } from './onboarding.repository.js';
@@ -99,11 +100,37 @@ export class VerificationService {
     });
   }
 
+  /** The fallback identity document (KY-07); every opening is audited. */
+  async identityDocument(accountId: string): Promise<StoredFileDto> {
+    const objectId = (await this.onboarding.identity(accountId))?.documentObjectId;
+    const file = objectId && (await this.uploads.read(objectId));
+    if (!file) throw new NotFoundException();
+    await this.audit.record({
+      action: `${ENTITY}.identity.document_opened`,
+      entity: ENTITY,
+      entityId: accountId,
+    });
+    return file;
+  }
+
+  /** A verifier accepts or rejects the fallback document, which settles the identity check. */
+  async reviewIdentity(accountId: string, input: IdentityReviewDto): Promise<void> {
+    await this.onboarding.transaction(async (client) => {
+      await this.reviewing(accountId, client);
+      const accepted = input.status === 'accepted';
+      if (!(await this.onboarding.reviewIdentityDocument(client, accountId, accepted))) {
+        throw reason(ConflictException, 'identity_not_in_review');
+      }
+      await this.record(accepted ? 'identity.verified' : 'identity.failed', accountId, client);
+    });
+  }
+
   async decide(admin: Principal, accountId: string, input: DecisionDto): Promise<void> {
     const to = await this.onboarding.transaction(async (client) => {
       const grant = await this.grant(accountId, client);
       const next = decide(grant.status, input.decision);
       if (!next) throw reason(ConflictException, 'application_not_in_review');
+      if (input.decision === 'approve') await this.identityVerified(accountId, client);
       const why = input.decision === 'approve' ? null : (input.reason ?? null);
       await this.change(client, admin, accountId, { from: grant.status, to: next, reason: why });
       await this.record(input.decision, accountId, client);
@@ -112,6 +139,12 @@ export class VerificationService {
     await this.coverage.invalidate();
     const template = OUTCOME_SMS[to];
     if (template) await this.notifier.smsAccount(accountId, template);
+  }
+
+  /** Nobody is approved on an identity that is not verified (KY-06). */
+  private async identityVerified(accountId: string, client: TransactionClient): Promise<void> {
+    const identity = await this.onboarding.identity(accountId, client);
+    if (identity?.status !== 'verified') throw reason(ConflictException, 'identity_not_verified');
   }
 
   private async reviewing(accountId: string, client: TransactionClient): Promise<void> {

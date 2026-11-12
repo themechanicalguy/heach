@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CoverageCacheModule } from '../search/coverage-cache.module.js';
+import { ApplicationGate } from './application-gate.js';
 import { ApplicationView } from './application-view.js';
 import { ChecklistSettings } from './checklist-settings.js';
 import { AdminChecklistsController } from './checklists.controller.js';
+import { IdentityService } from './identity.service.js';
 import { OnboardingController } from './onboarding.controller.js';
 import { OnboardingRepository } from './onboarding.repository.js';
 import { OnboardingService } from './onboarding.service.js';
@@ -16,7 +18,9 @@ import { VerificationService } from './verification.service.js';
   controllers: [OnboardingController, VerificationController, AdminChecklistsController],
   providers: [
     OnboardingRepository,
+    ApplicationGate,
     ApplicationView,
+    IdentityService,
     ChecklistSettings,
     OnboardingService,
     VerificationService,

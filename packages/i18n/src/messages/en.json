@@ -162,6 +162,8 @@
     "application_incomplete": "Some steps are not done yet.",
     "application_not_editable": "Your application cannot be changed while it is being reviewed.",
     "identity_not_pending": "This identity check has ended. Start it again.",
+    "identity_unavailable": "The identity service is not answering. Try again, or upload another identity document instead.",
+    "identity_locked": "Your name and gender come from your identity check. To change them, verify your identity again.",
     "provider_not_approved": "Your application is not approved yet.",
     "pin_not_serviceable": "One of these PIN codes is not served yet.",
     "availability_invalid": "Check the times: each must end after it starts.",
@@ -369,11 +371,38 @@
     "identityState": {
       "not_started": "Not started",
       "pending": "Waiting for the result",
+      "in_review": "Document received. Our team will check it with your application.",
       "verified": "Verified",
       "failed": "Not verified. Please try again."
     },
     "verifyIdentity": "Verify with Aadhaar or DigiLocker",
     "identityReturning": "Finishing your identity check…",
+    "identityConsent": {
+      "title": "Your consent",
+      "text": "To check who you are, HEACH asks an identity partner to confirm your identity through Aadhaar or DigiLocker, or our team checks the identity document you upload. We never receive or keep your Aadhaar number. We keep only the result, the method, the time and a reference. Draft wording, pending legal review.",
+      "agree": "I agree to this identity check"
+    },
+    "identityFallback": {
+      "title": "Cannot use Aadhaar or DigiLocker?",
+      "intro": "Upload a clear photo or PDF of another identity document. Our team checks it when they review your application.",
+      "noAadhaar": "Do not upload your Aadhaar card.",
+      "kind": "Which document is it?",
+      "kinds": {
+        "voter_id": "Voter ID card",
+        "passport": "Passport",
+        "driving_licence": "Driving licence",
+        "pan_card": "PAN card"
+      },
+      "upload": "Upload identity document",
+      "onFile": "On file: {kind}"
+    },
+    "identityBack": "Back to your application",
+    "verifiedDetails": {
+      "title": "Details from your identity check",
+      "dateOfBirth": "Date of birth",
+      "address": "Address",
+      "note": "Your name and gender on your profile also come from this check and cannot be edited."
+    },
     "items": {
       "nursing_registration": "Nursing council registration",
       "qualification_certificate": "Qualification certificate",

@@ -756,6 +756,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/provider/application/identity/details': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OnboardingController_identityDetails'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/application/identity/document': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OnboardingController_identityDocument'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/provider/application/payout': {
     parameters: {
       query?: never;
@@ -846,6 +878,38 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['VerificationController_reviewDocument'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/identity-document': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VerificationController_identityDocument'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/identity': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VerificationController_reviewIdentity'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3606,7 +3670,23 @@ export interface components {
         | 'suspended';
       statusReason: string | null;
       /** @enum {string} */
-      identity: 'not_started' | 'pending' | 'verified' | 'failed';
+      identity: 'not_started' | 'pending' | 'in_review' | 'verified' | 'failed';
+      /**
+       * @description How it was checked (KY-09)
+       * @enum {string|null}
+       */
+      identityMethod: 'aadhaar' | 'digilocker' | 'manual' | null;
+      /** @enum {string|null} */
+      identityDocumentKind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card' | null;
+      /** @description Version of the identity consent text in force (PR-01) */
+      identityConsentVersion: string;
+      /**
+       * @description Whether the name typed at sign-up agreed with the verified name (KY-04)
+       * @enum {string|null}
+       */
+      identityNameMatch: 'match' | 'mismatch' | null;
+      /** @description Name and gender came from the identity check and are locked (KY-03) */
+      identityDetailsVerified: boolean;
       needsPayout: boolean;
       payout: components['schemas']['PayoutSummaryDto'] | null;
       items: components['schemas']['ChecklistEntryDto'][];
@@ -3631,6 +3711,8 @@ export interface components {
        * @enum {string}
        */
       locale: 'or' | 'en' | 'hi';
+      /** @description Version of the consent text the provider agreed to (PR-01) */
+      consentVersion: string;
     };
     IdentityRedirectDto: {
       redirectUrl: string;
@@ -3638,6 +3720,26 @@ export interface components {
     IdentityCompleteDto: {
       code: string;
       reference: string;
+    };
+    IdentityDetailsDto: {
+      /** Format: date */
+      dateOfBirth: string;
+      address: string;
+    };
+    IdentityDocumentDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+      /** @enum {string} */
+      kind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card';
+      /**
+       * @description Language the consent text was read in
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+      /** @description Version of the consent text the provider agreed to (PR-01) */
+      consentVersion: string;
     };
     PayoutDetailsDto: {
       /** @enum {string} */
@@ -3688,7 +3790,23 @@ export interface components {
         | 'suspended';
       statusReason: string | null;
       /** @enum {string} */
-      identity: 'not_started' | 'pending' | 'verified' | 'failed';
+      identity: 'not_started' | 'pending' | 'in_review' | 'verified' | 'failed';
+      /**
+       * @description How it was checked (KY-09)
+       * @enum {string|null}
+       */
+      identityMethod: 'aadhaar' | 'digilocker' | 'manual' | null;
+      /** @enum {string|null} */
+      identityDocumentKind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card' | null;
+      /** @description Version of the identity consent text in force (PR-01) */
+      identityConsentVersion: string;
+      /**
+       * @description Whether the name typed at sign-up agreed with the verified name (KY-04)
+       * @enum {string|null}
+       */
+      identityNameMatch: 'match' | 'mismatch' | null;
+      /** @description Name and gender came from the identity check and are locked (KY-03) */
+      identityDetailsVerified: boolean;
       needsPayout: boolean;
       payout: components['schemas']['PayoutSummaryDto'] | null;
       items: components['schemas']['ChecklistEntryDto'][];
@@ -3713,6 +3831,10 @@ export interface components {
       status: 'accepted' | 'rejected';
       /** @description Required when rejected */
       reason?: string;
+    };
+    IdentityReviewDto: {
+      /** @enum {string} */
+      status: 'accepted' | 'rejected';
     };
     DecisionDto: {
       /** @enum {string} */
@@ -6258,6 +6380,13 @@ export interface operations {
           'application/json': components['schemas']['IdentityRedirectDto'];
         };
       };
+      /** @description identity_unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   OnboardingController_completeIdentity: {
@@ -6270,6 +6399,48 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['IdentityCompleteDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_identityDetails: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['IdentityDetailsDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_identityDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IdentityDocumentDto'];
       };
     };
     responses: {
@@ -6408,6 +6579,50 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['DocumentReviewDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  VerificationController_identityDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  VerificationController_reviewIdentity: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IdentityReviewDto'];
       };
     };
     responses: {

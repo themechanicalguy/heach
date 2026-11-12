@@ -1,4 +1,5 @@
 import type { ApplicationStatus } from '../accounts/account.repository.js';
+import type { IdentityState } from './onboarding.dto.js';
 import { type ChecklistItem, needsPayout, type OnboardingRole } from './checklists.js';
 
 /** The provider may change their application only in these statuses (PO-03, PO-04). */
@@ -16,17 +17,26 @@ export interface ApplicationFacts {
   role: OnboardingRole;
   /** The role's checklist with today's required flags (AD-08). */
   checklist: readonly ChecklistItem[];
-  identityVerified: boolean;
+  /** Verified, or a fallback document waiting for the verifier who reviews the application. */
+  identityOnFile: boolean;
   payoutOnFile: boolean;
   /** Checklist keys with a clean document, and whether each has its reference and expiry. */
   documents: ReadonlyMap<string, { reference: boolean; expiresOn: string | null }>;
   today: string;
 }
 
+/** The state shown for an identity check; a fallback document awaiting a verifier is in review. */
+export function identityState(
+  check: { status: 'pending' | 'verified' | 'failed'; method: string | null } | undefined,
+): IdentityState {
+  if (!check) return 'not_started';
+  return check.status === 'pending' && check.method === 'manual' ? 'in_review' : check.status;
+}
+
 /** What still stops the provider from submitting, as stable keys the app translates. */
 export function missingForSubmit(facts: ApplicationFacts): string[] {
   const missing: string[] = [];
-  if (!facts.identityVerified) missing.push('identity');
+  if (!facts.identityOnFile) missing.push('identity');
   for (const entry of facts.checklist) {
     const document = facts.documents.get(entry.key);
     if (!document) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { Notice, Skeleton } from '@heach/ui';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
@@ -31,10 +32,14 @@ export function IdentityReturn() {
       });
   }, [params, router, locale, t]);
 
+  // From the application the provider can retry or switch to the fallback document (KY-08).
   return error ? (
-    <Notice tone="danger" live>
-      {error}
-    </Notice>
+    <>
+      <Notice tone="danger" live>
+        {error}
+      </Notice>
+      <Link href={`/${locale}/provider`}>{t('application.identityBack')}</Link>
+    </>
   ) : (
     <Skeleton label={t('application.identityReturning')} />
   );

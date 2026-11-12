@@ -26,6 +26,23 @@ export interface DocumentRow {
   uploadedAt: Date;
 }
 
+export interface IdentityRow {
+  status: 'pending' | 'verified' | 'failed';
+  method: 'aadhaar' | 'digilocker' | 'manual' | null;
+  reference: string;
+  documentKind: string | null;
+  documentObjectId: string | null;
+  nameMatch: 'match' | 'mismatch' | null;
+}
+
+export interface IdentityOutcome {
+  verified: boolean;
+  method: string;
+  detail: EncryptedField;
+  verifiedDetails: EncryptedField | null;
+  nameMatch: 'match' | 'mismatch' | null;
+}
+
 export interface DocumentInput {
   item: string;
   objectId: string;
@@ -126,23 +143,27 @@ export class OnboardingRepository {
   }
 
   async identity(accountId: string, client: Queryable = this.pool) {
-    const { rows } = await client.query<{
-      status: string;
-      method: string | null;
-      reference: string;
-    }>('SELECT status, method, reference FROM app.identity_check WHERE account_id = $1', [
-      accountId,
-    ]);
+    const { rows } = await client.query<IdentityRow>(
+      `SELECT status, method, reference, document_kind AS "documentKind",
+              document_object_id AS "documentObjectId", name_match AS "nameMatch"
+         FROM app.identity_check WHERE account_id = $1`,
+      [accountId],
+    );
     return rows[0];
   }
 
+  /** Opens a partner check, dropping any earlier result; returns the fallback document it replaced. */
   async startIdentity(client: TransactionClient, accountId: string, reference: string) {
+    const replaced = (await this.identity(accountId, client))?.documentObjectId ?? undefined;
     await client.query(
       `INSERT INTO app.identity_check (account_id, status, reference) VALUES ($1, 'pending', $2)
        ON CONFLICT (account_id) DO UPDATE SET status = 'pending', method = NULL,
-         reference = EXCLUDED.reference, checked_at = NULL`,
+         reference = EXCLUDED.reference, checked_at = NULL, detail = NULL,
+         verified_details = NULL, name_match = NULL,
+         document_object_id = NULL, document_kind = NULL`,
       [accountId, reference],
     );
+    return replaced;
   }
 
   /** Records the partner's result for the pending check with this reference only. */
@@ -150,14 +171,94 @@ export class OnboardingRepository {
     client: TransactionClient,
     accountId: string,
     reference: string,
-    result: { verified: boolean; method: string },
+    result: IdentityOutcome,
   ): Promise<boolean> {
     const outcome = await client.query(
-      `UPDATE app.identity_check SET status = $3, method = $4, checked_at = now()
-        WHERE account_id = $1 AND reference = $2 AND status = 'pending'`,
-      [accountId, reference, result.verified ? 'verified' : 'failed', result.method],
+      `UPDATE app.identity_check SET status = $3, method = $4, detail = $5,
+              verified_details = $6, name_match = $7, checked_at = now()
+        WHERE account_id = $1 AND reference = $2 AND status = 'pending' AND method IS NULL`,
+      [
+        accountId,
+        reference,
+        result.verified ? 'verified' : 'failed',
+        result.method,
+        result.detail,
+        result.verifiedDetails,
+        result.nameMatch,
+      ],
     );
     return outcome.rowCount === 1;
+  }
+
+  /** The manual fallback (KY-07): the document waits for a verifier; returns the one it replaced. */
+  async saveIdentityDocument(
+    client: TransactionClient,
+    accountId: string,
+    input: { reference: string; objectId: string; kind: string },
+  ) {
+    const replaced = (await this.identity(accountId, client))?.documentObjectId ?? undefined;
+    await client.query(
+      `INSERT INTO app.identity_check
+         (account_id, status, method, reference, document_object_id, document_kind)
+       VALUES ($1, 'pending', 'manual', $2, $3, $4)
+       ON CONFLICT (account_id) DO UPDATE SET status = 'pending', method = 'manual',
+         reference = EXCLUDED.reference, checked_at = NULL, detail = NULL,
+         verified_details = NULL, name_match = NULL,
+         document_object_id = EXCLUDED.document_object_id,
+         document_kind = EXCLUDED.document_kind`,
+      [accountId, input.reference, input.objectId, input.kind],
+    );
+    return replaced;
+  }
+
+  /** A verifier's decision on the fallback document; only a document still waiting can be decided. */
+  async reviewIdentityDocument(
+    client: TransactionClient,
+    accountId: string,
+    accepted: boolean,
+  ): Promise<boolean> {
+    const outcome = await client.query(
+      `UPDATE app.identity_check SET status = $2, checked_at = now()
+        WHERE account_id = $1 AND status = 'pending' AND method = 'manual'`,
+      [accountId, accepted ? 'verified' : 'failed'],
+    );
+    return outcome.rowCount === 1;
+  }
+
+  async verifiedDetails(accountId: string): Promise<EncryptedField | null> {
+    const { rows } = await this.pool.query<{ details: EncryptedField | null }>(
+      `SELECT verified_details AS details FROM app.identity_check
+        WHERE account_id = $1 AND status = 'verified'`,
+      [accountId],
+    );
+    return rows[0]?.details ?? null;
+  }
+
+  /** The verified name and gender replace what was typed at sign-up (KY-03). */
+  async prefillProfile(
+    client: TransactionClient,
+    accountId: string,
+    verified: { fullName: string; gender: string },
+  ): Promise<void> {
+    await client.query(
+      `UPDATE app.account_profile SET full_name = $2, gender = $3, updated_at = now()
+        WHERE account_id = $1`,
+      [accountId, verified.fullName, verified.gender],
+    );
+  }
+
+  /** Consent to the identity check, once per text version (PR-01). */
+  async recordIdentityConsent(
+    client: TransactionClient,
+    accountId: string,
+    consent: { purpose: string; version: string },
+    locale: string,
+  ): Promise<void> {
+    await client.query(
+      `INSERT INTO app.consent_record (id, account_id, purpose, version, locale)
+       VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`,
+      [randomUUID(), accountId, consent.purpose, consent.version, locale],
+    );
   }
 
   async payout(accountId: string, client: Queryable = this.pool) {
@@ -246,8 +347,8 @@ export class OnboardingRepository {
     return rows;
   }
 
-  async fullName(accountId: string): Promise<string | null> {
-    const { rows } = await this.pool.query<{ full_name: string | null }>(
+  async fullName(accountId: string, client: Queryable = this.pool): Promise<string | null> {
+    const { rows } = await client.query<{ full_name: string | null }>(
       'SELECT full_name FROM app.account_profile WHERE account_id = $1',
       [accountId],
     );

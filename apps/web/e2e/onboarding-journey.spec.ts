@@ -74,6 +74,7 @@ for (const locale of LOCALES) {
           name: new RegExp(t.application.steps.identity.replaceAll(/[()]/g, '.')),
         })
         .click();
+      await page.getByLabel(t.application.identityConsent.agree).check();
       await page.getByRole('button', { name: t.application.verifyIdentity }).click();
       // The partner sends the browser back through the identity return page to the application.
       await page.waitForURL(/\/provider\/onboarding\/identity/);

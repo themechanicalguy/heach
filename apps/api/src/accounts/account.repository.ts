@@ -205,6 +205,16 @@ export class AccountRepository {
   }
 
   /** Corrects basic details after setup, in the caller's transaction (AC-06). */
+  /** True when the name and gender came from the identity partner and are locked (KY-03). */
+  async identityLocked(client: TransactionClient, id: string): Promise<boolean> {
+    const { rows } = await client.query(
+      `SELECT 1 FROM app.identity_check
+        WHERE account_id = $1 AND status = 'verified' AND verified_details IS NOT NULL`,
+      [id],
+    );
+    return rows.length > 0;
+  }
+
   async correctProfile(
     client: TransactionClient,
     id: string,

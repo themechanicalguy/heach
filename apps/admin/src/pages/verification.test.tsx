@@ -5,7 +5,10 @@ import en from '../../messages/en.json';
 
 const ACCOUNT = '00000000-0000-4000-8000-0000000000bb';
 
-function review(status: ApplicationReview['status']): ApplicationReview {
+function review(
+  status: ApplicationReview['status'],
+  overrides: Partial<ApplicationReview> = {},
+): ApplicationReview {
   return {
     accountId: ACCOUNT,
     fullName: 'Synthetic Nurse',
@@ -13,6 +16,11 @@ function review(status: ApplicationReview['status']): ApplicationReview {
     status,
     statusReason: null,
     identity: 'verified',
+    identityMethod: 'digilocker',
+    identityDocumentKind: null,
+    identityConsentVersion: '2026-11-draft.1',
+    identityNameMatch: 'match',
+    identityDetailsVerified: true,
     needsPayout: true,
     payout: { method: 'upi', holderName: 'Synthetic Nurse', hint: 'bank' },
     editable: false,
@@ -50,10 +58,14 @@ function review(status: ApplicationReview['status']): ApplicationReview {
         createdAt: '2026-10-30T00:00:00Z',
       },
     ],
+    ...overrides,
   };
 }
 
-function stubApi(status: ApplicationReview['status'] = 'under_review') {
+function stubApi(
+  status: ApplicationReview['status'] = 'under_review',
+  overrides: Partial<ApplicationReview> = {},
+) {
   const calls: { method: string; path: string; body?: unknown }[] = [];
   const queue: ApplicationSummary[] = [
     {
@@ -76,7 +88,7 @@ function stubApi(status: ApplicationReview['status'] = 'under_review') {
       });
       if (path.startsWith('/applications?'))
         return Promise.resolve(new Response(JSON.stringify(path.includes('decided') ? [] : queue)));
-      if (path.includes('/documents/')) {
+      if (path.includes('/documents/') || path.endsWith('/identity-document')) {
         return Promise.resolve(
           new Response(
             JSON.stringify({ contentType: 'application/pdf', contentBase64: btoa('%PDF') }),
@@ -84,7 +96,7 @@ function stubApi(status: ApplicationReview['status'] = 'under_review') {
         );
       }
       if (method === 'POST') return Promise.resolve(new Response(null, { status: 204 }));
-      return Promise.resolve(new Response(JSON.stringify(review(status))));
+      return Promise.resolve(new Response(JSON.stringify(review(status, overrides))));
     }),
   );
   return calls;
@@ -126,6 +138,52 @@ describe('Verification queue (AD-02)', () => {
     expect(calls.find((call) => call.path.endsWith('/decision'))?.body).toEqual({
       decision: 'request_changes',
       reason: 'documents_expired',
+    });
+  });
+
+  it('KY-09 shows how identity was checked', async () => {
+    stubApi();
+    render(<Applications />);
+    fireEvent.click(
+      await screen.findByRole('button', { name: `${en.verification.open} Synthetic Nurse` }),
+    );
+    expect(await screen.findByText(en.verification.identityMethods.digilocker)).toBeTruthy();
+    expect(screen.queryByText(en.verification.identityDocument)).toBeNull();
+  });
+
+  it('KY-04 a name that differed from the verified one is flagged', async () => {
+    stubApi('under_review', { identityNameMatch: 'mismatch' });
+    render(<Applications />);
+    fireEvent.click(
+      await screen.findByRole('button', { name: `${en.verification.open} Synthetic Nurse` }),
+    );
+    expect(await screen.findByText(en.verification.nameMismatch)).toBeTruthy();
+    expect(screen.getByText(en.verification.nameMatches.mismatch)).toBeTruthy();
+  });
+
+  it('KY-07 a verifier opens the fallback identity document and accepts it', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:synthetic');
+    const calls = stubApi('under_review', {
+      identity: 'in_review',
+      identityMethod: 'manual',
+      identityDocumentKind: 'passport',
+      identityNameMatch: null,
+      identityDetailsVerified: false,
+      items: [],
+    });
+    render(<Applications />);
+    fireEvent.click(
+      await screen.findByRole('button', { name: `${en.verification.open} Synthetic Nurse` }),
+    );
+    expect(await screen.findByText(en.verification.identityStates.in_review)).toBeTruthy();
+    expect(screen.getByText(en.verification.identityKinds.passport)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: en.verification.download }));
+    expect(await screen.findByRole('link', { name: en.verification.download })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: en.verification.accept }));
+    await waitFor(() => {
+      expect(calls.find((call) => call.path.endsWith('/identity'))?.body).toEqual({
+        status: 'accepted',
+      });
     });
   });
 

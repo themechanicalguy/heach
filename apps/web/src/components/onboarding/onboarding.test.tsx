@@ -30,6 +30,11 @@ const application = (overrides: Partial<Application> = {}): Application => ({
   status: 'draft',
   statusReason: null,
   identity: 'not_started',
+  identityMethod: null,
+  identityDocumentKind: null,
+  identityConsentVersion: '2026-11-draft.1',
+  identityNameMatch: null,
+  identityDetailsVerified: false,
   needsPayout: true,
   payout: null,
   editable: true,
@@ -162,7 +167,9 @@ describe('OnboardingView (J1)', () => {
     fireEvent.click(screen.getByLabelText('Bank account'));
     expect(screen.getByLabelText('IFSC')).toBeTruthy();
   });
+});
 
+describe('OnboardingView identity check (KY-01, KY-07, KY-08)', () => {
   it('KY-01 starts the identity check at the partner, and the return page completes it', async () => {
     const assign = vi.fn();
     vi.stubGlobal('location', { href: window.location.href, assign });
@@ -170,12 +177,17 @@ describe('OnboardingView (J1)', () => {
       .mockResolvedValueOnce(application())
       .mockResolvedValueOnce({ redirectUrl: 'https://partner.invalid/x' });
     inEnglish(<OnboardingView />);
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Verify with Aadhaar or DigiLocker' }),
-    );
+    const verify = await screen.findByRole('button', { name: 'Verify with Aadhaar or DigiLocker' });
+    // Consent comes first: the check cannot start without it.
+    expect((verify as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText('I agree to this identity check'));
+    fireEvent.click(verify);
     await waitFor(() => {
       expect(assign).toHaveBeenCalledWith('https://partner.invalid/x');
     });
+    expect(
+      JSON.parse((state.api.mock.calls.at(-1) as [string, RequestInit])[1].body as string),
+    ).toEqual({ locale: 'en', consentVersion: '2026-11-draft.1' });
     vi.unstubAllGlobals();
 
     state.api.mockResolvedValueOnce(application({ identity: 'verified' }));
@@ -196,6 +208,77 @@ describe('OnboardingView (J1)', () => {
     state.api.mockRejectedValueOnce(new ApiError(409, 'identity_not_pending'));
     inEnglish(<IdentityReturn />);
     expect(await screen.findByText('This identity check has ended. Start it again.')).toBeTruthy();
+    expect(
+      screen.getByRole('link', { name: 'Back to your application' }).getAttribute('href'),
+    ).toBe('/en/provider');
+  });
+
+  it('KY-08 an unreachable partner shows a retry message that points to the fallback', async () => {
+    const { ApiError } = await import('../../lib/api');
+    state.api
+      .mockResolvedValueOnce(application())
+      .mockRejectedValueOnce(new ApiError(503, 'identity_unavailable'));
+    inEnglish(<OnboardingView />);
+    fireEvent.click(await screen.findByLabelText('I agree to this identity check'));
+    fireEvent.click(screen.getByRole('button', { name: 'Verify with Aadhaar or DigiLocker' }));
+    expect(await screen.findByText(/The identity service is not answering/)).toBeTruthy();
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Verify with Aadhaar or DigiLocker' })
+        .disabled,
+    ).toBe(false);
+  });
+});
+
+describe('OnboardingView verified details and fallback (KY-03, KY-07)', () => {
+  it('KY-03 shows the verified date of birth and address, and says the name is locked', async () => {
+    state.api
+      .mockResolvedValueOnce(
+        application({
+          identity: 'verified',
+          identityMethod: 'digilocker',
+          identityDetailsVerified: true,
+        }),
+      )
+      .mockResolvedValueOnce({ dateOfBirth: '1990-01-01', address: '1 Synthetic Lane' });
+    inEnglish(<OnboardingView />);
+    expect(await screen.findByText('1 Synthetic Lane')).toBeTruthy();
+    expect(screen.getByText(/1990/)).toBeTruthy();
+    expect(screen.getByText(/cannot be edited/)).toBeTruthy();
+    expect(state.api.mock.calls.at(-1)?.[0]).toBe('/provider/application/identity/details');
+  });
+
+  it('KY-07 uploads another identity document as the fallback, with consent', async () => {
+    state.api.mockResolvedValueOnce(application()).mockResolvedValueOnce(
+      application({
+        identity: 'in_review',
+        identityMethod: 'manual',
+        identityDocumentKind: 'passport',
+        missing: [],
+      }),
+    );
+    inEnglish(<OnboardingView />);
+    const upload = await screen.findByRole('button', { name: 'Upload identity document' });
+    expect(screen.getByText('Do not upload your Aadhaar card.')).toBeTruthy();
+    fireEvent.click(screen.getByLabelText('Passport'));
+    const file = new File(['%PDF-1.7 synthetic'], 'id.pdf', { type: 'application/pdf' });
+    fireEvent.change(screen.getByLabelText(/^Choose a file/), {
+      target: { files: [file] },
+    });
+    expect((upload as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText('I agree to this identity check'));
+    fireEvent.click(upload);
+    expect(
+      await screen.findByText('Document received. Our team will check it with your application.'),
+    ).toBeTruthy();
+    expect(screen.getByText('On file: Passport')).toBeTruthy();
+    const [path, init] = state.api.mock.calls.at(-1) as [string, RequestInit];
+    expect(path).toBe('/provider/application/identity/document');
+    expect(JSON.parse(init.body as string)).toMatchObject({
+      kind: 'passport',
+      locale: 'en',
+      consentVersion: '2026-11-draft.1',
+      contentType: 'application/pdf',
+    });
   });
 });
 

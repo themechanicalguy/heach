@@ -1,5 +1,5 @@
 import { createHmac, randomUUID } from 'node:crypto';
-import type { IdentityVerifier } from './identity.port.js';
+import type { IdentityResult, IdentityVerifier, VerifiedAttributes } from './identity.port.js';
 import type { ObjectStore } from './object-store.port.js';
 import type { GatewayEvent, PaymentGateway } from './payments.port.js';
 import type { VirusScanner } from './scanner.port.js';
@@ -154,18 +154,30 @@ export class FakeVideoRooms implements VideoRooms {
 }
 
 export class FakeIdentityVerifier implements IdentityVerifier {
+  /** Set by a test to make the partner unreachable, as an outage would. */
+  failing = false;
+  /** Set by a test: the details the partner shares with a verified result (KY-03). */
+  attributes: VerifiedAttributes | undefined;
+
   /** Sends the person straight back as if they had consented; the code `approved` verifies. */
   startConsent(reference: string, returnUrl: string): Promise<{ redirectUrl: string }> {
+    if (this.failing) return Promise.reject(new Error('Identity partner unavailable'));
     const url = new URL(returnUrl);
     url.searchParams.set('code', 'approved');
     url.searchParams.set('ref', reference);
     return Promise.resolve({ redirectUrl: url.toString() });
   }
 
-  completeConsent(
-    code: string,
-  ): Promise<{ verified: boolean; documentType: 'aadhaar' | 'digilocker' }> {
-    return Promise.resolve({ verified: code === 'approved', documentType: 'digilocker' });
+  completeConsent(code: string): Promise<IdentityResult> {
+    if (this.failing) return Promise.reject(new Error('Identity partner unavailable'));
+    const verified = code === 'approved';
+    return Promise.resolve({
+      verified,
+      documentType: 'digilocker',
+      lastFour: '0000',
+      transactionId: `fake-${randomUUID()}`,
+      ...(verified && this.attributes ? { attributes: this.attributes } : {}),
+    });
   }
 }
 

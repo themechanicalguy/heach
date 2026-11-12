@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { ApplicationStatus } from '../accounts/account.repository.js';
-import { EDITABLE, missingForSubmit } from './application-rules.js';
+import { IDENTITY_CONSENT } from '../accounts/consent-versions.js';
+import { EDITABLE, identityState, missingForSubmit } from './application-rules.js';
 import { ChecklistSettings } from './checklist-settings.js';
 import { needsPayout, type OnboardingRole } from './checklists.js';
-import type { ApplicationDto, IdentityState } from './onboarding.dto.js';
+import type { ApplicationDto, IdentityDocumentKind } from './onboarding.dto.js';
 import { type DocumentRow, OnboardingRepository } from './onboarding.repository.js';
 
 /** Today in India, as YYYY-MM-DD (AV-04: the service runs on IST only). */
@@ -30,12 +31,17 @@ export class ApplicationView {
       this.checklists.for(grant.role),
     ]);
     const byItem = new Map(documents.map((row) => [row.item, row]));
-    const identityState = (identity?.status ?? 'not_started') as IdentityState;
+    const state = identityState(identity);
     return {
       role: grant.role,
       status: grant.status,
       statusReason: grant.statusReason,
-      identity: identityState,
+      identity: state,
+      identityMethod: identity?.method ?? null,
+      identityDocumentKind: (identity?.documentKind ?? null) as IdentityDocumentKind | null,
+      identityConsentVersion: IDENTITY_CONSENT.version,
+      identityNameMatch: identity?.nameMatch ?? null,
+      identityDetailsVerified: identity?.nameMatch != null && state === 'verified',
       needsPayout: needsPayout(grant.role),
       payout: payout ?? null,
       items: checklist.map((entry) => ({
@@ -45,7 +51,7 @@ export class ApplicationView {
       missing: missingForSubmit({
         role: grant.role,
         checklist,
-        identityVerified: identityState === 'verified',
+        identityOnFile: state === 'verified' || state === 'in_review',
         payoutOnFile: Boolean(payout),
         documents: cleanDocuments(documents),
         today: todayInIndia(),

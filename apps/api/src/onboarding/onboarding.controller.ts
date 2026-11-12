@@ -11,7 +11,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiServiceUnavailableResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { principalOf } from '../auth/auth.guard.js';
 import { RequireReverification } from '../auth/reverification.js';
@@ -22,10 +28,13 @@ import {
   ApplicationDto,
   DocumentUploadDto,
   IdentityCompleteDto,
+  IdentityDetailsDto,
+  IdentityDocumentDto,
   IdentityRedirectDto,
   IdentityStartDto,
   PayoutDetailsDto,
 } from './onboarding.dto.js';
+import { IdentityService } from './identity.service.js';
 import { OnboardingService } from './onboarding.service.js';
 
 /** The signed-in provider's own application (J1, PO-01 to PO-06). */
@@ -34,7 +43,10 @@ import { OnboardingService } from './onboarding.service.js';
 @Controller('v1/provider/application')
 @UseGuards(requireFlag('accounts'))
 export class OnboardingController {
-  constructor(private readonly onboarding: OnboardingService) {}
+  constructor(
+    private readonly onboarding: OnboardingService,
+    private readonly identity: IdentityService,
+  ) {}
 
   @Get()
   @Header('Cache-Control', 'no-store')
@@ -61,11 +73,12 @@ export class OnboardingController {
   @HttpCode(HttpStatus.OK)
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: IdentityRedirectDto })
+  @ApiServiceUnavailableResponse({ description: 'identity_unavailable' })
   async startIdentity(
     @Body() body: IdentityStartDto,
     @Req() request: Request,
   ): Promise<IdentityRedirectDto> {
-    return this.onboarding.startIdentity(principalOf(request), body.locale);
+    return this.identity.start(principalOf(request), body);
   }
 
   @Post('identity/complete')
@@ -76,7 +89,30 @@ export class OnboardingController {
     @Body() body: IdentityCompleteDto,
     @Req() request: Request,
   ): Promise<ApplicationDto> {
-    return this.onboarding.completeIdentity(principalOf(request), body);
+    await this.identity.complete(principalOf(request), body);
+    return this.onboarding.application(principalOf(request));
+  }
+
+  /** Date of birth and address as verified, for the provider only (KY-03). */
+  @Get('identity/details')
+  @Header('Cache-Control', 'no-store')
+  @Roles(...ONBOARDING_ROLES)
+  @ApiOkResponse({ type: IdentityDetailsDto })
+  async identityDetails(@Req() request: Request): Promise<IdentityDetailsDto> {
+    return this.identity.details(principalOf(request));
+  }
+
+  /** The fallback when Aadhaar or DigiLocker cannot be used (KY-07); upload content type. */
+  @Put('identity/document')
+  @Header('Cache-Control', 'no-store')
+  @Roles(...ONBOARDING_ROLES)
+  @ApiOkResponse({ type: ApplicationDto })
+  async identityDocument(
+    @Body() body: IdentityDocumentDto,
+    @Req() request: Request,
+  ): Promise<ApplicationDto> {
+    await this.identity.uploadDocument(principalOf(request), body);
+    return this.onboarding.application(principalOf(request));
   }
 
   @Put('payout')

@@ -72,6 +72,8 @@
     "password_too_long": "Use at most 200 characters.",
     "password_reused": "Choose a password different from the current one.",
     "application_not_in_review": "This application is not in review any more. Reload the list.",
+    "identity_not_verified": "Accept the identity document first, or request changes.",
+    "identity_not_in_review": "This identity document has already been decided. Reload the application.",
     "booking_transition_refused": "This booking cannot be changed in its current status.",
     "refund_exceeds_paid": "The refund is more than what is left to refund.",
     "provider_busy": "That provider is busy at this time.",
@@ -197,6 +199,25 @@
     "open": "Review",
     "detailTitle": "Application",
     "identity": "Identity check",
+    "identityMethod": "Checked through",
+    "identityMethods": {
+      "aadhaar": "Aadhaar (partner)",
+      "digilocker": "DigiLocker (partner)",
+      "manual": "Document reviewed by a verifier"
+    },
+    "nameMatch": "Name typed at sign-up",
+    "nameMatches": {
+      "match": "Agrees with the verified name",
+      "mismatch": "Differs from the verified name"
+    },
+    "nameMismatch": "The name typed at sign-up differed from the verified name, which is now on the profile. Check that the documents carry the verified name.",
+    "identityDocument": "Identity document",
+    "identityKinds": {
+      "voter_id": "Voter ID card",
+      "passport": "Passport",
+      "driving_licence": "Driving licence",
+      "pan_card": "PAN card"
+    },
     "payout": "Payout account",
     "payoutNone": "Not given",
     "documents": "Documents",
@@ -238,6 +259,7 @@
     "identityStates": {
       "not_started": "Not started",
       "pending": "Pending",
+      "in_review": "Document waiting for review",
       "verified": "Verified",
       "failed": "Failed"
     },

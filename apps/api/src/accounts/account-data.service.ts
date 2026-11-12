@@ -43,6 +43,12 @@ export class AccountDataService {
       const account = await this.accounts.lockForSetup(client, principal.userId);
       if (!account?.setupCompletedAt) throw reason(ConflictException, 'setup_incomplete');
       assertFitsRoles(account, change);
+      if (
+        changesVerified(account, change) &&
+        (await this.accounts.identityLocked(client, account.id))
+      ) {
+        throw reason(ConflictException, 'identity_locked');
+      }
       await this.accounts.correctProfile(client, account.id, change);
       if (change.organisationName) {
         await client.query(
@@ -129,4 +135,11 @@ function assertFitsRoles(account: AccountRecord, change: ProfileCorrection): voi
     throw reason(BadRequestException, 'field_not_for_role');
   }
   if (change.languages.length === 0) throw reason(BadRequestException, 'details_missing');
+}
+
+/** Whether the change touches the name or gender the identity check may have verified (KY-03). */
+function changesVerified(account: AccountRecord, change: ProfileCorrection): boolean {
+  const name = change.fullName !== undefined && change.fullName !== account.draft.fullName;
+  const gender = change.gender !== undefined && change.gender !== account.draft.gender;
+  return name || gender;
 }

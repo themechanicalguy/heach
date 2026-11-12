@@ -43,6 +43,7 @@ export type ProviderDocument = components['schemas']['DocumentDto'];
 export type DocumentUpload = components['schemas']['DocumentUploadDto'];
 export type PayoutDetails = components['schemas']['PayoutDetailsDto'];
 export type IdentityRedirect = components['schemas']['IdentityRedirectDto'];
+export type IdentityDetails = components['schemas']['IdentityDetailsDto'];
 export type ApplicationSummary = components['schemas']['ApplicationSummaryDto'];
 export type ApplicationReview = components['schemas']['ApplicationReviewDto'];
 export type Decision = components['schemas']['DecisionDto'];

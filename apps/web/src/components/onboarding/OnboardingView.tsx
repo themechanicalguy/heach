@@ -90,7 +90,7 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
           current={steps.indexOf(step) + 1}
           total={steps.length}
         />
-        {step === 'identity' && <IdentityStep application={application} />}
+        {step === 'identity' && <IdentityStep application={application} onSaved={setApplication} />}
         {step === 'documents' && <Documents application={application} onSaved={setApplication} />}
         {step === 'payout' && application.needsPayout && (
           <PayoutForm application={application} onSaved={setApplication} />

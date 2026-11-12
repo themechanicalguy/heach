@@ -22,7 +22,19 @@ const APPLICATION_STATUSES = [
   'rejected',
   'suspended',
 ] as const;
-const IDENTITY_STATES = ['not_started', 'pending', 'verified', 'failed'] as const;
+// `in_review`: a fallback document is waiting for a verifier (KY-07).
+const IDENTITY_STATES = ['not_started', 'pending', 'in_review', 'verified', 'failed'] as const;
+const IDENTITY_METHODS = ['aadhaar', 'digilocker', 'manual'] as const;
+export type IdentityMethod = (typeof IDENTITY_METHODS)[number];
+// Never an Aadhaar card: its copy would carry the full number (PR-03).
+export const IDENTITY_DOCUMENT_KINDS = [
+  'voter_id',
+  'passport',
+  'driving_licence',
+  'pan_card',
+] as const;
+export type IdentityDocumentKind = (typeof IDENTITY_DOCUMENT_KINDS)[number];
+const LOCALES = ['or', 'en', 'hi'] as const;
 export type IdentityState = (typeof IDENTITY_STATES)[number];
 // Base64 of at most 5 MB, the upload limit (EN-07).
 const MAX_BASE64 = 7_000_000;
@@ -117,6 +129,31 @@ export class ApplicationDto {
   @ApiProperty({ enum: IDENTITY_STATES })
   identity!: IdentityState;
 
+  @ApiProperty({
+    enum: IDENTITY_METHODS,
+    nullable: true,
+    description: 'How it was checked (KY-09)',
+  })
+  identityMethod!: IdentityMethod | null;
+
+  @ApiProperty({ enum: IDENTITY_DOCUMENT_KINDS, nullable: true })
+  identityDocumentKind!: IdentityDocumentKind | null;
+
+  @ApiProperty({ description: 'Version of the identity consent text in force (PR-01)' })
+  identityConsentVersion!: string;
+
+  @ApiProperty({
+    enum: ['match', 'mismatch'],
+    nullable: true,
+    description: 'Whether the name typed at sign-up agreed with the verified name (KY-04)',
+  })
+  identityNameMatch!: 'match' | 'mismatch' | null;
+
+  @ApiProperty({
+    description: 'Name and gender came from the identity check and are locked (KY-03)',
+  })
+  identityDetailsVerified!: boolean;
+
   @ApiProperty()
   needsPayout!: boolean;
 
@@ -133,10 +170,40 @@ export class ApplicationDto {
   editable!: boolean;
 }
 
+const CONSENT_VERSION = /^[a-z0-9.-]{1,40}$/;
+
 export class IdentityStartDto {
-  @ApiProperty({ enum: ['or', 'en', 'hi'], description: 'Language of the page to return to' })
-  @IsIn(['or', 'en', 'hi'])
-  locale!: 'or' | 'en' | 'hi';
+  @ApiProperty({ enum: LOCALES, description: 'Language of the page to return to' })
+  @IsIn(LOCALES)
+  locale!: (typeof LOCALES)[number];
+
+  @ApiProperty({ description: 'Version of the consent text the provider agreed to (PR-01)' })
+  @Matches(CONSENT_VERSION)
+  consentVersion!: string;
+}
+
+/** The fallback identity document (KY-07), sent with the upload content type. */
+export class IdentityDocumentDto extends UploadDto {
+  @ApiProperty({ enum: IDENTITY_DOCUMENT_KINDS })
+  @IsIn(IDENTITY_DOCUMENT_KINDS)
+  kind!: IdentityDocumentKind;
+
+  @ApiProperty({ enum: LOCALES, description: 'Language the consent text was read in' })
+  @IsIn(LOCALES)
+  locale!: (typeof LOCALES)[number];
+
+  @ApiProperty({ description: 'Version of the consent text the provider agreed to (PR-01)' })
+  @Matches(CONSENT_VERSION)
+  consentVersion!: string;
+}
+
+/** The provider's own verified details that are not on the profile (KY-03). Restricted. */
+export class IdentityDetailsDto {
+  @ApiProperty({ format: 'date' })
+  dateOfBirth!: string;
+
+  @ApiProperty()
+  address!: string;
 }
 
 export class IdentityRedirectDto {
@@ -250,6 +317,12 @@ export class DocumentReviewDto {
   @ValidateIf((body: DocumentReviewDto) => body.status === 'rejected')
   @Matches(/^[a-z_]{1,40}$/)
   reason?: string;
+}
+
+export class IdentityReviewDto {
+  @ApiProperty({ enum: ['accepted', 'rejected'] })
+  @IsIn(['accepted', 'rejected'])
+  status!: 'accepted' | 'rejected';
 }
 
 export const DECISION_REASONS = [

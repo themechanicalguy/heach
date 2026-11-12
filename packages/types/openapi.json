@@ -1433,6 +1433,9 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "identity_unavailable"
           }
         },
         "security": [
@@ -1453,6 +1456,64 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/IdentityCompleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/application/identity/details": {
+      "get": {
+        "operationId": "OnboardingController_identityDetails",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/application/identity/document": {
+      "put": {
+        "operationId": "OnboardingController_identityDocument",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityDocumentDto"
               }
             }
           }
@@ -1668,6 +1729,75 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DocumentReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/applications/{accountId}/identity-document": {
+      "get": {
+        "operationId": "VerificationController_identityDocument",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/applications/{accountId}/identity": {
+      "post": {
+        "operationId": "VerificationController_reviewIdentity",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityReviewDto"
               }
             }
           }
@@ -7900,7 +8030,32 @@
           },
           "identity": {
             "type": "string",
-            "enum": ["not_started", "pending", "verified", "failed"]
+            "enum": ["not_started", "pending", "in_review", "verified", "failed"]
+          },
+          "identityMethod": {
+            "type": "string",
+            "enum": ["aadhaar", "digilocker", "manual"],
+            "nullable": true,
+            "description": "How it was checked (KY-09)"
+          },
+          "identityDocumentKind": {
+            "type": "string",
+            "enum": ["voter_id", "passport", "driving_licence", "pan_card"],
+            "nullable": true
+          },
+          "identityConsentVersion": {
+            "type": "string",
+            "description": "Version of the identity consent text in force (PR-01)"
+          },
+          "identityNameMatch": {
+            "type": "string",
+            "enum": ["match", "mismatch"],
+            "nullable": true,
+            "description": "Whether the name typed at sign-up agreed with the verified name (KY-04)"
+          },
+          "identityDetailsVerified": {
+            "type": "boolean",
+            "description": "Name and gender came from the identity check and are locked (KY-03)"
           },
           "needsPayout": {
             "type": "boolean"
@@ -7937,6 +8092,11 @@
           "status",
           "statusReason",
           "identity",
+          "identityMethod",
+          "identityDocumentKind",
+          "identityConsentVersion",
+          "identityNameMatch",
+          "identityDetailsVerified",
           "needsPayout",
           "payout",
           "items",
@@ -7974,9 +8134,13 @@
             "type": "string",
             "enum": ["or", "en", "hi"],
             "description": "Language of the page to return to"
+          },
+          "consentVersion": {
+            "type": "string",
+            "description": "Version of the consent text the provider agreed to (PR-01)"
           }
         },
-        "required": ["locale"]
+        "required": ["locale", "consentVersion"]
       },
       "IdentityRedirectDto": {
         "type": "object",
@@ -8000,6 +8164,46 @@
           }
         },
         "required": ["code", "reference"]
+      },
+      "IdentityDetailsDto": {
+        "type": "object",
+        "properties": {
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": ["dateOfBirth", "address"]
+      },
+      "IdentityDocumentDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string",
+            "description": "The file, base64 encoded; at most 5 MB decoded"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["voter_id", "passport", "driving_licence", "pan_card"]
+          },
+          "locale": {
+            "type": "string",
+            "enum": ["or", "en", "hi"],
+            "description": "Language the consent text was read in"
+          },
+          "consentVersion": {
+            "type": "string",
+            "description": "Version of the consent text the provider agreed to (PR-01)"
+          }
+        },
+        "required": ["contentType", "contentBase64", "kind", "locale", "consentVersion"]
       },
       "PayoutDetailsDto": {
         "type": "object",
@@ -8108,7 +8312,32 @@
           },
           "identity": {
             "type": "string",
-            "enum": ["not_started", "pending", "verified", "failed"]
+            "enum": ["not_started", "pending", "in_review", "verified", "failed"]
+          },
+          "identityMethod": {
+            "type": "string",
+            "enum": ["aadhaar", "digilocker", "manual"],
+            "nullable": true,
+            "description": "How it was checked (KY-09)"
+          },
+          "identityDocumentKind": {
+            "type": "string",
+            "enum": ["voter_id", "passport", "driving_licence", "pan_card"],
+            "nullable": true
+          },
+          "identityConsentVersion": {
+            "type": "string",
+            "description": "Version of the identity consent text in force (PR-01)"
+          },
+          "identityNameMatch": {
+            "type": "string",
+            "enum": ["match", "mismatch"],
+            "nullable": true,
+            "description": "Whether the name typed at sign-up agreed with the verified name (KY-04)"
+          },
+          "identityDetailsVerified": {
+            "type": "boolean",
+            "description": "Name and gender came from the identity check and are locked (KY-03)"
           },
           "needsPayout": {
             "type": "boolean"
@@ -8159,6 +8388,11 @@
           "status",
           "statusReason",
           "identity",
+          "identityMethod",
+          "identityDocumentKind",
+          "identityConsentVersion",
+          "identityNameMatch",
+          "identityDetailsVerified",
           "needsPayout",
           "payout",
           "items",
@@ -8199,6 +8433,16 @@
           }
         },
         "required": ["documentId", "status"]
+      },
+      "IdentityReviewDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["accepted", "rejected"]
+          }
+        },
+        "required": ["status"]
       },
       "DecisionDto": {
         "type": "object",
