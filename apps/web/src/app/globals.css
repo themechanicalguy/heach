@@ -1203,6 +1203,11 @@ body {
   gap: 1.5rem;
   align-items: start;
 }
+.profile-photo {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .onboarding-steps {
   display: flex;
   flex-wrap: wrap;

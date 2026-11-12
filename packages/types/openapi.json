@@ -1599,6 +1599,118 @@
         "tags": ["provider"]
       }
     },
+    "/v1/provider/profile": {
+      "get": {
+        "operationId": "ProfileController_view",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderProfileDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      },
+      "put": {
+        "operationId": "ProfileController_save",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderProfileInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderProfileDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
+    "/v1/provider/profile/photo": {
+      "get": {
+        "operationId": "ProfileController_photo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      },
+      "put": {
+        "operationId": "ProfileController_uploadPhoto",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderProfileDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["provider"]
+      }
+    },
     "/admin/v1/applications": {
       "get": {
         "operationId": "VerificationController_queue",
@@ -1736,6 +1848,39 @@
         "responses": {
           "204": {
             "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["admin"]
+      }
+    },
+    "/admin/v1/applications/{accountId}/photo": {
+      "get": {
+        "operationId": "VerificationController_photo",
+        "parameters": [
+          {
+            "name": "accountId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2504,6 +2649,34 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProviderProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["search"]
+      }
+    },
+    "/v1/providers/{id}/photo": {
+      "get": {
+        "operationId": "SearchController_photo",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoredFileDto"
                 }
               }
             }
@@ -7917,6 +8090,27 @@
         },
         "required": ["id", "template", "params", "bookingId", "createdAt", "readAt", "override"]
       },
+      "ProviderProfileDetailsDto": {
+        "type": "object",
+        "properties": {
+          "qualifications": {
+            "type": "string",
+            "nullable": true
+          },
+          "experienceYears": {
+            "type": "number",
+            "nullable": true
+          },
+          "hasPhoto": {
+            "type": "boolean"
+          },
+          "photoVerified": {
+            "type": "boolean",
+            "description": "The photo came from the identity check and is locked (KY-03)"
+          }
+        },
+        "required": ["qualifications", "experienceYears", "hasPhoto", "photoVerified"]
+      },
       "PayoutSummaryDto": {
         "type": "object",
         "properties": {
@@ -8069,6 +8263,9 @@
             "type": "boolean",
             "description": "Name and gender came from the identity check and are locked (KY-03)"
           },
+          "profile": {
+            "$ref": "#/components/schemas/ProviderProfileDetailsDto"
+          },
           "needsPayout": {
             "type": "boolean"
           },
@@ -8109,6 +8306,7 @@
           "identityConsentVersion",
           "identityNameMatch",
           "identityDetailsVerified",
+          "profile",
           "needsPayout",
           "payout",
           "items",
@@ -8243,6 +8441,47 @@
         },
         "required": ["method", "holderName"]
       },
+      "ProviderProfileInputDto": {
+        "type": "object",
+        "properties": {
+          "qualifications": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "experienceYears": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60
+          }
+        }
+      },
+      "StoredFileDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string"
+          }
+        },
+        "required": ["contentType", "contentBase64"]
+      },
+      "UploadDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": ["application/pdf", "image/jpeg", "image/png"]
+          },
+          "contentBase64": {
+            "type": "string",
+            "description": "The file, base64 encoded; at most 5 MB decoded"
+          }
+        },
+        "required": ["contentType", "contentBase64"]
+      },
       "ApplicationSummaryDto": {
         "type": "object",
         "properties": {
@@ -8351,6 +8590,9 @@
             "type": "boolean",
             "description": "Name and gender came from the identity check and are locked (KY-03)"
           },
+          "profile": {
+            "$ref": "#/components/schemas/ProviderProfileDetailsDto"
+          },
           "needsPayout": {
             "type": "boolean"
           },
@@ -8405,6 +8647,7 @@
           "identityConsentVersion",
           "identityNameMatch",
           "identityDetailsVerified",
+          "profile",
           "needsPayout",
           "payout",
           "items",
@@ -8414,19 +8657,6 @@
           "fullName",
           "history"
         ]
-      },
-      "StoredFileDto": {
-        "type": "object",
-        "properties": {
-          "contentType": {
-            "type": "string",
-            "enum": ["application/pdf", "image/jpeg", "image/png"]
-          },
-          "contentBase64": {
-            "type": "string"
-          }
-        },
-        "required": ["contentType", "contentBase64"]
       },
       "DocumentReviewDto": {
         "type": "object",
@@ -9105,6 +9335,19 @@
             "nullable": true,
             "description": "Nursing council registration (PO-05)"
           },
+          "qualifications": {
+            "type": "string",
+            "nullable": true,
+            "description": "As the provider wrote them (PO-05)"
+          },
+          "experienceYears": {
+            "type": "number",
+            "nullable": true
+          },
+          "hasPhoto": {
+            "type": "boolean",
+            "description": "A photo is at `providers/:id/photo`"
+          },
           "listings": {
             "type": "array",
             "items": {
@@ -9136,6 +9379,9 @@
           "languages",
           "identityVerified",
           "registrationNumber",
+          "qualifications",
+          "experienceYears",
+          "hasPhoto",
           "listings",
           "pins",
           "travelSurchargePaise",
@@ -9496,20 +9742,6 @@
             "description": "Mobile number of that person"
           }
         }
-      },
-      "UploadDto": {
-        "type": "object",
-        "properties": {
-          "contentType": {
-            "type": "string",
-            "enum": ["application/pdf", "image/jpeg", "image/png"]
-          },
-          "contentBase64": {
-            "type": "string",
-            "description": "The file, base64 encoded; at most 5 MB decoded"
-          }
-        },
-        "required": ["contentType", "contentBase64"]
       },
       "CreateBookingDto": {
         "type": "object",

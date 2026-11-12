@@ -178,6 +178,15 @@ export class ProviderProfileDto {
   })
   registrationNumber!: string | null;
 
+  @ApiProperty({ type: String, nullable: true, description: 'As the provider wrote them (PO-05)' })
+  qualifications!: string | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  experienceYears!: number | null;
+
+  @ApiProperty({ description: 'A photo is at `providers/:id/photo`' })
+  hasPhoto!: boolean;
+
   @ApiProperty({ type: [ProfileListingDto] })
   listings!: ProfileListingDto[];
 

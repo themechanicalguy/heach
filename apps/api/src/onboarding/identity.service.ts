@@ -32,6 +32,8 @@ import type {
 } from './onboarding.dto.js';
 import { namesMatch } from './name-match.js';
 import { OnboardingRepository } from './onboarding.repository.js';
+import { ProfileRepository } from './profile.repository.js';
+import { ProfileService } from './profile.service.js';
 import { type PreparedShare, SharedDocumentsService } from './shared-documents.service.js';
 
 const ENTITY = 'provider_application';
@@ -50,6 +52,8 @@ export class IdentityService {
     private readonly gate: ApplicationGate,
     private readonly uploads: UploadsService,
     private readonly shared: SharedDocumentsService,
+    private readonly profiles: ProfileService,
+    private readonly photos: ProfileRepository,
     private readonly audit: AuditService,
     private readonly env: EnvVars,
     @Inject(IDENTITY_VERIFIER) private readonly identity: IdentityVerifier,
@@ -62,6 +66,7 @@ export class IdentityService {
     const replaced = await this.gate.editable(principal.userId, async (client) => {
       await this.consent(client, principal.userId, input.locale);
       await this.record('identity.started', principal.userId, client);
+      await this.photos.unlockPhoto(client, principal.userId);
       return this.onboarding.startIdentity(client, principal.userId, reference);
     });
     if (replaced) await this.uploads.discard(replaced);
@@ -75,6 +80,9 @@ export class IdentityService {
     const detail = await this.encrypt(detailOf(result));
     const verifiedDetails = attributes ? await this.encrypt(restrictedOf(attributes)) : null;
     const shares = await this.shares(principal.userId, result);
+    const photo = attributes?.photo
+      ? await this.profiles.prepareVerified(principal.userId, attributes.photo)
+      : undefined;
     const discard = await this.gate.editable(principal.userId, async (client) => {
       const typed = await this.onboarding.fullName(principal.userId, client);
       const finished = await this.onboarding.finishIdentity(
@@ -94,7 +102,10 @@ export class IdentityService {
         await this.onboarding.prefillProfile(client, principal.userId, profileOf(attributes));
       const action = result.verified ? 'identity.verified' : 'identity.failed';
       await this.record(action, principal.userId, client);
-      return this.shared.save(client, principal.userId, shares);
+      const discard = await this.shared.save(client, principal.userId, shares);
+      const replaced =
+        photo && (await this.profiles.setPhoto(client, principal.userId, photo, true));
+      return replaced ? [...discard, replaced] : discard;
     });
     await this.shared.discard(discard);
   }
@@ -128,6 +139,7 @@ export class IdentityService {
       if (prepared.verdict === 'infected') return undefined;
       await this.consent(client, principal.userId, input.locale);
       await this.record('identity.document_uploaded', principal.userId, client);
+      await this.photos.unlockPhoto(client, principal.userId);
       return this.onboarding.saveIdentityDocument(client, principal.userId, {
         reference: randomUUID(),
         objectId: prepared.id,

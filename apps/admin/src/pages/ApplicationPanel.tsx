@@ -8,6 +8,7 @@ import { usePending } from '../use-pending';
 import { DecisionForm } from './DecisionForm';
 import { IdentityDocumentRow } from './IdentityDocumentRow';
 import { label } from './labels';
+import { ProfileFacts } from './ProfileFacts';
 import { ReviewButtons } from './ReviewButtons';
 import { StoredFileButton } from './StoredFileButton';
 
@@ -70,6 +71,7 @@ export function ApplicationPanel({ accountId, onDecided, onClose }: Readonly<Pro
         <Notice tone="warning">{t('verification.nameMismatch')}</Notice>
       )}
       <IdentityDocumentRow accountId={accountId} application={application} onReviewed={reload} />
+      <ProfileFacts accountId={accountId} profile={application.profile} />
       <h3>{t('verification.documents')}</h3>
       <ul className="admin-list">
         {application.items.map((entry) => (

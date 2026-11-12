@@ -6,6 +6,7 @@ import { ChecklistSettings } from './checklist-settings.js';
 import { needsPayout, type OnboardingRole } from './checklists.js';
 import type { ApplicationDto, IdentityDocumentKind } from './onboarding.dto.js';
 import { type DocumentRow, OnboardingRepository } from './onboarding.repository.js';
+import { ProfileService } from './profile.service.js';
 
 /** Today in India, as YYYY-MM-DD (AV-04: the service runs on IST only). */
 export function todayInIndia(now = new Date()): string {
@@ -18,17 +19,19 @@ export class ApplicationView {
   constructor(
     private readonly onboarding: OnboardingRepository,
     private readonly checklists: ChecklistSettings,
+    private readonly profiles: ProfileService,
   ) {}
 
   async build(
     accountId: string,
     grant: { role: OnboardingRole; status: ApplicationStatus; statusReason: string | null },
   ): Promise<ApplicationDto> {
-    const [documents, identity, payout, checklist] = await Promise.all([
+    const [documents, identity, payout, checklist, profile] = await Promise.all([
       this.onboarding.documents(accountId),
       this.onboarding.identity(accountId),
       this.onboarding.payout(accountId),
       this.checklists.for(grant.role),
+      this.profiles.view(accountId),
     ]);
     const byItem = new Map(documents.map((row) => [row.item, row]));
     const state = identityState(identity);
@@ -42,6 +45,7 @@ export class ApplicationView {
       identityConsentVersion: IDENTITY_CONSENT.version,
       identityNameMatch: identity?.nameMatch ?? null,
       identityDetailsVerified: identity?.nameMatch != null && state === 'verified',
+      profile,
       needsPayout: needsPayout(grant.role),
       payout: payout ?? null,
       items: checklist.map((entry) => ({

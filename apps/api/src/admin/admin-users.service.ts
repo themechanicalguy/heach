@@ -2,6 +2,7 @@ import { CoveragePinsCache } from '../search/coverage-pins.cache.js';
 import type { BlindIndexer, FieldEncryptor } from '@heach/crypto';
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service.js';
+import { currentContext } from '../common/request-context.js';
 import { SessionService } from '../auth/session.service.js';
 import { BLIND_INDEXER, FIELD_ENCRYPTOR } from '../crypto/crypto.tokens.js';
 import { RoleAvailability } from '../flags/role-availability.js';
@@ -80,6 +81,15 @@ export class AdminUsersService {
     if (!(await this.users.find(id))) throw new NotFoundException();
     const changed = await this.users.transaction(async (client) => {
       if (!(await this.users.setStatus(client, id, change))) return false;
+      const principal = currentContext()?.principal;
+      await this.users.moveApplication(
+        client,
+        id,
+        change.status === 'suspended'
+          ? { from: 'approved', to: 'suspended' }
+          : { from: 'suspended', to: 'approved' },
+        { id: principal?.userId ?? null, role: principal?.role ?? 'system' },
+      );
       await this.audit.record({ action, entity: ENTITY, entityId: id }, client);
       return true;
     });

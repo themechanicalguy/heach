@@ -20,6 +20,7 @@ import type {
   StoredFileDto,
 } from './onboarding.dto.js';
 import { OnboardingRepository } from './onboarding.repository.js';
+import { ProfileService } from './profile.service.js';
 
 const ENTITY = 'provider_application';
 const OPEN: readonly ApplicationStatus[] = ['submitted', 'under_review'];
@@ -44,6 +45,7 @@ export class VerificationService {
     private readonly audit: AuditService,
     private readonly notifier: Notifier,
     private readonly coverage: CoveragePinsCache,
+    private readonly profiles: ProfileService,
   ) {}
 
   queue(view: 'open' | 'decided' = 'open'): Promise<ApplicationSummaryDto[]> {
@@ -98,6 +100,12 @@ export class VerificationService {
         client,
       );
     });
+  }
+
+  /** The profile photo as the provider will publish it (PO-05); the opening is audited. */
+  async photo(accountId: string): Promise<StoredFileDto> {
+    await this.grant(accountId);
+    return this.profiles.photo(accountId, { audit: true });
   }
 
   /** The fallback identity document (KY-07); every opening is audited. */

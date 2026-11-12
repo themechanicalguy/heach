@@ -28,6 +28,22 @@ const PUBLISHED = `${ELIGIBLE}
                        FROM app.review v WHERE v.provider_account_id = l.provider_account_id
                         AND NOT v.hidden) rv ON true`;
 
+interface PublicFacts {
+  identityVerified: boolean;
+  registrationNumber: string | null;
+  qualifications: string | null;
+  experienceYears: number | null;
+  hasPhoto: boolean;
+}
+
+const NO_FACTS: PublicFacts = {
+  identityVerified: false,
+  registrationNumber: null,
+  qualifications: null,
+  experienceYears: null,
+  hasPhoto: false,
+};
+
 const RESULT_COLUMNS = `l.id AS "listingId", l.provider_account_id AS "providerId",
   coalesce(o.name, p.full_name) AS name, r.role, p.gender, p.languages,
   i.code AS "itemCode", t.name AS "itemName", i.kind, i.prescription_required AS "prescriptionRequired",
@@ -144,16 +160,26 @@ export class SearchRepository {
   }
 
   async publicFacts(providerId: string) {
-    const { rows } = await this.pool.query<{
-      identityVerified: boolean;
-      registrationNumber: string | null;
-    }>(
+    const { rows } = await this.pool.query<PublicFacts>(
       `SELECT EXISTS (SELECT 1 FROM app.identity_check c WHERE c.account_id = $1 AND c.status = 'verified') AS "identityVerified",
               (SELECT d.reference FROM app.provider_document d
-                WHERE d.account_id = $1 AND d.item = 'nursing_registration' AND d.review_status <> 'rejected') AS "registrationNumber"`,
+                WHERE d.account_id = $1 AND d.item = 'nursing_registration' AND d.review_status <> 'rejected') AS "registrationNumber",
+              f.qualifications, f.experience_years AS "experienceYears",
+              f.photo_object_id IS NOT NULL AS "hasPhoto"
+         FROM (SELECT 1) one LEFT JOIN app.provider_profile f ON f.account_id = $1`,
       [providerId],
     );
-    return rows[0] ?? { identityVerified: false, registrationNumber: null };
+    return rows[0] ?? NO_FACTS;
+  }
+
+  /** Whether the provider has a published listing, so their profile and photo are public. */
+  async published(providerId: string): Promise<boolean> {
+    const { rows } = await this.pool.query(
+      `SELECT 1 FROM app.listing l ${ELIGIBLE}
+        WHERE l.active AND l.provider_account_id = $1 LIMIT 1`,
+      [providerId],
+    );
+    return rows.length > 0;
   }
 
   async pins(providerId: string): Promise<string[]> {

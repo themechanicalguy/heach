@@ -820,6 +820,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/provider/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProfileController_view'];
+    put: operations['ProfileController_save'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/profile/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProfileController_photo'];
+    put: operations['ProfileController_uploadPhoto'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/admin/v1/applications': {
     parameters: {
       query?: never;
@@ -878,6 +910,22 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['VerificationController_reviewDocument'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VerificationController_photo'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -1180,6 +1228,22 @@ export interface paths {
       cookie?: never;
     };
     get: operations['SearchController_profile'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/providers/{id}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SearchController_photo'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3627,6 +3691,13 @@ export interface components {
       /** @description Edited wording of the template in the requested language (AD-09) */
       override: string | null;
     };
+    ProviderProfileDetailsDto: {
+      qualifications: string | null;
+      experienceYears: number | null;
+      hasPhoto: boolean;
+      /** @description The photo came from the identity check and is locked (KY-03) */
+      photoVerified: boolean;
+    };
     PayoutSummaryDto: {
       /** @enum {string} */
       method: 'bank' | 'upi';
@@ -3694,6 +3765,7 @@ export interface components {
       identityNameMatch: 'match' | 'mismatch' | null;
       /** @description Name and gender came from the identity check and are locked (KY-03) */
       identityDetailsVerified: boolean;
+      profile: components['schemas']['ProviderProfileDetailsDto'];
       needsPayout: boolean;
       payout: components['schemas']['PayoutSummaryDto'] | null;
       items: components['schemas']['ChecklistEntryDto'][];
@@ -3759,6 +3831,21 @@ export interface components {
       /** @description UPI ID, for example name@bank */
       upiId?: string;
     };
+    ProviderProfileInputDto: {
+      qualifications?: string;
+      experienceYears?: number;
+    };
+    StoredFileDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      contentBase64: string;
+    };
+    UploadDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+    };
     ApplicationSummaryDto: {
       /** Format: uuid */
       accountId: string;
@@ -3814,6 +3901,7 @@ export interface components {
       identityNameMatch: 'match' | 'mismatch' | null;
       /** @description Name and gender came from the identity check and are locked (KY-03) */
       identityDetailsVerified: boolean;
+      profile: components['schemas']['ProviderProfileDetailsDto'];
       needsPayout: boolean;
       payout: components['schemas']['PayoutSummaryDto'] | null;
       items: components['schemas']['ChecklistEntryDto'][];
@@ -3825,11 +3913,6 @@ export interface components {
       accountId: string;
       fullName: string | null;
       history: components['schemas']['ApplicationEventDto'][];
-    };
-    StoredFileDto: {
-      /** @enum {string} */
-      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
-      contentBase64: string;
     };
     DocumentReviewDto: {
       /** Format: uuid */
@@ -4064,6 +4147,11 @@ export interface components {
       identityVerified: boolean;
       /** @description Nursing council registration (PO-05) */
       registrationNumber: string | null;
+      /** @description As the provider wrote them (PO-05) */
+      qualifications: string | null;
+      experienceYears: number | null;
+      /** @description A photo is at `providers/:id/photo` */
+      hasPhoto: boolean;
       listings: components['schemas']['ProfileListingDto'][];
       pins: string[];
       travelSurchargePaise: number;
@@ -4205,12 +4293,6 @@ export interface components {
       contactName?: string;
       /** @description Mobile number of that person */
       contactPhone?: string;
-    };
-    UploadDto: {
-      /** @enum {string} */
-      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
-      /** @description The file, base64 encoded; at most 5 MB decoded */
-      contentBase64: string;
     };
     CreateBookingDto: {
       /**
@@ -6510,6 +6592,90 @@ export interface operations {
       };
     };
   };
+  ProfileController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderProfileDetailsDto'];
+        };
+      };
+    };
+  };
+  ProfileController_save: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProviderProfileInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderProfileDetailsDto'];
+        };
+      };
+    };
+  };
+  ProfileController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  ProfileController_uploadPhoto: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UploadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderProfileDetailsDto'];
+        };
+      };
+    };
+  };
   VerificationController_queue: {
     parameters: {
       query?: {
@@ -6594,6 +6760,27 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  VerificationController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
       };
     };
   };
@@ -7063,6 +7250,27 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ProviderProfileDto'];
+        };
+      };
+    };
+  };
+  SearchController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
         };
       };
     };

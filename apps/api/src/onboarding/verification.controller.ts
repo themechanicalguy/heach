@@ -79,6 +79,14 @@ export class VerificationController {
     await this.verification.reviewDocument(accountId, body);
   }
 
+  @Get(':accountId/photo')
+  @Header('Cache-Control', 'no-store')
+  @Roles('super_admin', 'verifier')
+  @ApiOkResponse({ type: StoredFileDto })
+  async photo(@Param('accountId', uuid) accountId: string): Promise<StoredFileDto> {
+    return this.verification.photo(accountId);
+  }
+
   @Get(':accountId/identity-document')
   @Header('Cache-Control', 'no-store')
   @Roles('super_admin', 'verifier')

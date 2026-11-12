@@ -2,12 +2,15 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBase64,
   IsIn,
+  IsInt,
   IsISO8601,
   IsOptional,
   IsString,
   Length,
   Matches,
+  Max,
   MaxLength,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import { NAME_PATTERN } from '../accounts/setup-rules.js';
@@ -125,6 +128,36 @@ export class PayoutSummaryDto {
   hint!: string;
 }
 
+/** What the public profile shows beyond the account details (PO-05). */
+export class ProviderProfileDetailsDto {
+  @ApiProperty({ type: String, nullable: true })
+  qualifications!: string | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  experienceYears!: number | null;
+
+  @ApiProperty()
+  hasPhoto!: boolean;
+
+  @ApiProperty({ description: 'The photo came from the identity check and is locked (KY-03)' })
+  photoVerified!: boolean;
+}
+
+export class ProviderProfileInputDto {
+  @ApiPropertyOptional({ maxLength: 300 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  qualifications?: string;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 60 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(60)
+  experienceYears?: number;
+}
+
 export class ApplicationDto {
   @ApiProperty()
   role!: string;
@@ -162,6 +195,9 @@ export class ApplicationDto {
     description: 'Name and gender came from the identity check and are locked (KY-03)',
   })
   identityDetailsVerified!: boolean;
+
+  @ApiProperty({ type: ProviderProfileDetailsDto })
+  profile!: ProviderProfileDetailsDto;
 
   @ApiProperty()
   needsPayout!: boolean;

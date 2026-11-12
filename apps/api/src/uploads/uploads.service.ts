@@ -79,8 +79,11 @@ export class UploadsService {
     await this.audit.record({ action, entity: ENTITY, entityId: upload.id }, client);
   }
 
-  /** The file if it is clean; the caller has already checked that the reader may see it. */
-  async read(id: string): Promise<StoredFile | undefined> {
+  /**
+   * The file if it is clean; the caller has already checked that the reader may see it. Reads
+   * are audited unless the file is public (a published profile photo).
+   */
+  async read(id: string, options = { audit: true }): Promise<StoredFile | undefined> {
     const { rows } = await this.pool.query<{ content_type: string; scan_status: string }>(
       'SELECT content_type, scan_status FROM app.stored_object WHERE id = $1',
       [id],
@@ -90,7 +93,9 @@ export class UploadsService {
     const body = await this.store.get(objectKey(id));
     if (!body) return undefined;
     const contentBase64 = await this.encryptor.decrypt(JSON.parse(body) as EncryptedField);
-    await this.audit.record({ action: `${ENTITY}.read`, entity: ENTITY, entityId: id });
+    if (options.audit) {
+      await this.audit.record({ action: `${ENTITY}.read`, entity: ENTITY, entityId: id });
+    }
     return { contentType: row.content_type, contentBase64 };
   }
 

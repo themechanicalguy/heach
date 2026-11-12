@@ -35,6 +35,7 @@ const application = (overrides: Partial<Application> = {}): Application => ({
   identityConsentVersion: '2026-11-draft.1',
   identityNameMatch: null,
   identityDetailsVerified: false,
+  profile: { qualifications: null, experienceYears: null, hasPhoto: false, photoVerified: false },
   needsPayout: true,
   payout: null,
   editable: true,
@@ -97,7 +98,7 @@ it.each(['or', 'en', 'hi'] as const)(
       </I18nProvider>,
     );
     for (const [index, step] of (
-      ['identity', 'documents', 'payout', 'review'] as const
+      ['identity', 'documents', 'profile', 'payout', 'review'] as const
     ).entries()) {
       const label = messages.application.steps[step];
       fireEvent.click(
@@ -302,6 +303,55 @@ describe('OnboardingView verified details and fallback (KY-03, KY-07)', () => {
   });
 });
 
+describe('OnboardingView profile step (PO-05)', () => {
+  it('PO-05 saves qualifications and experience, and shows them in the review', async () => {
+    const profile = {
+      qualifications: 'GNM, synthetic',
+      experienceYears: 7,
+      hasPhoto: false,
+      photoVerified: false,
+    };
+    state.api.mockResolvedValueOnce(application()).mockResolvedValueOnce(profile);
+    inEnglish(<OnboardingView />);
+    fireEvent.click(await screen.findByRole('button', { name: /3. Profile and photo/ }));
+    fireEvent.change(screen.getByLabelText(/^Qualifications/), {
+      target: { value: 'GNM, synthetic' },
+    });
+    fireEvent.change(screen.getByLabelText('Years of experience'), { target: { value: '7' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save profile' }));
+    expect(await screen.findByText('Profile saved.')).toBeTruthy();
+    const [path, init] = state.api.mock.calls.at(-1) as [string, RequestInit];
+    expect(path).toBe('/provider/profile');
+    expect(JSON.parse(init.body as string)).toEqual({
+      qualifications: 'GNM, synthetic',
+      experienceYears: 7,
+    });
+    fireEvent.click(screen.getByRole('button', { name: /5. Review and submit/ }));
+    expect(screen.getByText('GNM, synthetic · 7 years of experience')).toBeTruthy();
+    expect(screen.getByText('No photo yet.')).toBeTruthy();
+  });
+
+  it('KY-03 a photo from the identity check is shown and cannot be replaced', async () => {
+    state.api
+      .mockResolvedValueOnce(
+        application({
+          profile: {
+            qualifications: null,
+            experienceYears: null,
+            hasPhoto: true,
+            photoVerified: true,
+          },
+        }),
+      )
+      .mockResolvedValueOnce({ contentType: 'image/png', contentBase64: 'iVBORw==' });
+    inEnglish(<OnboardingView />);
+    fireEvent.click(await screen.findByRole('button', { name: /3. Profile and photo/ }));
+    expect(await screen.findByAltText('Your profile photo')).toBeTruthy();
+    expect(screen.getByText(/came from your identity check/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Upload photo' })).toBeNull();
+  });
+});
+
 describe('OnboardingView review and submit (J1)', () => {
   it('PO-03 reviews every step read-only, with masked values and a way back to edit', async () => {
     const filled = application({
@@ -322,7 +372,7 @@ describe('OnboardingView review and submit (J1)', () => {
     };
     state.api.mockResolvedValueOnce(withNumber);
     inEnglish(<OnboardingView />);
-    fireEvent.click(await screen.findByRole('button', { name: /4. Review and submit/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /5. Review and submit/ }));
     expect(screen.getAllByText('Nurse or paramedic')).toHaveLength(2);
     expect(screen.getByText('Verified')).toBeTruthy();
     expect(screen.getByText('Number ••••8765 · Valid until 1 Jan 2030')).toBeTruthy();
@@ -339,7 +389,7 @@ describe('OnboardingView review and submit (J1)', () => {
       .mockResolvedValueOnce(complete)
       .mockResolvedValueOnce({ ...complete, status: 'submitted', editable: false });
     inEnglish(<OnboardingView />);
-    fireEvent.click(await screen.findByRole('button', { name: /4. Review and submit/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /5. Review and submit/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Submit application' }));
     await waitFor(() => {
       expect(state.push).toHaveBeenCalledWith('/en');

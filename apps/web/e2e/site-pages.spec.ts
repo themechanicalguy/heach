@@ -88,6 +88,13 @@ async function expectResilientLayout(page: Page) {
 }
 
 /** Synthetic browser fixtures; real API authorization and content editing have integration tests. */
+const NO_PROFILE = {
+  qualifications: null,
+  experienceYears: null,
+  hasPhoto: false,
+  photoVerified: false,
+};
+
 async function signedIn(page: Page, locale: Locale, role = 'patient') {
   await page.route('**/api/v1/**', async (route) => {
     const path = new URL(route.request().url()).pathname.replace('/api/v1', '');
@@ -115,6 +122,9 @@ async function signedIn(page: Page, locale: Locale, role = 'patient') {
         name: 'Synthetic Provider',
         languages: ['or', 'en'],
         identityVerified: true,
+        qualifications: null,
+        experienceYears: null,
+        hasPhoto: false,
         pins: ['751001'],
         rating: null,
         ratingCount: 0,
@@ -173,6 +183,7 @@ async function signedIn(page: Page, locale: Locale, role = 'patient') {
         identityConsentVersion: '2026-11-draft.1',
         identityNameMatch: null,
         identityDetailsVerified: false,
+        profile: NO_PROFILE,
         needsPayout: true,
         editable: true,
         missing: ['identity'],

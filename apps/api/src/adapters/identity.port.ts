@@ -5,6 +5,8 @@ export interface VerifiedAttributes {
   /** YYYY-MM-DD. */
   dateOfBirth: string;
   address: string;
+  /** The photo on the identity document, when the partner shares it. */
+  photo?: { contentType: string; contentBase64: string };
 }
 
 /** A document the person chose to share from DigiLocker, as its issuer published it (KY-02). */

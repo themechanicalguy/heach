@@ -397,6 +397,22 @@
       "onFile": "On file: {kind}"
     },
     "identityBack": "Back to your application",
+    "profile": {
+      "intro": "This is what patients see on your profile. It is optional, and our team reviews it with your application.",
+      "qualifications": "Qualifications",
+      "qualificationsHint": "For example: GNM, 2015. Up to 300 characters.",
+      "experience": "Years of experience",
+      "save": "Save profile",
+      "saved": "Profile saved.",
+      "photo": "Profile photo",
+      "photoHint": "A clear photo of your face (JPG or PNG, up to 5 MB).",
+      "uploadPhoto": "Upload photo",
+      "photoOnFile": "Your photo is on file.",
+      "noPhoto": "No photo yet.",
+      "photoVerified": "This photo came from your identity check and cannot be replaced.",
+      "ownPhotoAlt": "Your profile photo",
+      "notGiven": "Not given"
+    },
     "issuedCopy": "Issued copy shared from DigiLocker · {issuer}",
     "verifiedDetails": {
       "title": "Details from your identity check",
@@ -514,6 +530,9 @@
     "decline": "Decline"
   },
   "profile": {
+    "qualifications": "Qualifications: {text}",
+    "experience": "{years, plural, one {# year of experience} other {# years of experience}}",
+    "photoAlt": "Photo of {name}",
     "title": "Your details",
     "edit": "Correct my details",
     "save": "Save",

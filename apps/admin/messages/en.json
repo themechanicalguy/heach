@@ -211,6 +211,13 @@
       "mismatch": "Differs from the verified name"
     },
     "nameMismatch": "The name typed at sign-up differed from the verified name, which is now on the profile. Check that the documents carry the verified name.",
+    "profile": "Public profile",
+    "qualifications": "Qualifications",
+    "experience": "Years of experience",
+    "notGiven": "Not given",
+    "photo": "Profile photo",
+    "photoVerified": "From the identity check",
+    "noPhoto": "No photo",
     "issuedCopy": "Issued copy from DigiLocker:",
     "identityDocument": "Identity document",
     "identityKinds": {

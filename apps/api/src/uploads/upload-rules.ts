@@ -4,7 +4,12 @@ export type UploadType = (typeof UPLOAD_TYPES)[number];
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 export type UploadPurpose =
-  'provider_document' | 'booking_attachment' | 'visit_record' | 'lab_report' | 'vault_upload';
+  | 'provider_document'
+  | 'booking_attachment'
+  | 'visit_record'
+  | 'lab_report'
+  | 'vault_upload'
+  | 'profile_photo';
 
 // The first bytes of each allowed type: the declared type alone is never trusted.
 const SIGNATURES: Record<UploadType, number[]> = {

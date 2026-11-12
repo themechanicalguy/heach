@@ -21,6 +21,12 @@ function review(
     identityConsentVersion: '2026-11-draft.1',
     identityNameMatch: 'match',
     identityDetailsVerified: true,
+    profile: {
+      qualifications: 'GNM, synthetic',
+      experienceYears: 7,
+      hasPhoto: false,
+      photoVerified: false,
+    },
     needsPayout: true,
     payout: { method: 'upi', holderName: 'Synthetic Nurse', hint: 'bank' },
     editable: false,
@@ -150,6 +156,9 @@ describe('Verification queue (AD-02)', () => {
       await screen.findByRole('button', { name: `${en.verification.open} Synthetic Nurse` }),
     );
     expect(await screen.findByText(en.verification.identityMethods.digilocker)).toBeTruthy();
+    // PO-05: what the provider will publish.
+    expect(screen.getByText('GNM, synthetic')).toBeTruthy();
+    expect(screen.getByText(en.verification.noPhoto)).toBeTruthy();
     // KY-02: a copy shared from DigiLocker names its issuer.
     expect(screen.getByText(/Issued copy from DigiLocker: Synthetic Police Office/)).toBeTruthy();
     expect(screen.queryByText(en.verification.identityDocument)).toBeNull();
