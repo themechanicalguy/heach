@@ -16,4 +16,7 @@ the i18n catalogues. Names, icons and colours per app are in `android/app/src/pa
 `android/app/src/provider`; the secured window, back button and server address are in
 `MainActivity.java` and `android/app/build.gradle`.
 
+`FilesPlugin.java` opens a file the web app hands over (a record, a report) in the phone's viewer,
+because a web view cannot download the web app's in-memory files.
+
 Setup and commands: [local development](../../docs/local-development.md#android-apps).

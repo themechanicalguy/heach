@@ -27,6 +27,9 @@ Ionic) whose Android shell loads the hosted web app, with two Gradle product fla
 
 - The shell holds no screens, no business rules and no API calls of its own. Every screen is the
   web app's, so authorisation stays on the server (SE-02) and the apps cannot drift from the web.
+- The one native addition is `FilesPlugin`: a web view ignores the in-memory download links the
+  web app uses, so inside the apps a file the page has already fetched is handed to the shell,
+  kept in the app's private cache and opened in the phone's viewer. It holds no rules of its own.
 - The server origin is a build setting (`HEACH_SERVER_URL`), never a string in source. Debug
   builds default to `localhost`, forwarded to the developer's machine with `adb reverse`, and
   are the only builds that allow clear-text HTTP; release builds refuse to build without an HTTPS origin.

@@ -17,6 +17,9 @@ public class MainActivity extends BridgeActivity {
         // MA-04: any screen may show health data, so none may be captured or shown in recents.
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         config = webAppConfig();
+        // MA-06: files the web app hands over open in the phone's viewer; none outlive a restart.
+        FilesPlugin.clearOpened(this);
+        registerPlugin(FilesPlugin.class);
         super.onCreate(savedInstanceState);
         getOnBackPressedDispatcher().addCallback(this, backThroughPages());
     }

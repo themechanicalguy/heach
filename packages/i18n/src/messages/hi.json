@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "HEACH",
-    "takePhoto": "फ़ोटो लें"
+    "takePhoto": "फ़ोटो लें",
+    "photoAdded": "फ़ोटो जोड़ी गई।"
   },
   "home": {
     "title": "घर पर देखभाल, सत्यापित और आपके पास",

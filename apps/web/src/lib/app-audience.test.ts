@@ -1,4 +1,4 @@
-import { appAudience, appHome, offeredInApp } from './app-audience';
+import { appAudience, appHome, offeredInApp, sideOffered } from './app-audience';
 
 describe('appAudience (MA-08)', () => {
   it('reads the app from the user agent the Android shell appends', () => {
@@ -45,4 +45,13 @@ describe('offeredInApp (MA-08)', () => {
 it('appHome is the first page of each app', () => {
   expect(appHome('provider', 'or')).toBe('/or/provider');
   expect(appHome('patient', 'hi')).toBe('/hi');
+});
+
+it("sideOffered keeps each app to its own side's roles and a browser to both (MA-08)", () => {
+  expect(sideOffered('patient', 'care')).toBe(true);
+  expect(sideOffered('patient', 'provider')).toBe(false);
+  expect(sideOffered('provider', 'provider')).toBe(true);
+  expect(sideOffered('provider', 'care')).toBe(false);
+  expect(sideOffered(undefined, 'care')).toBe(true);
+  expect(sideOffered(undefined, 'provider')).toBe(true);
 });

@@ -1,8 +1,9 @@
 'use client';
 
-import { TextField } from '@heach/ui';
-import { type ChangeEvent, useState } from 'react';
+import { Button, TextField } from '@heach/ui';
+import { type ChangeEvent, useRef, useState } from 'react';
 import { useI18n } from '../../lib/i18n-context';
+import { shrinkPhoto } from '../../lib/photo';
 import { useAppAudience } from '../../lib/use-app-audience';
 
 interface Props {
@@ -15,36 +16,53 @@ interface Props {
 
 /**
  * A file upload that, inside the Android apps, also offers the camera (MA-06): the app's file
- * picker lists files only, so a second field opens the camera. Browsers already offer both.
+ * picker lists files only, so a button opens the camera. Browsers already offer both.
  */
 export function FileOrPhotoField({ label, hint, accept, onFile }: Readonly<Props>) {
   const { t } = useI18n();
   const inApp = useAppAudience() !== undefined;
-  // Choosing with one field empties the other, so only the file in use is shown.
-  const [cleared, setCleared] = useState({ file: 0, photo: 0 });
-  const pick = (other: 'file' | 'photo') => (event: ChangeEvent<HTMLInputElement>) => {
+  const camera = useRef<HTMLInputElement>(null);
+  // Which source holds the file in use; choosing with one empties the other.
+  const [source, setSource] = useState<'file' | 'photo'>();
+  const [fileKey, setFileKey] = useState(0);
+  const pickFile = (event: ChangeEvent<HTMLInputElement>) => {
     onFile(event.currentTarget.files?.[0]);
-    setCleared((counts) => ({ ...counts, [other]: counts[other] + 1 }));
+    setSource('file');
+  };
+  const pickPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const photo = input.files?.[0];
+    if (!photo) return;
+    onFile(await shrinkPhoto(photo));
+    setSource('photo');
+    setFileKey((key) => key + 1);
+    input.value = '';
   };
   return (
     <>
       <TextField
-        key={cleared.file}
+        key={fileKey}
         label={label}
         hint={hint}
         type="file"
         accept={accept}
-        onChange={pick('photo')}
+        onChange={pickFile}
       />
       {inApp && (
-        <TextField
-          key={cleared.photo}
-          label={t('app.takePhoto')}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={pick('file')}
-        />
+        <div className="flow__form">
+          <input
+            ref={camera}
+            hidden
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(event) => void pickPhoto(event)}
+          />
+          <Button className="heach-button--secondary" onClick={() => camera.current?.click()}>
+            {t('app.takePhoto')}
+          </Button>
+          {source === 'photo' && <p role="status">{t('app.photoAdded')}</p>}
+        </div>
       )}
     </>
   );

@@ -150,6 +150,14 @@ pnpm --filter @heach/mobile android:install  # build and install HEACH and HEACH
 - Each app sends `HeachApp/patient` or `HeachApp/provider` in its user agent; the web app uses
   it to keep each app to its own side (MA-08). To see that in a browser, set the same user agent.
 - Screenshots of the apps are blocked on purpose (MA-04), including `adb` screen capture.
+- **Walkthrough of both apps.** With the stack up (`pnpm dev:up`), the emulator running, both
+  apps installed and the API built (`pnpm --filter @heach/api build`, for the admin CLI):
+  `E2E_ANDROID=1 E2E_API=1 E2E_BASE_URL=http://localhost:3000 pnpm --filter @heach/web exec playwright test --project=android`.
+  It drives the two apps against each other (book and pay, accept and complete, camera to
+  Records, the provider application) and sets up `adb reverse` itself. It sends many codes from
+  one machine: raise `OTP_SENDS_PER_DEVICE_PER_HOUR` and the address caps in `.env` first. The
+  apps block the phone's screenshots, so the suite captures pages through the debug build's
+  web view.
 - `apk` and `android:install` run `sync` first: it writes the offline page from the i18n
   catalogues and copies it into the Android project.
 

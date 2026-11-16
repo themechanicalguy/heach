@@ -37,3 +37,12 @@ export function offeredInApp(audience: AppAudience | undefined, pathname: string
 export function appHome(audience: AppAudience, locale: string): string {
   return audience === 'provider' ? `/${locale}/provider` : `/${locale}`;
 }
+
+/**
+ * Whether an app offers roles of a side at sign-up and "add a role": the patient app offers care
+ * roles, the provider app offers provider roles, a browser offers both (MA-08).
+ */
+export function sideOffered(audience: AppAudience | undefined, side: 'care' | 'provider'): boolean {
+  if (!audience) return true;
+  return (audience === 'provider') === (side === 'provider');
+}

@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "HEACH",
-    "takePhoto": "Take a photo"
+    "takePhoto": "Take a photo",
+    "photoAdded": "Photo added."
   },
   "home": {
     "title": "Care at home, verified and close to you",

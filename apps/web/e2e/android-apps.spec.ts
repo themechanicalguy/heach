@@ -6,6 +6,7 @@ import { InLanguage, pay, startBooking } from './journey-steps';
 import {
   completePatientSetup,
   completeProviderSetup,
+  confirmItIsMe,
   signInByOtp,
   syntheticMobile,
 } from './otp-helpers';
@@ -55,9 +56,18 @@ async function backTo(device: AndroidDevice, app: App): Promise<void> {
 async function show(device: AndroidDevice, app: App): Promise<Page> {
   if (!(await isInFront(device, app)))
     await device.shell(`am start -n ${appId(app)}/in.heach.MainActivity`);
-  const page = await (await device.webView({ pkg: appId(app) })).page();
-  page.setDefaultTimeout(20_000);
-  return page;
+  // Android may have closed a backgrounded app to free memory; its old connection is then dead
+  // and a new one appears once the app has started again.
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const page = await (await device.webView({ pkg: appId(app) })).page();
+    const alive = await page.evaluate(() => true).catch(() => false);
+    if (alive) {
+      page.setDefaultTimeout(20_000);
+      return page;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(`No page to drive in ${appId(app)}`);
 }
 
 /** The app as just installed: no session, no language chosen. */
@@ -112,6 +122,7 @@ let nurse: Provider;
 let patient: Page;
 let provider: Page;
 let bookingId: string;
+let nurseMobile: string;
 
 test.beforeAll(async () => {
   const [first] = await android.devices();
@@ -140,6 +151,9 @@ test('a new patient chooses a language, signs up, books a nurse and pays in HEAC
   await location.getByRole('button', { name: t.location.skip }).click();
   await patient.getByRole('link', { name: t.nav.signIn }).click();
   await signIn(patient, syntheticMobile());
+  // MA-08: the patient app offers care roles only.
+  await expect(patient.getByRole('radio', { name: t.roles.patient.label })).toBeVisible();
+  await expect(patient.getByRole('radio', { name: t.roles.nurse.label })).toHaveCount(0);
   await completePatientSetup(patient, 'en', 'Synthetic App Patient');
   await expect(patient).not.toHaveURL(/\/setup\//);
   await shot(patient, 'patient-signed-in');
@@ -165,7 +179,7 @@ test("the nurse signs in to HEACH Provider, accepts, and runs the visit with the
   startSoon(bookingId);
 
   patient = await show(device, 'patient');
-  await patient.reload();
+  await patient.goto(`${SERVER}/en/bookings/${bookingId}`);
   const code = await new InLanguage(patient, 'en', SERVER).shownCode(t.visit.showCode);
   await shot(patient, 'patient-code');
 
@@ -192,7 +206,7 @@ test("the nurse signs in to HEACH Provider, accepts, and runs the visit with the
 
 test('the patient rates the visit and finds its notes in Records', async () => {
   patient = await show(device, 'patient');
-  await patient.reload();
+  await patient.goto(`${SERVER}/en/bookings/${bookingId}`);
   await patient.getByLabel(t.visit.stars).fill('5');
   await patient.getByRole('button', { name: t.visit.rate }).click();
   await expect(patient.getByText(t.visit.rated)).toBeVisible();
@@ -201,26 +215,34 @@ test('the patient rates the visit and finds its notes in Records', async () => {
   await shot(patient, 'patient-records');
 });
 
-test('the patient photographs an old prescription into Records', async () => {
+/** Takes a picture in the phone's camera and confirms it; the camera then closes by itself. */
+async function takePhoto(device: AndroidDevice, app: App): Promise<void> {
+  await tapNative(device, 'com.android.camera2:id/shutter_button');
+  await tapNative(device, 'com.android.camera2:id/done_button');
+  await expect.poll(() => isInFront(device, app)).toBe(true);
+}
+
+test('the patient photographs an old prescription into Records and opens it again', async () => {
   const upload = new InLanguage(patient, 'en', SERVER).card(t.vault.uploadTitle);
   await upload.getByLabel(t.vault.type).selectOption('prescription');
   await upload.getByLabel(t.vault.recordTitle).fill('Synthetic old prescription');
   await upload.getByLabel(t.vault.recordDate).fill('2026-09-01');
-  await upload.getByLabel(t.app.takePhoto).click();
-  await tapNative(device, 'com.android.camera2:id/shutter_button');
-  await tapNative(device, 'com.android.camera2:id/done_button');
-  // The camera hands the photo back and closes by itself.
-  await expect.poll(() => isInFront(device, 'patient')).toBe(true);
-  patient = await show(device, 'patient');
-  const photo = patient.getByLabel(t.app.takePhoto);
-  await expect.poll(() => photo.evaluate((input: HTMLInputElement) => input.files?.length)).toBe(1);
-  await shot(patient, 'patient-photo-chosen');
-  const form = new InLanguage(patient, 'en', SERVER).card(t.vault.uploadTitle);
-  await form.getByRole('button', { name: t.vault.save }).click();
-  await shot(patient, 'patient-photo-saving');
-  await expect(form.getByText(t.vault.saved)).toBeVisible();
+  await upload.getByRole('button', { name: t.app.takePhoto }).click();
+  await takePhoto(device, 'patient');
+  await expect(upload.getByText(t.app.photoAdded)).toBeVisible();
+  await shot(patient, 'patient-photo-added');
+  await upload.getByRole('button', { name: t.vault.save }).click();
+  await expect(upload.getByText(t.vault.saved)).toBeVisible();
 
-  await shot(patient, 'patient-photo-saved');
+  // MA-06: Download opens the record in the phone's own viewer, over the app.
+  const record = patient
+    .getByRole('listitem')
+    .filter({ hasText: 'Synthetic old prescription' })
+    .first();
+  await record.getByRole('button', { name: t.vault.download }).click();
+  await expect.poll(() => frontPackage(device)).not.toBe(appId('patient'));
+  await device.screenshot({ path: test.info().outputPath('record-in-viewer.png') });
+  await backTo(device, 'patient');
 });
 
 test('closing and reopening HEACH keeps the patient signed in', async () => {
@@ -231,14 +253,84 @@ test('closing and reopening HEACH keeps the patient signed in', async () => {
   await shot(patient, 'patient-reopened');
 });
 
-test('a new nurse signs up and applies in HEACH Provider', async () => {
+const PDF = {
+  name: 'certificate.pdf',
+  mimeType: 'application/pdf',
+  buffer: Buffer.from('%PDF-1.7\n% synthetic certificate\n'),
+};
+
+/** One checklist document: a camera photo or a chosen file, its details, then Upload. */
+async function uploadDocument(
+  key: 'nursing_registration' | 'qualification_certificate' | 'police_verification',
+  from: 'camera' | 'file',
+): Promise<void> {
+  const card = provider
+    .locator('.heach-card')
+    .filter({ has: provider.getByRole('heading', { name: t.application.items[key] }) });
+  if (from === 'camera') {
+    await card.getByRole('button', { name: t.app.takePhoto }).click();
+    await takePhoto(device, 'provider');
+    await expect(card.getByText(t.app.photoAdded)).toBeVisible();
+  } else {
+    await card.getByLabel(t.application.chooseFile).setInputFiles(PDF);
+  }
+  if (key !== 'qualification_certificate') {
+    await card.getByLabel(t.application.reference).fill('SYN-12345');
+    await card.getByLabel(t.application.expiresOn).fill('2030-01-01');
+  }
+  await card.getByRole('button', { name: t.application.upload }).click();
+  await expect(card.getByText(t.application.documentState.clean)).toBeVisible();
+}
+
+const step = (name: string) =>
+  provider.getByRole('button', { name: new RegExp(name.replaceAll(/[()]/g, '.')) });
+
+test('a new nurse signs up in HEACH Provider and is offered provider roles only', async () => {
   provider = await freshApp(device, 'provider');
-  const mobile = syntheticMobile();
-  await signIn(provider, mobile);
+  nurseMobile = syntheticMobile();
+  await signIn(provider, nurseMobile);
   await expect(provider).toHaveURL(/\/en\/setup\/role$/);
-  await shot(provider, 'provider-roles');
+  await expect(provider.getByRole('radio', { name: t.roles.nurse.label })).toBeVisible();
+  await expect(provider.getByRole('radio', { name: t.roles.patient.label })).toHaveCount(0);
   await completeProviderSetup(provider, 'nurse', 'Synthetic App Nurse');
   await expect(provider).toHaveURL(`${SERVER}/en/provider`);
   await expect(provider.getByRole('heading', { name: t.application.title })).toBeVisible();
-  await shot(provider, 'provider-application');
+});
+
+test('the nurse uploads documents, one from the camera, and passes the identity check', async () => {
+  await step(t.application.steps.documents).click();
+  await uploadDocument('nursing_registration', 'camera');
+  await uploadDocument('qualification_certificate', 'file');
+  await uploadDocument('police_verification', 'file');
+  await shot(provider, 'provider-documents');
+  await step(t.application.steps.identity).click();
+  await provider.getByRole('button', { name: t.application.verifyIdentity }).click();
+  // The partner sends the nurse back through the identity return page, still inside the app.
+  await provider.waitForURL(`${SERVER}/en/provider`);
+  await expect(provider.getByText(t.application.identityState.verified)).toBeVisible();
+  expect(await isInFront(device, 'provider')).toBe(true);
+});
+
+test('the nurse saves a payout account, submits, and stays on the application', async () => {
+  await step(t.application.steps.payout).click();
+  await provider.getByRole('radio', { name: t.application.payoutMethod.upi }).check();
+  await provider.getByLabel(t.application.holderName).fill('Synthetic App Nurse');
+  await provider.getByLabel(t.application.upiId).fill('synthetic@okbank');
+  await provider.getByRole('button', { name: t.application.savePayout }).click();
+  await confirmItIsMe(provider, 'en', nurseMobile);
+  await step(t.application.steps.review).click();
+  const submit = provider.getByRole('button', { name: t.application.submit, exact: true });
+  await expect(submit).toBeEnabled();
+  await submit.click();
+  // The provider app has no patient home to go to: the application shows its new status.
+  await expect(provider.getByText(t.application.status.submitted, { exact: true })).toBeVisible();
+  await expect(provider).toHaveURL(`${SERVER}/en/provider`);
+  await shot(provider, 'provider-submitted');
+});
+
+test('signing out of HEACH Provider returns to its sign-in screen', async () => {
+  await provider.getByRole('button', { name: t.site.more }).click();
+  await provider.getByRole('button', { name: t.nav.signOut }).click();
+  // The provider app's home is the provider area, which asks a signed-out device to sign in.
+  await expect(provider).toHaveURL(/\/en\/sign-in\?next=/);
 });
