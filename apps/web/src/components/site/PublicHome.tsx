@@ -11,7 +11,16 @@ import { SiteEvidence } from './SiteEvidence';
 import { FaqPreview } from './FaqPreview';
 
 /** Public homepage. Statistics and testimonials await real, approved data (B8/B9). */
-export function PublicHome({ config, locale }: Readonly<{ config: SiteConfig; locale: string }>) {
+export function PublicHome({
+  config,
+  locale,
+  joinOffered = true,
+}: Readonly<{
+  config: SiteConfig;
+  locale: string;
+  /** False in the patient Android app, which does not offer provider work (MA-08). */
+  joinOffered?: boolean;
+}>) {
   const { t } = translatorFor(locale);
   return (
     <main className="page site-home">
@@ -64,13 +73,15 @@ export function PublicHome({ config, locale }: Readonly<{ config: SiteConfig; lo
         </a>
       </section>
       <FaqPreview locale={locale} />
-      <section className="site-section site-section--peach">
-        <h2>{t('site.join')}</h2>
-        <p>{t('site.joinBody')}</p>
-        <a className="heach-button" href={`/${locale}/providers/join`}>
-          {t('site.join')}
-        </a>
-      </section>
+      {joinOffered && (
+        <section className="site-section site-section--peach">
+          <h2>{t('site.join')}</h2>
+          <p>{t('site.joinBody')}</p>
+          <a className="heach-button" href={`/${locale}/providers/join`}>
+            {t('site.join')}
+          </a>
+        </section>
+      )}
       <section className="site-section">
         <h2>{t('site.final')}</h2>
         <CareFinder />

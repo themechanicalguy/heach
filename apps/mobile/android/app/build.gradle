@@ -5,6 +5,12 @@ def serverUrl = providers.gradleProperty('HEACH_SERVER_URL')
     .orElse(providers.environmentVariable('HEACH_SERVER_URL')).getOrNull()
 // Debug builds reach the developer's own `pnpm dev` through `adb reverse` (see package.json).
 def debugServerUrl = serverUrl ?: 'http://localhost:3000'
+// Hosts of partner pages (identity, payments) that may open inside the app, comma-separated
+// (MA-03, MA-06). Every other address outside the server opens in the phone's browser.
+def allowNavigation = providers.gradleProperty('HEACH_ALLOW_NAVIGATION')
+    .orElse(providers.environmentVariable('HEACH_ALLOW_NAVIGATION')).getOrElse('')
+// HEACH links open in the app once Android has verified them against the server (MA-06).
+def appLinkHost = serverUrl ? new URI(serverUrl).host : 'localhost'
 
 android {
     namespace = "in.heach"
@@ -14,7 +20,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField 'String', 'ALLOW_NAVIGATION', "\"${allowNavigation}\""
+        manifestPlaceholders = [appLinkHost: appLinkHost]
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
@@ -64,9 +71,6 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
-    testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 }
 

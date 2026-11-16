@@ -1,5 +1,7 @@
 package in.heach;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.webkit.WebView;
@@ -23,12 +25,35 @@ public class MainActivity extends BridgeActivity {
         return new CapConfig.Builder(this)
             .setServerUrl(BuildConfig.SERVER_URL)
             .setStartPath(BuildConfig.START_PATH)
+            // MA-05: shown instead of the browser's error page when the server cannot be reached.
+            // "Try again" there returns to the start page.
+            .setErrorPath("offline.html?to=" + Uri.encode(BuildConfig.SERVER_URL + BuildConfig.START_PATH))
+            // MA-03: partner pages that may open in the app; anything else opens in the browser.
+            .setAllowNavigation(partnerHosts())
             // Lets the web app tell which app it is running in (MA-08).
             .setAppendedUserAgentString("HeachApp/" + BuildConfig.FLAVOR)
             // Capacitor logs page addresses; keep them out of release logs.
             .setLoggingEnabled(BuildConfig.DEBUG)
             .setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
             .create();
+    }
+
+    private static String[] partnerHosts() {
+        String hosts = BuildConfig.ALLOW_NAVIGATION.trim();
+        return hosts.isEmpty() ? new String[0] : hosts.split("\\s*,\\s*");
+    }
+
+    /** MA-06: a HEACH link opened from outside (a partner's return, an SMS) loads in the app. */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Uri link = intent.getData();
+        Uri server = Uri.parse(BuildConfig.SERVER_URL);
+        boolean ours =
+            link != null && "https".equals(link.getScheme()) && server.getAuthority().equals(link.getAuthority());
+        if (ours && bridge != null) {
+            bridge.getWebView().loadUrl(link.toString());
+        }
     }
 
     /** MA-05: back walks the page history and leaves the app from the first page. */

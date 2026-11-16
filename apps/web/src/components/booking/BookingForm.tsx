@@ -1,5 +1,6 @@
 'use client';
 
+import { FileOrPhotoField } from '../files/FileOrPhotoField';
 import { formatDateTime, normalizeDigits } from '@heach/i18n';
 import { Button, Card, CheckboxField, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { Booking, LinkedPatient, ProfileListing } from '@heach/types';
@@ -307,14 +308,11 @@ function BookingFields({
 function PrescriptionField({ onFile }: Readonly<Pick<FieldsProps, 'onFile'>>) {
   const { t } = useI18n();
   return (
-    <TextField
+    <FileOrPhotoField
       label={t('book.prescription')}
       hint={t('book.prescriptionHint')}
-      type="file"
       accept="application/pdf,image/jpeg,image/png"
-      onChange={(event) => {
-        onFile(event.currentTarget.files?.[0]);
-      }}
+      onFile={onFile}
     />
   );
 }

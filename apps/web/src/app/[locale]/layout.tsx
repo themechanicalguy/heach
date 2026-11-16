@@ -25,6 +25,7 @@ import { HeaderCare } from '../../components/site/HeaderCare';
 import { FooterSwitch } from '../../components/site/FooterSwitch';
 import { AppFooter, SiteFooter } from '../../components/site/SiteFooter';
 import { shellMessages } from '../../lib/client-messages';
+import { requestAudience } from '../../lib/request-audience';
 import { siteConfig } from '../../lib/site-config';
 import '@heach/ui/ui.css';
 import '../fonts.css';
@@ -59,6 +60,7 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
   const { t } = translatorFor(locale);
   const flags = serverFlags();
   const accounts = flags.isOn('accounts');
+  const audience = await requestAudience();
   return (
     <html lang={locale}>
       <head>
@@ -95,7 +97,13 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
                   <OfflineStatus />
                   {children}
                   <FooterSwitch
-                    full={<SiteFooter config={siteConfig()} locale={locale} />}
+                    full={
+                      <SiteFooter
+                        config={siteConfig()}
+                        locale={locale}
+                        joinOffered={audience !== 'patient'}
+                      />
+                    }
                     compact={<AppFooter config={siteConfig()} locale={locale} />}
                   />
                   <LocationDialog />

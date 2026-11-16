@@ -22,3 +22,36 @@ it('does not remember the welcome suggestion until a language is chosen', () => 
     proxy(new NextRequest('https://example.test/or/welcome')).cookies.get('heach_lang'),
   ).toBeUndefined();
 });
+
+describe('Android apps serve one side each (MA-08)', () => {
+  const from = (path: string, app: string) =>
+    proxy(
+      new NextRequest(`https://example.test${path}`, {
+        headers: { 'user-agent': `Mozilla/5.0 Chrome/140 HeachApp/${app}` },
+      }),
+    );
+
+  it('sends patient pages opened in the provider app to the provider area', () => {
+    expect(from('/en', 'provider').headers.get('location')).toBe(
+      'https://example.test/en/provider',
+    );
+    expect(from('/or/bookings', 'provider').headers.get('location')).toBe(
+      'https://example.test/or/provider',
+    );
+  });
+
+  it('sends provider pages opened in the patient app to the home page', () => {
+    expect(from('/hi/provider/requests', 'patient').headers.get('location')).toBe(
+      'https://example.test/hi',
+    );
+    expect(from('/en/providers/join', 'patient').headers.get('location')).toBe(
+      'https://example.test/en',
+    );
+  });
+
+  it('leaves each app its own pages and shared pages', () => {
+    expect(from('/en/provider', 'provider').headers.get('location')).toBeNull();
+    expect(from('/en/bookings', 'patient').headers.get('location')).toBeNull();
+    expect(from('/en/account', 'provider').headers.get('location')).toBeNull();
+  });
+});

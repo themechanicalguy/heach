@@ -68,6 +68,30 @@ jobs:
       - name: Dependency audit, all dependencies (high and critical block the merge, SO-03.2)
         run: pnpm audit --audit-level high
 
+  android:
+    name: Android apps build (MA-01)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The runner image ships the Android SDK and JDK 21; Gradle does not run on newer JDKs.
+      - name: Build the patient and provider debug apps
+        run: JAVA_HOME="$JAVA_HOME_21_X64" pnpm --filter @heach/mobile apk
+      - name: A release build without an HTTPS server must fail (MA-02)
+        working-directory: apps/mobile/android
+        run: |
+          if JAVA_HOME="$JAVA_HOME_21_X64" ./gradlew assemblePatientRelease -q; then
+            echo "A release build without HEACH_SERVER_URL succeeded" && exit 1
+          fi
+
   smoke:
     name: E2E smoke
     runs-on: ubuntu-latest

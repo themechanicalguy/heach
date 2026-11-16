@@ -145,8 +145,13 @@ pnpm --filter @heach/mobile android:install  # build and install HEACH and HEACH
   emulator restarts. `localhost` matters: sign-in cookies and the service worker
   need a secure context, and the emulator's own address for the laptop (`10.0.2.2`) is not one.
 - A release build fails unless `HEACH_SERVER_URL` is an `https://` address (MA-02).
+- `HEACH_ALLOW_NAVIGATION=host1,host2` lists partner hosts (identity, payments) whose pages may
+  open inside the app; every other outside address opens in the phone's browser (MA-03).
+- Each app sends `HeachApp/patient` or `HeachApp/provider` in its user agent; the web app uses
+  it to keep each app to its own side (MA-08). To see that in a browser, set the same user agent.
 - Screenshots of the apps are blocked on purpose (MA-04), including `adb` screen capture.
-- `pnpm --filter @heach/mobile sync` after changing `capacitor.config.ts` or adding a plugin.
+- `apk` and `android:install` run `sync` first: it writes the offline page from the i18n
+  catalogues and copies it into the Android project.
 
 ## Database TLS, roles and migrations (Step 2)
 

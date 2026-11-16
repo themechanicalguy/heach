@@ -36,6 +36,14 @@
         </provider>
     </application>
 
+    <!-- MA-06: lets the upload fields find the phone's camera app. No camera permission is
+         needed: the camera app takes the photo and hands it back. -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
+
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />

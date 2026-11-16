@@ -11,7 +11,8 @@ requirements MA-01 to MA-08).
 
 Debug builds add `.debug` to the ID, so they install beside a Play build.
 
-There are no screens here. Names, icons and colours per app are in `android/app/src/patient` and
+There are no screens here except the offline page, which `scripts/offline-page.mjs` writes from
+the i18n catalogues. Names, icons and colours per app are in `android/app/src/patient` and
 `android/app/src/provider`; the secured window, back button and server address are in
 `MainActivity.java` and `android/app/build.gradle`.
 

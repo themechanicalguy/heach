@@ -1,5 +1,6 @@
 'use client';
 
+import { FileOrPhotoField } from '../files/FileOrPhotoField';
 import { Button, Card, Notice, TextField } from '@heach/ui';
 import type {
   HistoryEntry,
@@ -214,13 +215,10 @@ function UploadForm({
       {field('facility', t('vault.facility'))}
       {field('tags', t('vault.tags'))}
       {field('notes', t('vault.notes'))}
-      <TextField
+      <FileOrPhotoField
         label={t('vault.file')}
-        type="file"
         accept="application/pdf,image/jpeg,image/png"
-        onChange={(event) => {
-          setFile(event.currentTarget.files?.[0]);
-        }}
+        onFile={setFile}
       />
       {error && (
         <Notice tone="danger" live>

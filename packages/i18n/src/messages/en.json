@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "HEACH"
+    "name": "HEACH",
+    "takePhoto": "Take a photo"
   },
   "home": {
     "title": "Care at home, verified and close to you",
@@ -26,7 +27,8 @@
     "referral": "Invite"
   },
   "offline": {
-    "banner": "You are offline. Saved pages still work; changes need a connection."
+    "banner": "You are offline. Saved pages still work; changes need a connection.",
+    "noConnection": "No connection. Check your internet and try again."
   },
   "state": {
     "loading": "Loading",
