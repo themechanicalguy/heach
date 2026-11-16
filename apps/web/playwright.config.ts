@@ -5,6 +5,8 @@ const PORT = 3100;
 // otherwise Playwright starts `next start` itself.
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${String(PORT)}`;
 
+const ANDROID = /android-apps\.spec\.ts/;
+
 /** Mobile, tablet and desktop on every PR (TS-05.1); widths match the layout tokens (UX-02). */
 export default defineConfig({
   testDir: './e2e',
@@ -17,7 +19,15 @@ export default defineConfig({
   use: { baseURL, ignoreHTTPSErrors: Boolean(process.env.E2E_BASE_URL) },
   projects: [
     {
+      // The Android apps on an emulator or phone (E2E_ANDROID=1). The apps load the dev server,
+      // which compiles each page on its first visit, so checks wait longer.
+      name: 'android',
+      testMatch: ANDROID,
+      expect: { timeout: 20_000 },
+    },
+    {
       name: 'mobile',
+      testIgnore: ANDROID,
       use: {
         ...devices['Pixel 7'],
         browserName: 'chromium',
@@ -26,9 +36,14 @@ export default defineConfig({
     },
     {
       name: 'tablet',
+      testIgnore: ANDROID,
       use: { browserName: 'chromium', viewport: { width: 768, height: 1024 }, hasTouch: true },
     },
-    { name: 'desktop', use: { browserName: 'chromium', viewport: { width: 1280, height: 800 } } },
+    {
+      name: 'desktop',
+      testIgnore: ANDROID,
+      use: { browserName: 'chromium', viewport: { width: 1280, height: 800 } },
+    },
   ],
   ...(!process.env.E2E_BASE_URL && {
     webServer: {

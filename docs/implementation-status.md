@@ -331,7 +331,7 @@ Branch `feat/step-9-plans-referrals`. API: `plans` module (packages, subscriptio
 
 ## Android apps (in progress, [ADR 0016](adr/0016-android-apps-with-capacitor.md))
 
-Not a guideline step: the owner added Android apps to the scope on 16 November 2026. `apps/mobile` is a Capacitor shell with no screens of its own; setup is in [local development](local-development.md#android-apps). Checked on an Android 16 emulator against the local stack; not yet on a real phone. CI builds both debug apps and checks that a release build without an HTTPS server fails (job `android`, not yet run on GitHub).
+Not a guideline step: the owner added Android apps to the scope on 16 November 2026. `apps/mobile` is a Capacitor shell with no screens of its own; setup is in [local development](local-development.md#android-apps). Checked on an Android 16 emulator against the local stack; not yet on a real phone. CI builds both debug apps and checks that a release build without an HTTPS server fails (job `android`, not yet run on GitHub). A walkthrough suite drives both apps on the emulator (`apps/web/e2e/android-apps.spec.ts`, Playwright project `android`, `E2E_ANDROID=1`): a patient signs up, books and pays in HEACH; the nurse accepts, starts with the patient's code and completes in HEACH Provider; the patient rates, photographs a record into Records, and stays signed in after the app is closed; a new nurse signs up in HEACH Provider. Found and still open: Download does nothing inside the apps (records, reports, prescriptions); account setup offers both sides' roles; the rest of the provider application (documents, identity, payout, submit) is not walked yet.
 
 | Item | Status | What exists | What is missing |
 | --- | --- | --- | --- |
