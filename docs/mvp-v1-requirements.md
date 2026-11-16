@@ -89,10 +89,11 @@ The first release delivers one complete loop for each of the four services: onbo
 - Admin panel: verification, users, catalogue, bookings, labs, plans, referrals, finance, complaints, content, reports
 - Encryption, access control and audit for all patient data, from the first sprint
 - Odia, English and Hindi across patient and provider apps
+- Android apps for patients and for providers, built from one project around the web app ([ADR 0016](adr/0016-android-apps-with-capacitor.md))
 
 ### Out of scope for the first release
 
-- Native Android or iOS apps (the PWA is installable)
+- A native iOS app (the PWA is installable; Android apps are in scope, [ADR 0016](adr/0016-android-apps-with-capacitor.md))
 - Emergency or ambulance services; the app shows a clear "not for emergencies, call 108" notice
 - Online doctor consultation, and in-clinic appointments for any speciality, including dental and skin (deferred beyond the MVP, below)
 - Pharmacy ordering and insurance claims
@@ -523,6 +524,21 @@ Every requirement below is a "Must" for the first release, except those marked *
 | RF-01 | Patient rates 1 to 5 stars with optional comment after a completed booking only. |
 | RF-02 | Reviews can be reported; admin can hide a review with a recorded reason. |
 | RF-03 | Help and complaint form attached to a booking, with status tracking. |
+
+### Android apps (MA)
+
+Added on 16 November 2026 ([ADR 0016](adr/0016-android-apps-with-capacitor.md)). The apps show the web app's screens; every other requirement applies inside them unchanged.
+
+| ID | Requirement |
+| --- | --- |
+| MA-01 | One project builds two Android apps: a patient app that opens at the home page and a provider app that opens at the provider area, each with its own application ID, name and icon, installable side by side. |
+| MA-02 | The server address is a build setting. Only debug builds may use clear-text HTTP; a release build needs an HTTPS address. |
+| MA-03 | The app navigates only within the HEACH origin; any other link opens in the phone's browser. |
+| MA-04 | Screens cannot be captured or recorded and are blank in the recent-apps list; Android backup of app data is off. |
+| MA-05 | The Android back button goes back through the app's pages and leaves the app from the first page; with no connection the app shows the offline page (PF-07), not a browser error. |
+| MA-06 | Camera and file upload work for vault records and onboarding documents; payment (UPI apps) and DigiLocker hand-offs return to the app; HEACH links open in the installed app. |
+| MA-07 | Push notifications through an adapter with a test double; push text carries no personal or health data. |
+| MA-08 | Each app serves one side: the provider app does not offer patient booking and the patient app does not offer provider work. The server still authorises every request (SE-02). |
 
 ### Fast-follow after the first release
 

@@ -1,0 +1,24 @@
+{
+  "name": "@heach/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "cap sync android",
+    "apk": "cd android && ./gradlew assembleDebug",
+    "android:install": "cd android && ./gradlew installPatientDebug installProviderDebug",
+    "android:reverse": "adb reverse tcp:${WEB_PORT:-3000} tcp:${WEB_PORT:-3000}",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/core": "8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2",
+    "@heach/config": "workspace:*",
+    "eslint": "10.12.0",
+    "typescript": "6.0.3"
+  }
+}
