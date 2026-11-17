@@ -51,6 +51,13 @@ ${blocks}
       document.documentElement.lang = locale;
       var block = document.querySelector('section[lang="' + locale + '"]');
       block.hidden = false;
+      // The launch screen waits for a page to say it is ready (MA-09); this one is. Capacitor
+      // gives its script only to pages from the server, so this page posts the message itself.
+      if (window.androidBridge) {
+        androidBridge.postMessage(
+          JSON.stringify({ callbackId: '-1', pluginId: 'SplashScreen', methodName: 'hide', options: {} }),
+        );
+      }
       block.querySelector('button').addEventListener('click', function () {
         location.replace(new URLSearchParams(location.search).get('to'));
       });

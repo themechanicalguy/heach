@@ -8,9 +8,13 @@ import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.CapConfig;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /** The whole native app: a secured window around the hosted web app (ADR 0016). */
 public class MainActivity extends BridgeActivity {
+
+    private static final int LAUNCH_SCREEN_LIMIT_MS = 10_000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,21 @@ public class MainActivity extends BridgeActivity {
             // Capacitor logs page addresses; keep them out of release logs.
             .setLoggingEnabled(BuildConfig.DEBUG)
             .setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+            .setPluginsConfiguration(pluginSettings())
             .create();
+    }
+
+    /**
+     * MA-09: the launch screen stays until the page says it can be used, so a slow connection
+     * shows the brand, not a blank screen. It lifts by itself after the limit if the page never does.
+     */
+    private static JSONObject pluginSettings() {
+        try {
+            JSONObject launchScreen = new JSONObject().put("launchAutoHide", true).put("launchShowDuration", LAUNCH_SCREEN_LIMIT_MS);
+            return new JSONObject().put("SplashScreen", launchScreen);
+        } catch (JSONException impossible) {
+            throw new IllegalStateException(impossible);
+        }
     }
 
     private static String[] partnerHosts() {

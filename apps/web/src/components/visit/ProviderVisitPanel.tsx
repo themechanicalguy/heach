@@ -5,6 +5,7 @@ import { Button, Card, Notice, TextField } from '@heach/ui';
 import type { BookingPolicy, ProviderBooking, Shift } from '@heach/types';
 import { useState } from 'react';
 import { api } from '../../lib/api';
+import { successTick } from '../../lib/app-feel';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
@@ -82,6 +83,7 @@ function CodeAction({
         onClick={() =>
           void run(async () => {
             await api(path, { method: 'POST', body: JSON.stringify({ code }) });
+            successTick();
             await onChanged();
           })
         }
@@ -141,6 +143,7 @@ function CompleteVisit({
               method: 'POST',
               body: JSON.stringify(notes),
             });
+            successTick();
             await onChanged();
           })
         }

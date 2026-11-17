@@ -539,6 +539,7 @@ Added on 16 November 2026 ([ADR 0016](adr/0016-android-apps-with-capacitor.md)).
 | MA-06 | Camera and file upload work for vault records and onboarding documents; payment (UPI apps) and DigiLocker hand-offs return to the app; HEACH links open in the installed app. |
 | MA-07 | Push notifications through an adapter with a test double; push text carries no personal or health data. |
 | MA-08 | Each app serves one side: the provider app does not offer patient booking and the patient app does not offer provider work. The server still authorises every request (SE-02). |
+| MA-09 | The apps feel like apps: the launch screen stays until the first page can be used (at most 10 seconds), a tap on a link shows progress until the next page arrives, a booking paid, a request accepted, a visit started or completed, a rating sent and an application submitted give a short vibration, and controls show a pressed state and do not select their text on a long press. |
 
 ### Fast-follow after the first release
 

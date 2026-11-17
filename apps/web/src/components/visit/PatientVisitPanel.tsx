@@ -6,6 +6,7 @@ import type { Booking, Shift, VisitCode, VisitRecord } from '@heach/types';
 import Link from 'next/link';
 import { useState } from 'react';
 import { api } from '../../lib/api';
+import { successTick } from '../../lib/app-feel';
 import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { usePending } from '../../lib/use-pending';
@@ -145,6 +146,7 @@ function RateForm({ bookingId }: Readonly<{ bookingId: string }>) {
     run(async () => {
       const body = { stars: Number(stars), ...(comment ? { comment } : {}) };
       await api(`/bookings/${bookingId}/review`, { method: 'POST', body: JSON.stringify(body) });
+      successTick();
       setDone(true);
     });
   return (

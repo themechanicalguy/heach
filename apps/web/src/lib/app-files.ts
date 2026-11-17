@@ -1,7 +1,4 @@
-/** The part of the Android shell's bridge the web app uses (apps/mobile, ADR 0016). */
-interface NativeBridge {
-  nativePromise: (plugin: string, method: string, options: object) => Promise<unknown>;
-}
+import { callApp } from './app-bridge';
 
 export interface AppFile {
   /** With its extension, as a download would be named. */
@@ -15,9 +12,7 @@ export interface AppFile {
  * ignores the in-memory download links browsers use, so inside the apps this replaces them.
  */
 export async function openInApp(file: AppFile): Promise<void> {
-  const bridge = (window as { Capacitor?: NativeBridge }).Capacitor;
-  if (!bridge) throw new Error('The app bridge is missing');
-  await bridge.nativePromise('HeachFiles', 'open', file);
+  await callApp('HeachFiles', 'open', file);
 }
 
 /** Text as base64, for a file made on the page (the account export). */

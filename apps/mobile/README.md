@@ -2,7 +2,7 @@
 
 The Android apps: one Capacitor project that shows the hosted web app (`apps/web`) and builds two
 apps through Gradle flavours ([ADR 0016](../../docs/adr/0016-android-apps-with-capacitor.md),
-requirements MA-01 to MA-08).
+requirements MA-01 to MA-09).
 
 | Flavour    | Application ID      | Opens at    |
 | ---------- | ------------------- | ----------- |

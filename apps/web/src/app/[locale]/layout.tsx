@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { isLocale, LOCALES } from '@heach/i18n';
+import { AppFeel } from '../../components/app/AppFeel';
 import { ErrorTracking } from '../../components/ErrorTracking';
 import { HeaderAccount } from '../../components/HeaderAccount';
 import { LanguageSwitch } from '../../components/LanguageSwitch';
@@ -62,7 +63,7 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
   const accounts = flags.isOn('accounts');
   const audience = await requestAudience();
   return (
-    <html lang={locale}>
+    <html lang={locale} data-app={audience}>
       <head>
         {criticalFontFiles(locale).map((href, index) => (
           <link
@@ -108,6 +109,7 @@ export default async function LocaleLayout({ children, params }: Readonly<Props>
                   />
                   <LocationDialog />
                   <ErrorTracking />
+                  {audience && <AppFeel />}
                 </LocationProvider>
               </CareSearchProvider>
             </AccountProvider>

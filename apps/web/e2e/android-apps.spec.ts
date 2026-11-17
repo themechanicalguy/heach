@@ -76,23 +76,25 @@ async function freshApp(device: AndroidDevice, app: App): Promise<Page> {
   return show(device, app);
 }
 
-/** Taps a control of another app (the phone's camera) by its resource ID, as a finger would. */
-async function tapNative(device: AndroidDevice, id: string): Promise<void> {
+/** The centre of a control of another app (the phone's camera), found by its resource ID. */
+async function nativeControl(device: AndroidDevice, id: string): Promise<string | undefined> {
   const control = new RegExp(
     `resource-id="${id}"[^>]*bounds="\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]"`,
   );
-  await expect
-    .poll(async () => {
-      const dump = await device.shell(
-        'uiautomator dump /sdcard/heach-ui.xml; cat /sdcard/heach-ui.xml',
-      );
-      const [, left, top, right, bottom] = (control.exec(dump.toString()) ?? []).map(Number);
-      if (left === undefined || top === undefined || right === undefined || bottom === undefined)
-        return false;
-      await device.shell(`input tap ${String((left + right) / 2)} ${String((top + bottom) / 2)}`);
-      return true;
-    })
-    .toBe(true);
+  const dump = await device.shell(
+    'uiautomator dump /sdcard/heach-ui.xml; cat /sdcard/heach-ui.xml',
+  );
+  const [, left, top, right, bottom] = (control.exec(dump.toString()) ?? []).map(Number);
+  if (left === undefined || top === undefined || right === undefined || bottom === undefined)
+    return undefined;
+  return `${String((left + right) / 2)} ${String((top + bottom) / 2)}`;
+}
+
+/** Taps that control as a finger would; false when it is not on the screen. */
+async function tapNative(device: AndroidDevice, id: string): Promise<boolean> {
+  const centre = await nativeControl(device, id);
+  if (centre) await device.shell(`input tap ${centre}`);
+  return centre !== undefined;
 }
 
 /**
@@ -144,6 +146,8 @@ test('a new patient chooses a language, signs up, books a nurse and pays in HEAC
   await expect(patient).toHaveURL(/\/welcome$/);
   await patient.getByRole('link', { name: t.locale.en, exact: true }).click();
   await expect(patient).toHaveURL(`${SERVER}/en`);
+  // MA-09: the page knows it is in the app, which turns on the app-only touch styles.
+  await expect(patient.locator('html')).toHaveAttribute('data-app', 'patient');
   // The first visit asks where care is needed; this patient answers later, on the search form.
   const location = patient.getByRole('dialog');
   await expect(location).toBeVisible();
@@ -217,8 +221,18 @@ test('the patient rates the visit and finds its notes in Records', async () => {
 
 /** Takes a picture in the phone's camera and confirms it; the camera then closes by itself. */
 async function takePhoto(device: AndroidDevice, app: App): Promise<void> {
-  await tapNative(device, 'com.android.camera2:id/shutter_button');
-  await tapNative(device, 'com.android.camera2:id/done_button');
+  // The camera ignores a shutter tap made before its preview is ready, and a burst of taps
+  // stalls it, so the shutter is tapped every two seconds until the camera offers to confirm.
+  await expect
+    .poll(
+      async () => {
+        if (await tapNative(device, 'com.android.camera2:id/done_button')) return true;
+        await tapNative(device, 'com.android.camera2:id/shutter_button');
+        return false;
+      },
+      { intervals: [2_000], timeout: 40_000 },
+    )
+    .toBe(true);
   await expect.poll(() => isInFront(device, app)).toBe(true);
 }
 

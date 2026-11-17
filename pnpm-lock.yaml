@@ -404,6 +404,12 @@ importers:
       '@capacitor/core':
         specifier: 8.6.2
         version: 8.6.2
+      '@capacitor/haptics':
+        specifier: 8.0.2
+        version: 8.0.2(@capacitor/core@8.6.2)
+      '@capacitor/splash-screen':
+        specifier: 8.0.2
+        version: 8.0.2(@capacitor/core@8.6.2)
     devDependencies:
       '@capacitor/cli':
         specifier: 8.6.2
@@ -839,6 +845,16 @@ packages:
 
   '@capacitor/core@8.6.2':
     resolution: {integrity: sha512-UEb9crRuqEAe2Iu2eGOEuQ8rLQxpwg7ZZIpl17UJoytEpnV1e4oXXW0K7yYS2NsCOGmJjyLeKjNlgG7tkAoX8g==}
+
+  '@capacitor/haptics@8.0.2':
+    resolution: {integrity: sha512-c2hZzRR5Fk1tbTvhG1jhh2XBAf3EhnIerMIb2sl7Mt41Gxx1fhBJFDa0/BI1IbY4loVepyyuqNC9820/GZuoWQ==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
+  '@capacitor/splash-screen@8.0.2':
+    resolution: {integrity: sha512-0C6rYScr13WfAE9nPl4ScOQynmjFv9NT3Th+RZkD4ezYHmER6mcl1/lDYsv7jg3Rj3FOvLrlTlmNkUrr83kZzQ==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
 
   '@csstools/color-helpers@6.1.2':
     resolution: {integrity: sha512-grhRy3OKmniaAEKXMjua5z/EODX0MSqBGjunw8+j/3HQjOnahs2AGhvEOIYVUWcU6ScApbhLhVrQTX8XqrMrow==}
@@ -5812,6 +5828,14 @@ snapshots:
   '@capacitor/core@8.6.2':
     dependencies:
       tslib: 2.8.1
+
+  '@capacitor/haptics@8.0.2(@capacitor/core@8.6.2)':
+    dependencies:
+      '@capacitor/core': 8.6.2
+
+  '@capacitor/splash-screen@8.0.2(@capacitor/core@8.6.2)':
+    dependencies:
+      '@capacitor/core': 8.6.2
 
   '@csstools/color-helpers@6.1.2': {}
 

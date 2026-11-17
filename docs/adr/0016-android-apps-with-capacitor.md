@@ -3,7 +3,7 @@
 - **Status:** Accepted. Scope change asked for and the approach confirmed by the owner on
   16 November 2026 (recorded by Claude Code).
 - **Date:** 2026-11-16
-- **Requirements:** MA-01 to MA-08 (new); UX-08, PF-07, NT-01, EN-07, SE-02 (unchanged, apply
+- **Requirements:** MA-01 to MA-09 (new); UX-08, PF-07, NT-01, EN-07, SE-02 (unchanged, apply
   inside the apps)
 
 ## Context
@@ -30,6 +30,10 @@ Ionic) whose Android shell loads the hosted web app, with two Gradle product fla
 - The one native addition is `FilesPlugin`: a web view ignores the in-memory download links the
   web app uses, so inside the apps a file the page has already fetched is handed to the shell,
   kept in the app's private cache and opened in the phone's viewer. It holds no rules of its own.
+- Two official Capacitor plugins (MIT, maintained with Capacitor) were added on 17 November 2026
+  with the owner's approval: `@capacitor/splash-screen` keeps the launch screen up until the page
+  says it can be used, and `@capacitor/haptics` gives a short vibration on key confirmations
+  (MA-09). The web app calls both through the bridge and takes no dependency on them.
 - The server origin is a build setting (`HEACH_SERVER_URL`), never a string in source. Debug
   builds default to `localhost`, forwarded to the developer's machine with `adb reverse`, and
   are the only builds that allow clear-text HTTP; release builds refuse to build without an HTTPS origin.
