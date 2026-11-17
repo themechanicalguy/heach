@@ -88,9 +88,11 @@ jobs:
       - name: A release build without an HTTPS server must fail (MA-02)
         working-directory: apps/mobile/android
         run: |
-          if JAVA_HOME="$JAVA_HOME_21_X64" ./gradlew assemblePatientRelease -q; then
+          if JAVA_HOME="$JAVA_HOME_21_X64" ./gradlew assemblePatientRelease -q > release.log 2>&1; then
             echo "A release build without HEACH_SERVER_URL succeeded" && exit 1
           fi
+          # Refused by the check itself, not by some other fault in the build.
+          grep -q 'Release builds need HEACH_SERVER_URL' release.log
 
   smoke:
     name: E2E smoke

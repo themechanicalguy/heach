@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Only the two folders the app hands out: the camera's new photo (MA-06, written by Capacitor's
+     file chooser) and the file FilesPlugin opens in the phone's viewer. -->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="." />
-    <cache-path name="my_cache_images" path="." />
+    <external-files-path name="camera" path="Pictures/" />
+    <cache-path name="opened" path="opened/" />
 </paths>

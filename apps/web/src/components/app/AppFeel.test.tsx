@@ -53,6 +53,10 @@ it('shows progress from a tap on a link until the next page arrives (MA-09)', ()
   route.pathname = '/en/next-page';
   view.rerender(page());
   expect(screen.queryByRole('progressbar')).toBeNull();
+  // Back on the page the tap was made on: nothing is loading, so no bar.
+  route.pathname = '/en';
+  view.rerender(page());
+  expect(screen.queryByRole('progressbar')).toBeNull();
 });
 
 it('stops showing progress for a page that never arrives', () => {

@@ -68,13 +68,15 @@ export function FileDownload({
   const inApp = useAppAudience() !== undefined;
   const [download, setDownload] = useState<{ file: StoredFile; url: string }>();
   useEffect(() => {
+    // The apps hand the file to the phone instead (OpenInApp); no link is made for them.
+    if (inApp) return undefined;
     const bytes = Uint8Array.from(atob(file.contentBase64), (character) => character.charCodeAt(0));
     const url = URL.createObjectURL(new Blob([bytes], { type: file.contentType }));
     setDownload({ file, url });
     return () => {
       URL.revokeObjectURL(url);
     };
-  }, [file]);
+  }, [file, inApp]);
   if (inApp) return <OpenInApp file={file} name={name} label={label} />;
   return download?.file === file ? (
     <a

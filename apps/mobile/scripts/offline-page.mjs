@@ -22,7 +22,8 @@ export function offlinePage(catalogues) {
     const { app, offline, state } = catalogues[locale];
     return `    <section lang="${locale}" hidden>
       <h1>${escape(app.name)}</h1>
-      <p>${escape(offline.noConnection)}</p>
+      <p data-why="offline">${escape(offline.noConnection)}</p>
+      <p data-why="server" hidden>${escape(state.error)}</p>
       <button type="button">${escape(state.retry)}</button>
     </section>`;
   }).join('\n');
@@ -45,12 +46,18 @@ export function offlinePage(catalogues) {
   <body>
 ${blocks}
     <script>
-      // The phone's language if HEACH has it, else Odia. The app passes the page to retry.
+      // The phone's language if HEACH has it, else Odia. The app passes the page to retry
+      // and says when the server answered with a fault instead of being out of reach.
+      var asked = new URLSearchParams(location.search);
       var phone = /^(or|en|hi)/.exec(navigator.language || '');
       var locale = phone ? phone[1] : 'or';
       document.documentElement.lang = locale;
       var block = document.querySelector('section[lang="' + locale + '"]');
       block.hidden = false;
+      if (asked.get('why') === 'server') {
+        block.querySelector('[data-why="offline"]').hidden = true;
+        block.querySelector('[data-why="server"]').hidden = false;
+      }
       // The launch screen waits for a page to say it is ready (MA-09); this one is. Capacitor
       // gives its script only to pages from the server, so this page posts the message itself.
       if (window.androidBridge) {
@@ -59,7 +66,9 @@ ${blocks}
         );
       }
       block.querySelector('button').addEventListener('click', function () {
-        location.replace(new URLSearchParams(location.search).get('to'));
+        var to = asked.get('to') || '';
+        // Only ever a web address: this page can reach the app's bridge.
+        if (to.indexOf('https://') === 0 || to.indexOf('http://') === 0) location.replace(to);
       });
     </script>
   </body>

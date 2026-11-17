@@ -23,6 +23,21 @@ it('does not remember the welcome suggestion until a language is chosen', () => 
   ).toBeUndefined();
 });
 
+it('opens a path without a language in the language last used, as the provider app starts', () => {
+  const start = (cookie: string) =>
+    proxy(
+      new NextRequest('https://example.test/provider', {
+        headers: {
+          cookie,
+          'accept-language': 'en-IN',
+          'user-agent': 'Chrome/140 HeachApp/provider',
+        },
+      }),
+    ).headers.get('location');
+  expect(start('heach_lang=or')).toBe('https://example.test/or/provider');
+  expect(start('')).toBe('https://example.test/en/provider');
+});
+
 describe('Android apps serve one side each (MA-08)', () => {
   const from = (path: string, app: string) =>
     proxy(

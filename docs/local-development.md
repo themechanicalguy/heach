@@ -147,7 +147,9 @@ pnpm --filter @heach/mobile android:install  # build and install HEACH and HEACH
 - A release build fails unless `HEACH_SERVER_URL` is an `https://` address (MA-02).
 - `HEACH_ALLOW_NAVIGATION=host1,host2` lists partner hosts (identity, payments) whose pages may
   open inside the app; every other outside address opens in the phone's browser (MA-03).
-- Each app sends `HeachApp/patient` or `HeachApp/provider` in its user agent; the web app uses
+  Leave it empty unless a partner cannot work in the browser: a page from a listed host can
+  reach the app's bridge like a HEACH page can (it cannot open files; `FilesPlugin` refuses).
+- Each app sends `HeachApp/patient` or `HeachApp/provider`, then `HeachShell/<version code>`, in its user agent; the web app uses
   it to keep each app to its own side (MA-08). To see that in a browser, set the same user agent.
 - Screenshots of the apps are blocked on purpose (MA-04), including `adb` screen capture.
 - **Walkthrough of both apps.** With the stack up (`pnpm dev:up`), the emulator running, both

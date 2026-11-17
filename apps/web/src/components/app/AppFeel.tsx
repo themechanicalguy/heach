@@ -17,25 +17,23 @@ function tapOf(event: MouseEvent) {
   };
 }
 
-/** A web view has no address bar to show that a tap is loading a page, so the app shows a bar. */
-function PageProgress() {
+/** The bar from a tap on a link until this part is replaced by the next page's. */
+function ProgressFromTap() {
   const { t } = useI18n();
-  const page = `${usePathname()}?${useSearchParams().toString()}`;
-  const [leaving, setLeaving] = useState<string>();
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const onTap = (event: MouseEvent) => {
-      if (leavesPage(tapOf(event), window.location.href)) setLeaving(page);
+      if (leavesPage(tapOf(event), window.location.href)) setLoading(true);
     };
     document.addEventListener('click', onTap);
     return () => {
       document.removeEventListener('click', onTap);
     };
-  }, [page]);
-  const loading = leaving === page;
+  }, []);
   useEffect(() => {
     if (!loading) return undefined;
     const timer = window.setTimeout(() => {
-      setLeaving(undefined);
+      setLoading(false);
     }, GIVE_UP_MS);
     return () => {
       window.clearTimeout(timer);
@@ -43,6 +41,15 @@ function PageProgress() {
   }, [loading]);
   if (!loading) return null;
   return <div className="app-progress" role="progressbar" aria-label={t('state.loading')} />;
+}
+
+/**
+ * A web view has no address bar to show that a tap is loading a page, so the app shows a bar.
+ * Keyed by the page: arriving anywhere, forwards or back, starts with no bar.
+ */
+function PageProgress() {
+  const page = `${usePathname()}?${useSearchParams().toString()}`;
+  return <ProgressFromTap key={page} />;
 }
 
 /** What only the Android apps need to feel like apps (MA-09); never rendered in a browser. */

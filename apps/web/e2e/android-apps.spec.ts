@@ -70,8 +70,19 @@ async function show(device: AndroidDevice, app: App): Promise<Page> {
   throw new Error(`No page to drive in ${appId(app)}`);
 }
 
+/**
+ * The apps load `localhost`; this makes the device's localhost the machine running the web app.
+ * The emulator drops the forwarding now and then, so it is set again before each app start.
+ */
+function reachServer(device: AndroidDevice): void {
+  const port = `tcp:${new URL(SERVER).port}`;
+  // eslint-disable-next-line sonarjs/no-os-command-from-path -- adb is the developer's own tool, found on PATH; test only
+  execFileSync('adb', ['-s', device.serial(), 'reverse', port, port]);
+}
+
 /** The app as just installed: no session, no language chosen. */
 async function freshApp(device: AndroidDevice, app: App): Promise<Page> {
+  reachServer(device);
   await device.shell(`pm clear ${appId(app)}`);
   return show(device, app);
 }
@@ -130,10 +141,7 @@ test.beforeAll(async () => {
   const [first] = await android.devices();
   if (!first) throw new Error('No Android device or emulator is connected');
   device = first;
-  // The apps load `localhost`; this makes the device's localhost the machine running the web app.
-  const port = `tcp:${new URL(SERVER).port}`;
-  // eslint-disable-next-line sonarjs/no-os-command-from-path -- adb is the developer's own tool, found on PATH; test only
-  execFileSync('adb', ['-s', device.serial(), 'reverse', port, port]);
+  reachServer(device);
   nurse = await listedProvider('nurse', 'nursing_vitals_check', 40_000);
 });
 
@@ -260,6 +268,10 @@ test('the patient photographs an old prescription into Records and opens it agai
 });
 
 test('closing and reopening HEACH keeps the patient signed in', async () => {
+  // As a person closes an app: leave it, then swipe it away. Leaving is when the app saves
+  // its session to disk.
+  await device.shell('input keyevent KEYCODE_HOME');
+  await expect.poll(() => isInFront(device, 'patient')).toBe(false);
   await device.shell(`am force-stop ${appId('patient')}`);
   patient = await show(device, 'patient');
   await expect(patient).toHaveURL(`${SERVER}/en`);

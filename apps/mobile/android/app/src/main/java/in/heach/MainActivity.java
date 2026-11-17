@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
 import com.getcapacitor.BridgeActivity;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 public class MainActivity extends BridgeActivity {
 
     private static final int LAUNCH_SCREEN_LIMIT_MS = 10_000;
+    private PageErrors pageErrors;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +27,21 @@ public class MainActivity extends BridgeActivity {
         FilesPlugin.clearOpened(this);
         registerPlugin(FilesPlugin.class);
         super.onCreate(savedInstanceState);
+        // The first page is still on its way, so this client is in place before any answer.
+        pageErrors = new PageErrors(bridge);
+        bridge.setWebViewClient(pageErrors);
         getOnBackPressedDispatcher().addCallback(this, backThroughPages());
+    }
+
+    /**
+     * The session cookie changes each time it is used and the web view writes cookies to disk
+     * only now and then. Android may close the app any time after this point; with the old cookie
+     * on disk the next start would look like a replay and sign the user out everywhere (SE-07).
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        CookieManager.getInstance().flush();
     }
 
     private CapConfig webAppConfig() {
@@ -37,8 +53,8 @@ public class MainActivity extends BridgeActivity {
             .setErrorPath("offline.html?to=" + Uri.encode(BuildConfig.SERVER_URL + BuildConfig.START_PATH))
             // MA-03: partner pages that may open in the app; anything else opens in the browser.
             .setAllowNavigation(partnerHosts())
-            // Lets the web app tell which app it is running in (MA-08).
-            .setAppendedUserAgentString("HeachApp/" + BuildConfig.FLAVOR)
+            // Lets the web app tell which app, and which build of it, it is running in (MA-08).
+            .setAppendedUserAgentString("HeachApp/" + BuildConfig.FLAVOR + " HeachShell/" + BuildConfig.VERSION_CODE)
             // Capacitor logs page addresses; keep them out of release logs.
             .setLoggingEnabled(BuildConfig.DEBUG)
             .setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
@@ -52,7 +68,9 @@ public class MainActivity extends BridgeActivity {
      */
     private static JSONObject pluginSettings() {
         try {
-            JSONObject launchScreen = new JSONObject().put("launchAutoHide", true).put("launchShowDuration", LAUNCH_SCREEN_LIMIT_MS);
+            JSONObject launchScreen = new JSONObject()
+                .put("launchAutoHide", true)
+                .put("launchShowDuration", LAUNCH_SCREEN_LIMIT_MS);
             return new JSONObject().put("SplashScreen", launchScreen);
         } catch (JSONException impossible) {
             throw new IllegalStateException(impossible);
@@ -64,26 +82,37 @@ public class MainActivity extends BridgeActivity {
         return hosts.isEmpty() ? new String[0] : hosts.split("\\s*,\\s*");
     }
 
-    /** MA-06: a HEACH link opened from outside (a partner's return, an SMS) loads in the app. */
+    /** A link to the HEACH server itself: the only kind the app loads when asked from outside. */
+    private static boolean isOurs(Uri link) {
+        Uri server = Uri.parse(BuildConfig.SERVER_URL);
+        return link != null && "https".equals(link.getScheme()) && server.getAuthority().equals(link.getAuthority());
+    }
+
+    /**
+     * MA-06: a HEACH link opened from outside (a partner's return, an SMS) loads in the app.
+     * Capacitor also calls this with the link that started the app. Only the link's page is
+     * taken; the server is always the one this app was built for.
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Uri link = intent.getData();
-        Uri server = Uri.parse(BuildConfig.SERVER_URL);
-        boolean ours =
-            link != null && "https".equals(link.getScheme()) && server.getAuthority().equals(link.getAuthority());
-        if (ours && bridge != null) {
-            bridge.getWebView().loadUrl(link.toString());
+        if (isOurs(link) && bridge != null) {
+            String origin = link.getScheme() + "://" + link.getEncodedAuthority();
+            bridge.getWebView().loadUrl(BuildConfig.SERVER_URL + link.toString().substring(origin.length()));
         }
     }
 
-    /** MA-05: back walks the page history and leaves the app from the first page. */
+    /**
+     * MA-05: back walks the page history and leaves the app from the first page. The offline page
+     * is a dead end: going back from it would only load the page that failed again.
+     */
     private OnBackPressedCallback backThroughPages() {
         return new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 WebView webView = bridge == null ? null : bridge.getWebView();
-                if (webView != null && webView.canGoBack()) {
+                if (webView != null && webView.canGoBack() && !pageErrors.isShowing(webView)) {
                     webView.goBack();
                 } else {
                     finish();

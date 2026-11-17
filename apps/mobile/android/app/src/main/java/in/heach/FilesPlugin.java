@@ -13,6 +13,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Opens a file the web app has already fetched (a record, a report, a prescription) in the
@@ -24,6 +25,8 @@ import java.io.IOException;
 public class FilesPlugin extends Plugin {
 
     private static final String FOLDER = "opened";
+    /** The types the web app hands over; nothing the phone would run or install. */
+    private static final Set<String> TYPES = Set.of("application/pdf", "image/jpeg", "image/png", "application/json");
 
     /** Removes anything opened earlier; called at app start and before each new file. */
     static void clearOpened(Context context) {
@@ -41,7 +44,7 @@ public class FilesPlugin extends Plugin {
         String content = call.getString("contentBase64", "");
         // On the main thread: the page's address can only be read there.
         getActivity().runOnUiThread(() -> {
-            if (!calledByHeach() || name.isEmpty() || contentType.isEmpty() || content.isEmpty()) {
+            if (!calledByHeach() || name.isEmpty() || !TYPES.contains(contentType) || content.isEmpty()) {
                 call.reject("refused");
                 return;
             }
@@ -58,8 +61,10 @@ public class FilesPlugin extends Plugin {
     /** Only HEACH's own pages may hand files over, not a partner page open in the app. */
     private boolean calledByHeach() {
         String page = bridge.getWebView().getUrl();
+        if (page == null) return false;
         Uri server = Uri.parse(BuildConfig.SERVER_URL);
-        return page != null && server.getAuthority().equals(Uri.parse(page).getAuthority());
+        Uri current = Uri.parse(page);
+        return server.getScheme().equals(current.getScheme()) && server.getAuthority().equals(current.getAuthority());
     }
 
     private File write(String name, byte[] bytes) throws IOException {

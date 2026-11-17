@@ -38,6 +38,8 @@ Ionic) whose Android shell loads the hosted web app, with two Gradle product fla
   builds default to `localhost`, forwarded to the developer's machine with `adb reverse`, and
   are the only builds that allow clear-text HTTP; release builds refuse to build without an HTTPS origin.
 - The web view may navigate only within the configured origin. Other links open in the browser.
+  A partner host listed in `HEACH_ALLOW_NAVIGATION` is the exception and can reach the app's
+  bridge, so the list stays empty unless a partner cannot work in the browser.
 - The window is marked secure (no screenshots, no screen recording, blank in the recent-apps
   list) because any screen may show health data. Android backup of app data is off.
 - Native features (camera and file upload, app links, UPI and DigiLocker hand-off, push) are
