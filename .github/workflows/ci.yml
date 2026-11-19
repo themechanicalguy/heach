@@ -53,8 +53,9 @@ jobs:
       - name: Coverage of changed lines is at least 80 percent (TS-01.1)
         run: |
           cov="--coverage.enabled --coverage.reporter=lcov --coverage.reportsDirectory"
+          # The Android shell (apps/mobile) has no unit-tested source; its walkthrough is Playwright.
           pnpm -r --filter './apps/*' --filter './packages/*' --filter '!@heach/api' --filter '!@heach/config' \
-            exec vitest run $cov=coverage-unit
+            --filter '!@heach/mobile' exec vitest run $cov=coverage-unit
           (cd apps/api && pnpm exec vitest run $cov=coverage-all)
           node scripts/check-changed-coverage.mjs HEAD^1
       - name: Every column has a data class; Restricted columns are encrypted (DC-01)
