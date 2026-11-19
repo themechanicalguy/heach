@@ -34,8 +34,9 @@
 
 ## Web-only scope
 
-HEACH ships as three browser applications and one API. There is no native Android or iOS app;
-the requirements already put native apps out of scope and make the PWA installable. This page
+HEACH ships as three browser applications and one API. Since 16 November 2026 the patient and
+provider web app is also packaged as two Android apps that show the same screens
+([ADR 0016](adr/0016-android-apps-with-capacitor.md)); there is no iOS app. This page
 makes the consequence explicit: every care service, every role and every journey must complete in
 a supported browser (UX-08), with the PWA install as an enhancement, never a requirement.
 

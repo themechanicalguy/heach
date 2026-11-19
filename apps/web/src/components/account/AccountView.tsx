@@ -7,7 +7,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAccount } from '../../lib/account';
 import { useI18n } from '../../lib/i18n-context';
-import { destinationFor, isOrganisationOwner } from '../../lib/routing';
+import { sideOffered } from '../../lib/app-audience';
+import { destinationFor, isCareRole, isOrganisationOwner } from '../../lib/routing';
+import { useAppAudience } from '../../lib/use-app-audience';
 import { useSession } from '../../lib/session';
 import { usePending } from '../../lib/use-pending';
 import { AddRole } from './AddRole';
@@ -29,6 +31,11 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
   const [added, setAdded] = useState(false);
   const { pending, error, run } = usePending();
   const usable = me.activeRole !== 'new_account';
+  const audience = useAppAudience();
+  // An Android app lists, and switches among, the roles of its own side (MA-08).
+  const roles = me.roles.filter((grant) =>
+    sideOffered(audience, isCareRole(grant.role) ? 'care' : 'provider'),
+  );
   const roleName = (role: string) => t(`roles.${role as Me['activeRole']}.name`);
 
   const chooseRole = (role: string) =>
@@ -55,7 +62,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
           <Notice tone="warning">{t('account.noUsableRole')}</Notice>
         )}
         <ul className="role-list">
-          {me.roles.map((grant) => (
+          {roles.map((grant) => (
             <li key={grant.role}>
               <Card title={t(`roles.${grant.role}.label`)}>
                 <RoleAction

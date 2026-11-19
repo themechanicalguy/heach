@@ -1,5 +1,7 @@
 'use client';
 
+import { sideOffered } from '../../lib/app-audience';
+import { useAppAudience } from '../../lib/use-app-audience';
 import { ChoiceGroup, Notice } from '@heach/ui';
 import type { Invitation, Me } from '@heach/types';
 import { useRouter } from 'next/navigation';
@@ -36,12 +38,23 @@ export function RoleStep({ me }: Readonly<{ me: Me }>) {
   const role = picked ?? (savedInvitation ? `${INVITED}${savedInvitation.id}` : (saved ?? ''));
   const [missing, setMissing] = useState(false);
   const { pending, error, run } = usePending();
+  const audience = useAppAudience();
   const choices = (roles: readonly string[]) =>
     roles.map((value) => ({
       value,
       label: t(`roles.${value as RoleChoice}.label`),
       hint: t(`roles.${value as RoleChoice}.hint`),
     }));
+  // An Android app offers its own side only (MA-08); a browser offers both.
+  const groups = [
+    { side: 'care' as const, legend: t('setup.role.careGroup'), roles: offered(CARE_CHOICES, me) },
+    {
+      side: 'provider' as const,
+      legend: t('setup.role.providerGroup'),
+      roles: offered(PROVIDER_CHOICES, me),
+    },
+  ].filter((group) => sideOffered(audience, group.side));
+  const problem = missing ? t('setup.role.required') : error && t(error);
   const choose = (value: string) => {
     setRole(value);
     setMissing(false);
@@ -84,21 +97,17 @@ export function RoleStep({ me }: Readonly<{ me: Me }>) {
           onChange={choose}
         />
       )}
-      <ChoiceGroup
-        legend={t('setup.role.careGroup')}
-        name="role"
-        choices={choices(offered(CARE_CHOICES, me))}
-        value={role}
-        onChange={choose}
-      />
-      <ChoiceGroup
-        legend={t('setup.role.providerGroup')}
-        name="role"
-        choices={choices(offered(PROVIDER_CHOICES, me))}
-        value={role}
-        onChange={choose}
-        error={missing ? t('setup.role.required') : error && t(error)}
-      />
+      {groups.map((group, index) => (
+        <ChoiceGroup
+          key={group.legend}
+          legend={group.legend}
+          name="role"
+          choices={choices(group.roles)}
+          value={role}
+          onChange={choose}
+          error={index === groups.length - 1 ? problem : undefined}
+        />
+      ))}
       <StepActions submitLabel={t('setup.continue')} pending={pending} />
     </form>
   );
