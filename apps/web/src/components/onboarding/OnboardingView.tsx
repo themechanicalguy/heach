@@ -1,10 +1,12 @@
 'use client';
 
+import { useAppAudience } from '../../lib/use-app-audience';
 import { Button, Notice, Progress } from '@heach/ui';
 import type { Application } from '@heach/types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api';
+import { successTick } from '../../lib/app-feel';
 import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { usePending } from '../../lib/use-pending';
@@ -48,6 +50,7 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
     ? ['identity', 'documents', 'payout', 'review']
     : ['identity', 'documents', 'review'];
   const { pending, error, run } = usePending();
+  const audience = useAppAudience();
   useEffect(() => {
     const stepTitle = t(`application.steps.${step}`);
     document.title = `${stepTitle} · ${t('application.title')} · ${t('app.name')}`;
@@ -60,6 +63,13 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
   const submit = () =>
     run(async () => {
       setApplication(await api<Application>('/provider/application/submit', { method: 'POST' }));
+      successTick();
+      // The provider app has no other home: stay, and show the new status at the top (MA-08).
+      if (audience === 'provider') {
+        window.scrollTo(0, 0);
+        heading.current?.focus({ preventScroll: true });
+        return;
+      }
       rememberSubmitted();
       router.push(`/${locale}`);
     });

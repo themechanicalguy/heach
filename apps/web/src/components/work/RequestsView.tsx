@@ -5,6 +5,7 @@ import { Button, Card, EmptyState, Notice } from '@heach/ui';
 import type { ProviderRequest, StoredFile } from '@heach/types';
 import { useState } from 'react';
 import { api } from '../../lib/api';
+import { successTick } from '../../lib/app-feel';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
@@ -63,6 +64,7 @@ function RequestCard({
         method: 'POST',
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
+      if (path === 'accept') successTick();
       await onDone();
     });
   const viewPrescription = () =>

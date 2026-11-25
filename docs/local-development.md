@@ -106,6 +106,63 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
 - **`/readyz` returns 503**: run `docker compose ps`; the check marked `down` names the service.
 - **Start completely fresh**: `pnpm services:reset`, then `pnpm dev:up`.
 
+## Android apps
+
+`apps/mobile` builds the patient and provider Android apps around the web app
+([ADR 0016](adr/0016-android-apps-with-capacitor.md)). Nothing else in the repository needs these
+tools, and `pnpm check` does not build the apps.
+
+One-time setup on macOS (about 7 GB):
+
+```sh
+brew install openjdk@21
+brew install --cask android-commandlinetools
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+sdkmanager --licenses     # read and accept Google's SDK licences
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "emulator" \
+  "system-images;android-36;google_apis;arm64-v8a"
+avdmanager create avd -n heach-phone -k "system-images;android-36;google_apis;arm64-v8a" -d pixel_6a
+```
+
+Put the three `export` lines in `~/.zshrc`. Gradle does not run on the newest JDK, so `JAVA_HOME`
+must point at JDK 21 even if another Java is installed.
+
+Run both apps against your local stack:
+
+```sh
+pnpm dev:up                                  # the web app on http://localhost:3000
+emulator -avd heach-phone &                  # start the phone
+pnpm --filter @heach/mobile android:reverse  # the phone's localhost is now your laptop's
+pnpm --filter @heach/mobile android:install  # build and install HEACH and HEACH Provider
+```
+
+- Debug builds load `http://localhost:3000` unless `HEACH_SERVER_URL` is set
+  (`HEACH_SERVER_URL=https://… pnpm --filter @heach/mobile apk`). If `pnpm dev:up` moved the web
+  app to another port, set `WEB_PORT` for `android:reverse` and build with
+  `HEACH_SERVER_URL=http://localhost:<port>`. Run `android:reverse` again each time the
+  emulator restarts. `localhost` matters: sign-in cookies and the service worker
+  need a secure context, and the emulator's own address for the laptop (`10.0.2.2`) is not one.
+- A release build fails unless `HEACH_SERVER_URL` is an `https://` address (MA-02).
+- `HEACH_ALLOW_NAVIGATION=host1,host2` lists partner hosts (identity, payments) whose pages may
+  open inside the app; every other outside address opens in the phone's browser (MA-03).
+  Leave it empty unless a partner cannot work in the browser: a page from a listed host can
+  reach the app's bridge like a HEACH page can (it cannot open files; `FilesPlugin` refuses).
+- Each app sends `HeachApp/patient` or `HeachApp/provider`, then `HeachShell/<version code>`, in its user agent; the web app uses
+  it to keep each app to its own side (MA-08). To see that in a browser, set the same user agent.
+- Screenshots of the apps are blocked on purpose (MA-04), including `adb` screen capture.
+- **Walkthrough of both apps.** With the stack up (`pnpm dev:up`), the emulator running, both
+  apps installed and the API built (`pnpm --filter @heach/api build`, for the admin CLI):
+  `E2E_ANDROID=1 E2E_API=1 E2E_BASE_URL=http://localhost:3000 pnpm --filter @heach/web exec playwright test --project=android`.
+  It drives the two apps against each other (book and pay, accept and complete, camera to
+  Records, the provider application) and sets up `adb reverse` itself. It sends many codes from
+  one machine: raise `OTP_SENDS_PER_DEVICE_PER_HOUR` and the address caps in `.env` first. The
+  apps block the phone's screenshots, so the suite captures pages through the debug build's
+  web view.
+- `apk` and `android:install` run `sync` first: it writes the offline page from the i18n
+  catalogues and copies it into the Android project.
+
 ## Database TLS, roles and migrations (Step 2)
 
 - PostgreSQL and Redis accept TLS only (EN-01.1). `pnpm setup` creates a local CA and server

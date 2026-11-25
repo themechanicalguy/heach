@@ -5,6 +5,7 @@ import type { Booking, BookingPolicy } from '@heach/types';
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '../../lib/api';
+import { successTick } from '../../lib/app-feel';
 import { useI18n } from '../../lib/i18n-context';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
@@ -30,6 +31,7 @@ export function BookingReview({ booking }: Readonly<{ booking: Booking }>) {
     run(async () => {
       if (!checkout) return;
       await api(`/payments/sandbox/${checkout.orderId}/pay`, { method: 'POST' });
+      successTick();
       router.push(`/${locale}/bookings/${booking.id}?paid=1`);
     });
   return (

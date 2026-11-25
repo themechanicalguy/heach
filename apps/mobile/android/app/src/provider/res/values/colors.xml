@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Design token "text" (packages/ui/src/tokens.ts). -->
+    <color name="brand">#241A38</color>
+</resources>

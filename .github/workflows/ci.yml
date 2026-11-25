@@ -53,8 +53,9 @@ jobs:
       - name: Coverage of changed lines is at least 80 percent (TS-01.1)
         run: |
           cov="--coverage.enabled --coverage.reporter=lcov --coverage.reportsDirectory"
+          # The Android shell (apps/mobile) has no unit-tested source; its walkthrough is Playwright.
           pnpm -r --filter './apps/*' --filter './packages/*' --filter '!@heach/api' --filter '!@heach/config' \
-            exec vitest run $cov=coverage-unit
+            --filter '!@heach/mobile' exec vitest run $cov=coverage-unit
           (cd apps/api && pnpm exec vitest run $cov=coverage-all)
           node scripts/check-changed-coverage.mjs HEAD^1
       - name: Every column has a data class; Restricted columns are encrypted (DC-01)
@@ -67,6 +68,32 @@ jobs:
       # on developer machines and CI with access to the source (security review 2026-10-24).
       - name: Dependency audit, all dependencies (high and critical block the merge, SO-03.2)
         run: pnpm audit --audit-level high
+
+  android:
+    name: Android apps build (MA-01)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The runner image ships the Android SDK and JDK 21; Gradle does not run on newer JDKs.
+      - name: Build the patient and provider debug apps
+        run: JAVA_HOME="$JAVA_HOME_21_X64" pnpm --filter @heach/mobile apk
+      - name: A release build without an HTTPS server must fail (MA-02)
+        working-directory: apps/mobile/android
+        run: |
+          if JAVA_HOME="$JAVA_HOME_21_X64" ./gradlew assemblePatientRelease -q > release.log 2>&1; then
+            echo "A release build without HEACH_SERVER_URL succeeded" && exit 1
+          fi
+          # Refused by the check itself, not by some other fault in the build.
+          grep -q 'Release builds need HEACH_SERVER_URL' release.log
 
   smoke:
     name: E2E smoke
