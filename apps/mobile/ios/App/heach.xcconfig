@@ -1,0 +1,22 @@
+// One Xcode target, two apps (MA-01, ADR 0016). Pick the app with HEACH_AUDIENCE=patient|provider
+// on the xcodebuild command line (scripts/ios-apps.mjs); Xcode itself builds the patient app.
+HEACH_AUDIENCE = patient
+
+HEACH_BUNDLE_ID_patient = in.heach.patient
+HEACH_BUNDLE_ID_provider = in.heach.provider
+HEACH_NAME_patient = HEACH
+HEACH_NAME_provider = HEACH Provider
+HEACH_START_PATH_patient = /
+HEACH_START_PATH_provider = /provider
+
+PRODUCT_BUNDLE_IDENTIFIER = $(HEACH_BUNDLE_ID_$(HEACH_AUDIENCE))$(HEACH_ID_SUFFIX)
+HEACH_APP_NAME = $(HEACH_NAME_$(HEACH_AUDIENCE))
+HEACH_START_PATH = $(HEACH_START_PATH_$(HEACH_AUDIENCE))
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-$(HEACH_AUDIENCE)
+
+// The web app's address is a build setting (MA-02): HEACH_SERVER_URL=https://... on the command
+// line. Release builds refuse to build without an https address (build-checks.sh).
+HEACH_SERVER_URL =
+// Hosts of partner pages (identity, payments) that may open inside the app, comma-separated
+// (MA-03, MA-06). Every other address outside the server opens in the browser.
+HEACH_ALLOW_NAVIGATION =

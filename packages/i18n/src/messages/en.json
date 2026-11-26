@@ -2,7 +2,8 @@
   "app": {
     "name": "HEACH",
     "takePhoto": "Take a photo",
-    "photoAdded": "Photo added."
+    "photoAdded": "Photo added.",
+    "cameraPurpose": "HEACH uses the camera only when you choose to photograph a document or record to upload."
   },
   "home": {
     "title": "Care at home, verified and close to you",

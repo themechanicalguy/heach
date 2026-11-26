@@ -15,7 +15,7 @@ interface Props {
 }
 
 /**
- * A file upload that, inside the Android apps, also offers the camera (MA-06): the app's file
+ * A file upload that, inside the apps, also offers the camera (MA-06): the app's file
  * picker lists files only, so a button opens the camera. Browsers already offer both.
  */
 export function FileOrPhotoField({ label, hint, accept, onFile }: Readonly<Props>) {

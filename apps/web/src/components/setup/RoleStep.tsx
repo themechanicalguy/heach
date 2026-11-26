@@ -45,7 +45,7 @@ export function RoleStep({ me }: Readonly<{ me: Me }>) {
       label: t(`roles.${value as RoleChoice}.label`),
       hint: t(`roles.${value as RoleChoice}.hint`),
     }));
-  // An Android app offers its own side only (MA-08); a browser offers both.
+  // An app offers its own side only (MA-08); a browser offers both.
   const groups = [
     { side: 'care' as const, legend: t('setup.role.careGroup'), roles: offered(CARE_CHOICES, me) },
     {

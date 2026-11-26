@@ -1547,7 +1547,7 @@ body {
   }
 }
 
-/* Inside the Android apps only (MA-09): the layout marks the page with data-app. */
+/* Inside the Android and iPhone apps only (MA-09): the layout marks the page with data-app. */
 html[data-app] {
   /* The pressed state below replaces the browser's grey flash. */
   -webkit-tap-highlight-color: transparent;

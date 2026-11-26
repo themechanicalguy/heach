@@ -1,4 +1,4 @@
-/** The part of the Android shell's bridge the web app uses (apps/mobile, ADR 0016). */
+/** The part of the apps' bridge that the web app uses (Android and iPhone; ADR 0016). */
 interface NativeBridge {
   nativePromise: (plugin: string, method: string, options: object) => Promise<unknown>;
 }
@@ -6,7 +6,7 @@ interface NativeBridge {
 const bridge = (): NativeBridge | undefined =>
   (globalThis as { Capacitor?: NativeBridge }).Capacitor;
 
-/** Asks the Android app to do something only it can; rejects in a browser. */
+/** Asks the app to do something only it can; rejects in a browser. */
 export async function callApp(plugin: string, method: string, options: object = {}): Promise<void> {
   const app = bridge();
   if (!app) throw new Error('The app bridge is missing');

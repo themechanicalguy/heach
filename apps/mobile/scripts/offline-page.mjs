@@ -58,9 +58,12 @@ ${blocks}
         block.querySelector('[data-why="offline"]').hidden = true;
         block.querySelector('[data-why="server"]').hidden = false;
       }
-      // The launch screen waits for a page to say it is ready (MA-09); this one is. Capacitor
-      // gives its script only to pages from the server, so this page posts the message itself.
-      if (window.androidBridge) {
+      // The launch screen waits for a page to say it is ready (MA-09); this one is. On iPhone
+      // Capacitor's script runs here too; on Android it runs only on the server's pages, so this
+      // page posts the message to the bridge itself.
+      if (window.Capacitor && window.Capacitor.nativePromise) {
+        window.Capacitor.nativePromise('SplashScreen', 'hide', {}).catch(function () {});
+      } else if (window.androidBridge) {
         androidBridge.postMessage(
           JSON.stringify({ callbackId: '-1', pluginId: 'SplashScreen', methodName: 'hide', options: {} }),
         );

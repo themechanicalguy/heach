@@ -1,6 +1,6 @@
 import { callAppQuietly } from './app-bridge';
 
-/** Lifts the Android app's launch screen once the page can be used (MA-09). */
+/** Lifts the app's launch screen once the page can be used (MA-09). */
 export function showPage(): void {
   callAppQuietly('SplashScreen', 'hide');
 }

@@ -1,0 +1,8 @@
+#include "heach.xcconfig"
+#include "../debug.xcconfig"
+
+// Lets a debug build sit beside the App Store build on one phone.
+HEACH_ID_SUFFIX = .debug
+// The simulator shares the Mac's network, so localhost is the developer's own `pnpm dev`.
+// "/$()/" stops xcconfig from reading "//" as the start of a comment.
+HEACH_SERVER_URL = http:/$()/localhost:3000

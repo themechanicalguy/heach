@@ -20,4 +20,4 @@ Start from [the template](0000-template.md) and take the next number.
 | [0013](0013-retire-spec-driven-development.md) | Retire spec-driven development and Spec Kit | Accepted |
 | [0014](0014-accounts-roles-and-admin-realm.md) | Keep patient and provider accounts and admins in separate sign-in realms | Accepted (29 October 2026) |
 | [0015](0015-defer-online-consultation-and-clinic-appointments.md) | Defer online consultation and in-clinic appointments beyond the MVP | Accepted |
-| [0016](0016-android-apps-with-capacitor.md) | Ship Patient and Provider Android apps from one Capacitor project | Accepted |
+| [0016](0016-android-apps-with-capacitor.md) | Ship Patient and Provider Android and iPhone apps from one Capacitor project | Accepted |

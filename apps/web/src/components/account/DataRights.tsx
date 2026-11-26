@@ -23,7 +23,7 @@ function download(json: string): void {
   URL.revokeObjectURL(url);
 }
 
-/** The export as a file: saved by a browser, opened or shared by the Android apps (MA-06). */
+/** The export as a file: saved by a browser, opened or shared by the apps (MA-06). */
 async function handOver(data: AccountExport, inApp: boolean): Promise<void> {
   const json = JSON.stringify(data, null, 2);
   if (!inApp) {

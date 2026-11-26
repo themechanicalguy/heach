@@ -8,13 +8,17 @@
     "apk": "pnpm run sync && cd android && ./gradlew assembleDebug",
     "android:install": "pnpm run sync && cd android && ./gradlew installPatientDebug installProviderDebug",
     "android:reverse": "adb reverse tcp:${WEB_PORT:-3000} tcp:${WEB_PORT:-3000}",
+    "ios:sync": "node scripts/offline-page.mjs && node scripts/ios-resources.mjs && cap sync ios",
+    "ios:install": "pnpm run ios:sync && node scripts/ios-apps.mjs",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test scripts/*.test.mjs"
   },
   "dependencies": {
     "@capacitor/android": "8.6.2",
     "@capacitor/core": "8.6.2",
     "@capacitor/haptics": "8.0.2",
+    "@capacitor/ios": "8.6.2",
     "@capacitor/splash-screen": "8.0.2"
   },
   "devDependencies": {
