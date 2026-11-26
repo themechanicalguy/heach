@@ -80,7 +80,7 @@ export const config = {
   matcher: [
     {
       // Pages only: not the API, static assets, the service worker, manifest, health checks or
-      // /.well-known (Android app links).
+      // /.well-known (Android and iPhone app links).
       source:
         '/((?!api|_next/static|_next/image|healthz|\\.well-known|sw.js|manifest.webmanifest|icons|fonts|favicon.ico).*)',
     },

@@ -1,13 +1,16 @@
-type Env = Readonly<Record<string, string | undefined>>;
+export type Env = Readonly<Record<string, string | undefined>>;
 
 interface Statement {
   relation: string[];
   target: { namespace: 'android_app'; package_name: string; sha256_cert_fingerprints: string[] };
 }
 
+/** The apps' IDs: Android package names and iPhone bundle IDs are the same (MA-01). */
+export const APP_IDS = { patient: 'in.heach.patient', provider: 'in.heach.provider' } as const;
+
 const APPS = [
-  ['in.heach.patient', 'ANDROID_PATIENT_CERT_SHA256'],
-  ['in.heach.provider', 'ANDROID_PROVIDER_CERT_SHA256'],
+  [APP_IDS.patient, 'ANDROID_PATIENT_CERT_SHA256'],
+  [APP_IDS.provider, 'ANDROID_PROVIDER_CERT_SHA256'],
 ] as const;
 
 /** A signing certificate's SHA-256 fingerprint as Android prints it: 32 hex pairs with colons. */
