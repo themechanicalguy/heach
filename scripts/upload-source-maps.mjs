@@ -1,10 +1,12 @@
-// Uploads the web app's browser source maps to GlitchTip for one release, then deletes them so
+// Uploads the web app's or the admin console's browser source maps to GlitchTip for one release, then deletes them so
 // they are never served (LM-03.1). Uses GlitchTip's Sentry-compatible chunk upload and artifact
 // bundle API, with no extra dependency (@sentry/cli is FSL-licensed, outside D4).
 //
 // Usage: build with SOURCE_MAPS=upload, then
 //   GLITCHTIP_URL=… GLITCHTIP_ORG=… GLITCHTIP_PROJECT=… GLITCHTIP_AUTH_TOKEN=… \
 //   node scripts/upload-source-maps.mjs <release> [apps/web/.next/static]
+// For the admin console (scripts are served from the site root):
+//   node scripts/upload-source-maps.mjs <release> apps/admin/dist '~/'
 import { Blob, Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, rmSync } from 'node:fs';
@@ -12,7 +14,8 @@ import path from 'node:path';
 import process from 'node:process';
 import { crc32, gzipSync } from 'node:zlib';
 
-const URL_PREFIX = '~/_next/static/';
+/** Where the web app serves its built scripts; GlitchTip matches each error's frames by this URL. */
+const WEB_URL_PREFIX = '~/_next/static/';
 
 const MAP_COMMENT = /\/\/# sourceMappingURL=([\w.-]+\.map)\s*$/;
 
@@ -38,10 +41,9 @@ export function findMaps(dir) {
     .filter((file) => file.endsWith('.map'));
 }
 
-const assetUrl = (file) => URL_PREFIX + file.split(path.sep).join('/');
-
 /** The artifact bundle manifest: each script and its map, matched by release and file name. */
-export function bundleManifest(pairs, { org, release }) {
+export function bundleManifest(pairs, { org, release, urlPrefix = WEB_URL_PREFIX }) {
+  const assetUrl = (file) => urlPrefix + file.split(path.sep).join('/');
   const files = {};
   for (const { script, map } of pairs) {
     files[`files/${script}`] = {
@@ -134,18 +136,20 @@ async function upload(env, bundle, release) {
   return glitchtip(env, `organizations/${env.GLITCHTIP_ORG}/artifactbundle/assemble/`, assemble);
 }
 
-async function main([release, dir = 'apps/web/.next/static']) {
+async function main([release, dir = 'apps/web/.next/static', urlPrefix = WEB_URL_PREFIX]) {
   const env = process.env;
   const missing = ['GLITCHTIP_URL', 'GLITCHTIP_ORG', 'GLITCHTIP_PROJECT', 'GLITCHTIP_AUTH_TOKEN'];
   if (!release || missing.some((key) => !env[key])) {
-    throw new Error(`Usage: ${missing.join('=… ')}=… upload-source-maps.mjs <release> [dir]`);
+    throw new Error(
+      `Usage: ${missing.join('=… ')}=… upload-source-maps.mjs <release> [dir] [url-prefix]`,
+    );
   }
   const pairs = findMappedScripts(dir);
   if (pairs.length === 0)
     throw new Error(`No source maps in ${dir}; build with SOURCE_MAPS=upload`);
   const result = await upload(
     env,
-    buildBundle(dir, pairs, { org: env.GLITCHTIP_ORG, release }),
+    buildBundle(dir, pairs, { org: env.GLITCHTIP_ORG, release, urlPrefix }),
     release,
   );
   if (result.state !== 'created' && result.state !== 'ok')

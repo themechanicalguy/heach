@@ -39,6 +39,13 @@ test('LM-03.1: the manifest links each script to its map under the release', () 
   assert.equal(manifest.files['files/chunks/x1.js.map'].type, 'source_map');
 });
 
+test('LM-03.1: admin console scripts are matched at the site root', () => {
+  const pairs = [{ script: 'assets/index-a1.js', map: 'assets/index-a1.js.map' }];
+  const manifest = bundleManifest(pairs, { org: 'heach', release: 'abc123', urlPrefix: '~/' });
+  assert.equal(manifest.files['files/assets/index-a1.js'].url, '~/assets/index-a1.js');
+  assert.equal(manifest.files['files/assets/index-a1.js.map'].url, '~/assets/index-a1.js.map');
+});
+
 test('the zip writer produces a readable stored archive', () => {
   const zip = zipStored([
     { name: 'manifest.json', data: Buffer.from('{}') },

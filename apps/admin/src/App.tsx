@@ -20,6 +20,7 @@ import { Dashboard } from './pages/Dashboard';
 import { OwnPassword } from './pages/OwnPassword';
 import { SignIn } from './pages/SignIn';
 import { Users } from './pages/Users';
+import { ErrorTracking } from './ErrorTracking';
 import { SessionProvider, useSession } from './session';
 
 /** Sub-roles that may see users, and that may change them (the API enforces the same, AD-03). */
@@ -94,6 +95,7 @@ function Page({ section, role, selfId }: Readonly<PageProps & { section: Section
 export function App() {
   return (
     <SessionProvider>
+      <ErrorTracking />
       <Shell />
     </SessionProvider>
   );
