@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { api } from '../../lib/api';
 import { uploadInit } from '../../lib/files';
 import { useI18n } from '../../lib/i18n-context';
+import { withPrepared } from '../../lib/photo';
 import { usePending } from '../../lib/use-pending';
 import { StoredImage } from '../StoredImage';
 
@@ -135,7 +136,7 @@ function PhotoForm({ application, onSaved }: Readonly<FormProps>) {
             accept="image/jpeg,image/png"
             capture="user"
             onChange={(event) => {
-              setFile(event.currentTarget.files?.[0]);
+              withPrepared(event.currentTarget.files?.[0], setFile);
             }}
           />
           {error && (

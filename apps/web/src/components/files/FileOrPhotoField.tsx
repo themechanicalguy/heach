@@ -3,7 +3,7 @@
 import { Button, TextField } from '@heach/ui';
 import { type ChangeEvent, useRef, useState } from 'react';
 import { useI18n } from '../../lib/i18n-context';
-import { shrinkPhoto } from '../../lib/photo';
+import { shrinkPhoto, withPrepared } from '../../lib/photo';
 import { useAppAudience } from '../../lib/use-app-audience';
 
 interface Props {
@@ -15,8 +15,9 @@ interface Props {
 }
 
 /**
- * A file upload that, inside the Android apps, also offers the camera (MA-06): the app's file
- * picker lists files only, so a button opens the camera. Browsers already offer both.
+ * A file upload that, inside the apps, also offers the camera (MA-06): the app's file picker
+ * lists files only, so a button opens the camera. Browsers already offer both. A large picked
+ * image is made smaller before it is handed on (PO-02).
  */
 export function FileOrPhotoField({ label, hint, accept, onFile }: Readonly<Props>) {
   const { t } = useI18n();
@@ -26,7 +27,7 @@ export function FileOrPhotoField({ label, hint, accept, onFile }: Readonly<Props
   const [source, setSource] = useState<'file' | 'photo'>();
   const [fileKey, setFileKey] = useState(0);
   const pickFile = (event: ChangeEvent<HTMLInputElement>) => {
-    onFile(event.currentTarget.files?.[0]);
+    withPrepared(event.currentTarget.files?.[0], onFile);
     setSource('file');
   };
   const pickPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
