@@ -28,7 +28,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(FilesPlugin.class);
         super.onCreate(savedInstanceState);
         // The first page is still on its way, so this client is in place before any answer.
-        pageErrors = new PageErrors(bridge);
+        pageErrors = new PartnerPages(bridge, partnerHosts());
         bridge.setWebViewClient(pageErrors);
         getOnBackPressedDispatcher().addCallback(this, backThroughPages());
     }
@@ -51,8 +51,8 @@ public class MainActivity extends BridgeActivity {
             // MA-05: shown instead of the browser's error page when the server cannot be reached.
             // "Try again" there returns to the start page.
             .setErrorPath("offline.html?to=" + Uri.encode(BuildConfig.SERVER_URL + BuildConfig.START_PATH))
-            // MA-03: partner pages that may open in the app; anything else opens in the browser.
-            .setAllowNavigation(partnerHosts())
+            // MA-03: no hosts besides the server. Capacitor opens its bridge to each host listed
+            // here, so the partner pages that may open in the app are allowed by PartnerPages.
             // Lets the web app tell which app, and which build of it, it is running in (MA-08).
             .setAppendedUserAgentString("HeachApp/" + BuildConfig.FLAVOR + " HeachShell/" + BuildConfig.VERSION_CODE)
             // Capacitor logs page addresses; keep them out of release logs.
