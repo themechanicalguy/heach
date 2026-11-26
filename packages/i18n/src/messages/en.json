@@ -59,6 +59,7 @@
       "save": "Save note",
       "saved": "Note saved",
       "tooLong": "Keep the note under 2,000 characters.",
+      "patientOnly": "Notes are for patient accounts. You are signed in with a provider role, so you can't save or read notes here.",
       "count": "{count, plural, =0 {No notes} one {# note} other {# notes}}",
       "createdAt": "Written on {date}"
     }
