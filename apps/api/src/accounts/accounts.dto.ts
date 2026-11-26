@@ -18,8 +18,14 @@ import {
 import { LOCALES, type Locale } from '@heach/i18n';
 import { GRANTED_USER_ROLES, USER_ROLES } from '../common/request-context.js';
 import { LinkedPatientDto } from '../linked-patients/linked-patients.dto.js';
+import { IdentityDetailsDto } from '../onboarding/onboarding.dto.js';
 import { MembershipDto } from '../organisations/organisations.dto.js';
-import { CONSENT_PURPOSES, type ConsentPurpose } from './consent-versions.js';
+import {
+  CONSENT_PURPOSES,
+  type ConsentPurpose,
+  WITHDRAWABLE_PURPOSES,
+  type WithdrawablePurpose,
+} from './consent-versions.js';
 import {
   GENDERS,
   type Gender,
@@ -175,6 +181,24 @@ export class ConsentsDto {
   @ValidateNested({ each: true })
   @Type(() => ConsentDto)
   consents!: ConsentDto[];
+}
+
+/** A consent in force on the account (PR-01). */
+export class ConsentInForceDto {
+  @ApiProperty({ enum: WITHDRAWABLE_PURPOSES })
+  purpose!: WithdrawablePurpose;
+
+  @ApiProperty({ example: '2026-10-draft.1' })
+  version!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  givenAt!: string;
+}
+
+export class WithdrawConsentParamsDto {
+  @ApiProperty({ enum: WITHDRAWABLE_PURPOSES })
+  @IsIn(WITHDRAWABLE_PURPOSES)
+  purpose!: WithdrawablePurpose;
 }
 
 /** Adds the other side to an account (decision L-3); needs a fresh OTP. */
@@ -335,6 +359,11 @@ export class ExportConsentDto {
   @ApiProperty({ format: 'date-time', nullable: true, type: String }) withdrawnAt!: string | null;
 }
 
+/** Date of birth and address as the identity partner verified them (KY-03): Restricted. */
+export class ExportIdentityDto extends IdentityDetailsDto {
+  @ApiProperty({ format: 'date-time' }) checkedAt!: string;
+}
+
 /** Everything the account holds about its owner, as a download (PR-04, default D-4). */
 export class AccountExportDto {
   @ApiProperty({ format: 'date-time' }) exportedAt!: string;
@@ -346,6 +375,8 @@ export class AccountExportDto {
   @ApiProperty({ type: MembershipDto, nullable: true }) membership!: MembershipDto | null;
   @ApiProperty({ type: [LinkedPatientDto] }) linkedPatients!: LinkedPatientDto[];
   @ApiProperty({ type: [ExportCarePinDto] }) carePins!: ExportCarePinDto[];
+  @ApiProperty({ type: ExportIdentityDto, nullable: true })
+  verifiedIdentity!: ExportIdentityDto | null;
   @ApiProperty({ format: 'date-time', nullable: true, type: String })
   deletionRequestedAt!: string | null;
 }

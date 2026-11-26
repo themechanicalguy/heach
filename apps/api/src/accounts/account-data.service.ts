@@ -17,14 +17,16 @@ import {
   AccountRepository,
   type ProfileCorrection,
 } from './account.repository.js';
-import type { AccountExportDto } from './accounts.dto.js';
+import type { AccountExportDto, ConsentInForceDto, ExportIdentityDto } from './accounts.dto.js';
+import type { WithdrawablePurpose } from './consent-versions.js';
 import { isStaffRole } from './setup-rules.js';
 
 const ENTITY = 'account';
 
 /**
- * The account holder's rights over their own data (AC-06, PR-04): correct basic details,
- * download everything held, and ask for deletion. Export and deletion need a fresh OTP (AC-05).
+ * The account holder's rights over their own data (AC-06, PR-01, PR-04): correct basic details,
+ * download everything held, withdraw a consent and ask for deletion. Export and deletion need a
+ * fresh OTP (AC-05); withdrawing does not, so it is as easy as giving consent.
  * Carrying out a deletion is not built: its deadline and what must be kept wait on the lawyer
  * (default D-3).
  */
@@ -65,10 +67,11 @@ export class AccountDataService {
 
   async exportData(principal: Principal): Promise<AccountExportDto> {
     const account = await this.load(principal.userId);
-    const [consents, linkedPatients, membership] = await Promise.all([
+    const [consents, linkedPatients, membership, verifiedIdentity] = await Promise.all([
       this.accounts.consentHistory(account.id),
       this.linked.list(account.id),
       this.invitations.membership(account.id),
+      this.verifiedIdentity(account.id),
     ]);
     await this.audit.record({ action: 'account.exported', entity: ENTITY, entityId: account.id });
     return {
@@ -87,8 +90,20 @@ export class AccountDataService {
       membership,
       linkedPatients,
       carePins: await this.linked.carePins(account.id),
+      verifiedIdentity,
       deletionRequestedAt: account.deletionRequestedAt?.toISOString() ?? null,
     };
+  }
+
+  /** Decrypted only here, for the account holder's own export behind a fresh OTP. */
+  private async verifiedIdentity(accountId: string): Promise<ExportIdentityDto | null> {
+    const stored = await this.accounts.verifiedIdentity(accountId);
+    if (!stored) return null;
+    const details = JSON.parse(await this.encryptor.decrypt(stored.details)) as {
+      dateOfBirth: string;
+      address: string;
+    };
+    return { ...details, checkedAt: stored.checkedAt.toISOString() };
   }
 
   /** A repeated request keeps the open one (idempotent). */
@@ -109,6 +124,35 @@ export class AccountDataService {
       }
       await this.audit.record(
         { action: 'account.deletion.cancelled', entity: ENTITY, entityId: principal.userId },
+        client,
+      );
+    });
+  }
+
+  async consentsInForce(principal: Principal): Promise<ConsentInForceDto[]> {
+    const rows = await this.accounts.consentsInForce(principal.userId);
+    return rows.map((row) => ({
+      purpose: row.purpose as WithdrawablePurpose,
+      version: row.version,
+      givenAt: row.given_at.toISOString(),
+    }));
+  }
+
+  /**
+   * Withdraws one consent (PR-01). Terms and privacy then fall due again, so the app asks for them
+   * before it can be used; identity consent must be given again before another check.
+   */
+  async withdrawConsent(principal: Principal, purpose: WithdrawablePurpose): Promise<void> {
+    await this.accounts.transaction(async (client) => {
+      if (!(await this.accounts.withdrawConsent(client, principal.userId, purpose))) {
+        throw reason(ConflictException, 'consent_not_in_force');
+      }
+      await this.audit.record(
+        {
+          action: `account.consent.withdrawn.${purpose}`,
+          entity: ENTITY,
+          entityId: principal.userId,
+        },
         client,
       );
     });

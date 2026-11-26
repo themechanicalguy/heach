@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { api } from '../../lib/api';
 import { uploadInit } from '../../lib/files';
 import { useI18n } from '../../lib/i18n-context';
+import { withPrepared } from '../../lib/photo';
 import { usePending } from '../../lib/use-pending';
 
 // Never an Aadhaar card: its copy would carry the full number (PR-03).
@@ -58,7 +59,7 @@ export function IdentityFallback({ application, consented, onSaved }: Readonly<P
         accept="application/pdf,image/jpeg,image/png"
         capture="environment"
         onChange={(event) => {
-          setFile(event.currentTarget.files?.[0]);
+          withPrepared(event.currentTarget.files?.[0], setFile);
         }}
       />
       {error && (

@@ -726,6 +726,31 @@
           }
         ],
         "tags": ["account"]
+      },
+      "get": {
+        "operationId": "AccountDataController_consents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConsentInForceDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
       }
     },
     "/v1/me/roles": {
@@ -802,6 +827,36 @@
           },
           "403": {
             "description": "reverification_required"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["account"]
+      }
+    },
+    "/v1/me/consents/{purpose}": {
+      "delete": {
+        "operationId": "AccountDataController_withdrawConsent",
+        "parameters": [
+          {
+            "name": "purpose",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": ["terms", "privacy", "identity_verification"]
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "409": {
+            "description": "consent_not_in_force"
           }
         },
         "security": [
@@ -8457,6 +8512,23 @@
         },
         "required": ["pin", "person"]
       },
+      "ExportIdentityDto": {
+        "type": "object",
+        "properties": {
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["dateOfBirth", "address", "checkedAt"]
+      },
       "AccountExportDto": {
         "type": "object",
         "properties": {
@@ -8508,6 +8580,15 @@
               "$ref": "#/components/schemas/ExportCarePinDto"
             }
           },
+          "verifiedIdentity": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExportIdentityDto"
+              }
+            ]
+          },
           "deletionRequestedAt": {
             "type": "string",
             "format": "date-time",
@@ -8524,8 +8605,27 @@
           "membership",
           "linkedPatients",
           "carePins",
+          "verifiedIdentity",
           "deletionRequestedAt"
         ]
+      },
+      "ConsentInForceDto": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": ["terms", "privacy", "identity_verification"]
+          },
+          "version": {
+            "type": "string",
+            "example": "2026-10-draft.1"
+          },
+          "givenAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["purpose", "version", "givenAt"]
       },
       "MobileChangeDto": {
         "type": "object",

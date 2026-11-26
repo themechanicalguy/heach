@@ -268,6 +268,17 @@ export class AccountRepository {
     return result.rowCount === 1;
   }
 
+  /** The encrypted date of birth and address of a verified identity check, for the export (KY-03). */
+  async verifiedIdentity(id: string): Promise<{ details: EncryptedField; checkedAt: Date } | null> {
+    const { rows } = await this.pool.query<{ details: EncryptedField; checked_at: Date }>(
+      `SELECT verified_details AS details, checked_at FROM app.identity_check
+        WHERE account_id = $1 AND status = 'verified' AND verified_details IS NOT NULL`,
+      [id],
+    );
+    const row = rows[0];
+    return row ? { details: row.details, checkedAt: row.checked_at } : null;
+  }
+
   /** Every consent record of the account, withdrawn ones too, for the data export (PR-04). */
   async consentHistory(id: string) {
     const { rows } = await this.pool.query<{
@@ -282,6 +293,29 @@ export class AccountRepository {
       [id],
     );
     return rows;
+  }
+
+  /** The consents in force (given and not withdrawn), newest first (PR-01). */
+  async consentsInForce(id: string) {
+    const { rows } = await this.pool.query<{ purpose: string; version: string; given_at: Date }>(
+      `SELECT purpose, version, given_at FROM app.consent_record
+        WHERE account_id = $1 AND withdrawn_at IS NULL ORDER BY given_at DESC`,
+      [id],
+    );
+    return rows;
+  }
+
+  /**
+   * Marks the purpose's consent withdrawn (PR-01). The record stays as evidence that it was given
+   * (decision L-12). False when none was in force.
+   */
+  async withdrawConsent(client: TransactionClient, id: string, purpose: string): Promise<boolean> {
+    const result = await client.query(
+      `UPDATE app.consent_record SET withdrawn_at = now()
+        WHERE account_id = $1 AND purpose = $2 AND withdrawn_at IS NULL`,
+      [id, purpose],
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   /** Locks the account row until commit, so two setup completions cannot both grant a role. */
