@@ -42,8 +42,11 @@ builds either app from the build setting `HEACH_AUDIENCE` (`ios/App/heach.xcconf
   builds default to `localhost`, forwarded to the developer's machine with `adb reverse`, and
   are the only builds that allow clear-text HTTP; release builds refuse to build without an HTTPS origin.
 - The web view may navigate only within the configured origin. Other links open in the browser.
-  A partner host listed in `HEACH_ALLOW_NAVIGATION` is the exception and can reach the app's
-  bridge, so the list stays empty unless a partner cannot work in the browser.
+  A partner host listed in `HEACH_ALLOW_NAVIGATION` is the exception: its pages open inside the
+  app but never reach the app's bridge (on Android, `PartnerPages` keeps the hosts out of
+  Capacitor's own list, which would open the bridge to them, and a WebView too old to limit the
+  bridge by origin opens partner pages in the browser instead; amended 26 November 2026). The list
+  stays empty unless a partner cannot work in the browser.
 - The window is marked secure (no screenshots, no screen recording, blank in the recent-apps
   list) because any screen may show health data. Android backup of app data is off.
 - Native features (camera and file upload, app links, UPI and DigiLocker hand-off, push) are
@@ -60,7 +63,8 @@ builds either app from the build setting `HEACH_AUDIENCE` (`ios/App/heach.xcconf
   - There is no back button: a swipe from the edge goes back (MA-05).
   - HEACH links (universal links) need the Associated Domains capability, which needs an Apple
     Developer account, and an `apple-app-site-association` file on the server. The app already
-    loads such a link's page on its own server; the capability and the file are release work.
+    loads such a link's page on its own server, and the server serves the file once
+    `APPLE_TEAM_ID` is set; the capability is release work.
 
 ## Options considered
 

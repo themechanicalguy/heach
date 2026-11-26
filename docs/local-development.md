@@ -147,8 +147,9 @@ pnpm --filter @heach/mobile android:install  # build and install HEACH and HEACH
 - A release build fails unless `HEACH_SERVER_URL` is an `https://` address (MA-02).
 - `HEACH_ALLOW_NAVIGATION=host1,host2` lists partner hosts (identity, payments) whose pages may
   open inside the app; every other outside address opens in the phone's browser (MA-03).
-  Leave it empty unless a partner cannot work in the browser: a page from a listed host can
-  reach the app's bridge like a HEACH page can (it cannot open files; `FilesPlugin` refuses).
+  Leave it empty unless a partner cannot work in the browser. A page from a listed host never
+  reaches the app's bridge (`PartnerPages`); on a WebView too old to limit the bridge by origin it
+  opens in the browser instead.
 - Each app sends `HeachApp/patient` or `HeachApp/provider`, then `HeachShell/<version code>`, in its user agent; the web app uses
   it to keep each app to its own side (MA-08). To see that in a browser, set the same user agent.
 - Screenshots of the apps are blocked on purpose (MA-04), including `adb` screen capture.
@@ -193,7 +194,10 @@ pnpm --filter @heach/mobile ios:install     # build and install HEACH and HEACH 
   in Odia, English and Hindi (from the i18n catalogues), then copies them into the Xcode project.
   Run it before building in Xcode itself.
 - Only HEACH's own pages reach the app's native features on iPhone (`BridgeGate`), even pages
-  from hosts in `HEACH_ALLOW_NAVIGATION`.
+  from hosts in `HEACH_ALLOW_NAVIGATION`, as on Android.
+- HEACH links: the server serves `/.well-known/apple-app-site-association` from `APPLE_TEAM_ID`
+  (the provider area to HEACH Provider, everything else to HEACH). The apps also need the
+  Associated Domains capability, which needs an Apple developer account.
 - iOS cannot block screenshots; the apps cover their screens in the app switcher and while the
   screen is recorded (MA-04). Simulator screenshots therefore work.
 - In Safari on the Mac, Develop > Simulator lists the debug apps' pages for the web inspector.
