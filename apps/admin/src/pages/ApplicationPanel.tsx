@@ -6,7 +6,11 @@ import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
 import { usePending } from '../use-pending';
 import { DecisionForm } from './DecisionForm';
+import { IdentityDocumentRow } from './IdentityDocumentRow';
 import { label } from './labels';
+import { ProfileFacts } from './ProfileFacts';
+import { ReviewButtons } from './ReviewButtons';
+import { StoredFileButton } from './StoredFileButton';
 
 interface Props {
   accountId: string;
@@ -44,6 +48,18 @@ export function ApplicationPanel({ accountId, onDecided, onClose }: Readonly<Pro
         <dd>{label('verification.statuses', application.status)}</dd>
         <dt>{t('verification.identity')}</dt>
         <dd>{label('verification.identityStates', application.identity)}</dd>
+        {application.identityMethod && (
+          <>
+            <dt>{t('verification.identityMethod')}</dt>
+            <dd>{label('verification.identityMethods', application.identityMethod)}</dd>
+          </>
+        )}
+        {application.identityNameMatch && (
+          <>
+            <dt>{t('verification.nameMatch')}</dt>
+            <dd>{label('verification.nameMatches', application.identityNameMatch)}</dd>
+          </>
+        )}
         <dt>{t('verification.payout')}</dt>
         <dd>
           {application.payout
@@ -51,6 +67,12 @@ export function ApplicationPanel({ accountId, onDecided, onClose }: Readonly<Pro
             : t('verification.payoutNone')}
         </dd>
       </dl>
+      <AssistedNotices application={application} />
+      {application.identityNameMatch === 'mismatch' && (
+        <Notice tone="warning">{t('verification.nameMismatch')}</Notice>
+      )}
+      <IdentityDocumentRow accountId={accountId} application={application} onReviewed={reload} />
+      <ProfileFacts accountId={accountId} profile={application.profile} />
       <h3>{t('verification.documents')}</h3>
       <ul className="admin-list">
         {application.items.map((entry) => (
@@ -96,6 +118,21 @@ export function ApplicationPanel({ accountId, onDecided, onClose }: Readonly<Pro
   );
 }
 
+/** How the application came about, and what still blocks approval (AD-12). */
+function AssistedNotices({ application }: Readonly<{ application: ApplicationReview }>) {
+  return (
+    <>
+      {application.assisted && <Notice tone="info">{t('verification.assisted')}</Notice>}
+      {application.identityConsentAssisted && (
+        <Notice tone="warning">{t('verification.assistedConsent')}</Notice>
+      )}
+      {application.providerConsentDue && (
+        <Notice tone="warning">{t('verification.consentDue')}</Notice>
+      )}
+    </>
+  );
+}
+
 interface RowProps {
   accountId: string;
   entry: ChecklistEntry;
@@ -105,21 +142,12 @@ interface RowProps {
 
 function DocumentRow({ accountId, entry, inReview, onReviewed }: Readonly<RowProps>) {
   const { pending, error, run } = usePending();
-  const [href, setHref] = useState<string | undefined>();
   const document = entry.document;
   const optional = entry.required ? '' : ` (${t('verification.optional')})`;
   const title = entry.key + optional;
   if (!document) return <li>{`${title}: ${t('verification.noDocument')}`}</li>;
-  const open = () =>
-    run(async () => {
-      const file = await api<{ contentType: string; contentBase64: string }>(
-        `/applications/${accountId}/documents/${document.id}`,
-      );
-      const bytes = Uint8Array.from(atob(file.contentBase64), (char) => char.charCodeAt(0));
-      setHref(URL.createObjectURL(new Blob([bytes], { type: file.contentType })));
-    });
   const review = (status: 'accepted' | 'rejected') =>
-    run(async () => {
+    void run(async () => {
       const body = {
         documentId: document.id,
         status,
@@ -136,38 +164,15 @@ function DocumentRow({ accountId, entry, inReview, onReviewed }: Readonly<RowPro
     label('verification.review', document.reviewStatus),
     document.reference ? `${t('verification.reference')} ${document.reference}` : '',
     document.expiresOn ? `${t('verification.expires')} ${document.expiresOn}` : '',
+    document.issuer ? `${t('verification.issuedCopy')} ${document.issuer}` : '',
   ].filter(Boolean);
   return (
     <li>
       <strong>{title}</strong> {facts.join(' · ')}
-      {document.scanStatus === 'clean' &&
-        (href ? (
-          <a href={href} target="_blank" rel="noreferrer">
-            {t('verification.download')}
-          </a>
-        ) : (
-          <Button
-            className="heach-button--secondary"
-            onClick={() => void open()}
-            disabled={pending}
-          >
-            {t('verification.download')}
-          </Button>
-        ))}
-      {inReview && (
-        <>
-          <Button onClick={() => void review('accepted')} disabled={pending}>
-            {t('verification.accept')}
-          </Button>
-          <Button
-            className="heach-button--danger"
-            onClick={() => void review('rejected')}
-            disabled={pending}
-          >
-            {t('verification.reject')}
-          </Button>
-        </>
+      {document.scanStatus === 'clean' && (
+        <StoredFileButton path={`/applications/${accountId}/documents/${document.id}`} />
       )}
+      {inReview && <ReviewButtons pending={pending} onReview={review} />}
       {error !== undefined && <Notice tone="danger">{errorText(error)}</Notice>}
     </li>
   );

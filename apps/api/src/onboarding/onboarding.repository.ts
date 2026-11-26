@@ -3,10 +3,18 @@ import type { EncryptedField } from '@heach/crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type { ApplicationStatus } from '../accounts/account.repository.js';
+import { CONSENT_PURPOSES, type ConsentGiven } from '../accounts/consent-versions.js';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { type TransactionClient, withTransaction } from '../data-stores/transaction.js';
 
 type Queryable = Pick<pg.Pool, 'query'>;
+
+/** Narrowing for the verification queue (AD-02); ages are whole days, the upper bound exclusive. */
+export interface QueueFilters {
+  role?: string | undefined;
+  minAgeDays?: number | undefined;
+  maxAgeDays?: number | undefined;
+}
 
 export interface ProviderGrant {
   role: string;
@@ -24,6 +32,25 @@ export interface DocumentRow {
   reviewStatus: 'pending' | 'accepted' | 'rejected';
   reviewReason: string | null;
   uploadedAt: Date;
+  source: 'upload' | 'digilocker';
+  issuer: string | null;
+}
+
+export interface IdentityRow {
+  status: 'pending' | 'verified' | 'failed';
+  method: 'aadhaar' | 'digilocker' | 'manual' | null;
+  reference: string;
+  documentKind: string | null;
+  documentObjectId: string | null;
+  nameMatch: 'match' | 'mismatch' | null;
+}
+
+export interface IdentityOutcome {
+  verified: boolean;
+  method: string;
+  detail: EncryptedField;
+  verifiedDetails: EncryptedField | null;
+  nameMatch: 'match' | 'mismatch' | null;
 }
 
 export interface DocumentInput {
@@ -31,6 +58,8 @@ export interface DocumentInput {
   objectId: string;
   reference: string | null;
   expiresOn: string | null;
+  /** Set for a copy shared from DigiLocker (KY-02); an upload has none. */
+  issuer?: string;
 }
 
 export interface PayoutInput {
@@ -51,7 +80,8 @@ export interface StatusChange {
 
 const DOCUMENT_COLUMNS = `d.id, d.item, d.object_id AS "objectId", o.scan_status AS "scanStatus",
   d.reference, to_char(d.expires_on, 'YYYY-MM-DD') AS "expiresOn",
-  d.review_status AS "reviewStatus", d.review_reason AS "reviewReason", d.uploaded_at AS "uploadedAt"`;
+  d.review_status AS "reviewStatus", d.review_reason AS "reviewReason", d.uploaded_at AS "uploadedAt",
+  d.source, d.issuer`;
 
 /**
  * Provider applications (PO-01 to PO-06). Every statement names the account it reads or
@@ -104,11 +134,31 @@ export class OnboardingRepository {
     );
     const id = randomUUID();
     await client.query(
-      `INSERT INTO app.provider_document (id, account_id, item, object_id, reference, expires_on)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, accountId, input.item, input.objectId, input.reference, input.expiresOn],
+      `INSERT INTO app.provider_document
+         (id, account_id, item, object_id, reference, expires_on, source, issuer)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        id,
+        accountId,
+        input.item,
+        input.objectId,
+        input.reference,
+        input.expiresOn,
+        input.issuer ? 'digilocker' : 'upload',
+        input.issuer ?? null,
+      ],
     );
     return { id, replacedObjectId: rows[0]?.object_id };
+  }
+
+  /** Checklist items whose document a verifier has accepted. */
+  async acceptedItems(client: TransactionClient, accountId: string): Promise<Set<string>> {
+    const { rows } = await client.query<{ item: string }>(
+      `SELECT item FROM app.provider_document
+        WHERE account_id = $1 AND review_status = 'accepted'`,
+      [accountId],
+    );
+    return new Set(rows.map((row) => row.item));
   }
 
   async reviewDocument(
@@ -126,23 +176,27 @@ export class OnboardingRepository {
   }
 
   async identity(accountId: string, client: Queryable = this.pool) {
-    const { rows } = await client.query<{
-      status: string;
-      method: string | null;
-      reference: string;
-    }>('SELECT status, method, reference FROM app.identity_check WHERE account_id = $1', [
-      accountId,
-    ]);
+    const { rows } = await client.query<IdentityRow>(
+      `SELECT status, method, reference, document_kind AS "documentKind",
+              document_object_id AS "documentObjectId", name_match AS "nameMatch"
+         FROM app.identity_check WHERE account_id = $1`,
+      [accountId],
+    );
     return rows[0];
   }
 
+  /** Opens a partner check, dropping any earlier result; returns the fallback document it replaced. */
   async startIdentity(client: TransactionClient, accountId: string, reference: string) {
+    const replaced = (await this.identity(accountId, client))?.documentObjectId ?? undefined;
     await client.query(
       `INSERT INTO app.identity_check (account_id, status, reference) VALUES ($1, 'pending', $2)
        ON CONFLICT (account_id) DO UPDATE SET status = 'pending', method = NULL,
-         reference = EXCLUDED.reference, checked_at = NULL`,
+         reference = EXCLUDED.reference, checked_at = NULL, detail = NULL,
+         verified_details = NULL, name_match = NULL,
+         document_object_id = NULL, document_kind = NULL`,
       [accountId, reference],
     );
+    return replaced;
   }
 
   /** Records the partner's result for the pending check with this reference only. */
@@ -150,14 +204,95 @@ export class OnboardingRepository {
     client: TransactionClient,
     accountId: string,
     reference: string,
-    result: { verified: boolean; method: string },
+    result: IdentityOutcome,
   ): Promise<boolean> {
     const outcome = await client.query(
-      `UPDATE app.identity_check SET status = $3, method = $4, checked_at = now()
-        WHERE account_id = $1 AND reference = $2 AND status = 'pending'`,
-      [accountId, reference, result.verified ? 'verified' : 'failed', result.method],
+      `UPDATE app.identity_check SET status = $3, method = $4, detail = $5,
+              verified_details = $6, name_match = $7, checked_at = now()
+        WHERE account_id = $1 AND reference = $2 AND status = 'pending' AND method IS NULL`,
+      [
+        accountId,
+        reference,
+        result.verified ? 'verified' : 'failed',
+        result.method,
+        result.detail,
+        result.verifiedDetails,
+        result.nameMatch,
+      ],
     );
     return outcome.rowCount === 1;
+  }
+
+  /** The manual fallback (KY-07): the document waits for a verifier; returns the one it replaced. */
+  async saveIdentityDocument(
+    client: TransactionClient,
+    accountId: string,
+    input: { reference: string; objectId: string; kind: string },
+  ) {
+    const replaced = (await this.identity(accountId, client))?.documentObjectId ?? undefined;
+    await client.query(
+      `INSERT INTO app.identity_check
+         (account_id, status, method, reference, document_object_id, document_kind)
+       VALUES ($1, 'pending', 'manual', $2, $3, $4)
+       ON CONFLICT (account_id) DO UPDATE SET status = 'pending', method = 'manual',
+         reference = EXCLUDED.reference, checked_at = NULL, detail = NULL,
+         verified_details = NULL, name_match = NULL,
+         document_object_id = EXCLUDED.document_object_id,
+         document_kind = EXCLUDED.document_kind`,
+      [accountId, input.reference, input.objectId, input.kind],
+    );
+    return replaced;
+  }
+
+  /** A verifier's decision on the fallback document; only a document still waiting can be decided. */
+  async reviewIdentityDocument(
+    client: TransactionClient,
+    accountId: string,
+    accepted: boolean,
+  ): Promise<boolean> {
+    const outcome = await client.query(
+      `UPDATE app.identity_check SET status = $2, checked_at = now()
+        WHERE account_id = $1 AND status = 'pending' AND method = 'manual'`,
+      [accountId, accepted ? 'verified' : 'failed'],
+    );
+    return outcome.rowCount === 1;
+  }
+
+  async verifiedDetails(accountId: string): Promise<EncryptedField | null> {
+    const { rows } = await this.pool.query<{ details: EncryptedField | null }>(
+      `SELECT verified_details AS details FROM app.identity_check
+        WHERE account_id = $1 AND status = 'verified'`,
+      [accountId],
+    );
+    return rows[0]?.details ?? null;
+  }
+
+  /** The verified name and gender replace what was typed at sign-up (KY-03). */
+  async prefillProfile(
+    client: TransactionClient,
+    accountId: string,
+    verified: { fullName: string; gender: string },
+  ): Promise<void> {
+    await client.query(
+      `UPDATE app.account_profile SET full_name = $2, gender = $3, updated_at = now()
+        WHERE account_id = $1`,
+      [accountId, verified.fullName, verified.gender],
+    );
+  }
+
+  /** Consent to the identity check, once per text version (PR-01). */
+  async recordIdentityConsent(
+    client: TransactionClient,
+    accountId: string,
+    consent: { purpose: string; version: string },
+    locale: string,
+    assistedSessionId: string | null = null,
+  ): Promise<void> {
+    await client.query(
+      `INSERT INTO app.consent_record (id, account_id, purpose, version, locale, assisted_session_id)
+       VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`,
+      [randomUUID(), accountId, consent.purpose, consent.version, locale, assistedSessionId],
+    );
   }
 
   async payout(accountId: string, client: Queryable = this.pool) {
@@ -223,31 +358,83 @@ export class OnboardingRepository {
     return rows;
   }
 
-  /** Applications in the review queue, oldest first (AD-02). */
-  async queue(statuses: readonly ApplicationStatus[]) {
+  /**
+   * Applications in the review queue, oldest first (AD-02); flags show assisted onboarding (AD-12).
+   * Filters are bound parameters. Age counts whole days since the application last entered
+   * `submitted`; `maxAgeDays` is exclusive. An age filter leaves out rows with no submitted event.
+   */
+  async queue(statuses: readonly ApplicationStatus[], adminId: string, filters: QueueFilters = {}) {
     const { rows } = await this.pool.query<{
       accountId: string;
       role: string;
       status: ApplicationStatus;
       fullName: string | null;
       submittedAt: Date | null;
+      ageDays: number | null;
+      assisted: boolean;
+      assistedByYou: boolean;
     }>(
       `SELECT r.account_id AS "accountId", r.role, r.application_status AS status,
-              p.full_name AS "fullName",
-              (SELECT max(e.created_at) FROM app.application_event e
-                WHERE e.account_id = r.account_id AND e.to_status = 'submitted') AS "submittedAt"
+              p.full_name AS "fullName", sub.at AS "submittedAt", age.days AS "ageDays",
+              EXISTS (SELECT 1 FROM app.assisted_session s
+                       WHERE s.account_id = r.account_id AND s.consented_at IS NOT NULL) AS assisted,
+              EXISTS (SELECT 1 FROM app.assisted_session s
+                       WHERE s.account_id = r.account_id AND s.admin_id = $2
+                         AND s.consented_at IS NOT NULL) AS "assistedByYou"
          FROM app.role_assignment r
          LEFT JOIN app.account_profile p ON p.account_id = r.account_id
+         CROSS JOIN LATERAL (SELECT max(e.created_at) AS at FROM app.application_event e
+                              WHERE e.account_id = r.account_id AND e.to_status = 'submitted') sub
+         CROSS JOIN LATERAL (SELECT floor(extract(epoch FROM now() - sub.at) / 86400)::int AS days) age
         WHERE r.side = 'provider' AND r.application_status = ANY($1)
-        ORDER BY "submittedAt" NULLS LAST, r.granted_at
+          AND ($3::text IS NULL OR r.role = $3)
+          AND ($4::int IS NULL OR age.days >= $4)
+          AND ($5::int IS NULL OR age.days < $5)
+        ORDER BY sub.at NULLS LAST, r.granted_at
         LIMIT 200`,
-      [statuses],
+      [
+        statuses,
+        adminId,
+        filters.role ?? null,
+        filters.minAgeDays ?? null,
+        filters.maxAgeDays ?? null,
+      ],
     );
     return rows;
   }
 
-  async fullName(accountId: string): Promise<string | null> {
-    const { rows } = await this.pool.query<{ full_name: string | null }>(
+  /** Whether an admin set this application up with the provider (AD-12), and how identity consent came. */
+  async assistance(accountId: string, adminId: string, client: Queryable = this.pool) {
+    const { rows } = await client.query<{
+      assisted: boolean;
+      byAdmin: boolean;
+      identityConsentAssisted: boolean;
+    }>(
+      `SELECT EXISTS (SELECT 1 FROM app.assisted_session
+                       WHERE account_id = $1 AND consented_at IS NOT NULL) AS assisted,
+              EXISTS (SELECT 1 FROM app.assisted_session
+                       WHERE account_id = $1 AND admin_id = $2
+                         AND consented_at IS NOT NULL) AS "byAdmin",
+              EXISTS (SELECT 1 FROM app.consent_record
+                       WHERE account_id = $1 AND assisted_session_id IS NOT NULL
+                         AND withdrawn_at IS NULL) AS "identityConsentAssisted"`,
+      [accountId, adminId],
+    );
+    return rows[0] ?? { assisted: false, byAdmin: false, identityConsentAssisted: false };
+  }
+
+  /** The terms and privacy consents the account has given and not withdrawn (PR-01). */
+  async currentConsents(accountId: string, client: Queryable = this.pool): Promise<ConsentGiven[]> {
+    const { rows } = await client.query<ConsentGiven>(
+      `SELECT purpose, version FROM app.consent_record
+        WHERE account_id = $1 AND withdrawn_at IS NULL AND purpose = ANY($2)`,
+      [accountId, [...CONSENT_PURPOSES]],
+    );
+    return rows;
+  }
+
+  async fullName(accountId: string, client: Queryable = this.pool): Promise<string | null> {
+    const { rows } = await client.query<{ full_name: string | null }>(
       'SELECT full_name FROM app.account_profile WHERE account_id = $1',
       [accountId],
     );

@@ -101,7 +101,10 @@ If a secret was ever committed, treat it as leaked: rotate it, even after removi
   that program and set the `*_PORT` value and its URL in `.env` back by hand.
 - **`port is already allocated` from plain `docker compose up`**: only `pnpm dev:up` and
   `pnpm services:up` check ports; use those.
-- **`pnpm dev` without `dev:up`**: apps use the default ports, not the ones in `.env`.
+- **`pnpm dev` without `dev:up`**: only the API reads `.env` itself. The web app gets neither
+  the ports nor `APP_ENV` and `FEATURE_FLAGS`, so it runs as `production` with every flag off:
+  pages behind the `accounts` flag (sign-in, setup, account, vault) return 404. Stop it and run
+  `pnpm dev:up`.
 - **`Cannot connect to the Docker daemon`**: start Docker Desktop.
 - **`/readyz` returns 503**: run `docker compose ps`; the check marked `down` names the service.
 - **Start completely fresh**: `pnpm services:reset`, then `pnpm dev:up`.

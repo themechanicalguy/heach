@@ -11,7 +11,7 @@ import { CHECKLISTS, checklistItem, isOnboardingRole, needsPayout } from './chec
 const nurse = (overrides: Partial<ApplicationFacts> = {}): ApplicationFacts => ({
   role: 'nurse',
   checklist: CHECKLISTS.nurse,
-  identityVerified: true,
+  identityOnFile: true,
   payoutOnFile: true,
   today: '2026-10-30',
   documents: new Map([
@@ -44,7 +44,7 @@ describe('Provider application rules (PO-01, PO-04)', () => {
       ['police_verification', { reference: true, expiresOn: '2026-10-30' }],
     ]);
     expect(
-      missingForSubmit(nurse({ identityVerified: false, payoutOnFile: false, documents })),
+      missingForSubmit(nurse({ identityOnFile: false, payoutOnFile: false, documents })),
     ).toEqual([
       'identity',
       'nursing_registration',
@@ -58,7 +58,7 @@ describe('Provider application rules (PO-01, PO-04)', () => {
     const facts: ApplicationFacts = {
       role: 'sample_collector',
       checklist: CHECKLISTS.sample_collector,
-      identityVerified: true,
+      identityOnFile: true,
       payoutOnFile: false,
       today: '2026-10-30',
       documents: new Map([

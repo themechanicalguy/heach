@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { UPLOAD_CONTENT_TYPE } from '../src/app.factory.js';
+import { IDENTITY_CONSENT } from '../src/accounts/consent-versions.js';
 import { AccessTokenStore } from '../src/auth/access-token.store.js';
 import { CHECKLISTS, type OnboardingRole } from '../src/onboarding/checklists.js';
 import { adminSignIn, reverify, signedUp } from './account-helpers.js';
@@ -39,7 +40,7 @@ export async function verifyIdentity(app: INestApplication<App>, login: Login): 
   const started = await request(app.getHttpServer())
     .post('/v1/provider/application/identity/start')
     .set(bearer(login))
-    .send({ locale: 'en' })
+    .send({ locale: 'en', consentVersion: IDENTITY_CONSENT.version })
     .expect(200);
   const back = new URL((started.body as { redirectUrl: string }).redirectUrl);
   await request(app.getHttpServer())
@@ -49,8 +50,34 @@ export async function verifyIdentity(app: INestApplication<App>, login: Login): 
     .expect(200);
 }
 
+/** The manual fallback (KY-07): another identity document, sent with the consent version. */
+export function uploadIdentityDocument(
+  app: INestApplication<App>,
+  login: Login,
+  extra: object = {},
+) {
+  return request(app.getHttpServer())
+    .put('/v1/provider/application/identity/document')
+    .set(bearer(login))
+    .set('Content-Type', UPLOAD_CONTENT_TYPE)
+    .send(
+      JSON.stringify({
+        contentType: 'application/pdf',
+        contentBase64: SYNTHETIC_PDF,
+        kind: 'voter_id',
+        locale: 'en',
+        consentVersion: IDENTITY_CONSENT.version,
+        ...extra,
+      }),
+    );
+}
+
 /** A provider with every checklist item, identity and payout details, then submitted. */
-export async function submittedProvider(app: INestApplication<App>, role: OnboardingRole) {
+export async function submittedProvider(
+  app: INestApplication<App>,
+  role: OnboardingRole,
+  identity: 'partner' | 'document' = 'partner',
+) {
   const setup = role === 'lab' ? { organisationName: 'Synthetic Diagnostics' } : {};
   const { mobile, login } = await signedUp(app, { role, languages: ['or', 'en'], ...setup });
   for (const item of CHECKLISTS[role]) {
@@ -59,7 +86,8 @@ export async function submittedProvider(app: INestApplication<App>, role: Onboar
       ...(item.expiry ? { expiresOn: '2030-01-01' } : {}),
     }).expect(200);
   }
-  await verifyIdentity(app, login);
+  if (identity === 'partner') await verifyIdentity(app, login);
+  else await uploadIdentityDocument(app, login).expect(200);
   if (role !== 'sample_collector') {
     await reverify(app, mobile, login);
     await request(app.getHttpServer())

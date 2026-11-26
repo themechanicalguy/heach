@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SlotService } from '../availability/slot.service.js';
 import type { ProviderProfileDto, SearchQueryDto, SearchResultDto } from './search.dto.js';
+import { ProfileService } from '../onboarding/profile.service.js';
+import type { StoredFile } from '../uploads/uploads.service.js';
 import { SearchRepository } from './search.repository.js';
 
 const SEARCH_DAYS = 7;
@@ -11,7 +13,14 @@ export class SearchService {
   constructor(
     private readonly search: SearchRepository,
     private readonly slots: SlotService,
+    private readonly profiles: ProfileService,
   ) {}
+
+  /** The photo of a provider with a published listing (PO-05); public, so not audited. */
+  async photo(providerId: string): Promise<StoredFile> {
+    if (!(await this.search.published(providerId))) throw new NotFoundException();
+    return this.profiles.photo(providerId, { audit: false });
+  }
 
   startingPrices() {
     return this.search.startingPrices();

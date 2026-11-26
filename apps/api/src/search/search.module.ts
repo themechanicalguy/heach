@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { OnboardingModule } from '../onboarding/onboarding.module.js';
 import { AvailabilityModule } from '../availability/availability.module.js';
 import { CoverageCacheModule } from './coverage-cache.module.js';
 import { CoveragePinsService } from './coverage-pins.service.js';
@@ -9,7 +10,7 @@ import { SearchService } from './search.service.js';
 
 /** Public search, profiles and slots (Step 4: SD, PO-05). */
 @Module({
-  imports: [AvailabilityModule, CoverageCacheModule],
+  imports: [AvailabilityModule, CoverageCacheModule, OnboardingModule],
   controllers: [SearchController, CoverageController],
   providers: [SearchRepository, SearchService, CoveragePinsService],
   exports: [SearchRepository],

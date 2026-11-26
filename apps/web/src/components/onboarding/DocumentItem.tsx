@@ -47,6 +47,9 @@ export function DocumentItem({ entry, editable, onSaved }: Readonly<Props>) {
       <p className="flow__muted">
         {t(`application.documentState.${document?.scanStatus ?? 'missing'}`)}
       </p>
+      {document?.issuer && (
+        <Notice tone="success">{t('application.issuedCopy', { issuer: document.issuer })}</Notice>
+      )}
       {document?.reviewStatus === 'accepted' && (
         <Notice tone="success">{t('application.reviewState.accepted')}</Notice>
       )}

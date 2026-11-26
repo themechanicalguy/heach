@@ -1,8 +1,8 @@
 import type { UserDetail } from '@heach/types';
 
-type Handler = (body: Record<string, string>) => Promise<Response>;
+export type Handler = (body: Record<string, string>) => Promise<Response>;
 
-const json = (status: number, body?: unknown) =>
+export const json = (status: number, body?: unknown) =>
   Promise.resolve(new Response(status === 204 ? null : JSON.stringify(body), { status }));
 
 function syntheticUser(): UserDetail {
@@ -38,8 +38,13 @@ function syntheticUser(): UserDetail {
 }
 
 /** A small stand-in for the admin API in component tests; records the calls it gets. */
-export function fakeAdminApi(options: { role?: string } = {}) {
-  const calls: { method: string; path: string }[] = [];
+export function fakeAdminApi(options: { role?: string; routes?: Record<string, Handler> } = {}) {
+  const calls: {
+    method: string;
+    path: string;
+    body: Record<string, string>;
+    contentType: string | null;
+  }[] = [];
   const state = { signedIn: Boolean(options.role), reverified: false };
   const user = syntheticUser();
   const token = { accessToken: 'synthetic-token-123456789' };
@@ -77,6 +82,7 @@ export function fakeAdminApi(options: { role?: string } = {}) {
       user.status = 'active';
       return json(204);
     },
+    ...options.routes,
   };
   vi.stubGlobal(
     'fetch',
@@ -84,9 +90,10 @@ export function fakeAdminApi(options: { role?: string } = {}) {
       const method = init.method ?? 'GET';
       const path = url.replace('/api/admin/v1', '').split('?')[0] ?? '';
       const body = init.body ? (JSON.parse(init.body as string) as Record<string, string>) : {};
-      calls.push({ method, path });
+      const contentType = new Headers(init.headers).get('content-type');
+      calls.push({ method, path, body, contentType });
       return (routes[`${method} ${path}`] ?? (() => json(404, {})))(body);
     }),
   );
-  return { calls, user };
+  return { calls, user, state };
 }

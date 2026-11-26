@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 
-export type EditableStep = 'identity' | 'documents' | 'payout';
+export type EditableStep = 'identity' | 'documents' | 'profile' | 'payout';
 
 interface Props {
   application: Application;
@@ -51,6 +51,7 @@ export function ReviewStep({ application, pending, onEdit, onSubmit }: Readonly<
       </ReviewSection>
       {section('identity', <p>{t(`application.identityState.${application.identity}`)}</p>)}
       {section('documents', <DocumentSummary items={application.items} />)}
+      {section('profile', <ProfileSummary profile={application.profile} />)}
       {application.needsPayout && section('payout', <PayoutSummary application={application} />)}
       {application.editable && (
         <SubmitPanel application={application} pending={pending} onSubmit={onSubmit} />
@@ -115,6 +116,23 @@ function DocumentLine({ entry }: Readonly<{ entry: ChecklistEntry }>) {
         {t(keyFor('application.items', entry.key, 'application.steps.documents')) + optional}
       </strong>
       {details.length > 0 && <span className="flow__muted">{details.join(' · ')}</span>}
+    </>
+  );
+}
+
+function ProfileSummary({ profile }: Readonly<{ profile: Application['profile'] }>) {
+  const { t } = useI18n();
+  const experience =
+    profile.experienceYears === null
+      ? undefined
+      : t('profile.experience', { years: profile.experienceYears });
+  const lines = [profile.qualifications, experience].filter(Boolean);
+  return (
+    <>
+      <p>{lines.length > 0 ? lines.join(' · ') : t('application.profile.notGiven')}</p>
+      <p className="flow__muted">
+        {t(profile.hasPhoto ? 'application.profile.photoOnFile' : 'application.profile.noPhoto')}
+      </p>
     </>
   );
 }

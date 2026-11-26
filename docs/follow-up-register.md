@@ -105,3 +105,9 @@ Not Step 2 or Step 3 work. Each is accepted in writing in the ADR named; listed 
 
 The verification round reports zero high or critical findings. The full audit reports the three
 moderate advisories above; no dependency, scanner exclusion or severity threshold was changed.
+
+## Assisted onboarding (13 November 2026)
+
+| ID | Item | Owner | Trigger or due | Verification procedure | Expected evidence | Blocks | Closure condition | State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FU-47 | Assisted onboarding (AD-12) wording: native Odia and Hindi review of `sms.otp_assisted_consent`, `sms.otp_assisted_payout` and `sms.application_assisted_submitted` (drafts, see FU-34, FU-41); DLT registration of the three templates before any real SMS (FU-30); lawyer check that the consent SMS, which asks the provider to read a code to a support person, works as consent (FU-06) | Owner with native reviewers and the lawyer | Before real users, and before AD-12 is used with a real provider | Read each text in context in all three languages; compare with the registered DLT templates; lawyer reviews the consent flow end to end | Written native review, DLT template IDs, written legal opinion | AD-12 use with real providers | All three reviews recorded and texts changed if asked | Open; drafts in the catalogue |

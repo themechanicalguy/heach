@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { EncryptedField } from '@heach/crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
@@ -89,6 +90,30 @@ export class AdminUsersRepository {
       [id, change.status, change.reason],
     );
     return result.rowCount === 1;
+  }
+
+  /**
+   * PO-04: an Approved provider's application becomes Suspended with the account, and Approved
+   * again on reinstatement; the move is recorded like every other status change.
+   */
+  async moveApplication(
+    client: TransactionClient,
+    id: string,
+    move: { from: 'approved' | 'suspended'; to: 'approved' | 'suspended' },
+    actor: { id: string | null; role: string },
+  ): Promise<void> {
+    const moved = await client.query(
+      `UPDATE app.role_assignment SET application_status = $3
+        WHERE account_id = $1 AND side = 'provider' AND application_status = $2`,
+      [id, move.from, move.to],
+    );
+    if (moved.rowCount !== 1) return;
+    await client.query(
+      `INSERT INTO app.application_event
+         (id, account_id, from_status, to_status, actor_id, actor_role)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [randomUUID(), id, move.from, move.to, actor.id, actor.role],
+    );
   }
 }
 

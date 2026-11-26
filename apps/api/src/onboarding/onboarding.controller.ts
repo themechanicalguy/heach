@@ -11,7 +11,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiServiceUnavailableResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { principalOf } from '../auth/auth.guard.js';
 import { RequireReverification } from '../auth/reverification.js';
@@ -22,10 +28,13 @@ import {
   ApplicationDto,
   DocumentUploadDto,
   IdentityCompleteDto,
+  IdentityDetailsDto,
+  IdentityDocumentDto,
   IdentityRedirectDto,
   IdentityStartDto,
   PayoutDetailsDto,
 } from './onboarding.dto.js';
+import { IdentityService } from './identity.service.js';
 import { OnboardingService } from './onboarding.service.js';
 
 /** The signed-in provider's own application (J1, PO-01 to PO-06). */
@@ -34,14 +43,17 @@ import { OnboardingService } from './onboarding.service.js';
 @Controller('v1/provider/application')
 @UseGuards(requireFlag('accounts'))
 export class OnboardingController {
-  constructor(private readonly onboarding: OnboardingService) {}
+  constructor(
+    private readonly onboarding: OnboardingService,
+    private readonly identity: IdentityService,
+  ) {}
 
   @Get()
   @Header('Cache-Control', 'no-store')
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: ApplicationDto })
   async view(@Req() request: Request): Promise<ApplicationDto> {
-    return this.onboarding.application(principalOf(request));
+    return this.onboarding.application(principalOf(request).userId);
   }
 
   /** Sent with the content type `application/vnd.heach.upload+json`, which allows 7 MB. */
@@ -54,18 +66,19 @@ export class OnboardingController {
     @Body() body: DocumentUploadDto,
     @Req() request: Request,
   ): Promise<ApplicationDto> {
-    return this.onboarding.upload(principalOf(request), item, body);
+    return this.onboarding.upload(principalOf(request).userId, item, body);
   }
 
   @Post('identity/start')
   @HttpCode(HttpStatus.OK)
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: IdentityRedirectDto })
+  @ApiServiceUnavailableResponse({ description: 'identity_unavailable' })
   async startIdentity(
     @Body() body: IdentityStartDto,
     @Req() request: Request,
   ): Promise<IdentityRedirectDto> {
-    return this.onboarding.startIdentity(principalOf(request), body.locale);
+    return this.identity.start(principalOf(request), body);
   }
 
   @Post('identity/complete')
@@ -76,7 +89,32 @@ export class OnboardingController {
     @Body() body: IdentityCompleteDto,
     @Req() request: Request,
   ): Promise<ApplicationDto> {
-    return this.onboarding.completeIdentity(principalOf(request), body);
+    const principal = principalOf(request);
+    await this.identity.complete(principal, body);
+    return this.onboarding.application(principal.userId);
+  }
+
+  /** Date of birth and address as verified, for the provider only (KY-03). */
+  @Get('identity/details')
+  @Header('Cache-Control', 'no-store')
+  @Roles(...ONBOARDING_ROLES)
+  @ApiOkResponse({ type: IdentityDetailsDto })
+  async identityDetails(@Req() request: Request): Promise<IdentityDetailsDto> {
+    return this.identity.details(principalOf(request));
+  }
+
+  /** The fallback when Aadhaar or DigiLocker cannot be used (KY-07); upload content type. */
+  @Put('identity/document')
+  @Header('Cache-Control', 'no-store')
+  @Roles(...ONBOARDING_ROLES)
+  @ApiOkResponse({ type: ApplicationDto })
+  async identityDocument(
+    @Body() body: IdentityDocumentDto,
+    @Req() request: Request,
+  ): Promise<ApplicationDto> {
+    const principal = principalOf(request);
+    await this.identity.uploadDocument(principal.userId, body);
+    return this.onboarding.application(principal.userId);
   }
 
   @Put('payout')
@@ -85,7 +123,7 @@ export class OnboardingController {
   @ApiOkResponse({ type: ApplicationDto })
   @ApiForbiddenResponse({ description: 'reverification_required' })
   async payout(@Body() body: PayoutDetailsDto, @Req() request: Request): Promise<ApplicationDto> {
-    return this.onboarding.savePayout(principalOf(request), body);
+    return this.onboarding.savePayout(principalOf(request).userId, body);
   }
 
   @Post('submit')
@@ -93,6 +131,7 @@ export class OnboardingController {
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: ApplicationDto })
   async submit(@Req() request: Request): Promise<ApplicationDto> {
-    return this.onboarding.submit(principalOf(request));
+    const principal = principalOf(request);
+    return this.onboarding.submit(principal.userId, principal);
   }
 }

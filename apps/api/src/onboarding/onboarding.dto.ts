@@ -2,15 +2,20 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBase64,
   IsIn,
+  IsInt,
   IsISO8601,
   IsOptional,
   IsString,
   Length,
   Matches,
+  Max,
   MaxLength,
+  Min,
   ValidateIf,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { NAME_PATTERN } from '../accounts/setup-rules.js';
+import { ONBOARDING_ROLES, type OnboardingRole } from './checklists.js';
 import { UPLOAD_TYPES, type UploadType } from '../uploads/upload-rules.js';
 
 const APPLICATION_STATUSES = [
@@ -22,7 +27,19 @@ const APPLICATION_STATUSES = [
   'rejected',
   'suspended',
 ] as const;
-const IDENTITY_STATES = ['not_started', 'pending', 'verified', 'failed'] as const;
+// `in_review`: a fallback document is waiting for a verifier (KY-07).
+const IDENTITY_STATES = ['not_started', 'pending', 'in_review', 'verified', 'failed'] as const;
+const IDENTITY_METHODS = ['aadhaar', 'digilocker', 'manual'] as const;
+export type IdentityMethod = (typeof IDENTITY_METHODS)[number];
+// Never an Aadhaar card: its copy would carry the full number (PR-03).
+export const IDENTITY_DOCUMENT_KINDS = [
+  'voter_id',
+  'passport',
+  'driving_licence',
+  'pan_card',
+] as const;
+export type IdentityDocumentKind = (typeof IDENTITY_DOCUMENT_KINDS)[number];
+const LOCALES = ['or', 'en', 'hi'] as const;
 export type IdentityState = (typeof IDENTITY_STATES)[number];
 // Base64 of at most 5 MB, the upload limit (EN-07).
 const MAX_BASE64 = 7_000_000;
@@ -74,6 +91,15 @@ export class DocumentDto {
 
   @ApiProperty()
   uploadedAt!: Date;
+
+  @ApiProperty({
+    enum: ['upload', 'digilocker'],
+    description: 'An issued copy or an upload (KY-02)',
+  })
+  source!: 'upload' | 'digilocker';
+
+  @ApiProperty({ type: String, nullable: true, description: 'Who issued a DigiLocker copy' })
+  issuer!: string | null;
 }
 
 export class ChecklistEntryDto {
@@ -104,6 +130,36 @@ export class PayoutSummaryDto {
   hint!: string;
 }
 
+/** What the public profile shows beyond the account details (PO-05). */
+export class ProviderProfileDetailsDto {
+  @ApiProperty({ type: String, nullable: true })
+  qualifications!: string | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  experienceYears!: number | null;
+
+  @ApiProperty()
+  hasPhoto!: boolean;
+
+  @ApiProperty({ description: 'The photo came from the identity check and is locked (KY-03)' })
+  photoVerified!: boolean;
+}
+
+export class ProviderProfileInputDto {
+  @ApiPropertyOptional({ maxLength: 300 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  qualifications?: string;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 60 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(60)
+  experienceYears?: number;
+}
+
 export class ApplicationDto {
   @ApiProperty()
   role!: string;
@@ -116,6 +172,34 @@ export class ApplicationDto {
 
   @ApiProperty({ enum: IDENTITY_STATES })
   identity!: IdentityState;
+
+  @ApiProperty({
+    enum: IDENTITY_METHODS,
+    nullable: true,
+    description: 'How it was checked (KY-09)',
+  })
+  identityMethod!: IdentityMethod | null;
+
+  @ApiProperty({ enum: IDENTITY_DOCUMENT_KINDS, nullable: true })
+  identityDocumentKind!: IdentityDocumentKind | null;
+
+  @ApiProperty({ description: 'Version of the identity consent text in force (PR-01)' })
+  identityConsentVersion!: string;
+
+  @ApiProperty({
+    enum: ['match', 'mismatch'],
+    nullable: true,
+    description: 'Whether the name typed at sign-up agreed with the verified name (KY-04)',
+  })
+  identityNameMatch!: 'match' | 'mismatch' | null;
+
+  @ApiProperty({
+    description: 'Name and gender came from the identity check and are locked (KY-03)',
+  })
+  identityDetailsVerified!: boolean;
+
+  @ApiProperty({ type: ProviderProfileDetailsDto })
+  profile!: ProviderProfileDetailsDto;
 
   @ApiProperty()
   needsPayout!: boolean;
@@ -133,10 +217,40 @@ export class ApplicationDto {
   editable!: boolean;
 }
 
+const CONSENT_VERSION = /^[a-z0-9.-]{1,40}$/;
+
 export class IdentityStartDto {
-  @ApiProperty({ enum: ['or', 'en', 'hi'], description: 'Language of the page to return to' })
-  @IsIn(['or', 'en', 'hi'])
-  locale!: 'or' | 'en' | 'hi';
+  @ApiProperty({ enum: LOCALES, description: 'Language of the page to return to' })
+  @IsIn(LOCALES)
+  locale!: (typeof LOCALES)[number];
+
+  @ApiProperty({ description: 'Version of the consent text the provider agreed to (PR-01)' })
+  @Matches(CONSENT_VERSION)
+  consentVersion!: string;
+}
+
+/** The fallback identity document (KY-07), sent with the upload content type. */
+export class IdentityDocumentDto extends UploadDto {
+  @ApiProperty({ enum: IDENTITY_DOCUMENT_KINDS })
+  @IsIn(IDENTITY_DOCUMENT_KINDS)
+  kind!: IdentityDocumentKind;
+
+  @ApiProperty({ enum: LOCALES, description: 'Language the consent text was read in' })
+  @IsIn(LOCALES)
+  locale!: (typeof LOCALES)[number];
+
+  @ApiProperty({ description: 'Version of the consent text the provider agreed to (PR-01)' })
+  @Matches(CONSENT_VERSION)
+  consentVersion!: string;
+}
+
+/** The provider's own verified details that are not on the profile (KY-03). Restricted. */
+export class IdentityDetailsDto {
+  @ApiProperty({ format: 'date' })
+  dateOfBirth!: string;
+
+  @ApiProperty()
+  address!: string;
 }
 
 export class IdentityRedirectDto {
@@ -199,6 +313,19 @@ export class ApplicationSummaryDto {
 
   @ApiProperty({ type: Date, nullable: true })
   submittedAt!: Date | null;
+
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    description: 'Whole days since the application was submitted (AD-02)',
+  })
+  ageDays!: number | null;
+
+  @ApiProperty({ description: 'An admin set this application up with the provider (AD-12)' })
+  assisted!: boolean;
+
+  @ApiProperty({ description: 'The calling admin assisted it and may not review it (AD-12)' })
+  assistedByYou!: boolean;
 }
 
 export class ApplicationEventDto {
@@ -227,13 +354,50 @@ export class ApplicationReviewDto extends ApplicationDto {
 
   @ApiProperty({ type: [ApplicationEventDto] })
   history!: ApplicationEventDto[];
+
+  @ApiProperty({ description: 'An admin set this application up with the provider (AD-12)' })
+  assisted!: boolean;
+
+  @ApiProperty({ description: 'Identity consent was read aloud in an assisted session (KY-01)' })
+  identityConsentAssisted!: boolean;
+
+  @ApiProperty({ description: 'The provider has not yet accepted the current terms or privacy' })
+  providerConsentDue!: boolean;
 }
+
+export const AGE_BUCKETS = ['lt1', '1to3', 'gt3'] as const;
+export type AgeBucket = (typeof AGE_BUCKETS)[number];
+
+/** Whole digits only; anything else stays a string so validation refuses it. */
+const toWholeNumber = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' && /^\d{1,3}$/.test(value) ? Number(value) : value;
 
 export class ApplicationQueryDto {
   @ApiPropertyOptional({ enum: ['open', 'decided'] })
   @IsOptional()
   @IsIn(['open', 'decided'])
   view?: 'open' | 'decided';
+
+  @ApiPropertyOptional({ enum: ONBOARDING_ROLES, description: 'Only this provider type' })
+  @IsOptional()
+  @IsIn(ONBOARDING_ROLES)
+  role?: OnboardingRole;
+
+  @ApiPropertyOptional({
+    enum: AGE_BUCKETS,
+    description: 'Days since submission: under 1, from 1 to under 3, or 3 and more',
+  })
+  @IsOptional()
+  @IsIn(AGE_BUCKETS)
+  age?: AgeBucket;
+
+  @ApiPropertyOptional({ minimum: 0, maximum: 365, description: 'At least this many days old' })
+  @IsOptional()
+  @Transform(toWholeNumber)
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  minAgeDays?: number;
 }
 
 export class DocumentReviewDto {
@@ -250,6 +414,12 @@ export class DocumentReviewDto {
   @ValidateIf((body: DocumentReviewDto) => body.status === 'rejected')
   @Matches(/^[a-z_]{1,40}$/)
   reason?: string;
+}
+
+export class IdentityReviewDto {
+  @ApiProperty({ enum: ['accepted', 'rejected'] })
+  @IsIn(['accepted', 'rejected'])
+  status!: 'accepted' | 'rejected';
 }
 
 export const DECISION_REASONS = [

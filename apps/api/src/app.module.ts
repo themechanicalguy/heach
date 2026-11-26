@@ -13,6 +13,7 @@ import { DataStoresModule } from './data-stores/data-stores.module.js';
 import { FlagsModule } from './flags/flags.module.js';
 import { HealthController } from './health/health.controller.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
+import { AssistedOnboardingModule } from './assisted-onboarding/assisted-onboarding.module.js';
 import { OnboardingModule } from './onboarding/onboarding.module.js';
 import { AvailabilityModule } from './availability/availability.module.js';
 import { CatalogueModule } from './catalogue/catalogue.module.js';
@@ -61,6 +62,7 @@ export class AppModule {
         UploadsModule,
         NotificationsModule,
         OnboardingModule,
+        AssistedOnboardingModule,
         CatalogueModule,
         ListingsModule,
         AvailabilityModule,

@@ -36,6 +36,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/v1/audit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AuditController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/audit/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AuditController_exportCsv'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/auth/refresh': {
     parameters: {
       query?: never;
@@ -756,6 +788,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/provider/application/identity/details': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['OnboardingController_identityDetails'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/application/identity/document': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['OnboardingController_identityDocument'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/v1/provider/application/payout': {
     parameters: {
       query?: never;
@@ -782,6 +846,38 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations['OnboardingController_submit'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProfileController_view'];
+    put: operations['ProfileController_save'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/provider/profile/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['ProfileController_photo'];
+    put: operations['ProfileController_uploadPhoto'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -852,6 +948,54 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/admin/v1/applications/{accountId}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VerificationController_photo'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/identity-document': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['VerificationController_identityDocument'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/applications/{accountId}/identity': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['VerificationController_reviewIdentity'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/admin/v1/applications/{accountId}/decision': {
     parameters: {
       query?: never;
@@ -894,6 +1038,246 @@ export interface paths {
     get?: never;
     put: operations['AdminChecklistsController_set'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/consent': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_request'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/consent/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_resend'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/consent/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_verify'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/current': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AssistedSessionsController_current'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['AssistedSessionsController_view'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/end': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedSessionsController_end'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/details': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_details'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/documents/{item}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_document'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/identity-document': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_identityDocument'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/profile': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_profile'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_photo'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/payout/code': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedActionsController_payoutCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/payout/code/resend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedActionsController_resendPayoutCode'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/payout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations['AssistedActionsController_savePayout'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/admin/v1/assisted-onboarding/sessions/{sessionId}/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['AssistedActionsController_submit'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1116,6 +1500,22 @@ export interface paths {
       cookie?: never;
     };
     get: operations['SearchController_profile'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/providers/{id}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['SearchController_photo'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3065,6 +3465,26 @@ export interface components {
       status: 'ok' | 'error';
       checks: components['schemas']['ReadinessChecksDto'];
     };
+    AuditEntryDto: {
+      /** @description Position in the log, a bigint as a string */
+      seq: string;
+      /** Format: uuid */
+      id: string;
+      /** Format: date-time */
+      at: string;
+      actorId: string | null;
+      actorRole: string;
+      action: string;
+      entity: string;
+      entityId: string | null;
+      correlationId: string;
+    };
+    AuditPageDto: {
+      /** @description Newest first */
+      entries: components['schemas']['AuditEntryDto'][];
+      /** @description Pass as `before` for the next page; null on the last page */
+      nextBefore: string | null;
+    };
     AccessTokenDto: {
       accessToken: string;
       /** @description Seconds until the access token expires */
@@ -3563,6 +3983,13 @@ export interface components {
       /** @description Edited wording of the template in the requested language (AD-09) */
       override: string | null;
     };
+    ProviderProfileDetailsDto: {
+      qualifications: string | null;
+      experienceYears: number | null;
+      hasPhoto: boolean;
+      /** @description The photo came from the identity check and is locked (KY-03) */
+      photoVerified: boolean;
+    };
     PayoutSummaryDto: {
       /** @enum {string} */
       method: 'bank' | 'upi';
@@ -3583,6 +4010,13 @@ export interface components {
       reviewReason: string | null;
       /** Format: date-time */
       uploadedAt: string;
+      /**
+       * @description An issued copy or an upload (KY-02)
+       * @enum {string}
+       */
+      source: 'upload' | 'digilocker';
+      /** @description Who issued a DigiLocker copy */
+      issuer: string | null;
     };
     ChecklistEntryDto: {
       key: string;
@@ -3606,7 +4040,24 @@ export interface components {
         | 'suspended';
       statusReason: string | null;
       /** @enum {string} */
-      identity: 'not_started' | 'pending' | 'verified' | 'failed';
+      identity: 'not_started' | 'pending' | 'in_review' | 'verified' | 'failed';
+      /**
+       * @description How it was checked (KY-09)
+       * @enum {string|null}
+       */
+      identityMethod: 'aadhaar' | 'digilocker' | 'manual' | null;
+      /** @enum {string|null} */
+      identityDocumentKind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card' | null;
+      /** @description Version of the identity consent text in force (PR-01) */
+      identityConsentVersion: string;
+      /**
+       * @description Whether the name typed at sign-up agreed with the verified name (KY-04)
+       * @enum {string|null}
+       */
+      identityNameMatch: 'match' | 'mismatch' | null;
+      /** @description Name and gender came from the identity check and are locked (KY-03) */
+      identityDetailsVerified: boolean;
+      profile: components['schemas']['ProviderProfileDetailsDto'];
       needsPayout: boolean;
       payout: components['schemas']['PayoutSummaryDto'] | null;
       items: components['schemas']['ChecklistEntryDto'][];
@@ -3631,6 +4082,8 @@ export interface components {
        * @enum {string}
        */
       locale: 'or' | 'en' | 'hi';
+      /** @description Version of the consent text the provider agreed to (PR-01) */
+      consentVersion: string;
     };
     IdentityRedirectDto: {
       redirectUrl: string;
@@ -3638,6 +4091,26 @@ export interface components {
     IdentityCompleteDto: {
       code: string;
       reference: string;
+    };
+    IdentityDetailsDto: {
+      /** Format: date */
+      dateOfBirth: string;
+      address: string;
+    };
+    IdentityDocumentDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+      /** @enum {string} */
+      kind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card';
+      /**
+       * @description Language the consent text was read in
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+      /** @description Version of the consent text the provider agreed to (PR-01) */
+      consentVersion: string;
     };
     PayoutDetailsDto: {
       /** @enum {string} */
@@ -3649,6 +4122,21 @@ export interface components {
       ifsc?: string;
       /** @description UPI ID, for example name@bank */
       upiId?: string;
+    };
+    ProviderProfileInputDto: {
+      qualifications?: string;
+      experienceYears?: number;
+    };
+    StoredFileDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      contentBase64: string;
+    };
+    UploadDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
     };
     ApplicationSummaryDto: {
       /** Format: uuid */
@@ -3666,6 +4154,12 @@ export interface components {
       fullName: string | null;
       /** Format: date-time */
       submittedAt: string | null;
+      /** @description Whole days since the application was submitted (AD-02) */
+      ageDays: number | null;
+      /** @description An admin set this application up with the provider (AD-12) */
+      assisted: boolean;
+      /** @description The calling admin assisted it and may not review it (AD-12) */
+      assistedByYou: boolean;
     };
     ApplicationEventDto: {
       fromStatus: string;
@@ -3688,7 +4182,24 @@ export interface components {
         | 'suspended';
       statusReason: string | null;
       /** @enum {string} */
-      identity: 'not_started' | 'pending' | 'verified' | 'failed';
+      identity: 'not_started' | 'pending' | 'in_review' | 'verified' | 'failed';
+      /**
+       * @description How it was checked (KY-09)
+       * @enum {string|null}
+       */
+      identityMethod: 'aadhaar' | 'digilocker' | 'manual' | null;
+      /** @enum {string|null} */
+      identityDocumentKind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card' | null;
+      /** @description Version of the identity consent text in force (PR-01) */
+      identityConsentVersion: string;
+      /**
+       * @description Whether the name typed at sign-up agreed with the verified name (KY-04)
+       * @enum {string|null}
+       */
+      identityNameMatch: 'match' | 'mismatch' | null;
+      /** @description Name and gender came from the identity check and are locked (KY-03) */
+      identityDetailsVerified: boolean;
+      profile: components['schemas']['ProviderProfileDetailsDto'];
       needsPayout: boolean;
       payout: components['schemas']['PayoutSummaryDto'] | null;
       items: components['schemas']['ChecklistEntryDto'][];
@@ -3700,11 +4211,12 @@ export interface components {
       accountId: string;
       fullName: string | null;
       history: components['schemas']['ApplicationEventDto'][];
-    };
-    StoredFileDto: {
-      /** @enum {string} */
-      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
-      contentBase64: string;
+      /** @description An admin set this application up with the provider (AD-12) */
+      assisted: boolean;
+      /** @description Identity consent was read aloud in an assisted session (KY-01) */
+      identityConsentAssisted: boolean;
+      /** @description The provider has not yet accepted the current terms or privacy */
+      providerConsentDue: boolean;
     };
     DocumentReviewDto: {
       /** Format: uuid */
@@ -3713,6 +4225,10 @@ export interface components {
       status: 'accepted' | 'rejected';
       /** @description Required when rejected */
       reason?: string;
+    };
+    IdentityReviewDto: {
+      /** @enum {string} */
+      status: 'accepted' | 'rejected';
     };
     DecisionDto: {
       /** @enum {string} */
@@ -3744,6 +4260,155 @@ export interface components {
     };
     ChecklistInputDto: {
       required: boolean;
+    };
+    AssistedConsentRequestDto: {
+      /** @description The provider’s Indian mobile number, with or without +91 */
+      mobile: string;
+      /**
+       * @description Language of the SMS and of a new account
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+    };
+    AssistedChallengeDto: {
+      /** Format: uuid */
+      sessionId: string;
+      /** @description The provider’s number, last four digits only */
+      mobile: string;
+      /** @description Seconds until the code expires */
+      expiresInSeconds: number;
+      /** @description Seconds until a new code may be requested */
+      resendInSeconds: number;
+    };
+    AssistedCodeDto: {
+      /** @example 123456 */
+      code: string;
+    };
+    AssistedDocumentDto: {
+      /** @enum {string} */
+      scanStatus: 'pending' | 'clean' | 'infected';
+      /** @enum {string} */
+      reviewStatus: 'pending' | 'accepted' | 'rejected';
+      reviewReason: string | null;
+      /** Format: date-time */
+      uploadedAt: string;
+      /** @enum {string} */
+      source: 'upload' | 'digilocker';
+    };
+    AssistedChecklistEntryDto: {
+      key: string;
+      required: boolean;
+      /** @description A registration or certificate number is needed */
+      reference: boolean;
+      /** @description The document has an expiry date */
+      expiry: boolean;
+      document: components['schemas']['AssistedDocumentDto'] | null;
+    };
+    AssistedApplicationDto: {
+      role: string;
+      /** @enum {string} */
+      status:
+        | 'draft'
+        | 'submitted'
+        | 'under_review'
+        | 'changes_requested'
+        | 'approved'
+        | 'rejected'
+        | 'suspended';
+      statusReason: string | null;
+      /** @enum {string} */
+      identity: 'not_started' | 'pending' | 'in_review' | 'verified' | 'failed';
+      /** @description Version of the identity consent text in force (PR-01) */
+      identityConsentVersion: string;
+      profile: components['schemas']['ProviderProfileDetailsDto'];
+      needsPayout: boolean;
+      /** @description Payout details are on file; they are never shown */
+      payoutOnFile: boolean;
+      items: components['schemas']['AssistedChecklistEntryDto'][];
+      /** @description What still stops submission */
+      missing: string[];
+      /** @description The application may be changed now */
+      editable: boolean;
+    };
+    AssistedSessionDto: {
+      /** Format: uuid */
+      sessionId: string;
+      /** @description The provider’s number, last four digits only */
+      mobile: string;
+      /** @description First letter of each name word */
+      maskedName: string | null;
+      /** Format: date-time */
+      expiresAt: string;
+      ended: boolean;
+      /** @description The consent code created this account */
+      accountCreated: boolean;
+      setupComplete: boolean;
+      /** @description Name, gender and adult declaration are set and cannot be changed */
+      basicDetailsLocked: boolean;
+      /** @description A payout code is waiting to be used */
+      payoutCodeSent: boolean;
+      application: components['schemas']['AssistedApplicationDto'] | null;
+    };
+    AssistedDetailsDto: {
+      /** @enum {string} */
+      role: 'physiotherapist' | 'nurse' | 'attendant' | 'lab';
+      /** @description Not accepted once setup is complete */
+      fullName?: string;
+      /**
+       * @description Not accepted once setup is complete
+       * @enum {string}
+       */
+      gender?: 'female' | 'male' | 'other' | 'undisclosed';
+      /** @description Languages the provider speaks */
+      languages: ('or' | 'en' | 'hi')[];
+      /** @description The lab's name (labs only) */
+      organisationName?: string;
+      /** @description The provider confirmed they are 18 or older */
+      adultDeclared?: boolean;
+    };
+    AssistedIdentityDocumentDto: {
+      /** @enum {string} */
+      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
+      /** @description The file, base64 encoded; at most 5 MB decoded */
+      contentBase64: string;
+      /** @enum {string} */
+      kind: 'voter_id' | 'passport' | 'driving_licence' | 'pan_card';
+      /**
+       * @description Language the consent text was read in
+       * @enum {string}
+       */
+      locale: 'or' | 'en' | 'hi';
+      /** @description Version of the consent text the provider agreed to (PR-01) */
+      consentVersion: string;
+      /**
+       * @description The consent text was read to the provider (PR-01)
+       * @enum {boolean}
+       */
+      consentReadAloud: true;
+    };
+    AssistedPayoutChallengeDto: {
+      /** @description The provider’s number, last four digits only */
+      mobile: string;
+      /** @description Seconds until the code expires */
+      expiresInSeconds: number;
+      /** @description Seconds until a new code may be requested */
+      resendInSeconds: number;
+    };
+    AssistedPayoutDto: {
+      /** @enum {string} */
+      method: 'bank' | 'upi';
+      holderName: string;
+      /** @description Bank account number, 9 to 18 digits */
+      accountNumber?: string;
+      /** @description IFSC of the branch */
+      ifsc?: string;
+      /** @description UPI ID, for example name@bank */
+      upiId?: string;
+      /**
+       * @description The code the provider read out for this save
+       * @example 123456
+       */
+      code: string;
     };
     CatalogueItemDto: {
       code: string;
@@ -3935,6 +4600,11 @@ export interface components {
       identityVerified: boolean;
       /** @description Nursing council registration (PO-05) */
       registrationNumber: string | null;
+      /** @description As the provider wrote them (PO-05) */
+      qualifications: string | null;
+      experienceYears: number | null;
+      /** @description A photo is at `providers/:id/photo` */
+      hasPhoto: boolean;
       listings: components['schemas']['ProfileListingDto'][];
       pins: string[];
       travelSurchargePaise: number;
@@ -4076,12 +4746,6 @@ export interface components {
       contactName?: string;
       /** @description Mobile number of that person */
       contactPhone?: string;
-    };
-    UploadDto: {
-      /** @enum {string} */
-      contentType: 'application/pdf' | 'image/jpeg' | 'image/png';
-      /** @description The file, base64 encoded; at most 5 MB decoded */
-      contentBase64: string;
     };
     CreateBookingDto: {
       /**
@@ -5195,6 +5859,85 @@ export interface operations {
       };
     };
   };
+  AuditController_list: {
+    parameters: {
+      query?: {
+        /** @description Actor ID, exact */
+        actorId?: string;
+        /** @description Actor role, exact, for example `verifier` */
+        actorRole?: string;
+        /** @description Action prefix, matched literally, for example `admin.` */
+        action?: string;
+        /** @description Entity type, exact */
+        entity?: string;
+        /** @description Entity ID, exact */
+        entityId?: string;
+        /** @description Earliest time, inclusive (ISO 8601 date-time) */
+        from?: string;
+        /** @description Latest time, inclusive (ISO 8601 date-time) */
+        to?: string;
+        /** @description Cursor: only entries with a lower seq (a `nextBefore`) */
+        before?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AuditPageDto'];
+        };
+      };
+    };
+  };
+  AuditController_exportCsv: {
+    parameters: {
+      query?: {
+        /** @description Actor ID, exact */
+        actorId?: string;
+        /** @description Actor role, exact, for example `verifier` */
+        actorRole?: string;
+        /** @description Action prefix, matched literally, for example `admin.` */
+        action?: string;
+        /** @description Entity type, exact */
+        entity?: string;
+        /** @description Entity ID, exact */
+        entityId?: string;
+        /** @description Earliest time, inclusive (ISO 8601 date-time) */
+        from?: string;
+        /** @description Latest time, inclusive (ISO 8601 date-time) */
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description CSV, newest first, at most 5000 rows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'text/csv': string;
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   AuthController_refresh: {
     parameters: {
       query?: never;
@@ -6260,6 +7003,13 @@ export interface operations {
           'application/json': components['schemas']['IdentityRedirectDto'];
         };
       };
+      /** @description identity_unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   OnboardingController_completeIdentity: {
@@ -6272,6 +7022,48 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['IdentityCompleteDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApplicationDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_identityDetails: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['IdentityDetailsDto'];
+        };
+      };
+    };
+  };
+  OnboardingController_identityDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IdentityDocumentDto'];
       };
     };
     responses: {
@@ -6334,10 +7126,100 @@ export interface operations {
       };
     };
   };
+  ProfileController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderProfileDetailsDto'];
+        };
+      };
+    };
+  };
+  ProfileController_save: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProviderProfileInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderProfileDetailsDto'];
+        };
+      };
+    };
+  };
+  ProfileController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  ProfileController_uploadPhoto: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UploadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProviderProfileDetailsDto'];
+        };
+      };
+    };
+  };
   VerificationController_queue: {
     parameters: {
       query?: {
         view?: 'open' | 'decided';
+        /** @description Only this provider type */
+        role?: 'physiotherapist' | 'nurse' | 'attendant' | 'lab' | 'sample_collector';
+        /** @description Days since submission: under 1, from 1 to under 3, or 3 and more */
+        age?: 'lt1' | '1to3' | 'gt3';
+        /** @description At least this many days old */
+        minAgeDays?: number;
       };
       header?: never;
       path?: never;
@@ -6421,6 +7303,71 @@ export interface operations {
       };
     };
   };
+  VerificationController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  VerificationController_identityDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
+        };
+      };
+    };
+  };
+  VerificationController_reviewIdentity: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accountId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IdentityReviewDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   VerificationController_decide: {
     parameters: {
       query?: never;
@@ -6484,6 +7431,369 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  AssistedSessionsController_request: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedConsentRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedChallengeDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedSessionsController_resend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedChallengeDto'];
+        };
+      };
+    };
+  };
+  AssistedSessionsController_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedCodeDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedSessionsController_current: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+      /** @description The admin has no running session */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedSessionsController_view: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedSessionsController_end: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedActionsController_details: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedDetailsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_document: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+        item: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DocumentUploadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_identityDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedIdentityDocumentDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_profile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProviderProfileInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UploadDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_payoutCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedPayoutChallengeDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_resendPayoutCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedPayoutChallengeDto'];
+        };
+      };
+    };
+  };
+  AssistedActionsController_savePayout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssistedPayoutDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
+      };
+      /** @description reverification_required */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AssistedActionsController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AssistedSessionDto'];
+        };
       };
     };
   };
@@ -6843,6 +8153,27 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ProviderProfileDto'];
+        };
+      };
+    };
+  };
+  SearchController_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoredFileDto'];
         };
       };
     };

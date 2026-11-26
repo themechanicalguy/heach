@@ -35,6 +35,11 @@ describe('Database roles (EN-10.1, EN-10.2, SE-05.4)', () => {
     await expect(app.query('SELECT * FROM migrations.pgmigrations')).rejects.toThrow(DENIED);
   });
 
+  it('AD-12 the API role cannot delete assisted-session evidence', async () => {
+    await expect(app.query('SELECT count(*) FROM app.assisted_session')).resolves.toBeDefined();
+    await expect(app.query('DELETE FROM app.assisted_session')).rejects.toThrow(DENIED);
+  });
+
   it('EN-10.2 neither role can change the audit schema', async () => {
     for (const client of [app, migrator]) {
       await expect(client.query('ALTER TABLE audit.entry ADD COLUMN x int')).rejects.toThrow(

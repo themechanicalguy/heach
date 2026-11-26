@@ -161,6 +161,9 @@ describe('ProviderProfileView (PO-05, AV-02)', () => {
     gender: 'female',
     languages: ['or', 'en'],
     identityVerified: true,
+    qualifications: 'GNM, synthetic',
+    experienceYears: 7,
+    hasPhoto: false,
     registrationNumber: 'SYN-1',
     listings: [
       {
@@ -198,6 +201,8 @@ describe('ProviderProfileView (PO-05, AV-02)', () => {
       return Promise.resolve(profile);
     });
     inEnglish(<ProviderProfileView providerId={profile.id} />);
+    expect(await screen.findByText('Qualifications: GNM, synthetic')).toBeTruthy();
+    expect(screen.getByText('7 years of experience')).toBeTruthy();
     expect(await screen.findByText('Verified identity')).toBeTruthy();
     expect(screen.getByText('Registration number: SYN-1')).toBeTruthy();
     expect(screen.getByText('Speaks: Odia, English')).toBeTruthy();

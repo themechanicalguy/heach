@@ -28,3 +28,12 @@ export function consentsDue(given: readonly ConsentGiven[]): ConsentGiven[] {
 export function coversCurrentVersions(submitted: readonly ConsentGiven[]): boolean {
   return consentsDue(submitted).length === 0;
 }
+
+/**
+ * Asked just before the identity check rather than at sign-up (PR-01, KY-01), so it is not part
+ * of `CONSENT_PURPOSES`. The text is a draft until the lawyer's review (FU-06).
+ */
+export const IDENTITY_CONSENT = {
+  purpose: 'identity_verification',
+  version: '2026-11-draft.1',
+} as const;

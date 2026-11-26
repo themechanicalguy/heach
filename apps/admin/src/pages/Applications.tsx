@@ -4,8 +4,10 @@ import { useCallback, useState } from 'react';
 import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
+import { ApplicationFilters } from './ApplicationFilters';
 import { ApplicationPanel } from './ApplicationPanel';
 import { label } from './labels';
+import { NO_QUEUE_FILTERS, queuePath } from './queue-query';
 
 function columns(onOpen: (id: string) => void) {
   return [
@@ -27,19 +29,28 @@ function columns(onOpen: (id: string) => void) {
         a.submittedAt ? new Date(a.submittedAt).toLocaleDateString('en-IN') : '—',
     },
     {
+      key: 'age',
+      header: t('verification.age'),
+      cell: (a: ApplicationSummary) =>
+        typeof a.ageDays === 'number' ? t('verification.ageDays', { days: a.ageDays }) : '—',
+    },
+    {
       key: 'open',
       header: t('verification.open'),
-      cell: (a: ApplicationSummary) => (
-        <Button
-          className="heach-button--secondary"
-          aria-label={`${t('verification.open')} ${a.fullName ?? ''}`}
-          onClick={() => {
-            onOpen(a.accountId);
-          }}
-        >
-          {t('verification.open')}
-        </Button>
-      ),
+      cell: (a: ApplicationSummary) =>
+        a.assistedByYou ? (
+          t('verification.assistedByYou')
+        ) : (
+          <Button
+            className="heach-button--secondary"
+            aria-label={`${t('verification.open')} ${a.fullName ?? ''}`}
+            onClick={() => {
+              onOpen(a.accountId);
+            }}
+          >
+            {t('verification.open')}
+          </Button>
+        ),
     },
   ];
 }
@@ -48,9 +59,10 @@ function columns(onOpen: (id: string) => void) {
 export function Applications() {
   const [view, setView] = useState<'open' | 'decided'>('open');
   const [selected, setSelected] = useState<string | undefined>();
+  const [filters, setFilters] = useState(NO_QUEUE_FILTERS);
   const fetcher = useCallback(
-    () => api<ApplicationSummary[]>(`/applications?view=${view}`),
-    [view],
+    () => api<ApplicationSummary[]>(queuePath(view, filters)),
+    [view, filters],
   );
   const { loaded, reload } = useLoad(fetcher);
   return (
@@ -69,6 +81,7 @@ export function Applications() {
           setView(value === 'decided' ? 'decided' : 'open');
         }}
       />
+      <ApplicationFilters filters={filters} onChange={setFilters} />
       <div className="admin-split">
         <div className="admin-split__main">
           {loaded.state === 'loading' && <Skeleton label={t('state.loading')} />}

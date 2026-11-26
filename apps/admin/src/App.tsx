@@ -2,7 +2,9 @@ import { Skeleton } from '@heach/ui';
 import { type ReactNode, useState } from 'react';
 import { t } from './i18n';
 import { AdminLayout, type Section } from './layout/AdminLayout';
+import { AssistedOnboarding } from './pages/AssistedOnboarding';
 import { Admins } from './pages/Admins';
+import { AuditLog } from './pages/AuditLog';
 import { Applications } from './pages/Applications';
 import { Bookings } from './pages/Bookings';
 import { Catalogue } from './pages/Catalogue';
@@ -26,6 +28,7 @@ import { SessionProvider, useSession } from './session';
 const USER_READERS = new Set(['super_admin', 'support', 'verifier']);
 const USER_CHANGERS = new Set(['super_admin', 'support']);
 const VERIFIERS = new Set(['super_admin', 'verifier']);
+const ASSISTERS = new Set(['super_admin', 'support']);
 
 function Shell() {
   const { state } = useSession();
@@ -46,6 +49,7 @@ function Shell() {
 function sectionsFor(role: string): Section[] {
   const sections: Section[] = ['dashboard'];
   if (VERIFIERS.has(role)) sections.push('verification');
+  if (ASSISTERS.has(role)) sections.push('assisted');
   if (['super_admin', 'support', 'finance'].includes(role)) sections.push('bookings');
   if (role === 'super_admin' || role === 'finance') sections.push('finance');
   if (role === 'super_admin' || role === 'support')
@@ -54,7 +58,7 @@ function sectionsFor(role: string): Section[] {
   if (role === 'super_admin' || role === 'support') sections.push('referrals', 'catalogue');
   if (['super_admin', 'support', 'finance'].includes(role)) sections.push('settings');
   if (role === 'super_admin' || role === 'support') sections.push('content');
-  if (role === 'super_admin') sections.push('security');
+  if (role === 'super_admin') sections.push('security', 'audit');
   if (USER_READERS.has(role)) sections.push('users');
   if (role === 'super_admin') sections.push('admins');
   sections.push('password');
@@ -70,6 +74,7 @@ interface PageProps {
 const PAGES: Record<Section, (props: PageProps) => ReactNode> = {
   dashboard: () => <Dashboard />,
   verification: () => <Applications />,
+  assisted: () => <AssistedOnboarding />,
   bookings: ({ role }) => <Bookings role={role} />,
   finance: () => <Finance />,
   tickets: () => <Tickets />,
@@ -80,6 +85,7 @@ const PAGES: Record<Section, (props: PageProps) => ReactNode> = {
   referrals: () => <Referrals />,
   settings: ({ role }) => <Settings canChange={role === 'super_admin'} />,
   security: () => <Security />,
+  audit: () => <AuditLog />,
   content: ({ role }) => <Content canChange={role === 'super_admin'} />,
   catalogue: ({ role }) => <Catalogue canChange={role === 'super_admin'} />,
   users: ({ role }) => <Users canChange={USER_CHANGERS.has(role)} />,

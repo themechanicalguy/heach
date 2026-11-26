@@ -203,3 +203,30 @@ body {
   gap: 0.5rem;
   padding-left: 1.25rem;
 }
+
+.admin-viewer {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.admin-viewer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-viewer__stage {
+  display: grid;
+  place-items: center;
+  max-height: 60vh;
+  overflow: auto;
+  border: 1.5px solid var(--heach-border);
+  border-radius: 0.625rem;
+  background: var(--heach-surface);
+}
+
+.admin-viewer__image {
+  max-width: 100%;
+  transform-origin: center;
+}

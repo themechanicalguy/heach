@@ -14,6 +14,8 @@ import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
 import { DocumentItem } from './DocumentItem';
 import { IdentityStep } from './IdentityStep';
+import { ListenButton } from './ListenButton';
+import { ProfileStep } from './ProfileStep';
 import { PayoutForm } from './PayoutForm';
 import { type EditableStep, ReviewStep } from './ReviewStep';
 import { rememberSubmitted } from './submitted-notice';
@@ -47,8 +49,8 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
   const [step, setStep] = useState<Step>(initial.editable ? 'identity' : 'review');
   const heading = useRef<HTMLHeadingElement>(null);
   const steps: Step[] = initial.needsPayout
-    ? ['identity', 'documents', 'payout', 'review']
-    : ['identity', 'documents', 'review'];
+    ? ['identity', 'documents', 'profile', 'payout', 'review']
+    : ['identity', 'documents', 'profile', 'review'];
   const { pending, error, run } = usePending();
   const audience = useAppAudience();
   useEffect(() => {
@@ -100,8 +102,10 @@ function Hub({ initial }: Readonly<{ initial: Application }>) {
           current={steps.indexOf(step) + 1}
           total={steps.length}
         />
-        {step === 'identity' && <IdentityStep application={application} />}
+        <ListenButton step={step} />
+        {step === 'identity' && <IdentityStep application={application} onSaved={setApplication} />}
         {step === 'documents' && <Documents application={application} onSaved={setApplication} />}
+        {step === 'profile' && <ProfileStep application={application} onSaved={setApplication} />}
         {step === 'payout' && application.needsPayout && (
           <PayoutForm application={application} onSaved={setApplication} />
         )}

@@ -205,6 +205,16 @@ export class AccountRepository {
   }
 
   /** Corrects basic details after setup, in the caller's transaction (AC-06). */
+  /** True when the name and gender came from the identity partner and are locked (KY-03). */
+  async identityLocked(client: TransactionClient, id: string): Promise<boolean> {
+    const { rows } = await client.query(
+      `SELECT 1 FROM app.identity_check
+        WHERE account_id = $1 AND status = 'verified' AND verified_details IS NOT NULL`,
+      [id],
+    );
+    return rows.length > 0;
+  }
+
   async correctProfile(
     client: TransactionClient,
     id: string,
@@ -284,11 +294,44 @@ export class AccountRepository {
     client: TransactionClient,
     accountId: string,
     grant: { role: GrantedUserRole; side: Side; applicationStatus: ApplicationStatus | null },
+    grantedBy: 'self-registration' | 'assisted-onboarding' = 'self-registration',
   ): Promise<void> {
     await client.query(
       `INSERT INTO app.role_assignment (account_id, side, role, application_status, granted_by)
-       VALUES ($1, $2, $3, $4, 'self-registration')`,
-      [accountId, grant.side, grant.role, grant.applicationStatus],
+       VALUES ($1, $2, $3, $4, $5)`,
+      [accountId, grant.side, grant.role, grant.applicationStatus, grantedBy],
+    );
+  }
+
+  /**
+   * Basic details entered by a support admin for a provider who consented (AD-12). Setup is
+   * closed by the caller; no invitation applies.
+   */
+  async saveAssistedDetails(
+    client: TransactionClient,
+    id: string,
+    details: {
+      role: SetupRole;
+      fullName: string;
+      gender: Gender;
+      languages: readonly string[];
+      organisationName: string | null;
+    },
+  ): Promise<void> {
+    await client.query(
+      `UPDATE app.account_profile
+          SET setup_role = $2, full_name = $3, gender = $4, languages = $5::text[],
+              organisation_name = $6, adult_declared_at = now(), setup_invitation_id = NULL,
+              updated_at = now()
+        WHERE account_id = $1`,
+      [
+        id,
+        details.role,
+        details.fullName,
+        details.gender,
+        [...details.languages],
+        details.organisationName,
+      ],
     );
   }
 

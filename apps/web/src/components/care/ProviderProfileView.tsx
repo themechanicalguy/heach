@@ -10,6 +10,7 @@ import { useI18n } from '../../lib/i18n-context';
 import { keyFor } from '../../lib/message-keys';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
+import { StoredImage } from '../StoredImage';
 
 /** A provider's public profile with free times per service (PO-05, AV-02). */
 export function ProviderProfileView({ providerId }: Readonly<{ providerId: string }>) {
@@ -34,6 +35,12 @@ function Profile({ profile }: Readonly<{ profile: ProviderProfile }>) {
   return (
     <section className="flow" aria-labelledby="profile-title">
       <div className="flow__card">
+        {profile.hasPhoto && (
+          <StoredImage
+            path={`/providers/${profile.id}/photo`}
+            alt={t('profile.photoAlt', { name: profile.name })}
+          />
+        )}
         <h1 id="profile-title" className="flow__title">
           {profile.name}
         </h1>
@@ -43,6 +50,12 @@ function Profile({ profile }: Readonly<{ profile: ProviderProfile }>) {
         {profile.identityVerified && <Notice tone="success">{t('profile.verified')}</Notice>}
         {profile.registrationNumber && (
           <p>{t('profile.registration', { number: profile.registrationNumber })}</p>
+        )}
+        {profile.qualifications && (
+          <p>{t('profile.qualifications', { text: profile.qualifications })}</p>
+        )}
+        {profile.experienceYears !== null && (
+          <p>{t('profile.experience', { years: profile.experienceYears })}</p>
         )}
         <p>
           {t('profile.languages', {

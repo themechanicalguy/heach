@@ -9,6 +9,9 @@ export class ApiError extends Error {
   }
 }
 
+/** The content type of the upload routes (7 MB JSON with the file as base64). */
+export const UPLOAD_CONTENT_TYPE = 'application/vnd.heach.upload+json';
+
 let accessToken: string | undefined;
 let refreshing: Promise<boolean> | undefined;
 let onSessionEnded: (() => void) | undefined;
@@ -30,7 +33,7 @@ function send(path: string, init: RequestInit): Promise<Response> {
   const headers = new Headers(init.headers);
   headers.set('x-correlation-id', crypto.randomUUID());
   if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
-  if (init.body) headers.set('content-type', 'application/json');
+  if (init.body && !headers.has('content-type')) headers.set('content-type', 'application/json');
   return fetch(`/api/admin/v1${path}`, {
     ...init,
     headers,
@@ -88,13 +91,17 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (response.status === 204 ? undefined : await response.json()) as T;
 }
 
+/** A file answer (for example a CSV export) as a Blob, sent with the same Bearer token. */
+export async function apiBlob(path: string): Promise<Blob> {
+  return (await authorised(path, {})).blob();
+}
+
 /**
  * Saves a file the API serves to signed-in admins. A plain link cannot send the in-memory access
  * token, so the file is fetched and handed to the browser as a Blob.
  */
 export async function download(path: string, fileName: string): Promise<void> {
-  const blob = await (await authorised(path, {})).blob();
-  const url = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(await apiBlob(path));
   const link = document.createElement('a');
   link.href = url;
   link.download = fileName;

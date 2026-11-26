@@ -13,6 +13,7 @@ import {
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '../auth/roles.decorator.js';
 import { requireFlag } from '../flags/flags.module.js';
+import { StoredFileDto } from '../onboarding/onboarding.dto.js';
 import {
   ProfileQueryDto,
   ProviderProfileDto,
@@ -67,6 +68,14 @@ export class SearchController {
     @Query() query: ProfileQueryDto,
   ): Promise<ProviderProfileDto> {
     return this.search.profile(id, query.locale ?? 'or');
+  }
+
+  @Get('providers/:id/photo')
+  @Public('A published provider profile shows its photo (PO-05)')
+  @Header('Cache-Control', 'public, max-age=300')
+  @ApiOkResponse({ type: StoredFileDto })
+  async photo(@Param('id', uuid) id: string): Promise<StoredFileDto> {
+    return this.search.photo(id);
   }
 
   @Get('providers/:id/slots')

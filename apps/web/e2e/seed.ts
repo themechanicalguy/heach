@@ -182,9 +182,13 @@ export async function listedProvider(
       },
     });
   }
+  const { identityConsentVersion } = await call<{ identityConsentVersion: string }>(
+    '/v1/provider/application',
+    { token: session.token },
+  );
   const { redirectUrl } = await call<{ redirectUrl: string }>(
     '/v1/provider/application/identity/start',
-    { token: session.token, body: { locale: 'en' } },
+    { token: session.token, body: { locale: 'en', consentVersion: identityConsentVersion } },
   );
   const back = new URL(redirectUrl);
   await call('/v1/provider/application/identity/complete', {

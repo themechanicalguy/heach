@@ -1,7 +1,7 @@
 -- Database roles, schemas and the audit log (EN-10.2, SE-05). Run by the superuser on every
 -- deploy; idempotent. Passwords are set by bootstrap.ts, never written here.
 --   heach_migrator    runs migrations; owns schemas app and migrations
---   heach_app         the API: reads and writes app tables; may only append to the audit log
+--   heach_app         the API: reads and writes app tables; may only append to and search the audit log
 --   heach_audit_owner owns schema audit; cannot log in, so neither role above can change it
 
 DO $roles$
@@ -113,9 +113,36 @@ BEGIN
 END
 $fn$;
 
+-- Read access for the admin audit search and export (AD-11): filtered, newest first, capped, and
+-- without the hashes. NULL means no filter; the action prefix is matched literally.
+CREATE OR REPLACE FUNCTION audit.search(
+  p_actor_id text, p_actor_role text, p_action_prefix text, p_entity text, p_entity_id text,
+  p_from timestamptz, p_to timestamptz, p_before_seq bigint, p_limit integer
+) RETURNS TABLE (
+  seq bigint, id uuid, at timestamptz, actor_id text, actor_role text, action text,
+  entity text, entity_id text, correlation_id text
+) LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, audit AS $fn$
+  SELECT e.seq, e.id, e.at, e.actor_id, e.actor_role, e.action, e.entity, e.entity_id,
+         e.correlation_id
+  FROM audit.entry e
+  WHERE (p_actor_id IS NULL OR e.actor_id = p_actor_id)
+    AND (p_actor_role IS NULL OR e.actor_role = p_actor_role)
+    AND (p_action_prefix IS NULL OR starts_with(e.action, p_action_prefix))
+    AND (p_entity IS NULL OR e.entity = p_entity)
+    AND (p_entity_id IS NULL OR e.entity_id = p_entity_id)
+    AND (p_from IS NULL OR e.at >= p_from)
+    AND (p_to IS NULL OR e.at <= p_to)
+    AND (p_before_seq IS NULL OR e.seq < p_before_seq)
+  ORDER BY e.seq DESC
+  LIMIT LEAST(GREATEST(coalesce(p_limit, 50), 1), 5000)
+$fn$;
+
 REVOKE ALL ON ALL TABLES IN SCHEMA audit FROM PUBLIC, heach_app, heach_migrator;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA audit FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION audit.append(text, text, text, text, text, text) TO heach_app;
+GRANT EXECUTE ON FUNCTION audit.search(
+  text, text, text, text, text, timestamptz, timestamptz, bigint, integer
+) TO heach_app;
 GRANT EXECUTE ON FUNCTION audit.verify_chain() TO heach_migrator;
 
 RESET ROLE;

@@ -2,11 +2,22 @@
 
 import { formatDate } from '@heach/i18n';
 import type { CreatedNote, Note } from '@heach/types';
-import { Button, Card, EmptyState, ErrorState, Skeleton, TextField, Toast } from '@heach/ui';
+import {
+  Button,
+  Card,
+  EmptyState,
+  ErrorState,
+  Notice,
+  Skeleton,
+  TextField,
+  Toast,
+} from '@heach/ui';
 import { useCallback, useEffect, useState } from 'react';
+import { useAccount } from '../lib/account';
 import { api } from '../lib/api';
 import { useI18n } from '../lib/i18n-context';
 import { useSession } from '../lib/session';
+import { usePending } from '../lib/use-pending';
 
 const MAX_LENGTH = 2000;
 
@@ -16,6 +27,8 @@ type Load = { state: 'loading' } | { state: 'error' } | { state: 'ready'; notes:
 export function NotesView() {
   const { locale, t } = useI18n();
   const { status } = useSession();
+  const { enabled, account } = useAccount();
+  const { pending, error, run } = usePending();
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [draft, setDraft] = useState('');
   const [saved, setSaved] = useState(false);
@@ -29,22 +42,28 @@ export function NotesView() {
     }
   }, []);
 
+  // The API allows notes for patients only (403 otherwise), so wait for the role before asking.
+  const roleKnown = !enabled || account.state === 'ready';
+  const notPatient = account.state === 'ready' && account.me.activeRole !== 'patient';
   useEffect(() => {
-    if (status === 'signed-in') void refresh();
-  }, [status, refresh]);
+    if (status === 'signed-in' && roleKnown && !notPatient) void refresh();
+  }, [status, roleKnown, notPatient, refresh]);
 
-  const save = async (event: { preventDefault: () => void }) => {
+  const save = (event: { preventDefault: () => void }) => {
     event.preventDefault();
-    await api<CreatedNote>('/sample/notes', {
-      method: 'POST',
-      body: JSON.stringify({ body: draft }),
+    return run(async () => {
+      await api<CreatedNote>('/sample/notes', {
+        method: 'POST',
+        body: JSON.stringify({ body: draft }),
+      });
+      setDraft('');
+      setSaved(true);
+      await refresh();
     });
-    setDraft('');
-    setSaved(true);
-    await refresh();
   };
 
-  if (status === 'checking') return <Skeleton label={t('state.loading')} />;
+  if (status === 'checking' || (status === 'signed-in' && !roleKnown))
+    return <Skeleton label={t('state.loading')} />;
   if (status === 'signed-out') {
     return (
       <p>
@@ -52,6 +71,7 @@ export function NotesView() {
       </p>
     );
   }
+  if (notPatient) return <Notice tone="info">{t('sample.note.patientOnly')}</Notice>;
   const tooLong = draft.length > MAX_LENGTH;
   return (
     <>
@@ -67,7 +87,12 @@ export function NotesView() {
             setSaved(false);
           }}
         />
-        <Button type="submit" disabled={draft.trim() === '' || tooLong}>
+        {error && (
+          <Notice tone="danger" live>
+            {t(error)}
+          </Notice>
+        )}
+        <Button type="submit" disabled={draft.trim() === '' || tooLong || pending}>
           {t('sample.note.save')}
         </Button>
       </form>

@@ -4,7 +4,8 @@ import type pg from 'pg';
 import { PG_POOL } from '../data-stores/data-stores.tokens.js';
 import { type TransactionClient, withTransaction } from '../data-stores/transaction.js';
 
-export type OtpPurpose = 'sign_in' | 'reverify' | 'change_mobile';
+export type OtpPurpose =
+  'sign_in' | 'reverify' | 'change_mobile' | 'assisted_consent' | 'assisted_payout';
 
 export interface OtpChallengeRow {
   id: string;
@@ -58,6 +59,15 @@ export class OtpRepository {
         challenge.resendAt,
       ],
     );
+  }
+
+  /** The number a challenge was sent to, still encrypted. */
+  async mobileOf(id: string): Promise<EncryptedField | undefined> {
+    const { rows } = await this.pool.query<{ mobile: EncryptedField }>(
+      'SELECT mobile FROM app.otp_challenge WHERE id = $1',
+      [id],
+    );
+    return rows[0]?.mobile;
   }
 
   async lock(client: TransactionClient, id: string): Promise<OtpChallengeRow | undefined> {

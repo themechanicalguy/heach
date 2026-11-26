@@ -7,6 +7,7 @@ import './admin-layout.css';
 export type Section =
   | 'dashboard'
   | 'verification'
+  | 'assisted'
   | 'bookings'
   | 'finance'
   | 'tickets'
@@ -19,6 +20,7 @@ export type Section =
   | 'settings'
   | 'content'
   | 'security'
+  | 'audit'
   | 'users'
   | 'admins'
   | 'password';

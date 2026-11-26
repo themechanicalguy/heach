@@ -49,6 +49,8 @@ const TEMPLATES = {
   sign_in: 'otp_sign_in',
   reverify: 'otp_reverify',
   change_mobile: 'otp_change_mobile',
+  assisted_consent: 'otp_assisted_consent',
+  assisted_payout: 'otp_assisted_payout',
 } as const;
 
 /** Every expired, used-up or unknown challenge gives the same answer (no enumeration). */
@@ -92,6 +94,13 @@ export class OtpService {
     await this.challenges.purgeExpired().catch(() => undefined);
     await this.deliver(target, code, id);
     return issued(id);
+  }
+
+  /** The number a live challenge was sent to, for a caller that shows it masked. */
+  async mobileOf(challengeId: string): Promise<string> {
+    const mobile = await this.challenges.mobileOf(challengeId);
+    if (!mobile) throw expired();
+    return this.encryptor.decrypt(mobile);
   }
 
   /** A new code for the same challenge, once the cooldown has passed (decision L-6). */
