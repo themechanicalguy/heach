@@ -30,6 +30,7 @@ export type LinkedPatient = components['schemas']['LinkedPatientDto'];
 export type LinkedPatientInput = components['schemas']['LinkedPatientInputDto'];
 export type ProfileCorrection = components['schemas']['ProfileCorrectionDto'];
 export type AccountExport = components['schemas']['AccountExportDto'];
+export type ConsentInForce = components['schemas']['ConsentInForceDto'];
 export type Organisation = components['schemas']['OrganisationDto'];
 export type Member = components['schemas']['MemberDto'];
 export type Invitation = components['schemas']['InvitationDto'];

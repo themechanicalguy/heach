@@ -1,5 +1,6 @@
 import {
   adminSignIn,
+  CURRENT_CONSENTS,
   otpSignIn,
   requestCode,
   reverify,
@@ -95,6 +96,49 @@ describe('Account data rights: correct, export, request deletion (AC-06, PR-04)'
     await server().delete('/v1/me/deletion-request').set(bearer(login)).expect(204);
     await server().delete('/v1/me/deletion-request').set(bearer(login)).expect(409);
     expect(await me(login)).toMatchObject({ deletionRequestedAt: null });
+  });
+});
+
+describe('Withdrawing a consent (PR-01)', () => {
+  const { app, server } = useApp();
+  const me = async (login: Login) =>
+    (await server().get('/v1/me').set(bearer(login)).expect(200)).body as Record<string, unknown>;
+  /** The purposes in force, in a stable order. */
+  const purposesOf = (login: Login) => async () => {
+    const response = await server().get('/v1/me/consents').set(bearer(login)).expect(200);
+    return (response.body as { purpose: string }[])
+      .map((consent) => consent.purpose)
+      .sort((a, b) => a.localeCompare(b));
+  };
+
+  it('PR-01 a user withdraws a consent without a code; it falls due again and stays on record', async () => {
+    const { mobile, login } = await signedUp(app());
+    const purposes = purposesOf(login);
+    expect(await purposes()).toEqual(['privacy', 'terms']);
+
+    await server().delete('/v1/me/consents/terms').set(bearer(login)).expect(204);
+    expect(await purposes()).toEqual(['privacy']);
+    expect(await me(login)).toMatchObject({ consentsDue: [{ purpose: 'terms' }] });
+    const again = await server().delete('/v1/me/consents/terms').set(bearer(login)).expect(409);
+    expect(again.body).toMatchObject({ code: 'consent_not_in_force' });
+    await server().delete('/v1/me/consents/marketing').set(bearer(login)).expect(400);
+
+    // Kept as evidence: the export still holds the record, with when it was withdrawn.
+    await reverify(app(), mobile, login);
+    const exported = await server().get('/v1/me/export').set(bearer(login)).expect(200);
+    const terms = (
+      exported.body as { consents: { purpose: string; withdrawnAt: string | null }[] }
+    ).consents.filter((c) => c.purpose === 'terms');
+    expect(terms).toHaveLength(1);
+    expect(typeof terms[0]?.withdrawnAt).toBe('string');
+
+    // Accepting the current texts again, as the app's consent screen does, puts it back in force.
+    await server()
+      .post('/v1/me/consents')
+      .set(bearer(login))
+      .send({ consents: CURRENT_CONSENTS })
+      .expect(204);
+    expect(await purposes()).toEqual(['privacy', 'terms']);
   });
 });
 

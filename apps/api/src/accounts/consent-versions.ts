@@ -37,3 +37,7 @@ export const IDENTITY_CONSENT = {
   purpose: 'identity_verification',
   version: '2026-11-draft.1',
 } as const;
+
+/** Every purpose a user can give consent for, and so withdraw (PR-01). */
+export const WITHDRAWABLE_PURPOSES = [...CONSENT_PURPOSES, IDENTITY_CONSENT.purpose] as const;
+export type WithdrawablePurpose = (typeof WITHDRAWABLE_PURPOSES)[number];

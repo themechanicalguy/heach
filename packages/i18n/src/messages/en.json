@@ -225,7 +225,8 @@
     "password_reused": "Choose a password different from your current password.",
     "last_super_admin": "This is the last active super admin. Add another super admin first.",
     "email_in_use": "An admin with this email already exists.",
-    "admin_suspended": "Your admin access is suspended. Contact your administrator."
+    "admin_suspended": "Your admin access is suspended. Contact your administrator.",
+    "consent_not_in_force": "This consent has already been withdrawn."
   },
   "setup": {
     "progress": "Step {current} of {total}",
@@ -585,7 +586,27 @@
     "deleteIntro": "You can ask us to delete your account and its data. Our team will contact you before anything is deleted.",
     "delete": "Ask to delete my account",
     "requested": "You asked to delete your account on {date}. Our team will contact you.",
-    "cancel": "Withdraw my deletion request"
+    "cancel": "Withdraw my deletion request",
+    "consents": {
+      "title": "Your consents",
+      "intro": "What you have agreed to. You can withdraw a consent at any time. We keep a record that you gave it and when you withdrew it.",
+      "purpose": {
+        "terms": "Terms of use",
+        "privacy": "Using your details to run your account",
+        "identity_verification": "Checking your identity through an identity partner"
+      },
+      "given": "Agreed on {date}",
+      "withdraw": "Withdraw",
+      "confirm": {
+        "terms": "If you withdraw this, you cannot use HEACH until you agree again. To stop using HEACH for good, ask for your account to be deleted instead.",
+        "privacy": "If you withdraw this, you cannot use HEACH until you agree again. To stop using HEACH for good, ask for your account to be deleted instead.",
+        "identity_verification": "If you withdraw this, a new identity check will ask for your consent again. A check already done stays on your application."
+      },
+      "yes": "Yes, withdraw",
+      "keep": "Keep it",
+      "withdrawn": "Consent withdrawn.",
+      "none": "There are no consents to show."
+    }
   },
   "people": {
     "title": "People I book for",

@@ -6,6 +6,7 @@ import {
   Header,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Put,
   Req,
@@ -14,6 +15,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiOkResponse,
@@ -30,10 +32,12 @@ import { clientAddress, otpOrigin } from '../otp/otp-origin.js';
 import { AccountDataService } from './account-data.service.js';
 import {
   AccountExportDto,
+  ConsentInForceDto,
   MobileChangeDto,
   OtpChallengeDto,
   ProfileCorrectionDto,
   ReverifyDto,
+  WithdrawConsentParamsDto,
 } from './accounts.dto.js';
 import { MobileChangeService } from './mobile-change.service.js';
 
@@ -67,6 +71,27 @@ export class AccountDataController {
   @ApiForbiddenResponse({ description: 'reverification_required' })
   async exportData(@Req() request: Request): Promise<AccountExportDto> {
     return this.data.exportData(principalOf(request));
+  }
+
+  @Get('consents')
+  @Header('Cache-Control', 'no-store')
+  @Roles(...GRANTED_USER_ROLES)
+  @ApiOkResponse({ type: [ConsentInForceDto] })
+  async consents(@Req() request: Request): Promise<ConsentInForceDto[]> {
+    return this.data.consentsInForce(principalOf(request));
+  }
+
+  /** PR-01: no fresh code, so withdrawing is as easy as giving consent. */
+  @Delete('consents/:purpose')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(...GRANTED_USER_ROLES)
+  @ApiNoContentResponse()
+  @ApiConflictResponse({ description: 'consent_not_in_force' })
+  async withdrawConsent(
+    @Param() params: WithdrawConsentParamsDto,
+    @Req() request: Request,
+  ): Promise<void> {
+    await this.data.withdrawConsent(principalOf(request), params.purpose);
   }
 
   @Post('deletion-request')

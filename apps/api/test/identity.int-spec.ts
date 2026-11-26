@@ -1,7 +1,7 @@
 import { IDENTITY_CONSENT } from '../src/accounts/consent-versions.js';
 import { EICAR_MARKER, type FakeIdentityVerifier } from '../src/adapters/fakes.js';
 import { IDENTITY_VERIFIER } from '../src/adapters/identity.port.js';
-import { adminSignIn, signedUp, useApp } from './account-helpers.js';
+import { adminSignIn, reverify, signedUp, useApp } from './account-helpers.js';
 import { bearer } from './auth-helpers.js';
 import {
   acceptEveryDocument,
@@ -19,6 +19,26 @@ interface Application {
   identityConsentVersion: string;
   missing: string[];
   editable: boolean;
+}
+
+/** A verified identity check whose partner returned a name, gender, date of birth and address. */
+async function verifiedWithDetails(
+  nest: Parameters<typeof verifyIdentity>[0],
+  login: Parameters<typeof bearer>[0],
+  fullName: string,
+): Promise<void> {
+  const partner = nest.get<FakeIdentityVerifier>(IDENTITY_VERIFIER);
+  partner.attributes = {
+    fullName,
+    gender: 'female',
+    dateOfBirth: '1990-01-01',
+    address: '1 Synthetic Lane, Bhubaneswar 751001',
+  };
+  try {
+    await verifyIdentity(nest, login);
+  } finally {
+    partner.attributes = undefined;
+  }
 }
 
 describe('Identity check: consent, partner detail and outage (KY-01, KY-05, KY-08)', () => {
@@ -183,7 +203,6 @@ describe('Identity fallback document and its review (KY-07)', () => {
 
 describe('Verified details pre-fill the profile and the name is matched (KY-03, KY-04)', () => {
   const { app, db, server } = useApp();
-  const partner = () => app().get<FakeIdentityVerifier>(IDENTITY_VERIFIER);
   const application = async (login: Parameters<typeof bearer>[0]) =>
     (await server().get('/v1/provider/application').set(bearer(login)).expect(200))
       .body as Application;
@@ -193,19 +212,8 @@ describe('Verified details pre-fill the profile and the name is matched (KY-03, 
         setup: { draft: { fullName: string; gender: string } };
       }
     ).setup.draft;
-  const verifiedAs = async (login: Parameters<typeof bearer>[0], fullName: string) => {
-    partner().attributes = {
-      fullName,
-      gender: 'female',
-      dateOfBirth: '1990-01-01',
-      address: '1 Synthetic Lane, Bhubaneswar 751001',
-    };
-    try {
-      await verifyIdentity(app(), login);
-    } finally {
-      partner().attributes = undefined;
-    }
-  };
+  const verifiedAs = (login: Parameters<typeof bearer>[0], fullName: string) =>
+    verifiedWithDetails(app(), login, fullName);
   const details = (login: Parameters<typeof bearer>[0]) =>
     server().get('/v1/provider/application/identity/details').set(bearer(login));
 
@@ -279,5 +287,26 @@ describe('Verified details pre-fill the profile and the name is matched (KY-03, 
       identityNameMatch: null,
       identityDetailsVerified: false,
     });
+  });
+});
+
+describe('Verified details in the provider’s own data export (KY-03, PR-04)', () => {
+  const { app, server } = useApp();
+
+  it('KY-03 the provider’s own data export holds the verified details; none before a check', async () => {
+    const { mobile, login } = await signedUp(app(), { role: 'nurse', languages: ['or'] });
+    await reverify(app(), mobile, login);
+    const exported = () => server().get('/v1/me/export').set(bearer(login)).expect(200);
+    expect((await exported()).body).toMatchObject({ verifiedIdentity: null });
+    await verifiedWithDetails(app(), login, 'Synthetic Verified');
+    const body = (await exported()).body as { verifiedIdentity: { checkedAt: unknown } };
+    expect(body).toMatchObject({
+      profile: { fullName: 'Synthetic Verified', gender: 'female' },
+      verifiedIdentity: {
+        dateOfBirth: '1990-01-01',
+        address: '1 Synthetic Lane, Bhubaneswar 751001',
+      },
+    });
+    expect(typeof body.verifiedIdentity.checkedAt).toBe('string');
   });
 });

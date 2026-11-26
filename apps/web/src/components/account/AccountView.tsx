@@ -14,6 +14,7 @@ import { useSession } from '../../lib/session';
 import { usePending } from '../../lib/use-pending';
 import { AddRole } from './AddRole';
 import { PAGE_SLUGS } from '../content/ContentPageView';
+import { ConsentsGiven } from './ConsentsGiven';
 import { DataRights } from './DataRights';
 import { Invitations } from './Invitations';
 import { MobileChange } from './MobileChange';
@@ -104,6 +105,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
           }}
         />
       )}
+      {usable && <ConsentsGiven />}
       {usable && <DataRights me={me} />}
       <AboutLinks />
       <SignOutCard />

@@ -315,7 +315,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    get: operations['AccountDataController_consents'];
     put?: never;
     post: operations['MeController_acceptConsents'];
     delete?: never;
@@ -367,6 +367,22 @@ export interface paths {
     put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/me/consents/{purpose}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations['AccountDataController_withdrawConsent'];
     options?: never;
     head?: never;
     patch?: never;
@@ -3809,6 +3825,13 @@ export interface components {
       /** Format: uuid */
       person: string | null;
     };
+    ExportIdentityDto: {
+      /** Format: date */
+      dateOfBirth: string;
+      address: string;
+      /** Format: date-time */
+      checkedAt: string;
+    };
     AccountExportDto: {
       /** Format: date-time */
       exportedAt: string;
@@ -3822,8 +3845,17 @@ export interface components {
       membership: components['schemas']['MembershipDto'] | null;
       linkedPatients: components['schemas']['LinkedPatientDto'][];
       carePins: components['schemas']['ExportCarePinDto'][];
+      verifiedIdentity: components['schemas']['ExportIdentityDto'] | null;
       /** Format: date-time */
       deletionRequestedAt: string | null;
+    };
+    ConsentInForceDto: {
+      /** @enum {string} */
+      purpose: 'terms' | 'privacy' | 'identity_verification';
+      /** @example 2026-10-draft.1 */
+      version: string;
+      /** Format: date-time */
+      givenAt: string;
     };
     MobileChangeDto: {
       /**
@@ -6297,6 +6329,25 @@ export interface operations {
       };
     };
   };
+  AccountDataController_consents: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConsentInForceDto'][];
+        };
+      };
+    };
+  };
   MeController_acceptConsents: {
     parameters: {
       query?: never;
@@ -6386,6 +6437,32 @@ export interface operations {
       };
       /** @description reverification_required */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AccountDataController_withdrawConsent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        purpose: 'terms' | 'privacy' | 'identity_verification';
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description consent_not_in_force */
+      409: {
         headers: {
           [name: string]: unknown;
         };
