@@ -52,7 +52,7 @@ function PageProgress() {
   return <ProgressFromTap key={page} />;
 }
 
-/** What only the Android apps need to feel like apps (MA-09); never rendered in a browser. */
+/** What only the apps need to feel like apps (MA-09); never rendered in a browser. */
 export function AppFeel() {
   // Rendered after hydration, so the launch screen lifts on a page that already answers taps.
   useEffect(showPage, []);

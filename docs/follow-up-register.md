@@ -105,3 +105,10 @@ Not Step 2 or Step 3 work. Each is accepted in writing in the ADR named; listed 
 
 The verification round reports zero high or critical findings. The full audit reports the three
 moderate advisories above; no dependency, scanner exclusion or severity threshold was changed.
+
+## iPhone apps (26 November 2026)
+
+| ID | Item | Owner | Trigger or due | Verification procedure | Expected evidence | Blocks | Closure condition | State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FU-47 | Native Odia and Hindi review of `app.cameraPurpose`, the camera permission text iOS shows (written by Claude Code) | Owner with native reviewers (with FU-07) | Before an iPhone build reaches real users | Read the text in the iPhone permission prompt in each language | Corrections in a PR | iPhone release | Native review applied | Open |
+| FU-48 | Check the iPhone apps on a real iPhone: the cover while the screen is recorded or mirrored, the camera on upload fields, files opening, vibration, and web data left out of a backup (MA-04, MA-06, MA-09) | Owner | Once an Apple developer account and an HTTPS environment exist | Install a debug build pointed at the HTTPS environment; record the screen, upload a photo, open a record, pay a booking, back up the phone | Notes or screenshots in the PR that closes it | iPhone release | Every item seen working | Open |

@@ -1,2 +1,6 @@
 # Generated from packages/i18n by scripts/offline-page.mjs
 www/offline.html
+# Generated from packages/i18n and the brand colours by scripts/ios-resources.mjs
+ios/App/App/*.lproj/InfoPlist.strings
+ios/App/App/Assets.xcassets/AppIcon-*/
+ios/App/App/Assets.xcassets/Brand-*/

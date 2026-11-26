@@ -1,4 +1,4 @@
-/** Which Android app a request or page is running in, if any (MA-08, ADR 0016). */
+/** Which app (Android or iPhone) a request or page is running in, if any (MA-08, ADR 0016). */
 export type AppAudience = 'patient' | 'provider';
 
 /** The apps add `HeachApp/patient` or `HeachApp/provider` to the browser's user agent. */

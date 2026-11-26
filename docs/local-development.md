@@ -163,6 +163,41 @@ pnpm --filter @heach/mobile android:install  # build and install HEACH and HEACH
 - `apk` and `android:install` run `sync` first: it writes the offline page from the i18n
   catalogues and copies it into the Android project.
 
+## iPhone apps
+
+The same two apps for iPhone ([ADR 0016](adr/0016-android-apps-with-capacitor.md)) need a Mac
+with Xcode (about 12 GB) and an iOS simulator runtime (about 8 GB). One-time setup:
+
+```sh
+# Install Xcode from the App Store, open it once, then:
+sudo xcode-select -s /Applications/Xcode.app
+sudo xcodebuild -license accept
+xcodebuild -downloadPlatform iOS            # the iPhone simulator
+```
+
+Run both apps against your local stack:
+
+```sh
+pnpm dev:up                                 # the web app on http://localhost:3000
+open -a Simulator                           # start an iPhone simulator
+pnpm --filter @heach/mobile ios:install     # build and install HEACH and HEACH Provider
+```
+
+- The simulator shares the Mac's network, so debug builds load `http://localhost:3000` with no
+  forwarding. Set `HEACH_SERVER_URL` (and `HEACH_ALLOW_NAVIGATION`) in the environment to change
+  that; `ios:install` passes them to the build. A release build fails unless `HEACH_SERVER_URL`
+  is an `https://` address (MA-02).
+- One Xcode target builds either app: `HEACH_AUDIENCE=provider` on the `xcodebuild` command line
+  picks the provider app; opening `ios/App/App.xcodeproj` in Xcode builds the patient app.
+- `ios:sync` writes the offline page, each app's icon and colour, and the camera permission text
+  in Odia, English and Hindi (from the i18n catalogues), then copies them into the Xcode project.
+  Run it before building in Xcode itself.
+- Only HEACH's own pages reach the app's native features on iPhone (`BridgeGate`), even pages
+  from hosts in `HEACH_ALLOW_NAVIGATION`.
+- iOS cannot block screenshots; the apps cover their screens in the app switcher and while the
+  screen is recorded (MA-04). Simulator screenshots therefore work.
+- In Safari on the Mac, Develop > Simulator lists the debug apps' pages for the web inspector.
+
 ## Database TLS, roles and migrations (Step 2)
 
 - PostgreSQL and Redis accept TLS only (EN-01.1). `pnpm setup` creates a local CA and server

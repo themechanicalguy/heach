@@ -41,7 +41,7 @@ export function proxy(request: NextRequest): NextResponse {
       rememberedLocale(request) ?? negotiateLocale(request.headers.get('accept-language'));
     return NextResponse.redirect(new URL(`/${locale}${pathname}${search}`, request.url));
   }
-  // Each Android app serves one side (MA-08); a page of the other side goes to the app's home.
+  // Each app serves one side (MA-08); a page of the other side goes to the app's home.
   const audience = appAudience(request.headers.get('user-agent'));
   if (audience && !offeredInApp(audience, pathname))
     return NextResponse.redirect(new URL(appHome(audience, first), request.url));

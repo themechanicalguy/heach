@@ -38,7 +38,7 @@ export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void 
       await reload();
     });
 
-  // An Android app adds roles of its own side only (MA-08).
+  // An app adds roles of its own side only (MA-08).
   if (!sideOffered(audience, hasCare ? 'provider' : 'care')) return null;
   return (
     <section className="flow__card" aria-labelledby="add-role-title">

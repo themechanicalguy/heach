@@ -32,7 +32,7 @@ export function AccountView({ me }: Readonly<{ me: Me }>) {
   const { pending, error, run } = usePending();
   const usable = me.activeRole !== 'new_account';
   const audience = useAppAudience();
-  // An Android app lists, and switches among, the roles of its own side (MA-08).
+  // An app lists, and switches among, the roles of its own side (MA-08).
   const roles = me.roles.filter((grant) =>
     sideOffered(audience, isCareRole(grant.role) ? 'care' : 'provider'),
   );

@@ -18,7 +18,7 @@ export function PublicHome({
 }: Readonly<{
   config: SiteConfig;
   locale: string;
-  /** False in the patient Android app, which does not offer provider work (MA-08). */
+  /** False in the patient app, which does not offer provider work (MA-08). */
   joinOffered?: boolean;
 }>) {
   const { t } = translatorFor(locale);

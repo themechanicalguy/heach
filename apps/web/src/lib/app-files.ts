@@ -8,7 +8,7 @@ export interface AppFile {
 }
 
 /**
- * Hands a file to the Android app, which opens it in the phone's viewer (MA-06). A web view
+ * Hands a file to the app, which opens it in the phone's viewer (MA-06). A web view
  * ignores the in-memory download links browsers use, so inside the apps this replaces them.
  */
 export async function openInApp(file: AppFile): Promise<void> {

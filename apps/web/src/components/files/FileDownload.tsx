@@ -17,7 +17,7 @@ export function downloadName(name: string, contentType: string): string {
   return `${name}.${EXTENSIONS[contentType] ?? 'bin'}`;
 }
 
-/** Inside the Android apps a download link does nothing: the app opens the file (MA-06). */
+/** Inside the apps a download link does nothing: the app opens the file (MA-06). */
 function OpenInApp({
   file,
   name,

@@ -82,7 +82,7 @@ export function ShellNav({ accounts, sample }: Readonly<Props>) {
         ]
       : []),
   ];
-  // An Android app lists only its own side's pages (MA-08).
+  // An app lists only its own side's pages (MA-08).
   const offered = links.filter((link) => offeredInApp(audience, `/${locale}${link.path}`));
   const items = offered.map((link) => ({
     href: `/${locale}${link.path}`,
