@@ -204,7 +204,9 @@ pnpm --filter @heach/mobile android:install  # build and install HEACH and HEACH
   intended change, run the suite in the Playwright container against your local server:
   `docker run --rm --network host -v "$PWD:$PWD" -w "$PWD/apps/web" -e E2E_BASE_URL=http://host.docker.internal:3100 mcr.microsoft.com/playwright:v1.63.0-noble node node_modules/@playwright/test/cli.js test -g "TS-07.1|UX-03.1" --update-snapshots=all`.
 - `pnpm --filter @heach/web lighthouse` runs Lighthouse CI on the shell (mobile, at least 90).
-- Front-end errors go to GlitchTip only when `NEXT_PUBLIC_GLITCHTIP_DSN` is set at build time.
+- Front-end errors go to GlitchTip only when `NEXT_PUBLIC_GLITCHTIP_DSN` (web) or
+  `VITE_GLITCHTIP_DSN` (admin console) is set at build time. Both apps strip personal data the
+  same way (`@heach/logger/browser`).
 - `docker compose --profile observability up -d` adds GlitchTip, Prometheus and Grafana (the
   LM-05.1 dashboard) locally; see [the runbook](runbooks/error-tracking.md).
 

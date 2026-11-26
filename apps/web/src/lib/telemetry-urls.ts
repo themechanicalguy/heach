@@ -1,7 +1,4 @@
-/** A URL as telemetry may keep it: no query string, no fragment (LM-03.1, MV-11). */
-export function withoutQueryOrFragment(url: string): string {
-  return url.split(/[?#]/)[0] ?? '';
-}
+import { withoutQueryOrFragment } from '@heach/logger/browser';
 
 const ID = /^[0-9a-f-]{8,}$/i;
 // Random tokens mix case or digits; lowercase route slugs such as service names never do.

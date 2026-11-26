@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@heach/i18n": "workspace:*",
+    "@heach/logger": "workspace:*",
     "@heach/types": "workspace:*",
     "@heach/ui": "workspace:*",
+    "@sentry/browser": "11.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

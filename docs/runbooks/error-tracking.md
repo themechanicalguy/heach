@@ -34,6 +34,13 @@ request rate, 5xx share, and p50, p95 and p99 latency over five minutes.
 4. `pnpm --filter @heach/web exec next start -p 3100`, then
    `E2E_GLITCHTIP=1 E2E_BASE_URL=http://localhost:3100 GLITCHTIP_URL=http://localhost:8000 GLITCHTIP_AUTH_TOKEN=<token> NEXT_PUBLIC_BUILD_VERSION=<release> pnpm --filter @heach/web exec playwright test e2e/error-tracking.spec.ts --project=desktop`
 
+The admin console reports the same way, tagged with the admin's sub-role. Create a project
+`admin` in GlitchTip, build with
+`VITE_GLITCHTIP_DSN=<dsn> VITE_BUILD_VERSION=<release> SOURCE_MAPS=upload pnpm --filter "@heach/admin..." build`,
+then upload with the console's own folder and URL prefix:
+`GLITCHTIP_PROJECT=admin … node scripts/upload-source-maps.mjs <release> apps/admin/dist '~/'`.
+No end-to-end test covers the console yet.
+
 The test throws a clearly labelled synthetic error inside `OfflineStatus` and checks that
 GlitchTip shows the original `.tsx` file in the stack, the release and `role` tags, and no user.
 

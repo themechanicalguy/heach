@@ -1,23 +1,10 @@
-import { useCallback, useRef, useState } from 'react';
+import { usePendingAction } from '@heach/ui';
+
+/** Keeps the failure itself; pages turn it into text with `errorText`. */
+const keepFailure = (caught: unknown): unknown => caught ?? new Error('failed');
 
 /** One action at a time (no duplicate submissions); keeps the failure to show. */
 export function usePending() {
-  const busy = useRef(false);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<unknown>();
-  const run = useCallback(async (action: () => Promise<void>) => {
-    if (busy.current) return;
-    busy.current = true;
-    setPending(true);
-    setError(undefined);
-    try {
-      await action();
-    } catch (caught) {
-      setError(caught ?? new Error('failed'));
-    } finally {
-      busy.current = false;
-      setPending(false);
-    }
-  }, []);
+  const { pending, error, run } = usePendingAction(keepFailure);
   return { pending, error, run };
 }
