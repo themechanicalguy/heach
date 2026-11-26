@@ -4,6 +4,8 @@ import { BottomNav, Icon, type IconName } from '@heach/ui';
 import type { Me } from '@heach/types';
 import { usePathname } from 'next/navigation';
 import { useAccount } from '../lib/account';
+import { offeredInApp } from '../lib/app-audience';
+import { useAppAudience } from '../lib/use-app-audience';
 import { useI18n } from '../lib/i18n-context';
 import { isCareRole, isProviderRole } from '../lib/routing';
 import { useSession } from '../lib/session';
@@ -64,6 +66,7 @@ export function ShellNav({ accounts, sample }: Readonly<Props>) {
   const pathname = usePathname();
   const { account } = useAccount();
   const { status } = useSession();
+  const audience = useAppAudience();
   const links = [
     ...roleLinks(account.state === 'ready' ? account.me : undefined),
     ...(sample && !(account.state === 'ready' && isCareRole(account.me.activeRole))
@@ -79,7 +82,9 @@ export function ShellNav({ accounts, sample }: Readonly<Props>) {
         ]
       : []),
   ];
-  const items = links.map((link) => ({
+  // An Android app lists only its own side's pages (MA-08).
+  const offered = links.filter((link) => offeredInApp(audience, `/${locale}${link.path}`));
+  const items = offered.map((link) => ({
     href: `/${locale}${link.path}`,
     label: t(link.key),
     icon: <Icon name={link.icon} />,

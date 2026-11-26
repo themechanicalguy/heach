@@ -16,22 +16,27 @@ const SHIFT_COLUMNS = `id, day_index AS "dayIndex", attendant_account_id AS "att
 export class VisitsRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Pick<pg.Pool, 'query'>) {}
 
-  /** Counts a wrong code; returns the attempts so far (five lock the code). */
-  async failedCode(bookingId: string): Promise<number> {
-    const { rows } = await this.pool.query<{ code_attempts: number }>(
+  /**
+   * Takes one of the booking's code attempts, atomically: false once `max` are used. Taken before
+   * the code is compared, so parallel guesses can never get past the limit.
+   */
+  async takeCodeAttempt(bookingId: string, max: number): Promise<boolean> {
+    const { rows } = await this.pool.query(
       `INSERT INTO app.visit (booking_id, code_attempts) VALUES ($1, 1)
-       ON CONFLICT (booking_id) DO UPDATE SET code_attempts = app.visit.code_attempts + 1 RETURNING code_attempts`,
-      [bookingId],
+       ON CONFLICT (booking_id) DO UPDATE SET code_attempts = app.visit.code_attempts + 1
+        WHERE app.visit.code_attempts < $2
+       RETURNING code_attempts`,
+      [bookingId, max],
     );
-    return rows[0]?.code_attempts ?? 0;
+    return rows.length === 1;
   }
 
-  async attempts(bookingId: string): Promise<number> {
-    const { rows } = await this.pool.query<{ code_attempts: number }>(
-      'SELECT code_attempts FROM app.visit WHERE booking_id = $1',
+  /** Gives back the attempt a right code took: only wrong codes count towards the lock. */
+  async returnCodeAttempt(bookingId: string): Promise<void> {
+    await this.pool.query(
+      'UPDATE app.visit SET code_attempts = greatest(code_attempts - 1, 0) WHERE booking_id = $1',
       [bookingId],
     );
-    return rows[0]?.code_attempts ?? 0;
   }
 
   async start(client: TransactionClient, bookingId: string): Promise<void> {

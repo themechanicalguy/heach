@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { api, refresh, setAccessToken } from './api';
+import { api, refresh, setAccessToken, whenSessionEnds } from './api';
 
 type State =
   { status: 'checking' } | { status: 'signed-out' } | { status: 'signed-in'; me: AdminMe };
@@ -26,6 +26,15 @@ export function SessionProvider({ children }: Readonly<{ children: ReactNode }>)
   const [state, setState] = useState<State>({ status: 'checking' });
   const load = useCallback(async () => {
     setState({ status: 'signed-in', me: await api<AdminMe>('/me') });
+  }, []);
+  useEffect(() => {
+    // An expired or revoked session drops to sign-in instead of leaving pages failing (SE-07.8).
+    whenSessionEnds(() => {
+      setState({ status: 'signed-out' });
+    });
+    return () => {
+      whenSessionEnds(undefined);
+    };
   }, []);
   useEffect(() => {
     void refresh()

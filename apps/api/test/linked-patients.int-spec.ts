@@ -28,6 +28,28 @@ describe('Linked patients: add, edit, remove, ownership (AC-03, default D-1)', (
     expect(await list(login)).toEqual([]);
   });
 
+  it('MV-12 a person with records or history in the vault is never removed with them', async () => {
+    const { login } = await signedUp(app(), { role: 'representative' });
+    const id = ((await add(login).expect(201)).body as { id: string }).id;
+    await server()
+      .post('/v1/vault/history')
+      .set(bearer(login))
+      .send({ kind: 'allergy', text: 'Synthetic dust allergy', personId: id })
+      .expect(204);
+    const refused = await server().delete(`/v1/me/linked-patients/${id}`).set(bearer(login));
+    expect(refused.status).toBe(409);
+    expect(refused.body).toMatchObject({ code: 'linked_patient_has_records' });
+    const kept = await db().query<{ n: number }>(
+      'SELECT count(*)::int AS n FROM app.history_entry WHERE linked_patient_id = $1',
+      [id],
+    );
+    expect(kept.rows[0]?.n).toBe(1);
+    await expect(db().query('DELETE FROM app.linked_patient WHERE id = $1', [id])).rejects.toThrow(
+      /RESTRICT setting of foreign key/,
+    );
+    expect(await list(login)).toHaveLength(1);
+  });
+
   it('AC-03 a patient may also link people; a provider role may not', async () => {
     const patient = await signedUp(app());
     await add(patient.login).expect(201);

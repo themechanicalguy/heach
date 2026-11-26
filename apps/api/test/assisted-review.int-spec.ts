@@ -1,7 +1,7 @@
 import { adminSignIn, otpSignIn, useApp } from './account-helpers.js';
 import { bearer } from './auth-helpers.js';
 import { completeAssisted } from './assisted-helpers.js';
-import { submittedProvider } from './provider-helpers.js';
+import { acceptEveryDocument, submittedProvider } from './provider-helpers.js';
 
 const APPLICATIONS = '/admin/v1/applications';
 
@@ -125,6 +125,8 @@ describe('AD-12 approval waits for the provider to accept the terms', () => {
       providerConsentDue: true,
     });
     await server().post(`${url}/identity`).set(bearer(verifier)).send({ status: 'accepted' });
+    // Every document reviewed (AD-02), so the terms are what still stops the approval.
+    await acceptEveryDocument(app(), verifier, accountId);
     const decide = () => server().post(`${url}/decision`).set(bearer(verifier));
     const early = await decide().send({ decision: 'approve' }).expect(409);
     expect(early.body).toMatchObject({ code: 'provider_consent_due' });

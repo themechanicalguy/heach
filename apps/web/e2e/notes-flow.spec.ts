@@ -1,5 +1,5 @@
 import { CATALOGUES } from '@heach/i18n';
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Page, test } from './test';
 
 const or = CATALOGUES.or;
 const NOTE = `ଆଜି ମୋର ମୁଣ୍ଡ ବିନ୍ଧୁଛି ${String(Date.now())}`; // synthetic, unique per run

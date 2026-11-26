@@ -30,6 +30,7 @@ Read these before planning any work. Do not copy their content here; link to req
 | ------------------------ | ------------------------------------------------------------------------------------- |
 | Repository               | pnpm workspaces + Turborepo, Node LTS pinned, TypeScript strict                       |
 | Patient and provider app | Next.js (React, TypeScript), installable PWA, server rendered                         |
+| Android apps             | Capacitor shell over the web app, Gradle flavours `patient` and `provider`            |
 | Admin panel              | React + TypeScript single-page app with a data-grid library                           |
 | UI                       | Design tokens, Tailwind CSS, accessible headless components, Storybook                |
 | i18n                     | ICU message catalogues; locale-prefixed routes `/or`, `/en`, `/hi`                    |
@@ -54,6 +55,7 @@ apps/
   web/        Next.js PWA for patients and providers (role-based routes)
   admin/      React SPA admin panel, desktop first, English only
   api/        NestJS API and background workers
+  mobile/     Capacitor Android shell around apps/web; flavours patient and provider (ADR 0016)
 packages/
   ui/         Design tokens and accessible base components (Storybook)
   i18n/       ICU catalogues for or, en, hi; missing-key check

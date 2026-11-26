@@ -54,14 +54,23 @@ describe('Third-party test doubles (TS-06.1)', () => {
     expect(await gateway.orderStatus(orderId)).toEqual({ paid: true, amountPaise: 5000 });
     expect(await gateway.orderStatus('order_unknown')).toBeUndefined();
     expect(() => gateway.sandboxCapture('order_unknown')).toThrow();
-    expect((await gateway.refund({ paymentId: 'pay_1', amountPaise: 100 })).refundId).toMatch(
-      /^rfnd_/,
-    );
+    const first = await gateway.refund({
+      paymentId: 'pay_1',
+      amountPaise: 100,
+      idempotencyKey: 'k1',
+    });
+    expect(first.refundId).toMatch(/^rfnd_/);
+    expect(
+      await gateway.refund({ paymentId: 'pay_1', amountPaise: 100, idempotencyKey: 'k1' }),
+    ).toEqual(first);
+    expect(gateway.refunds).toHaveLength(1);
     expect(
       (await gateway.transfer({ providerId: 'p', amountPaise: 100, reference: 'r' })).transferId,
     ).toMatch(/^trf_/);
     gateway.failingRefunds = true;
-    await expect(gateway.refund({ paymentId: 'pay_1', amountPaise: 100 })).rejects.toThrow();
+    await expect(
+      gateway.refund({ paymentId: 'pay_1', amountPaise: 100, idempotencyKey: 'k2' }),
+    ).rejects.toThrow();
   });
 
   it('TS-06.1 the video and identity doubles answer without a network', async () => {

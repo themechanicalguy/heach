@@ -15,6 +15,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { RequireReverification } from '../auth/reverification.js';
 import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AuditService } from '../audit/audit.service.js';
@@ -25,7 +26,8 @@ import { requireFlag } from '../flags/flags.module.js';
 import { PaymentsRepository } from '../payments/payments.repository.js';
 import { RefundsService } from '../payments/refunds.service.js';
 import { actorOf } from './booking-actor.js';
-import { BookingEffects } from './booking-effects.js';
+import { BookingEffects, type Message } from './booking-effects.js';
+import { CheckoutService } from './checkout.service.js';
 import { BookingRepository } from './booking.repository.js';
 import { BookingViews } from './booking-views.js';
 import {
@@ -58,6 +60,7 @@ export class AdminBookingsController {
     private readonly dispatch: DispatchRepository,
     private readonly effects: BookingEffects,
     private readonly audit: AuditService,
+    private readonly checkout: CheckoutService,
   ) {}
 
   @Get()
@@ -119,6 +122,7 @@ export class AdminBookingsController {
   @Post(':id/refund')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles('super_admin', 'finance')
+  @UseGuards(RequireReverification)
   @ApiNoContentResponse()
   async refund(
     @Param('id', uuid) id: string,
@@ -147,7 +151,7 @@ export class AdminBookingsController {
     @Req() request: Request,
   ): Promise<void> {
     const principal = principalOf(request);
-    await this.bookings.transaction(async (client) => {
+    const moved = await this.bookings.transaction(async (client) => {
       const booking = await this.bookings.lock(client, id);
       if (!booking) throw new NotFoundException();
       if (booking.status !== 'confirmed')
@@ -168,6 +172,10 @@ export class AdminBookingsController {
       ) {
         throw reason(ConflictException, 'provider_busy');
       }
+      // The patient paid for this price; a provider who charges differently needs a new booking.
+      const fees = await this.checkout.fees(listing, booking.shiftDays);
+      if (fees.feePaise !== booking.feePaise || fees.travelPaise !== booking.travelPaise)
+        throw reason(ConflictException, 'reassign_price_differs');
       await this.bookings.reassign(
         client,
         booking,
@@ -178,21 +186,15 @@ export class AdminBookingsController {
         { action: 'booking.reassigned', entity: 'booking', entityId: id },
         client,
       );
+      return { before: booking.providerId, after: listing.providerId, booking };
     });
-    const booking = await this.bookings.find(id);
-    if (booking?.providerId) {
-      await this.effects.run({
-        messages: [
-          {
-            to: booking.providerId,
-            template: 'booking_confirmed',
-            params: { time: booking.startsAt.toISOString() },
-            bookingId: id,
-          },
-        ],
-        refundBookings: [],
-        releaseHolds: [],
-      });
-    }
+    const params = { time: moved.booking.startsAt.toISOString() };
+    const messages: Message[] = [
+      { to: moved.after, template: 'booking_confirmed', params, bookingId: id },
+      { to: moved.booking.bookerId, template: 'booking_confirmed', params, bookingId: id },
+    ];
+    if (moved.before)
+      messages.push({ to: moved.before, template: 'booking_cancelled', params, bookingId: id });
+    await this.effects.run({ messages, refundBookings: [], releaseHolds: [] });
   }
 }

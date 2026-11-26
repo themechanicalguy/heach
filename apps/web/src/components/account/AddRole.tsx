@@ -1,5 +1,7 @@
 'use client';
 
+import { sideOffered } from '../../lib/app-audience';
+import { useAppAudience } from '../../lib/use-app-audience';
 import { Button, ChoiceGroup, Notice, TextField } from '@heach/ui';
 import type { Me } from '@heach/types';
 import { LOCALES } from '@heach/i18n';
@@ -22,6 +24,7 @@ export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void 
   const [organisationName, setOrganisationName] = useState(me.setup.draft.organisationName ?? '');
   const { pending, error, setError, run } = usePending();
   const { attempt, sheet } = useReverified(run);
+  const audience = useAppAudience();
 
   const add = () =>
     attempt(async () => {
@@ -35,6 +38,8 @@ export function AddRole({ me, onAdded }: Readonly<{ me: Me; onAdded: () => void 
       await reload();
     });
 
+  // An Android app adds roles of its own side only (MA-08).
+  if (!sideOffered(audience, hasCare ? 'provider' : 'care')) return null;
   return (
     <section className="flow__card" aria-labelledby="add-role-title">
       <h2 id="add-role-title" className="flow__subtitle">

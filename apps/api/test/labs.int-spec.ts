@@ -14,6 +14,7 @@ import {
 import { bearer, type Login } from './auth-helpers.js';
 import { bookingOf, firstSlot, paidBooking } from './booking-helpers.js';
 import {
+  acceptEveryDocument,
   accountIdOf,
   listedProvider,
   SYNTHETIC_PDF,
@@ -77,7 +78,7 @@ async function labWithCollector(app: INestApplication<App>) {
   await server().post('/v1/provider/application/submit').set(bearer(collector)).expect(200);
   const collectorId = await accountIdOf(app, collector);
   const verifier = await adminSignIn(app, 'verifier');
-  await server().get(`/admin/v1/applications/${collectorId}`).set(bearer(verifier)).expect(200);
+  await acceptEveryDocument(app, verifier, collectorId);
   await server()
     .post(`/admin/v1/applications/${collectorId}/decision`)
     .set(bearer(verifier))

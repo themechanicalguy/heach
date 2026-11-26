@@ -1,5 +1,5 @@
 import { CATALOGUES, LOCALES, type Locale } from '@heach/i18n';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './test';
 import { expectAccessible } from './accessibility';
 
 async function expectFooterTargets(page: Page) {

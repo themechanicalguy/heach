@@ -14,9 +14,19 @@ export const UPLOAD_CONTENT_TYPE = 'application/vnd.heach.upload+json';
 
 let accessToken: string | undefined;
 let refreshing: Promise<boolean> | undefined;
+let onSessionEnded: (() => void) | undefined;
+
+// The refresh cookie is shared by every tab and rotates on use; a second tab sending the old
+// one would look like a replay and end the session everywhere (SE-07.5, SE-07.6).
+const REFRESH_LOCK = 'heach-admin-refresh';
 
 export function setAccessToken(token: string | undefined): void {
   accessToken = token;
+}
+
+/** Called once the refresh cookie is refused, so the console can return to sign-in. */
+export function whenSessionEnds(listener: (() => void) | undefined): void {
+  onSessionEnded = listener;
 }
 
 function send(path: string, init: RequestInit): Promise<Response> {
@@ -32,17 +42,32 @@ function send(path: string, init: RequestInit): Promise<Response> {
   });
 }
 
-/** Restores or extends the session from the refresh cookie; one refresh at a time. */
+/** Runs the task under the cross-tab lock where the browser has one. */
+function withRefreshLock<T>(task: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator === 'undefined' ? undefined : navigator.locks;
+  return locks ? locks.request(REFRESH_LOCK, task) : task();
+}
+
+async function requestRefresh(): Promise<boolean> {
+  const response = await send('/auth/refresh', { method: 'POST' });
+  if (response.status === 401) {
+    accessToken = undefined;
+    onSessionEnded?.();
+    return false;
+  }
+  if (!response.ok) throw await errorFrom(response);
+  accessToken = ((await response.json()) as { accessToken: string }).accessToken;
+  return true;
+}
+
+/**
+ * Restores or extends the session from the refresh cookie: one refresh at a time in this tab and
+ * across tabs. False only when the cookie is refused; an outage throws instead.
+ */
 export function refresh(): Promise<boolean> {
-  refreshing ??= send('/auth/refresh', { method: 'POST' })
-    .then(async (response) => {
-      if (!response.ok) return false;
-      accessToken = ((await response.json()) as { accessToken: string }).accessToken;
-      return true;
-    })
-    .finally(() => {
-      refreshing = undefined;
-    });
+  refreshing ??= withRefreshLock(requestRefresh).finally(() => {
+    refreshing = undefined;
+  });
   return refreshing;
 }
 
@@ -51,7 +76,8 @@ async function errorFrom(response: Response): Promise<ApiError> {
   return new ApiError(response.status, typeof body.code === 'string' ? body.code : undefined);
 }
 
-async function request(path: string, init: RequestInit): Promise<Response> {
+/** Sends with the access token; on 401 refreshes once and retries once. */
+async function authorised(path: string, init: RequestInit): Promise<Response> {
   let response = await send(path, init);
   if (response.status === 401 && !path.startsWith('/auth/') && (await refresh())) {
     response = await send(path, init);
@@ -61,13 +87,29 @@ async function request(path: string, init: RequestInit): Promise<Response> {
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const response = await request(path, init);
+  const response = await authorised(path, init);
   return (response.status === 204 ? undefined : await response.json()) as T;
 }
 
 /** A file answer (for example a CSV export) as a Blob, sent with the same Bearer token. */
 export async function apiBlob(path: string): Promise<Blob> {
-  return (await request(path, {})).blob();
+  return (await authorised(path, {})).blob();
+}
+
+/**
+ * Saves a file the API serves to signed-in admins. A plain link cannot send the in-memory access
+ * token, so the file is fetched and handed to the browser as a Blob.
+ */
+export async function download(path: string, fileName: string): Promise<void> {
+  const url = URL.createObjectURL(await apiBlob(path));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  // Revoked a moment later: some browsers start the download after click() returns.
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1_000);
 }
 
 /** The reason for a failure, as a key of `errors` in the catalogue; never the response body. */

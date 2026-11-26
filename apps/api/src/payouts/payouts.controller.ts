@@ -9,6 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { RequireReverification } from '../auth/reverification.js';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import type pg from 'pg';
@@ -34,20 +35,14 @@ export class EarningsController {
   @Roles(...ONBOARDING_ROLES)
   @ApiOkResponse({ type: EarningsDto })
   async view(@Req() request: Request): Promise<EarningsDto> {
-    const lines = await this.ledger.lines(principalOf(request).userId);
+    const providerId = principalOf(request).userId;
     const now = new Date();
-    const open = lines.filter((line) => !line.paidOut);
-    return {
-      balancePaise: open.reduce((sum, line) => sum + line.amountPaise, 0),
-      heldPaise: open
-        .filter((line) => line.availableAt > now)
-        .reduce((sum, line) => sum + line.amountPaise, 0),
-      paidOutPaise: -lines
-        .filter((line) => line.kind === 'payout')
-        .reduce((sum, line) => sum + line.amountPaise, 0),
-      nextPayoutAt: nextPayoutRun(now),
-      lines,
-    };
+    // Totals over the whole ledger; the list shows only the latest lines.
+    const [lines, totals] = await Promise.all([
+      this.ledger.lines(providerId),
+      this.ledger.totals(providerId, now),
+    ]);
+    return { ...totals, nextPayoutAt: nextPayoutRun(now), lines };
   }
 }
 
@@ -69,8 +64,8 @@ export class FinanceController {
   @ApiOkResponse({ type: FinanceDto })
   async view(): Promise<FinanceDto> {
     const { rows } = await this.pool.query<{ paid: number; refunded: number; commission: number }>(
-      `SELECT coalesce(sum(paid_paise), 0)::int AS paid, coalesce(sum(refunded_paise), 0)::int AS refunded,
-              coalesce(sum(commission_paise) FILTER (WHERE status = 'completed'), 0)::int AS commission
+      `SELECT coalesce(sum(paid_paise), 0)::float8 AS paid, coalesce(sum(refunded_paise), 0)::float8 AS refunded,
+              coalesce(sum(commission_paise) FILTER (WHERE status = 'completed'), 0)::float8 AS commission
          FROM app.booking`,
     );
     const totals = rows[0];
@@ -86,6 +81,7 @@ export class FinanceController {
   @Post('payout-runs')
   @HttpCode(HttpStatus.OK)
   @Roles('super_admin', 'finance')
+  @UseGuards(RequireReverification)
   @ApiOkResponse({ type: PayoutRunDto })
   async run(): Promise<PayoutRunDto> {
     const result = await this.ledger.runPayouts(new Date());

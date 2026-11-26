@@ -6,6 +6,7 @@ import { api } from '../api';
 import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
 import { usePending } from '../use-pending';
+import { useReverified } from '../use-reverified';
 import { label } from './labels';
 import en from '../../messages/en.json';
 
@@ -31,8 +32,10 @@ export function BookingPanel({ bookingId, role, onChanged, onClose }: Readonly<P
   const { loaded, reload } = useLoad(fetcher);
   const [notice, setNotice] = useState<string | undefined>();
   const { pending, error, run } = usePending();
+  // A manual refund needs a fresh TOTP code (L-11); the sheet asks for one when the API does.
+  const { attempt, sheet } = useReverified(run);
   const act = (path: string, body: object, done: string) =>
-    run(async () => {
+    attempt(async () => {
       await api(`/bookings/${bookingId}/${path}`, { method: 'POST', body: JSON.stringify(body) });
       setNotice(done);
       reload();
@@ -89,6 +92,7 @@ export function BookingPanel({ bookingId, role, onChanged, onClose }: Readonly<P
       <Button className="heach-button--secondary" onClick={onClose}>
         {t('bookings.close')}
       </Button>
+      {sheet}
     </aside>
   );
 }

@@ -27,7 +27,7 @@ https://{$PUBLIC_HOST}:443 {
 	tls internal
 	import security_headers
 	handle_path /api/* {
-		# In the order written: rate limit, refuse test sign-in, then proxy.
+		# In the order written: rate limit, refuse test sign-in and the admin API, then proxy.
 		route {
 			# Per client IP, before the API's own limits (SO-08.2). Pages and static assets are
 			# not limited here.
@@ -42,6 +42,10 @@ https://{$PUBLIC_HOST}:443 {
 			# on 9443 below. The API also refuses it without the key that entry adds.
 			@test_login path_regexp test_login (?i)/auth/+test-login
 			respond @test_login 404
+			# The admin API is served only on the admin entry (8443, through Session Manager),
+			# never to the internet (SE-04); matched like the test sign-in rule above.
+			@admin_api path_regexp admin_api (?i)^/+admin(/|$)
+			respond @admin_api 404
 			request_header -X-Test-Login-Key
 			reverse_proxy api:3001
 		}

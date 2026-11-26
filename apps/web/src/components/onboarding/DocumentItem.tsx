@@ -1,5 +1,6 @@
 'use client';
 
+import { FileOrPhotoField } from '../files/FileOrPhotoField';
 import { Button, Card, Notice, TextField } from '@heach/ui';
 import type { Application, ChecklistEntry } from '@heach/types';
 import { useState } from 'react';
@@ -67,14 +68,10 @@ export function DocumentItem({ entry, editable, onSaved }: Readonly<Props>) {
       )}
       {editable && (
         <div className="flow__form">
-          <TextField
+          <FileOrPhotoField
             label={t('application.chooseFile')}
-            type="file"
             accept="application/pdf,image/jpeg,image/png"
-            capture="environment"
-            onChange={(event) => {
-              setFile(event.currentTarget.files?.[0]);
-            }}
+            onFile={setFile}
           />
           {entry.reference && (
             <TextField

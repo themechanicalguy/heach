@@ -51,6 +51,27 @@ describe('Admin app', () => {
     expect(screen.getByRole('heading', { level: 1, name: en.dashboard.title })).toBeTruthy();
   });
 
+  it('SE-07.8 an expired session returns to sign-in instead of leaving the page failing', async () => {
+    let refreshes = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        const json = (status: number, body: unknown) =>
+          Promise.resolve(new Response(JSON.stringify(body), { status }));
+        if (url.endsWith('/auth/refresh'))
+          return (refreshes += 1) === 1
+            ? json(200, { accessToken: 'synthetic-token', expiresIn: 600 })
+            : json(401, {});
+        if (url.endsWith('/me'))
+          return json(200, { email: 'admin@heach.invalid', role: 'support' });
+        return json(401, {});
+      }),
+    );
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: en.signIn.title })).toBeTruthy();
+    expect(refreshes).toBe(2);
+  });
+
   it('AD-01 finance does not see user management', async () => {
     serve('finance');
     render(<App />);

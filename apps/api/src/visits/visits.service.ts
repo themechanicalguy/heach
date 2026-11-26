@@ -2,7 +2,6 @@ import type { FieldEncryptor } from '@heach/crypto';
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -26,6 +25,7 @@ import { RefundsService } from '../payments/refunds.service.js';
 import { LedgerService } from '../payouts/ledger.service.js';
 import { Settings } from '../settings/settings.service.js';
 import { VaultFiling } from '../vault/vault-filing.js';
+import { CodeGate } from './code-gate.js';
 import { VisitCodes } from './visit-codes.js';
 import {
   noShowSplit,
@@ -36,8 +36,6 @@ import {
 } from './visit-rules.js';
 import type { VisitCodeDto, VisitNotesDto } from './visits.dto.js';
 import { type ShiftRow, VisitsRepository } from './visits.repository.js';
-
-const MAX_CODE_ATTEMPTS = 5;
 
 /**
  * The visit itself (J3, J4; HS-03 to HS-05): the patient's one-time code starts a visit or checks
@@ -52,6 +50,7 @@ export class VisitsService implements OnModuleInit {
     private readonly lifecycle: BookingLifecycle,
     private readonly effects: BookingEffects,
     private readonly codes: VisitCodes,
+    private readonly gate: CodeGate,
     private readonly ledger: LedgerService,
     private readonly refunds: RefundsService,
     private readonly strikes: StrikesService,
@@ -87,7 +86,7 @@ export class VisitsService implements OnModuleInit {
     // the request then fails, and the count must not wait on the booking's row lock.
     const before = await this.bookings.find(bookingId);
     if (before?.providerId !== principal.userId) throw new NotFoundException();
-    await this.checkCode(bookingId, 'visit', code);
+    await this.gate.check(bookingId, 'visit', code);
     const effects = await this.bookings.transaction(async (client) => {
       const booking = await this.mine(client, principal, bookingId);
       if (booking.kind === 'shift') throw reason(BadRequestException, 'use_shift_check_in');
@@ -151,7 +150,7 @@ export class VisitsService implements OnModuleInit {
   ) {
     const shift = (await this.visits.shifts(bookingId)).find((row) => row.dayIndex === day);
     if (shift?.attendantId !== principal.userId) throw new NotFoundException();
-    await this.checkCode(bookingId, `shift:${String(day)}:${phase}`, code);
+    await this.gate.check(bookingId, `shift:${String(day)}:${phase}`, code);
     const effects = await this.bookings.transaction(async (client) => {
       const booking = await this.bookings.lock(client, bookingId);
       const locked = booking && (await this.visits.lockShift(client, bookingId, day));
@@ -336,15 +335,6 @@ export class VisitsService implements OnModuleInit {
         now < shift.endsAt,
     );
     return next ? `shift:${String(next.dayIndex)}:in` : undefined;
-  }
-
-  private async checkCode(bookingId: string, moment: string, code: string): Promise<void> {
-    if ((await this.visits.attempts(bookingId)) >= MAX_CODE_ATTEMPTS)
-      throw reason(ForbiddenException, 'code_locked');
-    if (!this.codes.matches(bookingId, moment, code)) {
-      await this.visits.failedCode(bookingId);
-      throw reason(BadRequestException, 'code_incorrect');
-    }
   }
 
   private async mine(

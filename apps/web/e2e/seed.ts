@@ -105,7 +105,11 @@ async function reverify(session: Session): Promise<void> {
 }
 
 /** A signed-in admin of this sub-role, made with the operator CLI and enrolled in TOTP. */
-export async function adminToken(role: 'super_admin' | 'verifier'): Promise<string> {
+/** A signed-in admin; `reverified` also proves a fresh TOTP code for money actions (L-11). */
+export async function adminToken(
+  role: 'super_admin' | 'verifier',
+  { reverified = false } = {},
+): Promise<string> {
   const email = createAdmin(role);
   const { mfaTicket, enrolment } = await call<{
     mfaTicket: string;
@@ -114,6 +118,12 @@ export async function adminToken(role: 'super_admin' | 'verifier'): Promise<stri
   const { accessToken } = await call<{ accessToken: string }>('/admin/v1/auth/mfa', {
     body: { mfaTicket, code: totp(enrolment.secret) },
   });
+  if (reverified)
+    // The next step's code: the one just used is refused as a replay.
+    await call('/admin/v1/auth/reverify', {
+      token: accessToken,
+      body: { code: totp(enrolment.secret, Math.floor(Date.now() / 30_000) + 1) },
+    });
   return accessToken;
 }
 
@@ -198,7 +208,17 @@ export async function listedProvider(
     { token: verifier },
   );
   const accountId = queue.find((row) => row.fullName === name)?.accountId ?? '';
-  await call(`/admin/v1/applications/${accountId}`, { token: verifier });
+  const review = await call<{ items: { document: { id: string } | null }[] }>(
+    `/admin/v1/applications/${accountId}`,
+    { token: verifier },
+  );
+  // AD-02: every document is reviewed before an approval.
+  for (const { document } of review.items)
+    if (document)
+      await call(`/admin/v1/applications/${accountId}/documents`, {
+        token: verifier,
+        body: { documentId: document.id, status: 'accepted' },
+      });
   await call(`/admin/v1/applications/${accountId}/decision`, {
     token: verifier,
     body: { decision: 'approve' },
@@ -278,7 +298,7 @@ export async function startAndComplete(provider: Session, bookingId: string, cod
 
 /** A platform package plan, live at once, created by a super admin (PK-01). */
 export async function packagePlan(itemCode: string, units: number, pricePaise: number) {
-  const admin = await adminToken('super_admin');
+  const admin = await adminToken('super_admin', { reverified: true });
   const name = `Synthetic pack ${uniqueWord()}`;
   const text = { name, inclusions: 'Synthetic home visits', exclusions: 'Medicines' };
   await call('/admin/v1/plans', {

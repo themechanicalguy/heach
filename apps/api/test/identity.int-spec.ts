@@ -4,6 +4,7 @@ import { IDENTITY_VERIFIER } from '../src/adapters/identity.port.js';
 import { adminSignIn, signedUp, useApp } from './account-helpers.js';
 import { bearer } from './auth-helpers.js';
 import {
+  acceptEveryDocument,
   accountIdOf,
   submittedProvider,
   uploadIdentityDocument,
@@ -129,6 +130,8 @@ describe('Identity fallback document and its review (KY-07)', () => {
       .expect(409);
     const review = await server().get(path).set(bearer(verifier)).expect(200);
     expect(review.body).toMatchObject({ identity: 'in_review', identityMethod: 'manual' });
+    // Every document reviewed (AD-02), so identity is what still stops the approval.
+    await acceptEveryDocument(app(), verifier, provider.accountId);
     expect((await decide({ decision: 'approve' }).expect(409)).body).toMatchObject({
       code: 'identity_not_verified',
     });

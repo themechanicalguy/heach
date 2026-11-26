@@ -86,7 +86,16 @@ export function AppFooter({ config, locale }: Readonly<{ config: SiteConfig; loc
 }
 
 /** The public site's full directory footer; the header carries the language choice. */
-export function SiteFooter({ config, locale }: Readonly<{ config: SiteConfig; locale: string }>) {
+export function SiteFooter({
+  config,
+  locale,
+  joinOffered = true,
+}: Readonly<{
+  config: SiteConfig;
+  locale: string;
+  /** False in the patient Android app, which does not offer provider work (MA-08). */
+  joinOffered?: boolean;
+}>) {
   const { t } = translatorFor(locale);
   return (
     <footer className="site-footer">
@@ -97,7 +106,9 @@ export function SiteFooter({ config, locale }: Readonly<{ config: SiteConfig; lo
           links={SERVICES.map((service) => [`/services/${service}`, `services.${service}`])}
         />
         <FooterColumn locale={locale} title={t('site.forPatients')} links={PATIENT_LINKS} />
-        <FooterColumn locale={locale} title={t('site.forProviders')} links={PROVIDER_LINKS} />
+        {joinOffered && (
+          <FooterColumn locale={locale} title={t('site.forProviders')} links={PROVIDER_LINKS} />
+        )}
         <FooterColumn locale={locale} title={t('site.company')} links={LEGAL_LINKS} />
       </div>
       <div className="site-footer__strip">

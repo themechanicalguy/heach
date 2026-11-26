@@ -109,7 +109,19 @@ export class PaymentEventsService {
       const booking = await this.bookings.lock(client, bookingId);
       if (booking?.status !== 'pending_payment' || booking.totalPaise !== 0) return noEffects();
       await this.lifecycle.apply(client, booking, 'paid', SYSTEM, 'covered_by_plan');
-      const result = await this.dispatch.open(client, { ...booking, status: 'requested' }, now);
+      const requested = { ...booking, status: 'requested' as const };
+      // As for a paid booking: a chosen provider booked meanwhile for this time cancels it.
+      if (
+        booking.providerId !== null &&
+        (await this.bookings.providerBusy(
+          client,
+          booking.providerId,
+          { start: booking.startsAt, end: booking.endsAt },
+          booking.id,
+        ))
+      )
+        return this.cancellation.cancel(client, requested, SYSTEM, 'slot_taken');
+      const result = await this.dispatch.open(client, requested, now);
       if (booking.providerId)
         result.releaseHolds.push({
           providerId: booking.providerId,

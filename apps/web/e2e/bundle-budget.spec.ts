@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 import { initialJsGzipBytes } from '../scripts/bundle-budget.mjs';
 
 const BUDGET = 170 * 1024; // PF-02.1: initial JS per entry route, gzipped

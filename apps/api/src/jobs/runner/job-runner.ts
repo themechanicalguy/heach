@@ -121,8 +121,9 @@ export class JobRunner implements OnModuleInit, OnApplicationShutdown {
       const retryAt = new Date(now.getTime() + 60_000 * 2 ** attempts);
       appLogger.warn({ kind: job.kind, attempts }, 'Job failed');
       await client.query(
-        `UPDATE app.job SET attempts = $2, last_error = $3, run_at = $4,
-                status = CASE WHEN $2 >= $5 THEN 'dead' ELSE 'pending' END WHERE id = $1`,
+        `UPDATE app.job SET attempts = $2::smallint, last_error = $3, run_at = $4,
+                status = CASE WHEN $2::smallint >= $5::smallint THEN 'dead' ELSE 'pending' END
+          WHERE id = $1`,
         [
           job.id,
           attempts,

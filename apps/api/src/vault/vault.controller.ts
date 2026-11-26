@@ -14,7 +14,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import type pg from 'pg';
 import { AuditService } from '../audit/audit.service.js';
@@ -176,11 +182,14 @@ export class VaultController {
     return this.records.links(owner(request));
   }
 
+  /** A link opens records to anyone holding it and its code: a fresh OTP first (AC-05). */
   @Post('links')
   @HttpCode(HttpStatus.CREATED)
   @Header('Cache-Control', 'no-store')
   @Roles(...CARE_ROLES)
+  @UseGuards(RequireReverification)
   @ApiOkResponse({ type: LinkCreatedDto })
+  @ApiForbiddenResponse({ description: 'reverification_required' })
   async link(@Body() body: LinkInputDto, @Req() request: Request): Promise<LinkCreatedDto> {
     return this.vault.createLink(owner(request), body);
   }
@@ -193,11 +202,14 @@ export class VaultController {
     await this.vault.revokeLink(owner(request), id);
   }
 
+  /** Every record and history entry, decrypted: a fresh OTP first, as for /me/export (AC-05). */
   @Get('export')
   @Header('Cache-Control', 'no-store')
   @Header('Content-Disposition', 'attachment; filename="heach-vault.json"')
   @Roles(...CARE_ROLES)
+  @UseGuards(RequireReverification)
   @ApiOkResponse()
+  @ApiForbiddenResponse({ description: 'reverification_required' })
   async export(@Req() request: Request) {
     return this.vault.export(owner(request));
   }
@@ -251,13 +263,13 @@ export class ProviderVaultController {
 export class SharedLinkController {
   constructor(private readonly vault: VaultService) {}
 
-  @Post(':token')
+  @Post('open')
   @HttpCode(HttpStatus.OK)
   @Header('Cache-Control', 'no-store')
   @Public('The link and its one-time code are the authorisation (MV-09)')
   @ApiOkResponse({ type: SharedRecordsDto })
-  async open(@Param('token') token: string, @Body() body: LinkOpenDto): Promise<SharedRecordsDto> {
-    return this.vault.openLink(token, body.code);
+  async open(@Body() body: LinkOpenDto): Promise<SharedRecordsDto> {
+    return this.vault.openLink(body.token, body.code);
   }
 }
 
@@ -299,7 +311,7 @@ export class AdminVaultController {
   async stats(): Promise<VaultStatsDto> {
     const { rows } = await this.pool.query<VaultStatsDto>(
       `SELECT (SELECT count(*)::int FROM app.vault_record) AS records,
-              (SELECT coalesce(sum(o.size_bytes), 0)::int FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id) AS "storageBytes",
+              (SELECT coalesce(sum(o.size_bytes), 0)::float8 FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id) AS "storageBytes",
               (SELECT count(*)::int FROM app.stored_object WHERE scan_status = 'infected') AS "infectedUploads",
               (SELECT count(*)::int FROM app.record_share WHERE revoked_at IS NULL AND expires_at > now()) AS "activeShares",
               (SELECT count(*)::int FROM app.external_share WHERE revoked_at IS NULL AND expires_at > now()) AS "activeLinks",

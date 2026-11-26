@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 const GLITCHTIP = process.env.GLITCHTIP_URL ?? '';
 const TOKEN = process.env.GLITCHTIP_AUTH_TOKEN ?? '';

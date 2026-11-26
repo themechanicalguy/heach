@@ -1,5 +1,5 @@
 import { CATALOGUES } from '@heach/i18n';
-import { type BrowserContext, expect, type Page, test } from '@playwright/test';
+import { type BrowserContext, expect, type Page, test } from './test';
 
 const or = CATALOGUES.or;
 

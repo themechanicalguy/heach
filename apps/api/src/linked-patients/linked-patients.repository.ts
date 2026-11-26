@@ -100,6 +100,17 @@ export class LinkedPatientsRepository {
     return result.rowCount === 1;
   }
 
+  /** Whether the vault holds records or history for this person (locks the person's row). */
+  async hasHealthData(client: TransactionClient, ownerId: string, id: string): Promise<boolean> {
+    const { rows } = await client.query<{ held: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM app.vault_record WHERE owner_account_id = $1 AND linked_patient_id = $2)
+           OR EXISTS (SELECT 1 FROM app.history_entry WHERE owner_account_id = $1 AND linked_patient_id = $2) AS held
+         FROM app.linked_patient WHERE id = $2 AND owner_account_id = $1 FOR UPDATE`,
+      [ownerId, id],
+    );
+    return rows[0]?.held === true;
+  }
+
   async remove(client: TransactionClient, ownerId: string, id: string): Promise<boolean> {
     const result = await client.query(
       'DELETE FROM app.linked_patient WHERE id = $1 AND owner_account_id = $2',

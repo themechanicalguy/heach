@@ -1,5 +1,6 @@
 import { isLocale } from '@heach/i18n';
 import { type NextRequest, NextResponse } from 'next/server';
+import { appAudience, appHome, offeredInApp } from './lib/app-audience';
 import { contentSecurityPolicy } from './security/csp';
 import { negotiateLocale } from './i18n/negotiate';
 import { serverFlags } from './lib/flags';
@@ -8,10 +9,15 @@ import { serverFlags } from './lib/flags';
 const LANGUAGE_COOKIE = 'heach_lang';
 const YEAR_SECONDS = 365 * 24 * 60 * 60;
 
+function rememberedLocale(request: NextRequest): string | undefined {
+  const remembered = request.cookies.get(LANGUAGE_COOKIE)?.value ?? '';
+  return isLocale(remembered) ? remembered : undefined;
+}
+
 /** `/` on first launch goes to the language choice; later it goes to the language last used. */
 function rootRedirect(request: NextRequest): NextResponse {
-  const remembered = request.cookies.get(LANGUAGE_COOKIE)?.value ?? '';
-  if (isLocale(remembered)) return NextResponse.redirect(new URL(`/${remembered}`, request.url));
+  const remembered = rememberedLocale(request);
+  if (remembered) return NextResponse.redirect(new URL(`/${remembered}`, request.url));
   const locale = negotiateLocale(request.headers.get('accept-language'));
   const firstLaunch = accountsOn() ? '/welcome' : '';
   return NextResponse.redirect(new URL(`/${locale}${firstLaunch}`, request.url));
@@ -30,9 +36,15 @@ export function proxy(request: NextRequest): NextResponse {
   const first = pathname.split('/')[1] ?? '';
   if (pathname === '/') return rootRedirect(request);
   if (!isLocale(first)) {
-    const locale = negotiateLocale(request.headers.get('accept-language'));
+    // The provider app starts at /provider on every launch: keep the language chosen there.
+    const locale =
+      rememberedLocale(request) ?? negotiateLocale(request.headers.get('accept-language'));
     return NextResponse.redirect(new URL(`/${locale}${pathname}${search}`, request.url));
   }
+  // Each Android app serves one side (MA-08); a page of the other side goes to the app's home.
+  const audience = appAudience(request.headers.get('user-agent'));
+  if (audience && !offeredInApp(audience, pathname))
+    return NextResponse.redirect(new URL(appHome(audience, first), request.url));
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const csp = contentSecurityPolicy(
     nonce,
@@ -67,9 +79,10 @@ export function proxy(request: NextRequest): NextResponse {
 export const config = {
   matcher: [
     {
-      // Pages only: not the API, static assets, the service worker, manifest or health checks.
+      // Pages only: not the API, static assets, the service worker, manifest, health checks or
+      // /.well-known (Android app links).
       source:
-        '/((?!api|_next/static|_next/image|healthz|sw.js|manifest.webmanifest|icons|fonts|favicon.ico).*)',
+        '/((?!api|_next/static|_next/image|healthz|\\.well-known|sw.js|manifest.webmanifest|icons|fonts|favicon.ico).*)',
     },
   ],
 };

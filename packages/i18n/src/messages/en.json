@@ -1,6 +1,8 @@
 {
   "app": {
-    "name": "HEACH"
+    "name": "HEACH",
+    "takePhoto": "Take a photo",
+    "photoAdded": "Photo added."
   },
   "home": {
     "title": "Care at home, verified and close to you",
@@ -26,7 +28,8 @@
     "referral": "Invite"
   },
   "offline": {
-    "banner": "You are offline. Saved pages still work; changes need a connection."
+    "banner": "You are offline. Saved pages still work; changes need a connection.",
+    "noConnection": "No connection. Check your internet and try again."
   },
   "state": {
     "loading": "Loading",
@@ -152,6 +155,7 @@
     "organisation_unnamed": "Add your clinic’s name first.",
     "membership_closed": "This invitation or membership has already ended.",
     "linked_patient_limit": "You can add up to 10 people.",
+    "linked_patient_has_records": "This person can't be removed while the vault holds their records or history.",
     "birth_year_invalid": "Enter a valid year of birth.",
     "field_not_for_role": "This detail does not apply to your role.",
     "no_deletion_request": "There is no open deletion request.",

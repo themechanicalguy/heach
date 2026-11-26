@@ -2,16 +2,19 @@ import { formatDateTime, formatPaise } from '@heach/i18n';
 import { Button, ErrorState, Notice, Skeleton, Table } from '@heach/ui';
 import type { Finance as FinanceData, PayoutRun } from '@heach/types';
 import { useCallback, useState } from 'react';
-import { api } from '../api';
+import { api, download } from '../api';
 import { errorText, t } from '../i18n';
 import { useLoad } from '../use-load';
 import { usePending } from '../use-pending';
+import { useReverified } from '../use-reverified';
 
 /** Finance (AD-07): totals, commission rate, payout runs, and a CSV export without Restricted data. */
 export function Finance() {
   const { loaded, reload } = useLoad(useCallback(() => api<FinanceData>('/finance'), []));
   const [notice, setNotice] = useState<string | undefined>();
   const { pending, error, run } = usePending();
+  // A payout run moves money to every provider; it needs a fresh TOTP code (L-11).
+  const { attempt, sheet } = useReverified(run);
   if (loaded.state === 'loading') return <Skeleton label={t('state.loading')} />;
   if (loaded.state === 'error')
     return (
@@ -23,7 +26,7 @@ export function Finance() {
     );
   const data = loaded.value;
   const runNow = () =>
-    run(async () => {
+    attempt(async () => {
       const result = await api<PayoutRun>('/finance/payout-runs', { method: 'POST' });
       setNotice(t('finance.ran', { count: result.providerCount }));
       reload();
@@ -51,14 +54,15 @@ export function Finance() {
         <Button onClick={() => void runNow()} disabled={pending}>
           {t('finance.runNow')}
         </Button>
-        <a
-          className="heach-button heach-button--secondary"
-          href="/api/admin/v1/finance/export.csv"
-          download
+        <Button
+          className="heach-button--secondary"
+          disabled={pending}
+          onClick={() => void run(() => download('/finance/export.csv', 'bookings.csv'))}
         >
           {t('finance.export')}
-        </a>
+        </Button>
       </div>
+      {sheet}
       <h2>{t('finance.runs')}</h2>
       <Table
         caption={t('finance.runCaption')}

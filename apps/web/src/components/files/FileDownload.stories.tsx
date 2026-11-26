@@ -5,7 +5,7 @@ export const Default = {
   render: () => (
     <FileDownload
       file={{ contentType: 'application/pdf', contentBase64: 'JVBERg==' }}
-      filename="synthetic.pdf"
+      name="synthetic"
       label="Synthetic download"
     />
   ),

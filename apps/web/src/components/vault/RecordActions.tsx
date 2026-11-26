@@ -35,7 +35,7 @@ export function RecordActions({
     <div className="actions">
       {record.hasFile &&
         (file ? (
-          <FileDownload file={file} filename={`${record.title}.pdf`} label={t('vault.download')} />
+          <FileDownload file={file} name={record.title} label={t('vault.download')} />
         ) : (
           <Button
             className="heach-button--secondary"

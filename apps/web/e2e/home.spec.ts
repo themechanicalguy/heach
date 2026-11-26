@@ -1,5 +1,5 @@
 import { CATALOGUES, LOCALES } from '@heach/i18n';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 for (const locale of LOCALES) {
   test(`I18N-01.1 /${locale} serves the shell in its language without horizontal scroll`, async ({

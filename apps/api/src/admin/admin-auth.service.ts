@@ -22,6 +22,8 @@ import { matchTotp, newTotpSecret, otpauthUri } from './totp.js';
 
 /** Between the password and the TOTP code: 5 minutes and 5 codes at most (decision L-9). */
 const MFA_TICKET = { ttlSeconds: 5 * 60, maxAttempts: 5 } as const;
+/** Re-verification codes per admin session: 5 within 15 minutes (decision L-11, SE-04). */
+const REVERIFY = { windowSeconds: 15 * 60, maxAttempts: 5 } as const;
 const ENTITY = 'admin_account';
 
 export interface PasswordAccepted {
@@ -131,6 +133,7 @@ export class AdminAuthService {
 
   /** A fresh TOTP code unlocks sensitive admin actions for five minutes (decision L-11). */
   async reverify(principal: Principal, code: string): Promise<void> {
+    await this.takeReverifyAttempt(principal);
     const admin = await this.admins.findById(principal.userId);
     if (!admin?.active || !admin.totpSecret) throw fail('mfa_incorrect');
     const step = matchTotp(
@@ -143,8 +146,28 @@ export class AdminAuthService {
       await this.record('admin.reverify.failed', admin.id);
       throw fail('mfa_incorrect');
     }
+    await this.redis.del(reverifyKey(principal.sessionId));
     await this.reverifications.mark(principal.sessionId);
     await this.record('admin.reverified', admin.id);
+  }
+
+  /**
+   * Five codes per session, counted before each is checked (so parallel guesses count too); the
+   * sixth within 15 minutes ends every session of the admin, who signs in again with password and
+   * TOTP. Without this a stolen admin session could guess codes for its whole 8-hour life.
+   */
+  private async takeReverifyAttempt(principal: Principal): Promise<void> {
+    const key = reverifyKey(principal.sessionId);
+    const result = await this.redis
+      .multi()
+      .incr(key)
+      .expire(key, REVERIFY.windowSeconds, 'NX')
+      .exec();
+    if (Number(result?.[0]?.[1] ?? 0) <= REVERIFY.maxAttempts) return;
+    appLogger.warn({ event: 'admin_reverify_locked' }, 'Admin re-verification locked; signed out');
+    await this.record('admin.reverify.locked', principal.userId);
+    await this.sessions.signOutEverywhere(principal.userId);
+    throw fail('mfa_locked');
   }
 
   async profile(principal: Principal): Promise<Pick<AdminAccount, 'id' | 'email' | 'role'>> {
@@ -191,6 +214,7 @@ export class AdminAuthService {
 }
 
 const ticketKey = (ticket: string) => `admin-mfa:${hashToken(ticket)}`;
+const reverifyKey = (sessionId: string) => `admin-reverify:${sessionId}`;
 
 function temporaryExpired(admin: AdminAccount): boolean {
   return (

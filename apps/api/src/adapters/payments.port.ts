@@ -16,8 +16,19 @@ export interface PaymentGateway {
   createOrder(order: { amountPaise: number; receipt: string }): Promise<{ orderId: string }>;
   verifyWebhook(payload: string, signature: string): boolean;
   parseEvent(payload: string): GatewayEvent;
-  refund(payment: { paymentId: string; amountPaise: number }): Promise<{ refundId: string }>;
-  /** Releases a provider's settled earnings to their linked account (the weekly payout run). */
+  /**
+   * Refunds part or all of a payment. `idempotencyKey` is our refund's ID: sending the same key
+   * again must return the first refund, never pay out twice (the gateway's idempotency header).
+   */
+  refund(payment: {
+    paymentId: string;
+    amountPaise: number;
+    idempotencyKey: string;
+  }): Promise<{ refundId: string }>;
+  /**
+   * Releases a provider's settled earnings to their linked account (the weekly payout run).
+   * `reference` is unique per transfer and idempotent: sending it again never pays twice.
+   */
   transfer(payout: {
     providerId: string;
     amountPaise: number;

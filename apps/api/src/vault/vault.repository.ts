@@ -113,7 +113,7 @@ export class VaultRepository {
 
   async usedBytes(ownerId: string): Promise<number> {
     const { rows } = await this.pool.query<{ n: number }>(
-      `SELECT coalesce(sum(o.size_bytes), 0)::int AS n FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id
+      `SELECT coalesce(sum(o.size_bytes), 0)::float8 AS n FROM app.vault_record r JOIN app.stored_object o ON o.id = r.object_id
         WHERE r.owner_account_id = $1`,
       [ownerId],
     );
@@ -253,10 +253,21 @@ export class VaultRepository {
     return rows[0];
   }
 
-  async failLink(id: string): Promise<void> {
-    await this.pool.query('UPDATE app.external_share SET attempts = attempts + 1 WHERE id = $1', [
-      id,
-    ]);
+  /** Takes one of the link's code attempts, atomically: false once `max` are used. */
+  async takeLinkAttempt(id: string, max: number): Promise<boolean> {
+    const result = await this.pool.query(
+      'UPDATE app.external_share SET attempts = attempts + 1 WHERE id = $1 AND attempts < $2',
+      [id, max],
+    );
+    return result.rowCount === 1;
+  }
+
+  /** Gives back the attempt a right code took: only wrong codes count towards the lock. */
+  async returnLinkAttempt(id: string): Promise<void> {
+    await this.pool.query(
+      'UPDATE app.external_share SET attempts = greatest(attempts - 1, 0) WHERE id = $1',
+      [id],
+    );
   }
 
   async revokeLink(ownerId: string, id: string): Promise<boolean> {

@@ -1,5 +1,6 @@
 'use client';
 
+import { FileOrPhotoField } from '../files/FileOrPhotoField';
 import { Button, Card, Notice, TextField } from '@heach/ui';
 import type {
   HistoryEntry,
@@ -17,6 +18,7 @@ import { keyFor } from '../../lib/message-keys';
 import { usePending } from '../../lib/use-pending';
 import { useResource } from '../../lib/use-resource';
 import { ResourceView } from '../account/ResourceView';
+import { useReverified } from '../account/use-reverified';
 import { Select } from '../care/SearchView';
 import { VaultTimeline } from './VaultTimeline';
 
@@ -213,14 +215,10 @@ function UploadForm({
       {field('facility', t('vault.facility'))}
       {field('tags', t('vault.tags'))}
       {field('notes', t('vault.notes'))}
-      <TextField
+      <FileOrPhotoField
         label={t('vault.file')}
-        type="file"
         accept="application/pdf,image/jpeg,image/png"
-        capture="environment"
-        onChange={(event) => {
-          setFile(event.currentTarget.files?.[0]);
-        }}
+        onFile={setFile}
       />
       {error && (
         <Notice tone="danger" live>
@@ -322,6 +320,8 @@ function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
   const [hours, setHours] = useState('24');
   const [created, setCreated] = useState<LinkCreated | undefined>();
   const { pending, error, run } = usePending();
+  // A link opens records to anyone holding it and its code: a fresh OTP first (AC-05).
+  const { attempt, sheet } = useReverified(run);
   if (records.length === 0) return null;
   return (
     <Card title={t('vault.linkTitle')}>
@@ -343,14 +343,14 @@ function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
       )}
       {created ? (
         <Notice tone="success" live>
-          {t('vault.linkCreated')} {`${window.location.origin}/${locale}/shared/${created.token}`} ·{' '}
+          {t('vault.linkCreated')} {`${window.location.origin}/${locale}/shared#${created.token}`} ·{' '}
           {t('vault.linkCode', { code: created.code })}
         </Notice>
       ) : (
         <Button
           disabled={pending || chosen.length === 0}
           onClick={() =>
-            void run(async () => {
+            void attempt(async () => {
               setCreated(
                 await api<LinkCreated>('/vault/links', {
                   method: 'POST',
@@ -363,6 +363,7 @@ function LinkForm({ records }: Readonly<{ records: readonly VaultRecord[] }>) {
           {t('vault.createLink')}
         </Button>
       )}
+      {sheet}
     </Card>
   );
 }
